@@ -253,7 +253,14 @@ class DomainTray(Gtk.Application):
             'notify-send',
             "Domain %s is %s" % (vm['name'], str(vm['state']).lower())
         ])
-        self.tray_menu.add(domain_item)
+
+        position=0
+        for i in self.tray_menu:
+            if i.vm['name']>vm['name']:
+                break
+            position += 1
+            
+        self.tray_menu.insert(domain_item,position)
         self.menu_items[vm_path] = domain_item
         self.tray_menu.show_all()
 

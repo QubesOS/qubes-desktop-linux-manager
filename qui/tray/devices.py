@@ -120,7 +120,17 @@ class DomainMenu(Gtk.Menu):
             self.attached_item = menu_item
 
         self.menu_items[str(obj_path)] = menu_item
-        self.append(menu_item)
+        
+        # sort function
+        position=0
+        list_tmp={}
+        for i in self.menu_items:
+            list_tmp[str(self.menu_items[i].vm)]=i
+        for i in sorted(list_tmp):
+            if i<str(vm["name"]):
+                position +=1
+
+        self.insert(menu_item,position)
         self.show_all()
 
     def remove_vm(self, _, vm_obj_path):
@@ -177,6 +187,7 @@ class DeviceItem(Gtk.ImageMenuItem):
         self.dev = DEVICES[dev_obj_path]  # type: qui.models.qubes.Device
         self.dev_class = self.dev["dev_class"]
         label_path = self.dev.backend_domain['label']  # type: dbus.ObjectPath
+
         vm_icon = LABELS[label_path]["icon"]  # type: Gtk.Image
         hbox = qui.decorators.device_hbox(self.dev)  # type: Gtk.Box
 
@@ -215,6 +226,17 @@ class DeviceGroups():
             return
 
         position = self._position(dev['dev_class'])
+        
+        #sort function
+        list_tmp={}
+        name=dev.backend_domain['name']+':'+dev['ident']
+        for i in self.menu_items:
+            if dev['dev_class'] == i.dev['dev_class']:
+                d_name=str(i.dev.backend_domain['name']+':'+i.dev['ident'])
+                list_tmp[d_name]=1
+        for i in sorted(list_tmp):
+                if i<=str(name):
+                    position +=1
 
         self._insert(dev_obj_path, position)
 
@@ -227,7 +249,7 @@ class DeviceGroups():
         if dev_type == DEV_TYPES[0]:
             return 0
         else:
-            return self.positions[dev_type] + 1
+            return self.positions[dev_type]-self.counters[dev_type] + 1
 
     def _insert(self, dev_obj_path: dbus.ObjectPath, position: int) -> None:
         dev = DEVICES[dev_obj_path]
