@@ -268,8 +268,8 @@ class DomainMenuItem(Gtk.ImageMenuItem):
             self.name.set_label(self.vm.name)
         self._set_submenu(state)
 
-    def update_stats(self, memory_kb):
-        text = '{0} MB'.format(int(memory_kb)//1024)
+    def update_stats(self, memory_kb, cpu_usage):
+        text = '{0} MB, CPU:{1}%'.format(int(memory_kb)//1024, cpu_usage)
         self.memory.set_text(text)
 
 
@@ -441,7 +441,7 @@ class DomainTray(Gtk.Application):
     def update_stats(self, vm, _event, **kwargs):
         if vm not in self.menu_items:
             return
-        self.menu_items[vm].update_stats(kwargs['memory_kb'])
+        self.menu_items[vm].update_stats(kwargs['memory_kb'], kwargs['cpu_usage'])
 
     def initialize_menu(self):
         for vm in self.qapp.domains:
