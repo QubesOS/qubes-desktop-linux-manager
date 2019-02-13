@@ -441,7 +441,8 @@ class DomainTray(Gtk.Application):
     def update_stats(self, vm, _event, **kwargs):
         if vm not in self.menu_items:
             return
-        self.menu_items[vm].update_stats(kwargs['memory_kb'], kwargs['cpu_usage'])
+        self.menu_items[vm].update_stats(kwargs['memory_kb'],
+                kwargs['cpu_usage'])
 
     def initialize_menu(self):
         for vm in self.qapp.domains:
