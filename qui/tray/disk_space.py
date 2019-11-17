@@ -38,8 +38,8 @@ class PoolUsageData:
                     _("\n{:.1%} space left in pool {}").format(
                         1-pool.usage/pool.size, pool.name))
             if pool.usage_details.get('metadata_size', None):
-                metadata_usage = pool.usage_details['metadata_usage'] / \
-                                 pool.usage_details['metadata_size']
+                metadata_usage = int(pool.usage_details['metadata_usage']) / \
+                                 int(pool.usage_details['metadata_size'])
                 if metadata_usage >= URGENT_WARN_LEVEL:
                     self.warning_message.append(
                         "\nMetadata space for pool {} is running out. "
@@ -97,8 +97,8 @@ class PoolUsageData:
             percentage_box.pack_start(percentage_use, True, True, 0)
 
             if has_metadata:
-                metadata_usage = pool.usage_details['metadata_usage'] / \
-                                 pool.usage_details['metadata_size']
+                metadata_usage = int(pool.usage_details['metadata_usage']) / \
+                                 int(pool.usage_details['metadata_size'])
                 metadata_label = Gtk.Label()
                 metadata_label.set_markup(colored_percentage(
                     metadata_usage))
