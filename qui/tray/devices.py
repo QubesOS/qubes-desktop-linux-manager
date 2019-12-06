@@ -201,7 +201,7 @@ class VM:
 
 
 class DevicesTray(Gtk.Application):
-    def __init__(self, app_name, qapp, dispatcher, update_queue):
+    def __init__(self, app_name, qapp, dispatcher):
         super(DevicesTray, self).__init__()
         self.name = app_name
 
@@ -212,7 +212,6 @@ class DevicesTray(Gtk.Application):
 
         self.dispatcher = dispatcher
         self.qapp = qapp
-        self.update_queue = update_queue
 
         self.set_application_id(self.name)
         self.register()  # register Gtk Application
@@ -242,11 +241,46 @@ class DevicesTray(Gtk.Application):
             _('<b>Qubes Devices</b>\nView and manage devices.'))
 
     def device_list_update(self, vm, _event, **_kwargs):
+
+        changed_devices = []
+
+        # create list of all current devices from the changed VM
         try:
-            self.update_queue.put_nowait("update_request")
-        except asyncio.QueueFull:
-            # update requests are already pending, so drop this one
-            pass
+            for devclass in DEV_TYPES:
+                for device in vm.devices[devclass]:
+                    changed_devices.append(Device(device))
+        except qubesadmin.exc.QubesException:
+            changed_devices = []  # VM was removed
+
+        for dev in changed_devices:
+            if str(dev) not in self.devices:
+                self.devices[str(dev)] = dev
+                self.emit_notification(
+                    _("Device available"),
+                    _("Device {} is available").format(dev.description),
+                    Gio.NotificationPriority.NORMAL,
+                    notification_id=(dev.backend_domain +
+                                     dev.ident))
+
+        for devclass in DEV_TYPES:
+            for device in vm.devices[devclass].attached():
+                devname = str(device)
+                self.devices[devname].attachments.add(vm.name)
+
+        dev_to_remove = [name for name, dev in self.devices.items()
+                         if dev.backend_domain == vm
+                         and name not in changed_devices]
+        for dev_name in dev_to_remove:
+            self.emit_notification(
+                _("Device removed"),
+                _("Device {} is removed").format(
+                    self.devices[dev_name].description),
+                Gio.NotificationPriority.NORMAL,
+                notification_id=(self.devices[dev_name].backend_domain +
+                                 self.devices[dev_name].ident))
+            del self.devices[dev_name]
+
+        self.populate_menu()
 
     def initialize_vm_data(self):
         for vm in self.qapp.domains:
@@ -254,58 +288,22 @@ class DevicesTray(Gtk.Application):
                 self.vms.add(VM(vm))
 
     def initialize_dev_data(self):
-        updated_devices = {}
 
         # list all devices
         for domain in self.qapp.domains:
-            if not domain.is_running():
-                continue
-
             for devclass in DEV_TYPES:
                 for device in domain.devices[devclass]:
-                    devname = str(device)
-                    if devname not in updated_devices:
-                        dev = Device(device)
-                        updated_devices[devname] = dev
+                    self.devices[str(device)] = Device(device)
 
+        # list existing device attachments
+        for domain in self.qapp.domains:
+            for devclass in DEV_TYPES:
                 for device in domain.devices[devclass].attached():
-                    devname = str(device)
-                    if devname not in updated_devices:
-                        dev = Device(device)
-                        updated_devices[devname] = dev
-                    updated_devices[devname].attachments.add(domain.name)
-
-        previous = set(self.devices.keys())
-        current = set(updated_devices.keys())
-        removals = previous - current
-        for removal in removals:
-            self.emit_notification(
-                _("Device removed"),
-                _("Device {} was removed").format(
-                    self.devices[removal].description
-                ),
-                Gio.NotificationPriority.NORMAL,
-                notification_id=(
-                    self.devices[removal].backend_domain +
-                    self.devices[removal].ident
-                )
-            )
-
-        additions = current - previous
-        for addition in additions:
-            self.emit_notification(
-                _("Device available"),
-                _("Device {} is available").format(
-                    updated_devices[addition].description),
-                Gio.NotificationPriority.NORMAL,
-                notification_id=(
-                    updated_devices[addition].backend_domain +
-                    updated_devices[addition].ident
-                )
-            )
-
-        self.devices = updated_devices
-        self.populate_menu()
+                    dev = str(device)
+                    if dev in self.devices:
+                        # occassionally ghost UnknownDevices appear when a
+                        # device was removed but not detached from a VM
+                        self.devices[dev].attachments.add(domain.name)
 
     def device_attached(self, vm, _event, device, **_kwargs):
         if not vm.is_running() or device.devclass not in DEV_TYPES:
@@ -379,13 +377,12 @@ class DevicesTray(Gtk.Application):
                     menu_items[i-1].device.devclass:
                 self.tray_menu.add(Gtk.SeparatorMenuItem())
             self.tray_menu.add(item)
+
         self.tray_menu.show_all()
-        self.tray_menu.reposition()
 
     def show_menu(self, _unused, _event):
         self.populate_menu()
-        self.tray_menu.popup_at_pointer()
-        self.tray_menu.reposition()
+        self.tray_menu.popup_at_pointer(None)  # use current event
 
     def emit_notification(self, title, message, priority, error=False,
                           notification_id=None):
@@ -397,41 +394,16 @@ class DevicesTray(Gtk.Application):
         self.send_notification(notification_id, notification)
 
 
-async def updater(app: DevicesTray, queue: asyncio.Queue):
-    while True:
-        await queue.get()
-        count = 1
-        try:
-            while queue.get_nowait():
-                # pop extra update requests
-                count += 1
-        except asyncio.QueueEmpty:
-            # queue emptied
-            pass
-
-        app.initialize_dev_data()
-        while count > 0:
-            queue.task_done()
-            count -= 1
-
-
 def main():
     qapp = qubesadmin.Qubes()
     dispatcher = qubesadmin.events.EventsDispatcher(qapp)
-
-    update_queue = asyncio.Queue()
-
     app = DevicesTray(
-        'org.qubes.qui.tray.Devices', qapp, dispatcher, update_queue)
+        'org.qubes.qui.tray.Devices', qapp, dispatcher)
 
     loop = asyncio.get_event_loop()
 
-    worker = loop.create_task(updater(app, update_queue))
-
     done, _unused = loop.run_until_complete(asyncio.ensure_future(
         dispatcher.listen_for_events()))
-
-    worker.cancel()
 
     exit_code = 0
     for d in done:  # pylint: disable=invalid-name
