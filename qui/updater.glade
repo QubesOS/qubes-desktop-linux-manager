@@ -21,11 +21,12 @@
         <property name="column_homogeneous">True</property>
         <child>
           <object class="GtkButton" id="button_next">
-            <property name="label" translatable="yes">Next</property>
+            <property name="label" translatable="yes">_Next</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="valign">end</property>
+            <property name="use_underline">True</property>
           </object>
           <packing>
             <property name="left_attach">3</property>
@@ -95,11 +96,12 @@
                 </child>
                 <child>
                   <object class="GtkCheckButton" id="allow_update_unavailable">
-                    <property name="label" translatable="yes">Enable updates for qubes without known available updates</property>
+                    <property name="label" translatable="yes">_Enable updates for qubes without known available updates</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
                     <property name="draw_indicator">True</property>
+                    <property name="use_underline">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -245,11 +247,12 @@
         </child>
         <child>
           <object class="GtkButton" id="button_cancel">
-            <property name="label" translatable="yes">Cancel</property>
+            <property name="label" translatable="yes">_Cancel</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="valign">end</property>
+            <property name="use_underline">True</property>
           </object>
           <packing>
             <property name="left_attach">0</property>
