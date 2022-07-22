@@ -68,8 +68,8 @@ class QubesUpdater(Gtk.Application):
         self.details_icon = self.builder.get_object("details_icon")
         self.builder.get_object("details_icon_events").connect(
             "button-press-event", self.toggle_details)
-        self.builder.get_object("details_label_events").connect(
-            "button-press-event", self.toggle_details)
+        self.builder.get_object("details_label").connect(
+            "clicked", self.toggle_details)
 
         self.load_css()
 
