@@ -150,7 +150,7 @@ class QubesUpdater(Gtk.Application):
             self.progress_listview.show_all()
 
             self.next_button.set_sensitive(False)
-            self.next_button.set_label("Finish")
+            self.next_button.set_label("_Finish")
 
             # pylint: disable=attribute-defined-outside-init
             self.update_thread = threading.Thread(target=self.perform_update)
