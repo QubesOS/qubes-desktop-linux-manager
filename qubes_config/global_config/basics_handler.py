@@ -368,7 +368,7 @@ class KernelHolder(AbstractTraitHolder):
         )
 
     def _get_kernel_options(self) -> Dict[str, str]:
-        kernels = [kernel.vid for kernel in
+        kernels = [str(kernel.vid) for kernel in
                    self.qapp.pools['linux-kernel'].volumes]
         kernels = sorted(kernels, key=KernelVersion)
         kernels_dict = {kernel: kernel for kernel in kernels}
