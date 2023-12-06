@@ -7066,7 +7066,7 @@ to global clipboard</property>
                                     <property name="margin-right">20</property>
                                     <property name="margin-end">20</property>
                                     <property name="pixel-size">64</property>
-                                    <property name="icon-name">check_yes</property>
+                                    <property name="icon-name">qubes-check-yes</property>
                                     <property name="icon_size">6</property>
                                   </object>
                                   <packing>

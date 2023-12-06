@@ -223,11 +223,11 @@ class ThisDeviceHandler(PageHandler):
         for 'yes', show a green checkmark, for 'maybe' yellow one,
         and for all others red X."""
         if value == 'yes':
-            image_widget.set_from_pixbuf(load_icon('check_yes', 22, 22))
+            image_widget.set_from_pixbuf(load_icon('qubes-check-yes', 22, 22))
         elif value == 'maybe':
-            image_widget.set_from_pixbuf(load_icon('check_maybe', 22, 22))
+            image_widget.set_from_pixbuf(load_icon('qubes-check-maybe', 22, 22))
         else:
-            image_widget.set_from_pixbuf(load_icon('check_no', 20, 20))
+            image_widget.set_from_pixbuf(load_icon('qubes-check-no', 20, 20))
 
     def _get_policy_state(self) -> str:
         policy_files = sorted(
