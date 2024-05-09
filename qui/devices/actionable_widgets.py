@@ -115,12 +115,24 @@ class VariantIcon(Gtk.Image):
 
 
 class VMWithIcon(Gtk.Box):
-    def __init__(self, vm: backend.VM, size: int = 18, variant: str = 'dark'):
+    def __init__(self, vm: backend.VM, size: int = 18, variant: str = 'dark',
+                 name_extension: Optional[str] = None):
+        """
+        Icon with VM name and optional text name extension in parentheses.
+        :param vm: VM object
+        :param size: icon size
+        :param variant: light / dark string
+        :param name_extension: optional text to be added after vm name
+        after colon
+        """
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL)
         self.backend_icon = VariantIcon(vm.icon_name, variant, size)
 
         self.backend_label = Gtk.Label(xalign=0)
-        self.backend_label.set_markup(vm.name)
+        backend_label: str = vm.name
+        if name_extension:
+            backend_label += ": " + name_extension
+        self.backend_label.set_markup(backend_label)
 
         self.pack_start(self.backend_icon, False, False, 4)
         self.pack_start(self.backend_label, False, False, 0)
@@ -131,15 +143,17 @@ class VMWithIcon(Gtk.Box):
 class VMAttachmentDiagram(Gtk.Box):
     """
     Device attachment scheme, in the following form:
-    backend_vm [-> frontend_vm[, other_frontend+]]
+    backend_vm (device name) [-> frontend_vm[, other_frontend+]]
     """
-    def __init__(self, backend_vm: backend.VM,
-                 frontend_vms: Optional[List[backend.VM]],
+    def __init__(self, device: backend.Device,
                  variant: str = 'dark'):
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL)
 
+        backend_vm = device.backend_domain
+        frontend_vms = list(device.attachments)
         # backend is always there
-        backend_vm_icon = VMWithIcon(backend_vm)
+        backend_vm_icon = VMWithIcon(backend_vm,
+                                     name_extension=device.id_string)
         backend_vm_icon.get_style_context().add_class('main_device_vm')
         self.pack_start(backend_vm_icon, False, False, 4)
 
@@ -359,8 +373,7 @@ class DeviceHeaderWidget(Gtk.Box, ActionableWidget):
         self.device_label.set_xalign(Gtk.Align.CENTER)
         self.device_label.set_halign(Gtk.Align.CENTER)
 
-        self.diagram = VMAttachmentDiagram(device.backend_domain,
-                                           list(device.attachments), variant)
+        self.diagram = VMAttachmentDiagram(device, variant)
         self.diagram.set_halign(Gtk.Align.CENTER)
 
         self.add(self.device_label)
@@ -399,9 +412,7 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
         self.attach(self.device_icon, 0, 0, 1, 1)
         self.attach(self.device_label, 1, 0, 3, 1)
 
-        self.vm_diagram = VMAttachmentDiagram(device.backend_domain,
-                                              list(device.attachments),
-                                              self.variant)
+        self.vm_diagram = VMAttachmentDiagram(device, self.variant)
         self.attach(self.vm_diagram, 1, 1, 3, 1)
 
     def get_child_widgets(self, vms, disp_vm_templates) -> \

@@ -23,6 +23,7 @@ import qubesadmin
 import qubesadmin.exc
 import qubesadmin.devices
 import qubesadmin.vm
+from qubesadmin.utils import size_to_human
 
 import gi
 gi.require_version('Gtk', '3.0')  # isort:skip
@@ -99,7 +100,11 @@ class Device:
         self._dev: qubesadmin.devices.DeviceInfo = dev
         self.__hash = hash(dev)
         self._port: str = ''
+
         self._dev_name: str = getattr(dev, 'description', 'unknown')
+        if dev.devclass == 'block' and 'size' in dev.data:
+            self._dev_name += " (" + size_to_human(int(dev.data['size'])) + ")"
+
         self._ident: str = getattr(dev, 'ident', 'unknown')
         self._description: str = getattr(dev, 'description', 'unknown')
         self._devclass: str = getattr(dev, 'devclass', 'unknown')
