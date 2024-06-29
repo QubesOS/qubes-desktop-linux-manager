@@ -195,10 +195,11 @@ def test_do_update_templates(
     class MockPorc:
         def __init__(self, finish_after_n_polls=2):
             self.polls = 0
+            self.returncode = 40
             self.finish_after_n_polls = finish_after_n_polls
 
         def wait(self):
-            """Mock  waiting."""
+            """Mock waiting."""
             pass
 
         def poll(self):
@@ -206,7 +207,7 @@ def test_do_update_templates(
             self.polls += 1
             if self.polls < self.finish_after_n_polls:
                 return None
-            return 0
+            return self.returncode
 
 
     mock_subprocess.return_value = MockPorc()
@@ -239,6 +240,7 @@ def test_do_update_templates(
         stderr=subprocess.PIPE, stdout=subprocess.PIPE)]
     mock_subprocess.assert_has_calls(calls)
     mock_callback.assert_not_called()
+    assert sut.retcode == 40
 
 
 def test_get_update_summary(

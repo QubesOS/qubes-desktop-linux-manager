@@ -117,6 +117,7 @@ def test_setup_apply(
     (
         pytest.param((0, 0, 0, 0), 100, id="nothing to do"),
         pytest.param((0, 0, 1, 0), 1, id="failed"),
+        pytest.param((0, 0, 1, 0), 40, id="failed with retcode"),
         pytest.param((0, 0, 0, 1), 130, id="cancelled"),
         pytest.param((0, 0, 1, 1), 130, id="failed + cancelled"),
         pytest.param((0, 1, 0, 0), 100, id="no updates"),
@@ -152,6 +153,7 @@ def test_retcode(_populate_vm_list, _mock_logging, __mock_logging,
     def populate(**_kwargs):
         sut.summary_page.list_store = []
     sut.summary_page.populate_restart_list = Mock(side_effect=populate)
+    sut.progress_page.retcode = ret_code
     sut.progress_page.get_update_summary = Mock()
     sut.progress_page.get_update_summary.return_value = update_results
     sut.summary_page.show = Mock()

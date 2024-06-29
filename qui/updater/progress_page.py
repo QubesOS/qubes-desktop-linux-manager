@@ -56,6 +56,7 @@ class ProgressPage:
         self.exit_triggered = False
         self.update_thread = None
         self.after_update_callback = callback
+        self.retcode = None
 
         self.update_details = QubeUpdateDetails(self.builder)
 
@@ -355,6 +356,7 @@ class ProgressPage:
                 proc.wait()
                 read_err_thread.join()
                 read_out_thread.join()
+        self.retcode = proc.returncode
 
     def read_stderrs(self, proc, rows):
         for untrusted_line in iter(proc.stderr.readline, ''):

@@ -225,7 +225,10 @@ class QubesUpdater(Gtk.Application):
                 # no updates
                 self.retcode = 100
             if failed:
-                self.retcode = 1
+                if self.progress_page.retcode not in (None, 0, 100, 130):
+                    self.retcode = self.progress_page.retcode
+                else:
+                    self.retcode = 1
             if cancelled:
                 self.retcode = 130
             if failed or cancelled or not self.cliargs.non_interactive:
