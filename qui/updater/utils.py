@@ -135,10 +135,22 @@ class QubeClass(Enum):
     AppVM = 3
     DispVM = 4
 
+__effective_css_provider__: Gtk.CssProvider = None
+
+def SetEffectiveCssProvider(CssProvider: Gtk.CssProvider) -> None:
+    global __effective_css_provider__
+    __effective_css_provider__ = CssProvider
 
 def label_color_theme(color: str) -> str:
+    global __effective_css_provider__
     widget = Gtk.Label()
-    widget.get_style_context().add_class(f'qube-box-{color}')
+    if __effective_css_provider__ == None:
+        # Replicating the old behaviour. Both forward and backward compatible
+        widget.get_style_context().add_class(f'qube-box-{color}')
+    elif f'.qube-box-{color}' in __effective_css_provider__.to_string():
+        widget.get_style_context().add_class(f'qube-box-{color}')
+    else:
+        widget.get_style_context().add_class('qube-box-custom-label')
     gtk_color = widget.get_style_context().get_color(Gtk.StateFlags.NORMAL)
     color_rgb = ast.literal_eval(gtk_color.to_string()[3:])
     color_hex = '#{:02x}{:02x}{:02x}'.format(*color_rgb)

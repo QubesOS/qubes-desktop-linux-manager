@@ -192,7 +192,7 @@ def load_theme(widget: Gtk.Widget, light_theme_path: Optional[str] = None,
                dark_theme_path: Optional[str] = None,
                package_name: Optional[str] = None,
                light_file_name: Optional[str] = None,
-               dark_file_name: Optional[str] = None):
+               dark_file_name: Optional[str] = None) -> Gtk.CssProvider:
     """
     Load a dark or light theme to current screen, based on widget's
     current (system) defaults.
@@ -203,6 +203,7 @@ def load_theme(widget: Gtk.Widget, light_theme_path: Optional[str] = None,
     :param package_name: name of the package
     :param light_file_name: name of the css file with light theme
     :param dark_file_name: name of the css file with dark theme
+    Returns used CSS provider; it can be safely discarded if unused.
     """
     if not light_theme_path and light_file_name:
         assert package_name
@@ -222,6 +223,7 @@ def load_theme(widget: Gtk.Widget, light_theme_path: Optional[str] = None,
     provider.load_from_path(path)
     Gtk.StyleContext.add_provider_for_screen(
         screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+    return provider
 
 
 def is_theme_light(widget):

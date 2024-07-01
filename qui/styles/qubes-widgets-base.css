@@ -45,6 +45,10 @@ label {
     color: @black-label;
 }
 
+.qube-box-custom-label {
+    color: @custom-label;
+}
+
 .group_title {
     font-weight: 400;
     font-size: 150%;

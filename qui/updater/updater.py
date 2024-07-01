@@ -15,6 +15,7 @@ from qui.updater.progress_page import ProgressPage
 from qui.updater.updater_settings import Settings, OverriddenSettings
 from qui.updater.summary_page import SummaryPage
 from qui.updater.intro_page import IntroPage
+import qui.updater.utils
 
 gi.require_version('Gtk', '3.0')  # isort:skip
 from gi.repository import Gtk, Gdk, Gio  # isort:skip
@@ -93,10 +94,11 @@ class QubesUpdater(Gtk.Application):
             "button_cancel")
         self.cancel_button.connect("clicked", self.cancel_clicked)
 
-        load_theme(widget=self.main_window,
+        self.EffectiveCssProvider = load_theme(widget=self.main_window,
                    package_name='qui',
                    light_file_name='qubes-updater-light.css',
                    dark_file_name='qubes-updater-dark.css')
+        qui.updater.utils.SetEffectiveCssProvider(self.EffectiveCssProvider)
 
         self.header_label: Gtk.Label = self.builder.get_object("header_label")
 
