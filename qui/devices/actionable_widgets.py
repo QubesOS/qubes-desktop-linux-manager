@@ -401,7 +401,13 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
         self.device_icon.set_valign(Gtk.Align.CENTER)
 
         self.device_label = Gtk.Label(xalign=0)
-        self.device_label.set_markup(device.name)
+
+        label_markup = device.name
+        if hasattr(device, "_connection_timestamp"):
+            if int(time.monotonic() - device._connection_timestamp) < 120:
+                label_markup += ' <span foreground="red"><b>NEW!</b></span>'
+        self.device_label.set_markup(label_markup)
+        
         if self.device.attachments:
             self.device_label.get_style_context().add_class("dev_attached")
 
