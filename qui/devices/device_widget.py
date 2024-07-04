@@ -20,6 +20,7 @@
 from typing import Set, List, Dict
 import asyncio
 import sys
+import time
 
 import importlib.resources
 
@@ -130,6 +131,7 @@ class DevicesTray(Gtk.Application):
 
         for dev_name, dev in changed_devices.items():
             if dev_name not in self.devices:
+                dev._connection_timestamp = time.monotonic()
                 self.devices[dev_name] = dev
                 self.emit_notification(
                     _("Device available"),
