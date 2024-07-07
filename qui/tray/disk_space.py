@@ -346,6 +346,8 @@ class DiskSpace(Gtk.Application):
         self.set_application_id("org.qubes.qui.tray.DiskSpace")
         self.register()
 
+        # for some reaslon pylint doesn't see GLib.VariantType.new
+        # pylint: disable=no-member
         prefs_action = Gio.SimpleAction.new("prefs", GLib.VariantType.new("s"))
         prefs_action.connect("activate", launch_preferences_dialog)
         self.add_action(prefs_action)
