@@ -6,4 +6,4 @@ Terminal=false
 Name=Qubes Policy Editor
 GenericName=Qubes Policy Editor
 StartupNotify=false
-Categories=Settings;X-XFCE-SettingsDialog
+Categories=Settings;X-XFCE-SettingsDialog;Qubes Tools
