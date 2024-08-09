@@ -190,8 +190,8 @@ class QMemManHelper:
         self.qmemman_config = None
 
     def get_values(self) -> Dict[str, int]:
-        """Returns a dict of 'vm-min-mem': value in MB and
-        'dom0-mem-boost': value in MB """
+        """Returns a dict of 'vm-min-mem': value in MiB and
+        'dom0-mem-boost': value in MiB """
         self.qmemman_config = ConfigParser()
         self.qmemman_config.read(self.QMEMMAN_CONFIG_PATH)
 
@@ -209,8 +209,8 @@ class QMemManHelper:
         return result
 
     def save_values(self, values_dict: Dict[str, int]):
-        """Wants a dict of 'vm-min-mem': value in MB and
-        'dom0-mem-boost': value in MB"""
+        """Wants a dict of 'vm-min-mem': value in MiB and
+        'dom0-mem-boost': value in MiB"""
         # qmemman settings
         text_dict = {key: str(int(value)) + 'MiB'
                      for key, value in values_dict.items()}

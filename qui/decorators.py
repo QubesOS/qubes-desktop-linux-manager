@@ -191,7 +191,7 @@ class DomainDecorator(PropertiesDecorator):
             if header:
                 markup = _('<b>RAM</b>')
             else:
-                markup = f'{str(int(memory/1024))} MB'
+                markup = f'{str(int(memory/1024))} MiB'
 
             self.mem_label.set_markup(markup)
 
