@@ -107,7 +107,7 @@ class Device:
         if dev.devclass == 'block' and 'size' in dev.data:
             self._dev_name += " (" + size_to_human(int(dev.data['size'])) + ")"
 
-        self._ident: str = getattr(dev, 'ident', 'unknown')
+        self._ident: str = getattr(dev, 'port_id', 'unknown')
         self._description: str = getattr(dev, 'description', 'unknown')
         self._devclass: str = getattr(dev, 'devclass', 'unknown')
         self._data: Dict = getattr(dev, 'data', {})
@@ -232,7 +232,10 @@ class Device:
         """
         try:
             assignment = qubesadmin.device_protocol.DeviceAssignment(
-                self.backend_domain, self.id_string)
+                qubesadmin.device_protocol.Device(
+                    qubesadmin.device_protocol.Port(
+                        self.backend_domain, self.id_string, self.device_class)
+                ))
 
             vm.vm_object.devices[self.device_class].attach(assignment)
             self.gtk_app.emit_notification(
@@ -263,7 +266,10 @@ class Device:
             notification_id=self.notification_id)
         try:
             assignment = qubesadmin.device_protocol.DeviceAssignment(
-                self.backend_domain, self._ident)
+                qubesadmin.device_protocol.Device(
+                    qubesadmin.device_protocol.Port(
+                        self.backend_domain, self._ident, self.device_class)
+                ))
             vm.vm_object.devices[self.device_class].detach(assignment)
         except qubesadmin.exc.QubesException as ex:
             self.gtk_app.emit_notification(

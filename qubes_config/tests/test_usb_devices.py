@@ -845,15 +845,13 @@ def test_u2f_handler_add_without_service(test_qapp,
 def test_devices_handler_unsaved(test_qapp, test_policy_manager, real_builder):
     test_qapp.expected_calls[('sys-usb', "admin.vm.device.pci.Attached",
                               None, None)] = \
-        b"0\x00dom0+00_0d.0 ident='00_0d.0' devclass='pci' " \
+        b"0\x00dom0+00_0d.0 device_id='*' port_id='00_0d.0' devclass='pci' " \
         b"backend_domain='dom0' required='yes' attach_automatically='yes' " \
         b"_no-strict-reset='yes'\n"
     test_qapp.expected_calls[('dom0', "admin.vm.device.pci.Available",
                               None, None)] = \
-        b"0\x0000_0d.0 ident='00_0d.0' devclass='pci' backend_domain='dom0' " \
-        b"serial='unknown' manufacturer='unknown' " \
-        b"self_identity='0000:0000::p0c0300' vendor='unknown' " \
-        b"product='unknown' name='unknown' interfaces='p0c0300' " \
+        b"0\x0000_0d.0 device_id='0000:0000::p0c0300' port_id='00_0d.0' " \
+        b"devclass='pci' backend_domain='dom0' interfaces='p0c0300' " \
         b"_function='0' _bus='00' _libvirt_name='pci_0000_00_0d_0' " \
         b"_device='0d'\n"
 
@@ -878,26 +876,22 @@ def test_devices_handler_detect_usbvms(test_qapp,
                                        test_policy_manager, real_builder):
     test_qapp.expected_calls[('sys-usb', "admin.vm.device.pci.Attached",
                               None, None)] = \
-        b"0\x00dom0+00_0d.0 ident='00_0d.0' devclass='pci' " \
+        b"0\x00dom0+00_0d.0 device_id='*' port_id='00_0d.0' devclass='pci' " \
         b"backend_domain='dom0' required='yes' attach_automatically='yes' " \
         b"_no-strict-reset='yes'\n"
     test_qapp.expected_calls[('test-standalone', "admin.vm.device.pci.Attached",
                               None, None)] = \
-        b"0\x00dom0+00_0f.0 ident='00_0f.0' devclass='pci' " \
+        b"0\x00dom0+00_0f.0 device_id='*' port_id='00_0f.0' devclass='pci' " \
         b"backend_domain='dom0' required='yes' attach_automatically='yes' " \
         b"_no-strict-reset='yes'\n"
     test_qapp.expected_calls[('dom0', "admin.vm.device.pci.Available",
                               None, None)] = \
-        b"0\x0000_0f.0 ident='00_0f.0' devclass='pci' backend_domain='dom0' " \
-        b"serial='unknown' manufacturer='unknown' " \
-        b"self_identity='0000:0000::p0c0300' vendor='unknown' " \
-        b"product='unknown' name='unknown' interfaces='p0c0300' " \
+        b"0\x0000_0f.0 device_id='0000:0000::p0c0300' port_id='00_0f.0' " \
+        b"devclass='pci' backend_domain='dom0' interfaces='p0c0300' " \
         b"_function='0' _bus='00' _libvirt_name='pci_0000_00_0f_0' " \
         b"_device='0f'\n" \
-        b"00_0d.0 ident='00_0d.0' devclass='pci' backend_domain='dom0' " \
-        b"serial='unknown' manufacturer='unknown' " \
-        b"self_identity='0000:0000::p0c0300' vendor='unknown' " \
-        b"product='unknown' name='unknown' interfaces='p0c0300' " \
+        b"00_0d.0 device_id='0000:0000::p0c0300' port_id='00_0d.0' " \
+        b"devclass='pci' backend_domain='dom0' interfaces='p0c0300' " \
         b"_function='0' _bus='00' _libvirt_name='pci_0000_00_0d_0' " \
         b"_device='0d'\n"
 
