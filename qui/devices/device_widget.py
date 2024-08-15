@@ -124,7 +124,8 @@ class DevicesTray(Gtk.Application):
         try:
             for devclass in DEV_TYPES:
                 for device in vm.devices[devclass]:
-                    changed_devices[str(device)] = backend.Device(device, self)
+                    changed_devices[str(device.port)] = backend.Device(
+                        device, self)
 
         except qubesadmin.exc.QubesException:
             changed_devices = {}  # VM was removed
@@ -172,7 +173,8 @@ class DevicesTray(Gtk.Application):
             for devclass in DEV_TYPES:
                 try:
                     for device in domain.devices[devclass]:
-                        self.devices[str(device)] = backend.Device(device, self)
+                        self.devices[str(device.port)] = backend.Device(
+                            device, self)
                 except qubesadmin.exc.QubesException:
                     # we have no permission to access VM's devices
                     continue
@@ -183,7 +185,7 @@ class DevicesTray(Gtk.Application):
                 try:
                     for device in domain.devices[devclass
                             ].get_attached_devices():
-                        dev = str(device)
+                        dev = str(device.port)
                         if dev in self.devices:
                             # occassionally ghost UnknownDevices appear when a
                             # device was removed but not detached from a VM
@@ -202,14 +204,14 @@ class DevicesTray(Gtk.Application):
             # we don't have access to VM state
             return
 
-        if str(device) not in self.devices:
-            self.devices[str(device)] = backend.Device(device, self)
+        if str(device.port) not in self.devices:
+            self.devices[str(device.port)] = backend.Device(device, self)
 
         vm_wrapped = backend.VM(vm)
 
-        self.devices[str(device)].attachments.add(vm_wrapped)
+        self.devices[str(device.port)].attachments.add(vm_wrapped)
 
-    def device_detached(self, vm, _event, device, **_kwargs):
+    def device_detached(self, vm, _event, port, **_kwargs):
         try:
             if not vm.is_running():
                 return
@@ -217,11 +219,11 @@ class DevicesTray(Gtk.Application):
             # we don't have access to VM state
             return
 
-        device = str(device)
+        port = str(port)
         vm_wrapped = backend.VM(vm)
 
-        if device in self.devices:
-            self.devices[device].attachments.discard(vm_wrapped)
+        if port in self.devices:
+            self.devices[port].attachments.discard(vm_wrapped)
 
     def vm_start(self, vm, _event, **_kwargs):
         wrapped_vm = backend.VM(vm)
@@ -231,7 +233,7 @@ class DevicesTray(Gtk.Application):
         for devclass in DEV_TYPES:
             try:
                 for device in vm.devices[devclass].get_attached_devices():
-                    dev = str(device)
+                    dev = str(device.port)
                     if dev in self.devices:
                         self.devices[dev].attachments.add(wrapped_vm)
             except qubesadmin.exc.QubesDaemonAccessError:

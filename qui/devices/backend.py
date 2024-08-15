@@ -111,6 +111,7 @@ class Device:
         self._description: str = getattr(dev, 'description', 'unknown')
         self._devclass: str = getattr(dev, 'devclass', 'unknown')
         self._data: Dict = getattr(dev, 'data', {})
+        self._device_id = getattr(dev, 'device_id', '*')
         self.attachments: Set[VM] = set()
         backend_domain = getattr(dev, 'backend_domain', None)
         if backend_domain:
@@ -234,7 +235,8 @@ class Device:
             assignment = qubesadmin.device_protocol.DeviceAssignment(
                 qubesadmin.device_protocol.Device(
                     qubesadmin.device_protocol.Port(
-                        self.backend_domain, self.id_string, self.device_class)
+                        self.backend_domain, self.id_string, self.device_class),
+                    device_id=self._device_id,
                 ))
 
             vm.vm_object.devices[self.device_class].attach(assignment)

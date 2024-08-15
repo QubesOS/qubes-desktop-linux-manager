@@ -846,7 +846,7 @@ def test_devices_handler_unsaved(test_qapp, test_policy_manager, real_builder):
     test_qapp.expected_calls[('sys-usb', "admin.vm.device.pci.Attached",
                               None, None)] = \
         b"0\x00dom0+00_0d.0 device_id='*' port_id='00_0d.0' devclass='pci' " \
-        b"backend_domain='dom0' required='yes' attach_automatically='yes' " \
+        b"backend_domain='dom0' mode='required' " \
         b"_no-strict-reset='yes'\n"
     test_qapp.expected_calls[('dom0', "admin.vm.device.pci.Available",
                               None, None)] = \
@@ -877,12 +877,12 @@ def test_devices_handler_detect_usbvms(test_qapp,
     test_qapp.expected_calls[('sys-usb', "admin.vm.device.pci.Attached",
                               None, None)] = \
         b"0\x00dom0+00_0d.0 device_id='*' port_id='00_0d.0' devclass='pci' " \
-        b"backend_domain='dom0' required='yes' attach_automatically='yes' " \
+        b"backend_domain='dom0' mode='required' " \
         b"_no-strict-reset='yes'\n"
     test_qapp.expected_calls[('test-standalone', "admin.vm.device.pci.Attached",
                               None, None)] = \
         b"0\x00dom0+00_0f.0 device_id='*' port_id='00_0f.0' devclass='pci' " \
-        b"backend_domain='dom0' required='yes' attach_automatically='yes' " \
+        b"backend_domain='dom0' mode='required' " \
         b"_no-strict-reset='yes'\n"
     test_qapp.expected_calls[('dom0', "admin.vm.device.pci.Available",
                               None, None)] = \
