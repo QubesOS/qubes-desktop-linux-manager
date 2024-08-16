@@ -9,6 +9,8 @@
     <property name="receives-default">False</property>
     <property name="use-underline">True</property>
     <property name="draw-indicator">True</property>
+    <property name="tooltip-text" translatable="yes">Click here or press Ctrl+A to toggle selection</property>
+    <accelerator key="a" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
   </object>
   <object class="GtkListStore" id="list_store">
     <columns>
