@@ -31,8 +31,10 @@ import contextlib
 import math
 import os
 import fcntl
+import signal
 import qubesadmin
 import qubesadmin.events
+from functools import partial
 
 import gi
 gi.require_version('Gtk', '3.0')  # isort:skip
@@ -302,6 +304,11 @@ class NotificationApp(Gtk.Application):
             return key.upper()
         return key
 
+def signal_handler(app, _signum, _frame):
+    event = Gdk.EventButton()
+    event.button = 1
+    app.show_menu(None, event)
+
 def main():
     loop = asyncio.get_event_loop()
     wm = pyinotify.WatchManager()
@@ -313,6 +320,9 @@ def main():
 
     handler = EventHandler(loop=loop, gtk_app=gtk_app)
     pyinotify.AsyncioNotifier(wm, loop, default_proc_fun=handler)
+
+    signal_handler_wrapper = partial(signal_handler, gtk_app)
+    signal.signal(signal.SIGUSR1, signal_handler_wrapper)
 
     return run_asyncio_and_show_errors(loop, [asyncio.ensure_future(
         dispatcher.listen_for_events())], _("Qubes Clipboard Widget"))
