@@ -24,6 +24,8 @@ import qubesadmin.exc
 import qubesadmin.devices
 import qubesadmin.vm
 from qubesadmin.utils import size_to_human
+from qubesadmin.device_protocol import (Port, VirtualDevice, DeviceInfo,
+                                        DeviceAssignment)
 
 import gi
 gi.require_version('Gtk', '3.0')  # isort:skip
@@ -232,12 +234,9 @@ class Device:
         Perform attachment to provided VM.
         """
         try:
-            assignment = qubesadmin.device_protocol.DeviceAssignment(
-                qubesadmin.device_protocol.Device(
-                    qubesadmin.device_protocol.Port(
-                        self.backend_domain, self.id_string, self.device_class),
-                    device_id=self._device_id,
-                ))
+            assignment = DeviceAssignment(VirtualDevice(Port(
+                self.backend_domain, self.id_string, self.device_class),
+                device_id=self._device_id))
 
             vm.vm_object.devices[self.device_class].attach(assignment)
             self.gtk_app.emit_notification(
@@ -267,11 +266,8 @@ class Device:
             Gio.NotificationPriority.NORMAL,
             notification_id=self.notification_id)
         try:
-            assignment = qubesadmin.device_protocol.DeviceAssignment(
-                qubesadmin.device_protocol.Device(
-                    qubesadmin.device_protocol.Port(
-                        self.backend_domain, self._ident, self.device_class)
-                ))
+            assignment = DeviceAssignment(VirtualDevice(Port(
+                self.backend_domain, self._ident, self.device_class)))
             vm.vm_object.devices[self.device_class].detach(assignment)
         except qubesadmin.exc.QubesException as ex:
             self.gtk_app.emit_notification(
