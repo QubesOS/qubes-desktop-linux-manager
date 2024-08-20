@@ -24,8 +24,7 @@ import qubesadmin.exc
 import qubesadmin.devices
 import qubesadmin.vm
 from qubesadmin.utils import size_to_human
-from qubesadmin.device_protocol import (Port, VirtualDevice, DeviceInfo,
-                                        DeviceAssignment)
+from qubesadmin.device_protocol import Port, VirtualDevice, DeviceAssignment
 
 import gi
 gi.require_version('Gtk', '3.0')  # isort:skip
