@@ -9,6 +9,8 @@ import sys
 import os
 import threading
 import traceback
+import signal
+from functools import partial
 
 import qubesadmin
 import qubesadmin.events
@@ -19,7 +21,7 @@ from qubesadmin import exc
 
 import gi  # isort:skip
 gi.require_version('Gtk', '3.0')  # isort:skip
-from gi.repository import Gio, Gtk, GObject, GLib, GdkPixbuf  # isort:skip
+from gi.repository import Gio, Gtk, GObject, GLib, GdkPixbuf, Gdk  # isort:skip
 
 import gbulb
 gbulb.install()
@@ -596,7 +598,8 @@ class DomainTray(Gtk.Application):
         self.stats_dispatcher.add_handler('vm-stats', self.update_stats)
 
     def show_menu(self, _unused, event):
-        self.tray_menu.popup_at_pointer(event)  # None means current event
+        self.tray_menu.popup(None, None, None, None, event.button,
+                             Gtk.get_current_event_time())
 
     def emit_notification(self, vm, event, **kwargs):
         notification = Gio.Notification.new(_(
@@ -913,6 +916,11 @@ class DomainTray(Gtk.Application):
         self.stats_dispatcher.remove_handler('vm-stats', self.update_stats)
 
 
+def signal_handler(app, _signum, _frame):
+    event = Gdk.EventButton()
+    event.button = 1
+    app.show_menu(None, event)
+
 def main():
     ''' main function '''
     qapp = qubesadmin.Qubes()
@@ -922,6 +930,9 @@ def main():
     app = DomainTray(
         'org.qubes.qui.tray.Domains', qapp, dispatcher, stats_dispatcher)
     app.run()
+
+    signal_handler_wrapper = partial(signal_handler, app)
+    signal.signal(signal.SIGUSR1, signal_handler_wrapper)
 
     loop = asyncio.get_event_loop()
     tasks = [

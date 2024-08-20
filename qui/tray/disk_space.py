@@ -1,11 +1,13 @@
 # pylint: disable=wrong-import-position,import-error
 import sys
 import subprocess
+import signal
 from typing import List
+from functools import partial
 
 import gi
 gi.require_version('Gtk', '3.0')  # isort:skip
-from gi.repository import Gtk, GObject, Gio, GLib  # isort:skip
+from gi.repository import Gtk, GObject, Gio, GLib, Gdk  # isort:skip
 from qubesadmin import Qubes
 from qubesadmin.utils import size_to_human
 from qubesadmin import exc
@@ -358,7 +360,15 @@ class DiskSpace(Gtk.Application):
 
         GObject.timeout_add_seconds(120, self.refresh_icon)
 
+        signal_handler_wrapper = partial(self.__signal_handler)
+        signal.signal(signal.SIGUSR1, signal_handler_wrapper)
+
         Gtk.main()
+
+    def __signal_handler(self, _signum, _frame):
+        event = Gdk.EventButton()
+        event.button = 1
+        self.make_menu(None, event)
 
     def refresh_icon(self):
         pool_data = PoolUsageData(self.qubes_app)
@@ -418,7 +428,7 @@ class DiskSpace(Gtk.Application):
             self.icon.set_tooltip_markup(
                 _('<b>Qubes Disk Space Monitor</b>\nView free disk space.'))
 
-    def make_menu(self, _unused, _event):
+    def make_menu(self, _unused, event):
         pool_data = PoolUsageData(self.qubes_app)
         vm_data = VMUsageData(self.qubes_app)
 
@@ -460,7 +470,8 @@ class DiskSpace(Gtk.Application):
         menu.set_reserve_toggle_size(False)
 
         menu.show_all()
-        menu.popup_at_pointer(None)  # use current event
+        menu.popup(None, None, None, None, event.button,
+                   Gtk.get_current_event_time())
 
     @staticmethod
     def make_title_item(text):
