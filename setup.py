@@ -32,11 +32,11 @@ class InstallWithLocale(setuptools.command.install.install):
 
     def run(self):
         self.create_mo_files()
-        self.install_scripts()
+        self.install_custom_scripts()
         super().run()
 
     # create simple scripts that run much faster than "console entry points"
-    def install_scripts(self):
+    def install_custom_scripts(self):
         bin = os.path.join(self.root, "usr/bin")
         try:
             os.makedirs(bin)
