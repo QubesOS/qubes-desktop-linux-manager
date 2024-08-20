@@ -333,9 +333,8 @@ class FocusStealingHelper(GtkOneTimerHelper):
 
 class RPCConfirmationWindow:
     # pylint: disable=too-few-public-methods,too-many-instance-attributes
-    _source_file_ref = importlib.resources.files("qubes").joinpath(
-        os.path.join(
-            "ext", "device_attach_confirm", "AttachConfirmationWindow.glade"))
+    _source_file_ref = importlib.resources.files("qui").joinpath(
+        os.path.join("devices", "AttachConfirmationWindow.glade"))
 
     _source_id = {
         "window": "AttachConfirmationWindow",
