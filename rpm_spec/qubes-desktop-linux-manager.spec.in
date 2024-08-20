@@ -93,6 +93,7 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 
 %files
 /usr/bin/attach-confirm
+/usr/bin/qubes-device-agent
 %defattr(-,root,root,-)
 
 %dir %{python3_sitelib}/qui-*.egg-info

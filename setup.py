@@ -73,9 +73,10 @@ setuptools.setup(
     description='Qubes User Interface And Configuration Package',
     license='GPL2+',
     url='https://www.qubes-os.org/',
-    packages=["qui", "qui.updater", "qui.devices", "qui.tray", "qubes_config",
-              "qubes_config.global_config", "qubes_config.widgets",
-              "qubes_config.new_qube", 'qubes_config.policy_editor'],
+    packages=["qui", "qui.updater", "qui.devices", "qui.tools", "qui.tray",
+              "qubes_config", "qubes_config.global_config",
+              "qubes_config.widgets", "qubes_config.new_qube",
+              'qubes_config.policy_editor'],
     entry_points={
         'gui_scripts': [
             'qui-domains = qui.tray.domains:main',
