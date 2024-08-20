@@ -92,10 +92,13 @@ fi
 gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 
 %files
+/usr/bin/attach-confirm
 %defattr(-,root,root,-)
 
 %dir %{python3_sitelib}/qui-*.egg-info
 %{python3_sitelib}/qui-*.egg-info/*
+
+/usr/lib/qubes/qubes-device-agent-autostart
 
 %dir %{python3_sitelib}/qui
 %dir %{python3_sitelib}/qui/__pycache__
@@ -137,6 +140,14 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 %{python3_sitelib}/qui/devices/device_widget.py
 %{python3_sitelib}/qui/qubes-devices-dark.css
 %{python3_sitelib}/qui/qubes-devices-light.css
+%{python3_sitelib}/qui/devices/AttachConfirmationWindow.glade
+
+%dir %{python3_sitelib}/qui/tools
+%dir %{python3_sitelib}/qui/tools/__pycache__
+%{python3_sitelib}/qui/tools/__pycache__/*
+%{python3_sitelib}/qui/tools/__init__.py
+%{python3_sitelib}/qui/tools/attach_confirm.py
+%{python3_sitelib}/qui/tools/qubes_device_agent.py
 
 %dir %{python3_sitelib}/qui/tray/
 %dir %{python3_sitelib}/qui/tray/__pycache__
@@ -202,6 +213,7 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 %{_bindir}/qui-updates
 %{_bindir}/qui-clipboard
 %{_bindir}/qubes-update-gui
+/etc/xdg/autostart/qubes-device-agent.desktop
 /etc/xdg/autostart/qui-domains.desktop
 /etc/xdg/autostart/qui-devices.desktop
 /etc/xdg/autostart/qui-clipboard.desktop

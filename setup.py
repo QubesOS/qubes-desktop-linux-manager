@@ -32,7 +32,37 @@ class InstallWithLocale(setuptools.command.install.install):
 
     def run(self):
         self.create_mo_files()
+        self.install_scripts()
         super().run()
+
+    # create simple scripts that run much faster than "console entry points"
+    def install_scripts(self):
+        bin = os.path.join(self.root, "usr/bin")
+        try:
+            os.makedirs(bin)
+        except:
+            pass
+        for file, pkg in get_console_scripts():
+            path = os.path.join(bin, file)
+            with open(path, "w") as f:
+                f.write(
+"""#!/usr/bin/python3
+from {} import main
+import sys
+if __name__ == '__main__':
+	sys.exit(main())
+""".format(pkg))
+
+            os.chmod(path, 0o755)
+
+# don't import: import * is unreliable and there is no need, since this is
+# compile time and we have source files
+def get_console_scripts():
+    for filename in os.listdir('./qui/tools'):
+        basename, ext = os.path.splitext(os.path.basename(filename))
+        if basename == '__init__' or ext != '.py':
+            continue
+        yield basename.replace('_', '-'), 'qui.tools.{}'.format(basename)
 
 
 setuptools.setup(
@@ -69,7 +99,8 @@ setuptools.setup(
                           "styles/qubes-widgets-base.css",
                           "eol.json",
                           "qubes-devices-light.css",
-                          "qubes-devices-dark.css"
+                          "qubes-devices-dark.css",
+                          "devices/AttachConfirmationWindow.glade"
                           ],
                   'qubes_config': ["new_qube.glade",
                                    "global_config.glade",
