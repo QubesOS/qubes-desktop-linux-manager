@@ -40,7 +40,8 @@ def test_populate_vm_list(
         ('test-standalone', "admin.vm.feature.Get", 'updates-available', None)
     ] = b"0\x00" + str(1).encode()
     # inconsistent output of qubes-vm-update, but it does not matter
-    mock_subprocess.return_value = b'Following templates will be updated:'
+    mock_subprocess.return_value = \
+            b'Following templates will be updated:test-standalone'
 
     assert not sut.is_populated
 
@@ -53,6 +54,8 @@ def test_populate_vm_list(
     test_qapp.expected_calls[
         ('fedora-36', "admin.vm.feature.Get", 'updates-available', None)
     ] = b"0\x00" + str(1).encode()
+    mock_subprocess.return_value = \
+            b'Following templates will be updated:test-standalone,fedora-36'
 
     sut.populate_vm_list(test_qapp, mock_settings)
     assert len(sut.list_store) == 4

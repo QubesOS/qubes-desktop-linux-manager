@@ -122,6 +122,7 @@ class IntroPage:
             if row.vm.name == 'dom0':
                 continue
             row.updates_available = bool(row.vm.name in to_update)
+            row.selected = bool(row.vm.name in to_update)
 
     def get_vms_to_update(self) -> ListWrapper:
         """Returns list of vms selected to be updated"""
