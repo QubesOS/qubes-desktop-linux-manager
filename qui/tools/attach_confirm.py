@@ -18,50 +18,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 # USA.
-import os
 import sys
-import json
 import asyncio
 
 from qubes import Qubes
 
+from qrexec.server import call_socket_service
 
 SOCKET_PATH = "/var/run/qubes"
-
-
-def call_socket_service(
-    remote_domain, service, source_domain, params, socket_path=SOCKET_PATH
-):
-    """
-    Call a socket service, either over qrexec or locally.
-
-    The request is JSON-encoded, response is plain ASCII text.
-    """
-
-    if remote_domain == source_domain:
-        return call_socket_service_local(
-            service, source_domain, params, socket_path
-        )
-    raise NotImplementedError()
-    # return call_socket_service_remote(remote_domain, service, params)
-
-
-async def call_socket_service_local(
-    service, source_domain, params, socket_path=SOCKET_PATH
-):
-    if source_domain == "dom0":
-        header = f"{service} dom0 name dom0\0".encode("ascii")
-    else:
-        header = f"{service} {source_domain}\0".encode("ascii")
-
-    path = os.path.join(socket_path, service)
-    reader, writer = await asyncio.open_unix_connection(path)
-    writer.write(header)
-    writer.write(json.dumps(params).encode("ascii"))
-    writer.write_eof()
-    await writer.drain()
-    response = await reader.read()
-    return response.decode("ascii")
 
 
 def main():
@@ -86,7 +50,7 @@ def main():
     }
 
     ask_response = asyncio.run(call_socket_service(
-        guivm, socket, "dom0", params
+        guivm, socket, "dom0", params, SOCKET_PATH
     ))
 
     if ask_response.startswith("allow:"):
