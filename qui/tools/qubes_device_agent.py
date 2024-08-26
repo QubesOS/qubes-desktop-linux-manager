@@ -30,14 +30,8 @@ import importlib.resources
 # pylint: disable=import-error,wrong-import-position
 import gi
 
-from qrexec.server import SocketService
-from qrexec.utils import sanitize_domain_name
-from qubesadmin.device_protocol import DeviceSerializer
-
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, Gdk
-from qrexec.tools.qrexec_policy_agent import (
-    VMListModeler, RPCConfirmationWindow)
+from gi.repository import Gtk
 
 # pylint: enable=import-error
 
@@ -45,6 +39,13 @@ from qrexec.tools.qrexec_policy_agent import (
 import gbulb
 
 # pylint: enable=wrong-import-position
+
+from qrexec.server import SocketService
+from qrexec.utils import sanitize_domain_name
+from qrexec.tools.qrexec_policy_agent import (
+    VMListModeler, RPCConfirmationWindow)
+from qubesadmin.device_protocol import DeviceSerializer
+
 
 DEVICE_AGENT_SOCKET_PATH = "/var/run/qubes/device-agent.GUI"
 
@@ -75,11 +76,10 @@ class VMAndPortListModeler(VMListModeler):
 
     def apply_icon(self, entry, qube_name):
         if isinstance(entry, Gtk.Entry):
-            for key, vm_info in self._entries.items():
+            for vm_info in self._entries.values():
                 if qube_name == vm_info['api_name']:
                     entry.set_icon_from_pixbuf(
-                        Gtk.EntryIconPosition.PRIMARY,
-                        self._entries[key]["icon"],
+                        Gtk.EntryIconPosition.PRIMARY, vm_info["icon"],
                     )
                     break
             else:
@@ -107,8 +107,12 @@ class AttachmentConfirmationWindow(RPCConfirmationWindow):
         "error_message": "ErrorMessage",
     }
 
+    # We reuse most parts of superclass, but we need custom init,
+    # so we DO NOT call super().__init__()
+    # pylint: disable=super-init-not-called
     def __init__(
-        self, entries_info, source, device_name, argument, targets_list, target=None
+        self,
+        entries_info, source, device_name, argument, targets_list, target=None
     ):
         # pylint: disable=too-many-arguments
         sanitize_domain_name(source, assert_sanitized=True)
@@ -153,7 +157,7 @@ class AttachmentConfirmationWindow(RPCConfirmationWindow):
 
         options = {name: " " + options for vm_data in targets_list
                    for name, _, options in (vm_data.partition(" "),)}
-        list_modeler = self._new_vm_list_modeler(options)
+        list_modeler = self._new_vm_list_modeler_overridden(options)
 
         list_modeler.apply_model(
             self._rpc_combo_box,
@@ -171,7 +175,7 @@ class AttachmentConfirmationWindow(RPCConfirmationWindow):
 
         self._connect_events()
 
-    def _new_vm_list_modeler(self, options):
+    def _new_vm_list_modeler_overridden(self, options):
         return VMAndPortListModeler(options, self._entries_info)
 
 

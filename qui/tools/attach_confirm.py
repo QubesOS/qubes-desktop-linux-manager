@@ -55,9 +55,9 @@ def main():
 
     if ask_response.startswith("allow:"):
         print(ask_response[len("allow:"):], end="")
-        exit(0)
+        sys.exit(0)
     else:
-        exit(1)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
