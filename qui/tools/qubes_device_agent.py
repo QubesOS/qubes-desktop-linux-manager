@@ -56,6 +56,7 @@ class VMAndPortListModeler(VMListModeler):
         self._override_entries(options)
 
     def _override_entries(self, options):
+        self._entries = {}
         for name, vm in self._domains_info.items():
             if name.startswith("@dispvm:"):
                 vm_name = name[len("@dispvm:"):]
@@ -68,6 +69,7 @@ class VMAndPortListModeler(VMListModeler):
             icon = self._get_icon(vm.get("icon", None))
 
             display_name = prefix + vm_name + options.get(name, "")
+            display_name = display_name.strip()
             self._entries[display_name] = {
                 "api_name": vm_name,
                 "icon": icon,

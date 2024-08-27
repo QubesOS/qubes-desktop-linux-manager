@@ -21,7 +21,7 @@
 import sys
 import asyncio
 
-from qubes import Qubes
+import qubes
 
 from qrexec.server import call_socket_service
 
@@ -31,17 +31,25 @@ SOCKET_PATH = "/var/run/qubes"
 def main():
     socket = "device-agent.GUI"
 
-    guivm = sys.argv[1]
+    app = qubes.Qubes()
+    system_info = qubes.api.internal.get_system_info(app)
+    doms = app.domains
 
-    number_of_targets = len(sys.argv) - 5
-    doms = Qubes().domains
+    try:
+        guivm = system_info["domains"]["dom0"]["guivm"]
+    except KeyError:
+        guivm = "dom0"
+    if guivm is None:
+        guivm = "dom0"
+
+    number_of_targets = len(sys.argv) - 4
 
     params = {
-        "source": sys.argv[2],
-        "device_name": sys.argv[4],
-        "argument": sys.argv[3],
-        "targets": sys.argv[5:],
-        "default_target": sys.argv[5] if number_of_targets == 1 else "",
+        "source": sys.argv[1],
+        "device_name": sys.argv[3],
+        "argument": sys.argv[2],
+        "targets": sys.argv[4:],
+        "default_target": sys.argv[4] if number_of_targets == 1 else "",
         "icons": {
             doms[d].name
             if doms[d].klass != "DispVM" else f'@dispvm:{doms[d].name}':
