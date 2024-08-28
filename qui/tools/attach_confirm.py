@@ -52,9 +52,9 @@ def main():
         "targets": sys.argv[4:],
         "default_target": sys.argv[4] if number_of_targets == 1 else "",
         "icons": {
-            doms[d].name
-            if doms[d].klass != "DispVM" else f'@dispvm:{doms[d].name}':
-            doms[d].icon for d in doms.keys()
+            dom.name
+            if dom.klass != "DispVM" else f'@dispvm:{dom.name}':
+            dom.icon for dom in doms.values()
         },
     }
 
