@@ -21,9 +21,10 @@
 import sys
 import asyncio
 
-import qubes
+import qubesadmin
 
 from qrexec.server import call_socket_service
+from qrexec.utils import get_system_info
 
 SOCKET_PATH = "/var/run/qubes"
 
@@ -31,8 +32,8 @@ SOCKET_PATH = "/var/run/qubes"
 def main():
     socket = "device-agent.GUI"
 
-    app = qubes.Qubes()
-    system_info = qubes.api.internal.get_system_info(app)
+    app = qubesadmin.Qubes()
+    system_info = get_system_info()
     doms = app.domains
 
     try:
