@@ -137,7 +137,7 @@ class ThisDeviceHandler(PageHandler):
            qubes_ver=self._get_version('qubes'),
            bios=self._get_data('bios'),
            kernel_ver=self._get_version('kernel'),
-           xen_ver=self._get_version('xes'))
+           xen_ver=self._get_version('xen'))
         self.set_state(self.compat_hvm_image, self._get_data('hvm'))
         self.compat_hvm_label.set_markup(f"<b>HVM:</b> {self._get_data('hvm')}")
 
