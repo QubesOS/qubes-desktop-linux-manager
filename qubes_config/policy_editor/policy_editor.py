@@ -406,7 +406,7 @@ class PolicyEditor(Gtk.Application):
             ask_dialog.destroy()
 
         # validation - only alphanumerics and - _
-        if not re.compile(r'[\w-]+').match(new_name):
+        if not re.compile(r'^[\w-]+$').match(new_name):
             show_error(self.main_window, "Invalid policy file name",
                        f"Invalid policy file name: {new_name}. Policy file "
                        "names must contain only alphanumeric characters, "
