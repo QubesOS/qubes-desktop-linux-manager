@@ -34,6 +34,7 @@ install-icons:
 
 install-autostart:
 	mkdir -p $(DESTDIR)/etc/xdg/autostart
+	cp autostart/qubes-device-agent.desktop $(DESTDIR)/etc/xdg/autostart
 	cp autostart/qui-domains.desktop $(DESTDIR)/etc/xdg/autostart
 	cp autostart/qui-devices.desktop $(DESTDIR)/etc/xdg/autostart
 	cp autostart/qui-clipboard.desktop $(DESTDIR)/etc/xdg/autostart
@@ -48,6 +49,8 @@ install-autostart:
 	cp desktop/qubes-global-config.desktop $(DESTDIR)/usr/share/applications/
 	cp desktop/qubes-new-qube.desktop $(DESTDIR)/usr/share/applications/
 	cp desktop/qubes-policy-editor-gui.desktop $(DESTDIR)/usr/share/applications/
+	install -d $(DESTDIR)/usr/lib/qubes -m 0755
+	install -m 0755 qui/devices/qubes-device-agent-autostart $(DESTDIR)/usr/lib/qubes/qubes-device-agent-autostart
 
 install-lang:
 	mkdir -p $(DESTDIR)/usr/share/gtksourceview-4/language-specs/
