@@ -230,7 +230,9 @@
                     <property name="margin-bottom">20</property>
                     <property name="label" translatable="yes">Qubes OS checks for updates for running and networked qubes and their templates. Updates may also be available in other qubes, marked as {MAYBE} above.
 
-{OBSOLETE} qubes are based on templates that are no longer supported and no longer receive updates. Please install new templates using the Qubes Template Manager.</property>
+{OBSOLETE} qubes are based on templates that are no longer supported and no longer receive updates. Please install new templates using the Qubes Template Manager.
+
+Selected qubes will be automatically started if necessary and shutdown after successful update.</property>
                     <property name="use-markup">True</property>
                     <property name="wrap">True</property>
                     <style>
