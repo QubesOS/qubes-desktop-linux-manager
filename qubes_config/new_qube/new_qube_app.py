@@ -206,6 +206,12 @@ class CreateNewQube(Gtk.Application):
                 load_icon('qubes-question', 20, 20))
             return
         self.template_handler.change_vm_type(button_name)
+
+        if button_name == 'qube_type_template':
+            self.network_selector.network_none.set_active(True)
+        else:
+            self.network_selector.network_default.set_active(True)
+
         self.tooltips[button_name].set_from_pixbuf(load_icon(
                 'qubes-question-light', 20, 20))
 
@@ -227,8 +233,10 @@ class CreateNewQube(Gtk.Application):
 
         properties: Dict[str, Any] = {'provides_network':
                           self.advanced_handler.get_provides_network()}
-        if self.network_selector.get_selected_netvm() != qubesadmin.DEFAULT:
-            properties['netvm'] = self.network_selector.get_selected_netvm()
+        selected_netvm = self.network_selector.get_selected_netvm()
+        if not (klass == 'TemplateVM' and selected_netvm is None) \
+                and selected_netvm != qubesadmin.DEFAULT:
+            properties['netvm'] = selected_netvm
         if klass == 'StandaloneVM' and \
                 not self.template_handler.get_selected_template():
             properties['virt_mode'] = 'hvm'
