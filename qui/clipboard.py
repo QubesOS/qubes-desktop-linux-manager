@@ -85,11 +85,19 @@ class EventHandler(pyinotify.ProcessEvent):
 
         size = clipboard_formatted_size()
 
-        body = _("Clipboard contents fetched from qube: <b>'{vmname}'</b>\n"
+        if not os.path.getsize(DATA):
+            body = _("Failed to fetch clipboard from qube: <b>'{vmname}'</b>!\n"
+                 "Source clipboard too big to fit in Global clipboard buffer.\n"
+                 "Use <b>qvm-copy</b> to transfer large data between qubes.\n"
+                 "<small>Global clipboard is wiped</small>".format(
+                     vmname=vmname))
+            size = 0
+        else:
+            body = _("Clipboard contents fetched from qube: <b>'{vmname}'</b>\n"
                  "Copied <b>{size}</b> to the global clipboard.\n"
                  "<small>Press {shortcut} in qube "
                  "to paste to local clipboard.</small>".format(
-            vmname=vmname, size=size, shortcut=self.gtk_app.paste_shortcut))
+                vmname=vmname, size=size, shortcut=self.gtk_app.paste_shortcut))
 
         self.gtk_app.update_clipboard_contents(vmname, size, message=body)
 
