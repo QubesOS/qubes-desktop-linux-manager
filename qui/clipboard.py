@@ -36,7 +36,7 @@ import qubesadmin.events
 
 import gi
 gi.require_version('Gtk', '3.0')  # isort:skip
-from gi.repository import Gtk, Gio, Gdk  # isort:skip
+from gi.repository import Gtk, Gio, Gdk, GLib  # isort:skip
 
 import gbulb
 import pyinotify
@@ -92,6 +92,29 @@ class EventHandler(pyinotify.ProcessEvent):
             vmname=vmname, size=size, shortcut=self.gtk_app.paste_shortcut))
 
         self.gtk_app.update_clipboard_contents(vmname, size, message=body)
+
+        if self.gtk_app.clear_event_source_id is not None:
+            # If there is any clipboard clearing event in event loop, cancel it
+            GLib.source_remove(self.gtk_app.clear_event_source_id)
+            self.gtk_app.clear_event_source_id = None
+
+        try:
+            clear_timeout = self.gtk_app.qapp.domains[vmname].features[ \
+                "global-clipboard-timeout"]
+        except qubesadmin.exc.QubesException:
+            clear_timeout = None
+        if clear_timeout is None:
+            try:
+                clear_timeout = self.gtk_app.qapp.domains[ \
+                    self.gtk_app.qapp.local_name].features[ \
+                    "global-clipboard-timeout"]
+            except qubesadmin.exc.QubesException:
+                clear_timeout = None
+        if clear_timeout is not None and clear_timeout.isnumeric() and \
+                int(clear_timeout) > 0:
+            self.gtk_app.clear_event_source_id = GLib.timeout_add_seconds(
+                int(clear_timeout), self.gtk_app.clear_clipboard_event, \
+                os.path.getmtime(DATA))
 
     def _paste(self):
         ''' Sends Paste notification via Gio.Notification.
@@ -174,6 +197,8 @@ class NotificationApp(Gtk.Application):
 
         self.wm = wm
         self.temporary_watch = None
+
+        self.clear_event_source_id: int = None
 
         if not os.path.exists(FROM):
             # pylint: disable=no-member
@@ -260,6 +285,10 @@ class NotificationApp(Gtk.Application):
         dom0_item.connect('activate', self.copy_dom0_clipboard)
         self.menu.append(dom0_item)
 
+        clear_item = Gtk.MenuItem(_("Clear global clipboard"))
+        clear_item.connect('activate', self.clear_clipboard)
+        self.menu.append(clear_item)
+
     def copy_dom0_clipboard(self, *_args, **_kwargs):
         clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         text = clipboard.wait_for_text()
@@ -301,6 +330,33 @@ class NotificationApp(Gtk.Application):
         if len(key) == 1:
             return key.upper()
         return key
+
+    def clear_clipboard(self, *_args, **_kwargs):
+        try:
+            with appviewer_lock():
+                if os.path.exists(DATA):
+                    os.unlink(DATA)
+                if os.path.exists(FROM):
+                    os.unlink(FROM)
+                if os.path.exists(XEVENT):
+                    os.unlink(XEVENT)
+                self.update_clipboard_contents(vm=None, size=0, message= \
+                        _("Global clipboard cleared"))
+        except Exception:  # pylint: disable=broad-except
+            self.send_notify(_("Error while clearing global clipboard!"))
+
+    def clear_clipboard_event(self, modification_time: float) -> bool:
+        """ this event is called via GLib if source VM and/or GUIVM has
+        `global-clipboard-timeout=<SECONDS>` feature set and it times out """
+        if self.clear_event_source_id:
+            # first we remove the event from event loop
+            GLib.source_remove(self.clear_event_source_id)
+            self.clear_event_source_id = None
+        if os.path.getmtime(DATA) != modification_time:
+            # some other clipboard copy action has happened in the meantime
+            return False
+        self.clear_clipboard()
+        return False
 
 def main():
     loop = asyncio.get_event_loop()
