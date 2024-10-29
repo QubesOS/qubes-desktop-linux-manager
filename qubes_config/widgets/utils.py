@@ -108,17 +108,15 @@ def compare_rule_lists(rule_list_1: List[Rule],
             return False
     return True
 
-def _open_url_in_dvm(url, default_dvm: qubesadmin.vm.QubesVM):
+def _open_url(url):
     subprocess.run(
-        ['qvm-run', '-p', '--service', f'--dispvm={default_dvm}',
-         'qubes.OpenURL'], input=url.encode(), check=False,
+        ['qubes-virtual-browser', url.encode()], input=None, check=False,
         stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
 
-def open_url_in_disposable(url: str, qapp: qubesadmin.Qubes):
+def open_url_in_disposable(url: str):
     """Open provided url in disposable qube based on default disposable
     template"""
-    default_dvm = qapp.default_dispvm
     open_thread = threading.Thread(group=None,
-                                   target=_open_url_in_dvm,
-                                   args=[url, default_dvm])
+                                   target=_open_url,
+                                   args=[url])
     open_thread.start()

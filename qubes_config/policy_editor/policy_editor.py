@@ -26,7 +26,6 @@ from typing import Callable, Optional, Dict, Tuple
 import gi
 import importlib.resources
 
-import qubesadmin
 from qrexec.policy.admin_client import PolicyClient
 from qrexec.policy.parser import StringPolicy
 from qrexec.exc import PolicySyntaxError
@@ -246,8 +245,7 @@ class PolicyEditor(Gtk.Application):
 
     @staticmethod
     def _open_docs(_widget, url):
-        qapp = qubesadmin.Qubes()
-        open_url_in_disposable(url, qapp)
+        open_url_in_disposable(url)
         return True
 
     def setup_actions(self):
