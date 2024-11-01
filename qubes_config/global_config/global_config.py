@@ -21,7 +21,7 @@
 # pylint: disable=import-error
 """Global Qubes Config tool."""
 import sys
-from typing import Dict, Optional, List, Union
+from typing import Dict, Optional, List, Union, Any
 from html import escape
 import importlib.resources
 import logging
@@ -48,7 +48,7 @@ from .thisdevice_handler import ThisDeviceHandler
 import gi
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GLib, GObject
+from gi.repository import Gtk, GLib, GObject, Gio
 
 logger = logging.getLogger('qubes-global-config')
 
@@ -56,12 +56,21 @@ import gettext
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
+# in order to add more places as referencable locations, you need to add
+# a focusable widget to the UI and then add its name here
+LOCATIONS = ["default_qubes", "window_management", "memory_balancing",
+             "linux_kernel", "usb_input", "u2f", "dom0_updates",
+             "check_for_updates", "update_proxy", "template_repositories",
+             "clipboard_shortcut", "clipboard_policy", "filecopy_policy",
+             "open_in_vm"]
+
 
 class ClipboardHandler(PageHandler):
     """Handler for Clipboard policy. Adds a couple of comboboxes to a
     normal policy handler."""
     COPY_FEATURE = 'gui-default-secure-copy-sequence'
     PASTE_FEATURE = 'gui-default-secure-paste-sequence'
+
     def __init__(self, qapp: qubesadmin.Qubes,
                  gtk_builder: Gtk.Builder,
                  policy_manager: PolicyManager):
@@ -189,13 +198,46 @@ class GlobalConfig(Gtk.Application):
         :param qapp: qubesadmin.Qubes object
         :param policy_manager: PolicyManager object
         """
-        super().__init__(application_id='org.qubesos.globalconfig')
+        super().__init__(application_id='org.qubesos.globalconfig',
+                         flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
         self.qapp: qubesadmin.Qubes = qapp
         self.policy_manager = policy_manager
+
+        self.add_main_option(
+            "open-at",
+            ord("o"),
+            GLib.OptionFlags.NONE,
+            GLib.OptionArg.STRING,
+            "Open config tool at the provided location.",
+            "page_name#location",
+        )
+
+        self.open_at: Optional[str] = None
 
         self.progress_bar_dialog = ProgressBarDialog(
             self, _("Loading system settings..."))
         self.handlers: Dict[str, PageHandler] = {}
+
+    def do_command_line(self, command_line):
+        """
+        Handle CLI arguments. This method overrides default do_command_line
+        from Gtk.Application (and due to pygtk being dynamically generated
+        pylint is confused about its arguments).
+        """
+        # pylint: disable=arguments-differ
+        Gtk.Application.do_command_line(self, command_line)
+        options = command_line.get_options_dict()
+        options = options.end().unpack()
+        self.parse_options(options)
+        self.activate()
+        return 0
+
+    def parse_options(self, options: Dict[str, Any]):
+        """Parse command-line options."""
+        if "open-at" in options:
+            self.open_at = options["open-at"]
+        else:
+            self.open_at = None
 
     def do_activate(self, *args, **kwargs):
         """
@@ -222,7 +264,41 @@ class GlobalConfig(Gtk.Application):
             height = self.main_window.get_allocated_height()
         self.main_window.resize(width, height)
 
+        # open at specified location
+        if self.open_at:
+            self.scroll_to_location(self.open_at)
+
+        for widget_name in LOCATIONS:
+            widget = self.builder.get_object(widget_name)
+            widget.set_visible(False)
+
         self.hold()
+
+    def scroll_to_location(self, location_string):
+        """
+        Scroll to provided location. Location should be provided as
+        page[#location]. Currently supported pages and locations can be found
+        in the README.
+        """
+        if "#" in location_string:
+            page, location = location_string.split("#")
+        else:
+            page, location = location_string, None
+
+        if page in self.handlers:
+            for i in range(len(self.handlers)):
+                if self.main_notebook.get_nth_page(i).get_name() == page:
+                    self.main_notebook.set_current_page(i)
+                    break
+            else:
+                print("Page not found: ", page)
+
+        if location in LOCATIONS:
+            widget: Gtk.Widget = self.builder.get_object(location)
+            # hopefully it has some children
+            widget.grab_focus()
+        elif location:
+            print("Location not found: ", location)
 
     @staticmethod
     def register_signals():

@@ -32,7 +32,7 @@
                     <property name="can-focus">False</property>
                     <property name="vscroll-policy">natural</property>
                     <child>
-                      <!-- n-columns=3 n-rows=20 -->
+                      <!-- n-columns=3 n-rows=24 -->
                       <object class="GtkGrid" id="basics_contents">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
@@ -51,7 +51,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">0</property>
+                            <property name="top-attach">1</property>
                             <property name="width">3</property>
                           </packing>
                         </child>
@@ -67,7 +67,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">1</property>
+                            <property name="top-attach">2</property>
                             <property name="width">3</property>
                           </packing>
                         </child>
@@ -108,7 +108,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">2</property>
+                            <property name="top-attach">3</property>
                           </packing>
                         </child>
                         <child>
@@ -124,7 +124,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">6</property>
+                            <property name="top-attach">8</property>
                             <property name="width">3</property>
                           </packing>
                         </child>
@@ -137,7 +137,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">9</property>
+                            <property name="top-attach">11</property>
                           </packing>
                         </child>
                         <child>
@@ -149,7 +149,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">11</property>
+                            <property name="top-attach">13</property>
                           </packing>
                         </child>
                         <child>
@@ -161,7 +161,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">1</property>
-                            <property name="top-attach">9</property>
+                            <property name="top-attach">11</property>
                           </packing>
                         </child>
                         <child>
@@ -173,7 +173,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">1</property>
-                            <property name="top-attach">10</property>
+                            <property name="top-attach">12</property>
                           </packing>
                         </child>
                         <child>
@@ -185,7 +185,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">1</property>
-                            <property name="top-attach">11</property>
+                            <property name="top-attach">13</property>
                           </packing>
                         </child>
                         <child>
@@ -207,7 +207,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">1</property>
-                            <property name="top-attach">2</property>
+                            <property name="top-attach">3</property>
                           </packing>
                         </child>
                         <child>
@@ -228,7 +228,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">1</property>
-                            <property name="top-attach">4</property>
+                            <property name="top-attach">5</property>
                           </packing>
                         </child>
                         <child>
@@ -249,7 +249,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">1</property>
-                            <property name="top-attach">5</property>
+                            <property name="top-attach">6</property>
                           </packing>
                         </child>
                         <child>
@@ -271,7 +271,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">1</property>
-                            <property name="top-attach">3</property>
+                            <property name="top-attach">4</property>
                           </packing>
                         </child>
                         <child>
@@ -287,7 +287,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">12</property>
+                            <property name="top-attach">15</property>
                             <property name="width">3</property>
                           </packing>
                         </child>
@@ -304,7 +304,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">13</property>
+                            <property name="top-attach">16</property>
                             <property name="width">3</property>
                           </packing>
                         </child>
@@ -317,7 +317,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">14</property>
+                            <property name="top-attach">17</property>
                           </packing>
                         </child>
                         <child>
@@ -329,7 +329,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">15</property>
+                            <property name="top-attach">18</property>
                           </packing>
                         </child>
                         <child>
@@ -344,7 +344,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">16</property>
+                            <property name="top-attach">20</property>
                             <property name="width">2</property>
                           </packing>
                         </child>
@@ -356,7 +356,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">18</property>
+                            <property name="top-attach">22</property>
                             <property name="width">2</property>
                           </packing>
                         </child>
@@ -369,7 +369,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">19</property>
+                            <property name="top-attach">23</property>
                             <property name="width">2</property>
                           </packing>
                         </child>
@@ -386,7 +386,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">17</property>
+                            <property name="top-attach">21</property>
                             <property name="width">3</property>
                           </packing>
                         </child>
@@ -427,7 +427,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">3</property>
+                            <property name="top-attach">4</property>
                           </packing>
                         </child>
                         <child>
@@ -467,7 +467,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">4</property>
+                            <property name="top-attach">5</property>
                           </packing>
                         </child>
                         <child>
@@ -508,7 +508,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">5</property>
+                            <property name="top-attach">6</property>
                           </packing>
                         </child>
                         <child>
@@ -524,7 +524,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">7</property>
+                            <property name="top-attach">9</property>
                             <property name="width">3</property>
                           </packing>
                         </child>
@@ -570,7 +570,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">8</property>
+                            <property name="top-attach">10</property>
                             <property name="width">3</property>
                           </packing>
                         </child>
@@ -611,7 +611,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
-                            <property name="top-attach">10</property>
+                            <property name="top-attach">12</property>
                           </packing>
                         </child>
                         <child>
@@ -648,7 +648,7 @@
                           </object>
                           <packing>
                             <property name="left-attach">1</property>
-                            <property name="top-attach">14</property>
+                            <property name="top-attach">17</property>
                           </packing>
                         </child>
                         <child>
@@ -685,8 +685,80 @@
                           </object>
                           <packing>
                             <property name="left-attach">1</property>
-                            <property name="top-attach">15</property>
+                            <property name="top-attach">18</property>
                           </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="default_qubes">
+                            <property name="label" translatable="yes">anchor</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="window_management">
+                            <property name="label" translatable="yes">anchor</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">7</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="memory_balancing">
+                            <property name="label" translatable="yes">anchor</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">14</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="linux_kernel">
+                            <property name="label" translatable="yes">anchor</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">19</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                        <child>
+                          <placeholder/>
                         </child>
                         <child>
                           <placeholder/>
@@ -764,6 +836,19 @@
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
+                          <object class="GtkButton" id="usb_input">
+                            <property name="label" translatable="yes">anchor</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
@@ -777,7 +862,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">0</property>
+                            <property name="position">1</property>
                           </packing>
                         </child>
                         <child>
@@ -795,7 +880,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                         <child>
@@ -822,7 +907,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">2</property>
+                            <property name="position">3</property>
                           </packing>
                         </child>
                         <child>
@@ -863,7 +948,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">3</property>
+                            <property name="position">4</property>
                           </packing>
                         </child>
                         <child>
@@ -981,7 +1066,20 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">4</property>
+                            <property name="position">5</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="u2f">
+                            <property name="label" translatable="yes">anchor</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">6</property>
                           </packing>
                         </child>
                         <child>
@@ -998,7 +1096,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">5</property>
+                            <property name="position">7</property>
                           </packing>
                         </child>
                         <child>
@@ -1018,7 +1116,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">6</property>
+                            <property name="position">8</property>
                           </packing>
                         </child>
                         <child>
@@ -1086,7 +1184,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">7</property>
+                            <property name="position">9</property>
                           </packing>
                         </child>
                         <child>
@@ -1127,7 +1225,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">8</property>
+                            <property name="position">10</property>
                           </packing>
                         </child>
                         <child>
@@ -1156,7 +1254,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">9</property>
+                            <property name="position">11</property>
                           </packing>
                         </child>
                         <child>
@@ -1197,7 +1295,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">10</property>
+                            <property name="position">12</property>
                           </packing>
                         </child>
                         <child>
@@ -1221,7 +1319,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">12</property>
+                            <property name="position">14</property>
                           </packing>
                         </child>
                         <child>
@@ -2092,7 +2190,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">13</property>
+                            <property name="position">15</property>
                           </packing>
                         </child>
                         <style>
@@ -2139,6 +2237,19 @@
                         <property name="orientation">vertical</property>
                         <property name="spacing">5</property>
                         <child>
+                          <object class="GtkButton" id="dom0_updates">
+                            <property name="label" translatable="yes">anchor</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
@@ -2152,7 +2263,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">0</property>
+                            <property name="position">1</property>
                           </packing>
                         </child>
                         <child>
@@ -2216,7 +2327,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                         <child>
@@ -2243,7 +2354,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">2</property>
+                            <property name="position">3</property>
                           </packing>
                         </child>
                         <child>
@@ -2296,7 +2407,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">3</property>
+                            <property name="position">4</property>
                           </packing>
                         </child>
                         <child>
@@ -2351,7 +2462,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">4</property>
+                            <property name="position">5</property>
                           </packing>
                         </child>
                         <child>
@@ -2405,7 +2516,20 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">5</property>
+                            <property name="position">6</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="check_for_updates">
+                            <property name="label" translatable="yes">anchor</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">7</property>
                           </packing>
                         </child>
                         <child>
@@ -2422,7 +2546,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">6</property>
+                            <property name="position">8</property>
                           </packing>
                         </child>
                         <child>
@@ -2439,7 +2563,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">7</property>
+                            <property name="position">9</property>
                           </packing>
                         </child>
                         <child>
@@ -2489,7 +2613,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">8</property>
+                            <property name="position">10</property>
                           </packing>
                         </child>
                         <child>
@@ -2503,7 +2627,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">9</property>
+                            <property name="position">11</property>
                           </packing>
                         </child>
                         <child>
@@ -2549,7 +2673,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
-                            <property name="position">10</property>
+                            <property name="position">12</property>
                           </packing>
                         </child>
                         <child>
@@ -2600,7 +2724,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">11</property>
+                            <property name="position">13</property>
                           </packing>
                         </child>
                         <child>
@@ -2652,7 +2776,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">12</property>
+                            <property name="position">14</property>
                           </packing>
                         </child>
                         <child>
@@ -2700,7 +2824,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">13</property>
+                            <property name="position">15</property>
                           </packing>
                         </child>
                         <child>
@@ -2879,17 +3003,21 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">14</property>
+                            <property name="position">16</property>
                           </packing>
                         </child>
                         <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
+                          <object class="GtkButton" id="update_proxy">
+                            <property name="label" translatable="yes">anchor</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">17</property>
+                          </packing>
                         </child>
                         <child>
                           <object class="GtkLabel">
@@ -3285,6 +3413,19 @@
                             <style>
                               <class name="flat"/>
                             </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">27</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="template_repositories">
+                            <property name="label" translatable="yes">anchor</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -4354,6 +4495,19 @@
                         <property name="orientation">vertical</property>
                         <property name="spacing">5</property>
                         <child>
+                          <object class="GtkButton" id="clipboard_shortcut">
+                            <property name="label" translatable="yes">anchor</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
@@ -4367,7 +4521,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">0</property>
+                            <property name="position">1</property>
                           </packing>
                         </child>
                         <child>
@@ -4389,7 +4543,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                         <child>
@@ -4454,7 +4608,20 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">2</property>
+                            <property name="position">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="clipboard_policy">
+                            <property name="label" translatable="yes">anchor</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">4</property>
                           </packing>
                         </child>
                         <child>
@@ -4471,7 +4638,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">3</property>
+                            <property name="position">5</property>
                           </packing>
                         </child>
                         <child>
@@ -4488,7 +4655,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">4</property>
+                            <property name="position">6</property>
                           </packing>
                         </child>
                         <child>
@@ -4529,7 +4696,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">5</property>
+                            <property name="position">7</property>
                           </packing>
                         </child>
                         <child>
@@ -4570,7 +4737,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">6</property>
+                            <property name="position">8</property>
                           </packing>
                         </child>
                         <child>
@@ -4622,7 +4789,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">7</property>
+                            <property name="position">9</property>
                           </packing>
                         </child>
                         <child>
@@ -4675,7 +4842,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">8</property>
+                            <property name="position">10</property>
                           </packing>
                         </child>
                         <child>
@@ -4899,7 +5066,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">9</property>
+                            <property name="position">11</property>
                           </packing>
                         </child>
                         <child>
@@ -4965,7 +5132,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">10</property>
+                            <property name="position">12</property>
                           </packing>
                         </child>
                         <child>
@@ -5042,7 +5209,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">12</property>
+                            <property name="position">14</property>
                           </packing>
                         </child>
                         <style>
@@ -5089,6 +5256,19 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                         <property name="orientation">vertical</property>
                         <property name="spacing">5</property>
                         <child>
+                          <object class="GtkButton" id="filecopy_policy">
+                            <property name="label" translatable="yes">anchor</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
@@ -5102,7 +5282,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">0</property>
+                            <property name="position">1</property>
                           </packing>
                         </child>
                         <child>
@@ -5120,7 +5300,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                         <child>
@@ -5161,7 +5341,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">2</property>
+                            <property name="position">3</property>
                           </packing>
                         </child>
                         <child>
@@ -5202,7 +5382,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">3</property>
+                            <property name="position">4</property>
                           </packing>
                         </child>
                         <child>
@@ -5255,7 +5435,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">4</property>
+                            <property name="position">5</property>
                           </packing>
                         </child>
                         <child>
@@ -5306,7 +5486,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">5</property>
+                            <property name="position">6</property>
                           </packing>
                         </child>
                         <child>
@@ -5531,7 +5711,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">6</property>
+                            <property name="position">7</property>
                           </packing>
                         </child>
                         <child>
@@ -5597,7 +5777,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">7</property>
+                            <property name="position">8</property>
                           </packing>
                         </child>
                         <child>
@@ -5676,7 +5856,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">8</property>
+                            <property name="position">9</property>
                           </packing>
                         </child>
                         <child>
@@ -5688,7 +5868,20 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">9</property>
+                            <property name="position">10</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="open_in_vm">
+                            <property name="label" translatable="yes">anchor</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">11</property>
                           </packing>
                         </child>
                         <child>
@@ -5705,7 +5898,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">10</property>
+                            <property name="position">12</property>
                           </packing>
                         </child>
                         <child>
@@ -5723,7 +5916,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">11</property>
+                            <property name="position">13</property>
                           </packing>
                         </child>
                         <child>
@@ -5770,7 +5963,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
-                            <property name="position">12</property>
+                            <property name="position">14</property>
                           </packing>
                         </child>
                         <child>
@@ -5811,7 +6004,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">13</property>
+                            <property name="position">15</property>
                           </packing>
                         </child>
                         <child>
@@ -5852,7 +6045,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">14</property>
+                            <property name="position">16</property>
                           </packing>
                         </child>
                         <child>
@@ -5880,7 +6073,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">15</property>
+                            <property name="position">17</property>
                           </packing>
                         </child>
                         <child>
@@ -5921,7 +6114,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">16</property>
+                            <property name="position">18</property>
                           </packing>
                         </child>
                         <child>
@@ -5975,7 +6168,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">17</property>
+                            <property name="position">19</property>
                           </packing>
                         </child>
                         <child>
@@ -6001,7 +6194,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">18</property>
+                            <property name="position">20</property>
                           </packing>
                         </child>
                         <child>
@@ -6056,7 +6249,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">19</property>
+                            <property name="position">21</property>
                           </packing>
                         </child>
                         <child>
@@ -6122,7 +6315,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">20</property>
+                            <property name="position">22</property>
                           </packing>
                         </child>
                         <child>
@@ -6201,7 +6394,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">21</property>
+                            <property name="position">23</property>
                           </packing>
                         </child>
                         <style>
