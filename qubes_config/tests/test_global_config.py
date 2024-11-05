@@ -238,3 +238,73 @@ def test_global_config_broken_system(mock_error, mock_subprocess,
         app.main_notebook.next_page()
 
     mock_error.assert_not_called()
+
+
+@patch('subprocess.check_output')
+@patch('qubes_config.global_config.global_config.show_error')
+def test_global_config_open_at(
+        mock_error, mock_subprocess,
+        test_qapp, test_policy_manager, real_builder):
+    mock_subprocess.return_value = b''
+    app = GlobalConfig(test_qapp, test_policy_manager)
+    # do not call do_activate - it will make Gtk confused and, in case
+    # of errors, spawn an entire screenful of windows
+    app.perform_setup()
+    assert real_builder
+
+    with patch('builtins.print', side_effect=print) as mock_print:
+        app.scroll_to_location("basics")
+        mock_print.assert_not_called()
+        app.scroll_to_location("basics#default_qubes")
+        mock_print.assert_not_called()
+        app.scroll_to_location("basics#window_management")
+        mock_print.assert_not_called()
+        app.scroll_to_location("basics#memory_balancing")
+        mock_print.assert_not_called()
+        app.scroll_to_location("basics#linux_kernel")
+        mock_print.assert_not_called()
+
+        app.scroll_to_location("usb")
+        mock_print.assert_not_called()
+        app.scroll_to_location("usb#usb_input")
+        mock_print.assert_not_called()
+        app.scroll_to_location("usb#u2f")
+        mock_print.assert_not_called()
+
+        app.scroll_to_location("updates")
+        mock_print.assert_not_called()
+        app.scroll_to_location("updates#dom0_updates")
+        mock_print.assert_not_called()
+        app.scroll_to_location("updates#check_for_updates")
+        mock_print.assert_not_called()
+        app.scroll_to_location("updates#update_proxy")
+        mock_print.assert_not_called()
+        app.scroll_to_location("updates#template_repositories")
+        mock_print.assert_not_called()
+
+        app.scroll_to_location("splitgpgp")
+        mock_print.assert_not_called()
+
+        app.scroll_to_location("clipboard")
+        mock_print.assert_not_called()
+        app.scroll_to_location("clipboard#clipboard_shortcut")
+        mock_print.assert_not_called()
+        app.scroll_to_location("clipboard#clipboard_policy")
+        mock_print.assert_not_called()
+
+        app.scroll_to_location("file")
+        mock_print.assert_not_called()
+        app.scroll_to_location("file#filecopy_policy")
+        mock_print.assert_not_called()
+        app.scroll_to_location("file#open_in_vm")
+        mock_print.assert_not_called()
+
+        app.scroll_to_location("url")
+        mock_print.assert_not_called()
+
+        app.scroll_to_location("thisdevice")
+        mock_print.assert_not_called()
+
+        # and check a faulty location
+        app.scroll_to_location("error#words")
+        mock_print.assert_called()

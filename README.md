@@ -33,6 +33,44 @@ name an include file (e.g. `include/admin-ro`) to edit it, or name a new file to
 The policy editor will not allow you to save a policy file with syntactic errors,
 so it's preferable to use it rather than directly editing the policy files.
 
+# Global Config
+
+Command line parameters:
+
+## -o / --open-at page[#location]
+
+Open the tool at the provided location. Supported pages and their respective
+available locations are:
+- basics
+  - default_qubes
+  - window_management
+  - memory_balancing
+  - linux_kernel
+- usb
+  - usb_input
+  - u2f
+- updates
+  - dom0_updates
+  - check_for_updates
+  - update_proxy
+  - template_repositories
+- splitgpgp
+  - no locations available, can only be used as a page, without specific
+    location.
+- clipboard
+  - clipboard_shortcut
+  - clipboard_policy
+- file
+  - filecopy_policy
+  - open_in_vm
+- url:
+  - no locations available, can only be used as a page, without specific
+    location.
+- thisdevice
+  - no locations available, can only be used as a page, without specific
+    location.
+
+
 ## Translation
 
 To add more translation languages, add a directory in locales with a name corresponding to the target language code, with a subdirectory LC\_MESSAGES in it, copy the file locales/desktop-linux-manager.po into it, and edit its headers to reflect the translation details.
