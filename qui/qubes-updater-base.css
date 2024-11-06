@@ -229,6 +229,10 @@ treeview.view button
   color: @text-color;
 }
 
+treeview.view:selected {
+    background-color: #99bfff;
+}
+
 .add_label {
     color: @qubes-blue;
     font-weight: bold;
