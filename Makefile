@@ -48,6 +48,8 @@ install-autostart:
 	cp desktop/qubes-global-config.desktop $(DESTDIR)/usr/share/applications/
 	cp desktop/qubes-new-qube.desktop $(DESTDIR)/usr/share/applications/
 	cp desktop/qubes-policy-editor-gui.desktop $(DESTDIR)/usr/share/applications/
+	cp desktop/qubes-virtual-browser.desktop $(DESTDIR)/usr/share/applications/
+	xdg-settings set default-web-browser qubes-virtual-browser.desktop
 
 install-lang:
 	mkdir -p $(DESTDIR)/usr/share/gtksourceview-4/language-specs/

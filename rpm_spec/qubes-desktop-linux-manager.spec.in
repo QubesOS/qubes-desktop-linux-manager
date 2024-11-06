@@ -218,6 +218,7 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 /usr/share/applications/qubes-global-config.desktop
 /usr/share/applications/qubes-new-qube.desktop
 /usr/share/applications/qubes-policy-editor-gui.desktop
+/usr/share/applications/qubes-virtual-browser.desktop
 
 %{_bindir}/qubes-new-qube
 %{_bindir}/qubes-global-config
