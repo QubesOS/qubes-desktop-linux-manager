@@ -18,9 +18,11 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program; if not, see <http://www.gnu.org/licenses/>.
 from typing import Set, List, Dict
+from functools import partial
 import asyncio
 import sys
 import time
+import signal
 
 import importlib.resources
 
@@ -294,7 +296,7 @@ class DevicesTray(Gtk.Application):
 
         return theme
 
-    def show_menu(self, _unused, _event):
+    def show_menu(self, _unused, event):
         """Show menu at mouse pointer."""
         tray_menu = Gtk.Menu()
         theme = self.load_css(tray_menu)
@@ -333,7 +335,8 @@ class DevicesTray(Gtk.Application):
             tray_menu.add(item)
 
         tray_menu.show_all()
-        tray_menu.popup_at_pointer(None)  # use current event
+        tray_menu.popup(None, None, None, None, event.button,
+                        Gtk.get_current_event_time())
 
     def emit_notification(self, title, message, priority, error=False,
                           notification_id=None):
@@ -347,6 +350,11 @@ class DevicesTray(Gtk.Application):
         self.send_notification(notification_id, notification)
 
 
+def signal_handler(app, _signum, _frame):
+    event = Gdk.EventButton()
+    event.button = 1
+    app.show_menu(None, event)
+
 def main():
     qapp = qubesadmin.Qubes()
     # qapp = qubesadmin.tests.mock_app.MockQubesComplete()
@@ -354,6 +362,9 @@ def main():
     # dispatcher = qubesadmin.tests.mock_app.MockDispatcher(qapp)
     app = DevicesTray(
         'org.qubes.qui.tray.Devices', qapp, dispatcher)
+
+    signal_handler_wrapper = partial(signal_handler, app)
+    signal.signal(signal.SIGUSR1, signal_handler_wrapper)
 
     loop = asyncio.get_event_loop()
     return_code = qui.utils.run_asyncio_and_show_errors(

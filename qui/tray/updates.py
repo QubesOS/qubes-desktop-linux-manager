@@ -6,6 +6,8 @@
 import asyncio
 import sys
 import subprocess
+import signal
+from functools import partial
 
 import qubesadmin
 import qubesadmin.events
@@ -14,7 +16,7 @@ from qubesadmin import exc
 
 import gi  # isort:skip
 gi.require_version('Gtk', '3.0')  # isort:skip
-from gi.repository import Gtk, Gio  # isort:skip
+from gi.repository import Gtk, Gio, Gdk  # isort:skip
 
 import gbulb
 gbulb.install()
@@ -105,12 +107,13 @@ class UpdatesTray(Gtk.Application):
 
         self.tray_menu.show_all()
 
-    def show_menu(self, _unused, _event):
+    def show_menu(self, _unused, event):
         self.tray_menu = Gtk.Menu()
 
         self.setup_menu()
 
-        self.tray_menu.popup_at_pointer(None)  # use current event
+        self.tray_menu.popup(None, None, None, None, event.button,
+                             Gtk.get_current_event_time())
 
     @staticmethod
     def launch_updater(*_args, **_kwargs):
@@ -200,12 +203,20 @@ class UpdatesTray(Gtk.Application):
             self.widget_icon.set_visible(False)
 
 
+def signal_handler(app, _signum, _frame):
+    event = Gdk.EventButton()
+    event.button = 1
+    app.show_menu(None, event)
+
 def main():
     qapp = qubesadmin.Qubes()
     dispatcher = qubesadmin.events.EventsDispatcher(qapp)
     app = UpdatesTray(
         'org.qubes.qui.tray.Updates', qapp, dispatcher)
     app.run()
+
+    signal_handler_wrapper = partial(signal_handler, app)
+    signal.signal(signal.SIGUSR1, signal_handler_wrapper)
 
     loop = asyncio.get_event_loop()
 
