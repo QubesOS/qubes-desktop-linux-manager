@@ -247,7 +247,7 @@ def device_hbox(device) -> Gtk.Box:
     dev_icon = create_icon(icon)
 
     name_label = Gtk.Label(xalign=0)
-    name = f"{device.backend_domain}:{device.ident} - {device.description}"
+    name = f"{device.backend_domain}:{device.port_id} - {device.description}"
     if device.attachments:
         dev_list = ", ".join(list(device.attachments))
         name_label.set_markup(f'<b>{name} ({dev_list})</b>')

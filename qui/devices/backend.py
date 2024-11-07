@@ -24,6 +24,7 @@ import qubesadmin.exc
 import qubesadmin.devices
 import qubesadmin.vm
 from qubesadmin.utils import size_to_human
+from qubesadmin.device_protocol import DeviceAssignment
 
 import gi
 gi.require_version('Gtk', '3.0')  # isort:skip
@@ -107,10 +108,11 @@ class Device:
         if dev.devclass == 'block' and 'size' in dev.data:
             self._dev_name += " (" + size_to_human(int(dev.data['size'])) + ")"
 
-        self._ident: str = getattr(dev, 'ident', 'unknown')
+        self._ident: str = getattr(dev, 'port_id', 'unknown')
         self._description: str = getattr(dev, 'description', 'unknown')
         self._devclass: str = getattr(dev, 'devclass', 'unknown')
         self._data: Dict = getattr(dev, 'data', {})
+        self._device_id = getattr(dev, 'device_id', '*')
         self.attachments: Set[VM] = set()
         backend_domain = getattr(dev, 'backend_domain', None)
         if backend_domain:
@@ -231,8 +233,9 @@ class Device:
         Perform attachment to provided VM.
         """
         try:
-            assignment = qubesadmin.device_protocol.DeviceAssignment(
-                self.backend_domain, self.id_string)
+            assignment = DeviceAssignment.new(self.backend_domain,
+                port_id=self.id_string, devclass=self.device_class,
+                device_id=self._device_id)
 
             vm.vm_object.devices[self.device_class].attach(assignment)
             self.gtk_app.emit_notification(
@@ -262,8 +265,8 @@ class Device:
             Gio.NotificationPriority.NORMAL,
             notification_id=self.notification_id)
         try:
-            assignment = qubesadmin.device_protocol.DeviceAssignment(
-                self.backend_domain, self._ident)
+            assignment = DeviceAssignment.new(
+                self.backend_domain, self._ident, self.device_class)
             vm.vm_object.devices[self.device_class].detach(assignment)
         except qubesadmin.exc.QubesException as ex:
             self.gtk_app.emit_notification(
