@@ -248,9 +248,6 @@ class GlobalConfig(Gtk.Application):
         """
         The function that performs actual widget realization and setup.
         """
-        self.progress_bar_dialog.show()
-        self.progress_bar_dialog.update_progress(0)
-
         self.builder = Gtk.Builder()
         glade_ref = (importlib.resources.files('qubes_config') /
                      'global_config.glade')
@@ -265,6 +262,9 @@ class GlobalConfig(Gtk.Application):
                    package_name='qubes_config',
                    light_file_name='qubes-global-config-light.css',
                    dark_file_name='qubes-global-config-dark.css')
+
+        self.progress_bar_dialog.show_all()
+        self.progress_bar_dialog.update_progress(0)
 
         self.apply_button: Gtk.Button = self.builder.get_object('apply_button')
         self.cancel_button: Gtk.Button = \

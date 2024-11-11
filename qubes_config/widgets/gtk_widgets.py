@@ -649,7 +649,6 @@ class ProgressBarDialog(Gtk.Window):
 
         self.box.pack_start(self.progress_bar, False, False, 10)
 
-        self.show_all()
         self.update_progress(0)
 
         self.connect('delete-event', self._quit)

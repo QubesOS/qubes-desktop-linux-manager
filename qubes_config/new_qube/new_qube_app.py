@@ -89,9 +89,6 @@ class CreateNewQube(Gtk.Application):
         The function that performs actual widget realization and setup. Should
         be only called once, in the main instance of this application.
         """
-        self.progress_bar_dialog.show()
-        self.progress_bar_dialog.update_progress(0.1)
-
         self.builder = Gtk.Builder()
         glade_ref = (importlib.resources.files('qubes_config') /
                      'new_qube.glade')
@@ -108,6 +105,7 @@ class CreateNewQube(Gtk.Application):
                    light_file_name='qubes-new-qube-light.css',
                    dark_file_name='qubes-new-qube-dark.css')
 
+        self.progress_bar_dialog.show_all()
         self.progress_bar_dialog.update_progress(0.1)
 
         self.template_handler = TemplateHandler(self.builder, self.qapp)
