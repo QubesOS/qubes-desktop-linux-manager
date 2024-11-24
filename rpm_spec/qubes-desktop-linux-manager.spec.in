@@ -137,7 +137,6 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 %{python3_sitelib}/qui/devices/actionable_widgets.py
 %{python3_sitelib}/qui/devices/backend.py
 %{python3_sitelib}/qui/devices/device_widget.py
-%{python3_sitelib}/qui/devices/device_widget.py
 %{python3_sitelib}/qui/qubes-devices-dark.css
 %{python3_sitelib}/qui/qubes-devices-light.css
 %{python3_sitelib}/qui/devices/AttachConfirmationWindow.glade
@@ -155,6 +154,7 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 %{python3_sitelib}/qui/tray/domains.py
 %{python3_sitelib}/qui/tray/disk_space.py
 %{python3_sitelib}/qui/tray/updates.py
+%{python3_sitelib}/qui/tray/gtk3_xwayland_menu_dismisser.py
 
 %dir %{python3_sitelib}/qubes_config
 %dir %{python3_sitelib}/qubes_config/__pycache__
