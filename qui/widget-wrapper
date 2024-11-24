@@ -11,6 +11,17 @@ if ! [ -e /etc/qubes-release ] && ! [ -e /var/run/qubes-service/guivm ]; then
     exit 0
 fi
 
+if [[ -z "${DISPLAY:+test}" ]]; then
+    if [[ -n "${WAYLAND_DISPLAY:+test}" ]]; then
+        echo "The widgets require Xwayland, but it is not available."
+    else
+        echo "DISPLAY empty or unset"
+    fi >&2
+    exit 1
+fi
+
+export WAYLAND_DISPLAY=
+
 "$@"
 
 exit_code=$?
