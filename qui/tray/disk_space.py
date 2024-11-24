@@ -1,4 +1,10 @@
 # pylint: disable=wrong-import-position,import-error
+
+# Must be imported before creating threads
+from .gross_gtk3_bug_workaround import (
+    get_fullscreen_window_hack,
+)  # isort:skip
+
 import sys
 import subprocess
 from typing import List
@@ -338,6 +344,7 @@ class DiskSpace(Gtk.Application):
     def __init__(self, **properties):
         super().__init__(**properties)
 
+        self.disgusting_hack = get_fullscreen_window_hack()
         self.pool_warned = False
         self.vms_warned = set()
 
@@ -423,6 +430,7 @@ class DiskSpace(Gtk.Application):
         vm_data = VMUsageData(self.qubes_app)
 
         menu = Gtk.Menu()
+        self.disgusting_hack.show_for_widget(menu)
 
         menu.append(self.make_top_box(pool_data))
 

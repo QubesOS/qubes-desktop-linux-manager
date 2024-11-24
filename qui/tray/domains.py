@@ -2,6 +2,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position,import-error,superfluous-parens
 ''' A menu listing domains '''
+
+# Must be imported before creating threads
+from .gross_gtk3_bug_workaround import (
+    get_fullscreen_window_hack,
+)  # isort:skip
+
 import abc
 import asyncio
 import subprocess
@@ -537,6 +543,8 @@ class DomainTray(Gtk.Application):
             _('<b>Qubes Domains</b>\nView and manage running domains.'))
 
         self.tray_menu = Gtk.Menu()
+        self.disgusting_hack = get_fullscreen_window_hack()
+        self.disgusting_hack.show_for_widget(self.tray_menu)
 
         self.icon_cache = IconCache()
 

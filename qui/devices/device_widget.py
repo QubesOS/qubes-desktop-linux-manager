@@ -17,6 +17,12 @@
 #
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program; if not, see <http://www.gnu.org/licenses/>.
+
+# Must be imported before creating threads
+from ..tray.gross_gtk3_bug_workaround import (
+    get_fullscreen_window_hack,
+)  # isort:skip
+
 from typing import Set, List, Dict
 import asyncio
 import sys
@@ -73,6 +79,7 @@ class DevicesTray(Gtk.Application):
     """Tray application for handling devices."""
     def __init__(self, app_name, qapp, dispatcher):
         super().__init__()
+        self.disgusting_hack = get_fullscreen_window_hack()
         self.name: str = app_name
 
         # maps: port to connected device (e.g., sys-usb:sda -> block device)
@@ -300,6 +307,7 @@ class DevicesTray(Gtk.Application):
     def show_menu(self, _unused, _event):
         """Show menu at mouse pointer."""
         tray_menu = Gtk.Menu()
+        self.disgusting_hack.show_for_widget(tray_menu)
         theme = self.load_css(tray_menu)
         tray_menu.set_reserve_toggle_size(False)
 
