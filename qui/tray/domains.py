@@ -28,6 +28,8 @@ import gettext
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
+from .gross_gtk3_bug_workaround import DisgustingX11FullscreenWindowHack
+
 STATE_DICTIONARY = {
     'domain-pre-start': 'Transient',
     'domain-start': 'Running',
@@ -537,6 +539,8 @@ class DomainTray(Gtk.Application):
             _('<b>Qubes Domains</b>\nView and manage running domains.'))
 
         self.tray_menu = Gtk.Menu()
+        self.disgusting_hack = DisgustingX11FullscreenWindowHack()
+        self.disgusting_hack.show_for_widget(self.tray_menu)
 
         self.icon_cache = IconCache()
 
