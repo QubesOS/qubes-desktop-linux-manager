@@ -145,7 +145,7 @@ class VMWithIcon(Gtk.Box):
         self.backend_label = Gtk.Label(xalign=0)
         backend_label: str = vm.name
         if name_extension:
-            backend_label += ": " + name_extension
+            backend_label += ": " + GLib.markup_escape_text(name_extension)
         self.backend_label.set_markup(backend_label)
 
         self.pack_start(self.backend_icon, False, False, 4)
@@ -250,7 +250,9 @@ class DetachWidget(ActionableWidget, SimpleActionWidget):
         self, vm: backend.VM, device: backend.Device, variant: str = "dark"
     ):
         super().__init__(
-            "detach", "<b>Detach from " + vm.name + "</b>", variant
+            "detach",
+            "<b>Detach from " + GLib.markup_escape_text(vm.name) + "</b>",
+            variant,
         )
         self.vm = vm
         self.device = device
@@ -383,14 +385,14 @@ class DeviceHeaderWidget(Gtk.Box, ActionableWidget):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         # FUTURE: this is proposed layout for new API
         # self.device_label = Gtk.Label()
-        # self.device_label.set_markup(device.name)
+        # self.device_label.set_text(device.name)
         # self.device_label.get_style_context().add_class('device_name')
         # self.edit_icon = VariantIcon('edit', 'dark', 24)
         # self.detailed_description_label = Gtk.Label()
         # self.detailed_description_label.set_text(device.description)
         # self.backend_icon = VariantIcon(device.vm_icon, 'dark', 24)
         # self.backend_label = Gtk.Label(xalign=0)
-        # self.backend_label.set_markup(str(device.backend_domain))
+        # self.backend_label.set_text(str(device.backend_domain))
         #
         # self.title_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         # self.title_box.add(self.device_label)
@@ -405,7 +407,7 @@ class DeviceHeaderWidget(Gtk.Box, ActionableWidget):
         # self.add(self.attachment_box)
 
         self.device_label = Gtk.Label()
-        self.device_label.set_markup(device.name)
+        self.device_label.set_text(device.name)
         self.device_label.get_style_context().add_class("device_name")
         self.device_label.set_xalign(Gtk.Align.CENTER)
         self.device_label.set_halign(Gtk.Align.CENTER)
@@ -447,7 +449,7 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
 
         self.device_label = Gtk.Label(xalign=0)
 
-        label_markup = device.name
+        label_markup = GLib.markup_escape_text(device.name)
         if (
             device.connection_timestamp
             and int(time.monotonic() - device.connection_timestamp) < 120

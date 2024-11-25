@@ -261,7 +261,7 @@ class ActionWidget(Gtk.Box):
             self.callback()
 
     def _format_new_value(self, new_value):
-        self.name_widget.set_markup(f"{self.choices[new_value]}")
+        self.name_widget.set_text(f"{self.choices[new_value]}")
         if self.verb_description:
             self.additional_text_widget.set_text(
                 self.verb_description.get_verb_for_action_and_target(
