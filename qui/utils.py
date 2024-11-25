@@ -24,6 +24,7 @@ import json
 import sys
 import traceback
 from html import escape
+from typing import Union
 
 from qubesadmin import exc
 
@@ -38,7 +39,7 @@ _ = t.gettext
 import gi  # isort:skip
 
 gi.require_version("Gtk", "3.0")  # isort:skip
-from gi.repository import Gtk  # isort:skip
+from gi.repository import Gtk, GLib  # isort:skip
 
 with importlib.resources.files("qui").joinpath("eol.json").open() as stream:
     EOL_DATES = json.load(stream)
@@ -65,9 +66,9 @@ def run_asyncio_and_show_errors(loop, tasks, name, restart=True):
     message = _(
         "<b>Whoops. A critical error in {} has occurred.</b>"
         " This is most likely a bug."
-    ).format(name)
+    ).format(escape(name))
     if restart:
-        message += _(" {} will restart itself.").format(name)
+        message += escape(_(" {} will restart itself.").format(name))
 
     for d in done:  # pylint: disable=invalid-name
         try:
@@ -82,7 +83,7 @@ def run_asyncio_and_show_errors(loop, tasks, name, restart=True):
             exc_value_descr = escape(str(exc_value))
             traceback_descr = escape(traceback.format_exc(limit=10))
             exc_description = "\n<b>{}</b>: {}\n{}".format(
-                exc_type.__name__, exc_value_descr, traceback_descr
+                escape(exc_type.__name__), exc_value_descr, traceback_descr
             )
             dialog.format_secondary_markup(exc_description)
             dialog.run()
@@ -103,6 +104,34 @@ def check_update(vm) -> bool:
     except exc.QubesException:
         return True
     return False
+
+
+def _escape_str(s: Union[str, float, int]) -> Union[str, float, int]:
+    if isinstance(s, str):
+        # GLib uses NUL-terminated strings
+        assert "\0" not in s, "NUL characters not supported"
+        return GLib.markup_escape_text(s)
+    # For correctness, this relies on str(s) never containing
+    # XML metacharacters, as these will not be escaped.
+    # This is guaranteed for 'float', 'int', and 'bool',
+    # but not for user-defined subclasses of these types.
+    # pylint: disable=unidiomatic-typecheck
+    if type(s) in (float, int, bool):
+        return s
+    v = str(s)
+    if GLib.markup_escape_text(v) != v:
+        raise ValueError(
+            "cannot handle subclass of 'float' or 'int' if "
+            "__str__() returns string needing escaping "
+            f"(value needing escaping is {v!r})"
+        )
+    return v
+
+
+def markup_format(s, *args, **kwargs) -> str:
+    escaped_args = [_escape_str(i) for i in args]
+    escaped_kwargs = {k: _escape_str(v) for k, v in kwargs.items()}
+    return s.format(*escaped_args, **escaped_kwargs)
 
 
 def check_support(vm) -> bool:

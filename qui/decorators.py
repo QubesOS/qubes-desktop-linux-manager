@@ -10,6 +10,7 @@ gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk, Pango, GLib, GdkPixbuf  # isort:skip
 from qubesadmin import exc
 from qubesadmin.utils import size_to_human
+from .utils import markup_format
 
 import gettext
 
@@ -146,12 +147,13 @@ class DomainDecorator(PropertiesDecorator):
                 else:
                     perc_storage = self.cur_storage / self.max_storage
 
-                tooltip += _(
-                    "\nTemplate: <b>{template}</b>"
-                    "\nNetworking: <b>{netvm}</b>"
-                    "\nPrivate storage: <b>{current_storage:.2f}GB/"
-                    "{max_storage:.2f}GB ({perc_storage:.1%})</b>"
-                ).format(
+                tooltip += markup_format(
+                    _(
+                        "\nTemplate: <b>{template}</b>"
+                        "\nNetworking: <b>{netvm}</b>"
+                        "\nPrivate storage: <b>{current_storage:.2f}GB/"
+                        "{max_storage:.2f}GB ({perc_storage:.1%})</b>"
+                    ),
                     template=self.template_name,
                     netvm=self.netvm_name,
                     current_storage=self.cur_storage,
@@ -193,7 +195,8 @@ class DomainDecorator(PropertiesDecorator):
                     .get_color(Gtk.StateFlags.INSENSITIVE)
                     .to_color()
                 )
-                markup = f'<span color="{color.to_string()}">0%</span>'
+                escaped_color = GLib.markup_escape_text(color.to_string())
+                markup = f'<span color="{escaped_color}">0%</span>'
 
             self.cpu_label.set_markup(markup)
 
@@ -264,8 +267,9 @@ def device_hbox(device) -> Gtk.Box:
     name_label = Gtk.Label(xalign=0)
     name = f"{device.backend_domain}:{device.port_id} - {device.description}"
     if device.attachments:
-        dev_list = ", ".join(list(device.attachments))
-        name_label.set_markup(f"<b>{name} ({dev_list})</b>")
+        dev_list = GLib.markup_escape_text(", ".join(list(device.attachments)))
+        name_escaped = GLib.markup_escape_text(name)
+        name_label.set_markup(f"<b>{name_escaped} ({dev_list})</b>")
     else:
         name_label.set_text(name)
     name_label.set_max_width_chars(64)
@@ -296,7 +300,7 @@ def device_domain_hbox(vm, attached: bool) -> Gtk.Box:
 
     name = Gtk.Label(xalign=0)
     if attached:
-        name.set_markup(f"<b>{vm.vm_name}</b>")
+        name.set_markup(f"<b>{GLib.markup_escape_text(vm.vm_name)}</b>")
     else:
         name.set_text(vm.vm_name)
 

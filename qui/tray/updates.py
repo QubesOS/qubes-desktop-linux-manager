@@ -15,7 +15,7 @@ from qubesadmin import exc
 import gi  # isort:skip
 
 gi.require_version("Gtk", "3.0")  # isort:skip
-from gi.repository import Gtk, Gio  # isort:skip
+from gi.repository import Gtk, Gio, GLib  # isort:skip
 
 import gbulb
 
@@ -31,7 +31,7 @@ class TextItem(Gtk.MenuItem):
     def __init__(self, text):
         super().__init__()
         title_label = Gtk.Label()
-        title_label.set_markup(text)
+        title_label.set_markup("<b>" + GLib.markup_escape_text(text) + "</b>")
         title_label.set_halign(Gtk.Align.CENTER)
         title_label.set_justify(Gtk.Justification.CENTER)
         self.set_margin_left(10)
@@ -91,7 +91,7 @@ class UpdatesTray(Gtk.Application):
         self.tray_menu.set_reserve_toggle_size(False)
 
         if self.vms_needing_update:
-            self.tray_menu.append(TextItem(_("<b>Qube updates available!</b>")))
+            self.tray_menu.append(TextItem(_("Qube updates available!")))
             self.tray_menu.append(
                 RunItem(
                     _(
@@ -104,15 +104,21 @@ class UpdatesTray(Gtk.Application):
 
         if self.obsolete_vms:
             self.tray_menu.append(
-                TextItem(_("<b>Some qubes are no longer supported!</b>"))
+                TextItem(_("Some qubes are no longer supported!"))
             )
             obsolete_text = (
-                _(
-                    "The following qubes are based on distributions "
-                    "that are no longer supported:\n"
+                GLib.markup_escape_text(
+                    _(
+                        "The following qubes are based on distributions "
+                        "that are no longer supported:\n"
+                    )
+                    + ", ".join([str(vm) for vm in self.obsolete_vms])
                 )
-                + ", ".join([str(vm) for vm in self.obsolete_vms])
-                + _("\n<b>Install new templates with Template Manager</b>")
+                + "\n<b>"
+                + GLib.markup_escape_text(
+                    _("Install new templates with Template Manager")
+                )
+                + "</b>"
             )
             self.tray_menu.append(
                 RunItem(obsolete_text, self.launch_template_manager)

@@ -23,13 +23,14 @@ import logging
 
 import qubesadmin.vm
 from ..widgets.gtk_utils import show_error, load_icon, copy_to_global_clipboard
+from ..widgets.gtk_utils import markup_format
 from .page_handler import PageHandler
 from .policy_manager import PolicyManager
 
 import gi
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 import gettext
 
@@ -126,7 +127,7 @@ class ThisDeviceHandler(PageHandler):
             ).decode()
         except subprocess.CalledProcessError as ex:
             label_text += _("Failed to load system data: {ex}\n").format(
-                ex=str(ex)
+                ex=GLib.markup_escape_text(str(ex))
             )
             self.hcl_check = ""
 
@@ -141,8 +142,9 @@ class ThisDeviceHandler(PageHandler):
             label_text += _("Failed to load system data.\n")
             self.data_label.get_style_context().add_class("red_code")
 
-        label_text += _(
-            """<b>Brand:</b> {brand}
+        label_text += markup_format(
+            _(
+                """<b>Brand:</b> {brand}
 <b>Model:</b> {model}
 
 <b>CPU:</b> {cpu}
@@ -156,7 +158,7 @@ class ThisDeviceHandler(PageHandler):
 <b>Kernel:</b> {kernel_ver}
 <b>Xen:</b> {xen_ver}
 """
-        ).format(
+            ),
             brand=self._get_data("brand"),
             model=self._get_data("model"),
             cpu=self._get_data("cpu"),
@@ -169,16 +171,18 @@ class ThisDeviceHandler(PageHandler):
             xen_ver=self._get_version("xen"),
         )
         self.set_state(self.compat_hvm_image, self._get_data("hvm"))
-        self.compat_hvm_label.set_markup(f"<b>HVM:</b> {self._get_data('hvm')}")
+        self.compat_hvm_label.set_markup(
+            markup_format("<b>HVM:</b> {}", self._get_data("hvm"))
+        )
 
         self.set_state(self.compat_iommu_image, self._get_data("iommu"))
         self.compat_iommu_label.set_markup(
-            f"<b>I/O MMU:</b> {self._get_data('iommu')}"
+            markup_format("<b>I/O MMU:</b> {}", self._get_data("iommu"))
         )
 
         self.set_state(self.compat_hap_image, self._get_data("slat"))
         self.compat_hap_label.set_markup(
-            f"<b>HAP/SLAT:</b> {self._get_data('slat')}"
+            markup_format("<b>HAP/SLAT:</b> {}", self._get_data("slat"))
         )
 
         self.set_state(
@@ -201,7 +205,7 @@ class ThisDeviceHandler(PageHandler):
 
         self.set_state(self.compat_remapping_image, self._get_data("remap"))
         self.compat_remapping_label.set_markup(
-            f"<b>Remapping:</b> {self._get_data('remap')}"
+            markup_format(_("<b>Remapping:</b> {}"), self._get_data("remap"))
         )
 
         self.set_policy_state()
@@ -218,7 +222,7 @@ class ThisDeviceHandler(PageHandler):
         )
         self.compat_pv_tooltip.set_tooltip_markup(
             _("<b>The following qubes have PV virtualization mode:</b>\n - ")
-            + "\n - ".join([vm.name for vm in pv_vms])
+            + "\n - ".join([GLib.markup_escape_text(vm.name) for vm in pv_vms])
         )
         self.compat_pv_tooltip.set_visible(bool(pv_vms))
 

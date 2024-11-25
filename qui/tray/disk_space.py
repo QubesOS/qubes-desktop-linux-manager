@@ -29,7 +29,7 @@ class VMUsage:
 
         self.check_usage()
 
-    def check_usage(self):
+    def check_usage(self) -> None:
         self.problem_volumes = {}
         volumes_to_check = ["private"]
         if not hasattr(self.vm, "template"):
@@ -52,7 +52,7 @@ class VMUsageData:
 
         self.__populate_vms()
 
-    def __populate_vms(self):
+    def __populate_vms(self) -> None:
         for vm in self.qubes_app.domains:
             try:
                 if vm.is_running():
@@ -86,10 +86,14 @@ class VMUsageData:
         for volume_name, usage in vm_usage.problem_volumes.items():
             # pylint: disable=consider-using-f-string
             label_contents.append(
-                _("volume <b>{}</b> is {:.1%} full").format(volume_name, usage)
+                _("volume <b>{}</b> is {:.1%} full").format(
+                    GLib.markup_escape_text(volume_name), usage
+                )
             )
 
-        label_text = f"<b>{vm.name}</b>: " + ", ".join(label_contents)
+        label_text = f"<b>{GLib.markup_escape_text(vm.name)}</b>: " + ", ".join(
+            label_contents
+        )
         label_widget.set_markup(label_text)
 
         return vm, icon_img, label_widget
@@ -252,13 +256,21 @@ class PoolUsageData:
 
         if pool.has_error:
             # Pool with errors
-            formatted_name = f"<span color='red'><b>{pool.name}</b></span>"
+            formatted_name = (
+                '<span color="red"><b>'
+                + GLib.markup_escape_text(pool.name)
+                + "</b></span>"
+            )
         elif pool.size and "included_in" not in pool.config:
             # normal pool
-            formatted_name = f"<b>{pool.name}</b>"
+            formatted_name = f"<b>{GLib.markup_escape_text(pool.name)}</b>"
         else:
             # pool without data or included in another pool
-            formatted_name = f"<span color='grey'><i>{pool.name}</i></span>"
+            formatted_name = (
+                "<span color='grey'><i>"
+                + GLib.markup_escape_text(pool.name)
+                + "</i></span>"
+            )
 
         pool_name.set_markup(formatted_name)
         pool_name.set_margin_left(20)
@@ -270,20 +282,20 @@ class PoolUsageData:
 
         if pool.has_error:
             error_desc = Gtk.Label(xalign=0)
-            error_desc.set_markup("Error accessing pool data")
+            error_desc.set_text("Error accessing pool data")
             error_desc.set_margin_left(40)
             name_box.pack_start(error_desc, True, True, 0)
             return name_box, percentage_box, usage_box
 
         data_name = Gtk.Label(xalign=0)
-        data_name.set_markup("data")
+        data_name.set_text("data")
         data_name.set_margin_left(40)
 
         name_box.pack_start(data_name, True, True, 0)
 
         if pool.metadata_perc:
             metadata_name = Gtk.Label(xalign=0)
-            metadata_name.set_markup("metadata")
+            metadata_name.set_text("metadata")
             metadata_name.set_margin_left(40)
 
             name_box.pack_start(metadata_name, True, True, 0)
@@ -423,13 +435,15 @@ class DiskSpace(Gtk.Application):
             self.icon.set_from_icon_name("dialog-warning")
             text = _("<b>Qubes Disk Space Monitor</b>\n\nWARNING!")
             if pool_warning:
-                text += _("\nYou are running out of disk space.\n") + "".join(
-                    pool_warning
+                text += GLib.markup_escape_text(
+                    _("\nYou are running out of disk space.\n")
+                    + "".join(pool_warning)
                 )
             if vm_warning:
-                text += _(
-                    "\nThe following qubes are running out of space: "
-                ) + ", ".join([x.vm.name for x in vm_warning])
+                text += GLib.markup_escape_text(
+                    _("\nThe following qubes are running out of space: ")
+                    + ", ".join([x.vm.name for x in vm_warning])
+                )
             self.icon.set_tooltip_markup(text)
         else:
             self.icon.set_from_icon_name("drive-harddisk")
@@ -484,7 +498,7 @@ class DiskSpace(Gtk.Application):
     @staticmethod
     def make_title_item(text):
         label = Gtk.Label(xalign=0)
-        label.set_markup(_("<b>{}</b>").format(text))
+        label.set_markup("<b>{}</b>".format(GLib.markup_escape_text(text)))
         menu_item = Gtk.MenuItem()
         menu_item.add(label)
         menu_item.set_sensitive(False)

@@ -48,7 +48,7 @@ import gettext
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
-from .utils import run_asyncio_and_show_errors
+from .utils import run_asyncio_and_show_errors, markup_format
 
 gbulb.install()
 
@@ -127,19 +127,24 @@ class EventHandler(pyinotify.ProcessEvent):
         size = clipboard_formatted_size(metadata["sent_size"])
 
         if metadata["malformed_request"]:
-            body = ERROR_MALFORMED_DATA.format(vmname=metadata["vmname"])
+            body = markup_format(
+                ERROR_MALFORMED_DATA, vmname=metadata["vmname"]
+            )
             icon = "dialog-error"
         elif (
             metadata["qrexec_clipboard"]
             and metadata["sent_size"] >= metadata["buffer_size"]
         ):
             # Microsoft Windows clipboard case
-            body = WARNING_POSSIBLE_TRUNCATION.format(
-                vmname=metadata["vmname"], size=size
+            body = markup_format(
+                WARNING_POSSIBLE_TRUNCATION,
+                vmname=metadata["vmname"],
+                size=size,
             )
             icon = "dialog-warning"
         elif metadata["oversized_request"]:
-            body = ERROR_OVERSIZED_DATA.format(
+            body = markup_format(
+                ERROR_OVERSIZED_DATA,
                 vmname=metadata["vmname"],
                 size=size,
                 limit=clipboard_formatted_size(metadata["buffer_size"]),
@@ -150,13 +155,16 @@ class EventHandler(pyinotify.ProcessEvent):
             and metadata["cleared"]
             and metadata["sent_size"] == 0
         ):
-            body = WARNING_EMPTY_CLIPBOARD.format(vmname=metadata["vmname"])
+            body = markup_format(
+                WARNING_EMPTY_CLIPBOARD, vmname=metadata["vmname"]
+            )
             icon = "dialog-warning"
         elif not metadata["successful"]:
-            body = ERROR_ON_COPY.format(vmname=metadata["vmname"])
+            body = markup_format(ERROR_ON_COPY, vmname=metadata["vmname"])
             icon = "dialog-error"
         else:
-            body = MSG_COPY_SUCCESS.format(
+            body = markup_format(
+                MSG_COPY_SUCCESS,
                 vmname=metadata["vmname"],
                 size=size,
                 shortcut=self.gtk_app.paste_shortcut,
@@ -173,14 +181,15 @@ class EventHandler(pyinotify.ProcessEvent):
     def _paste(self, metadata: dict) -> None:
         """Sends Paste notification via Gio.Notification."""
         if not metadata["successful"] or metadata["malformed_request"]:
-            body = ERROR_ON_PASTE.format(vmname=metadata["vmname"])
+            body = markup_format(ERROR_ON_PASTE, vmname=metadata["vmname"])
             body += MSG_WIPED
             icon = "dialog-error"
         elif (
             "protocol_version_xside" in metadata.keys()
             and metadata["protocol_version_xside"] >= 0x00010008
         ):
-            body = MSG_PASTE_SUCCESS_METADATA.format(
+            body = markup_format(
+                MSG_PASTE_SUCCESS_METADATA,
                 size=clipboard_formatted_size(metadata["sent_size"]),
                 vmname=metadata["vmname"],
             )
@@ -355,9 +364,11 @@ class NotificationApp(Gtk.Application):
 
         else:
             self.clipboard_label.set_markup(
-                _(
-                    "<i>Global clipboard contents: {0} from <b>{1}</b></i>"
-                ).format(size, vm)
+                markup_format(
+                    _("<i>Global clipboard contents: {0} from <b>{1}</b></i>"),
+                    size,
+                    vm,
+                )
             )
             self.icon.set_from_icon_name("edit-copy")
 
@@ -391,10 +402,14 @@ class NotificationApp(Gtk.Application):
 
         help_label = Gtk.Label(xalign=0)
         help_label.set_markup(
-            _(
-                "<i>Use <b>{copy}</b> to copy and "
-                "<b>{paste}</b> to paste.</i>"
-            ).format(copy=self.copy_shortcut, paste=self.paste_shortcut)
+            markup_format(
+                _(
+                    "<i>Use <b>{copy}</b> to copy and "
+                    "<b>{paste}</b> to paste.</i>"
+                ),
+                copy=self.copy_shortcut,
+                paste=self.paste_shortcut,
+            )
         )
         help_item = Gtk.MenuItem()
         help_item.set_margin_left(10)
@@ -442,9 +457,11 @@ class NotificationApp(Gtk.Application):
                         '"protocol_version_xside":65544,\n'
                         '"protocol_version_vmside":65544,\n'
                         "}}\n".format(
-                            xevent_timestamp=str(Gtk.get_current_event_time()),
-                            sent_size=os.path.getsize(DATA),
-                            buffer_size="256000",
+                            xevent_timestamp=json.dumps(
+                                Gtk.get_current_event_time()
+                            ),
+                            sent_size=json.dumps(os.path.getsize(DATA)),
+                            buffer_size=json.dumps(256000),
                         )
                     )
         except Exception:  # pylint: disable=broad-except
