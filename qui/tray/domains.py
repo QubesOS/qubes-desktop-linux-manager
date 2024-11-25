@@ -524,6 +524,10 @@ class DomainMenuItem(Gtk.ImageMenuItem):
 class DomainTray(Gtk.Application):
     ''' A tray icon application listing all but halted domains. ” '''
 
+    def hide_menu(self, _unused_event):
+        self.tray_menu.hide()
+        return False
+
     def __init__(self, app_name, qapp, dispatcher, stats_dispatcher):
         super().__init__()
         self.qapp = qapp
@@ -537,6 +541,7 @@ class DomainTray(Gtk.Application):
             _('<b>Qubes Domains</b>\nView and manage running domains.'))
 
         self.tray_menu = Gtk.Menu()
+        self.widget_icon.connect('focus-out-event', self.hide_menu)
 
         self.icon_cache = IconCache()
 
