@@ -61,6 +61,8 @@ Requires:  qubes-artwork >= 4.1.5
 Requires:  xhost
 Requires:  gtksourceview4
 Requires:  gnome-icon-theme
+# for associating URLs with Qubes Virtual Browser
+Requires:  xdg-utils
 
 Provides:   qui = %{version}-%{release}
 Obsoletes:  qui < 4.0.0
@@ -81,11 +83,13 @@ make install DESTDIR=$RPM_BUILD_ROOT
 
 %post
 touch --no-create %{_datadir}/icons/Adwaita &>/dev/null || :
+xdg-settings set default-web-browser qubes-virtual-browser.desktop &>/ddev/null || :
 
 %postun
 if [ $1 -eq 0 ]; then
     touch --no-create %{_datadir}/icons/Adwaita &>/dev/null || :
     gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
+    xdg-settings set default-web-browser org.mozilla.firefox.desktop &>/dev/null || :
 fi
 
 %posttrans
@@ -206,6 +210,10 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 %{python3_sitelib}/qubes_config/policy_editor/__init__.py
 %{python3_sitelib}/qubes_config/policy_editor/policy_help.txt
 
+%{python3_sitelib}/qubes_virtual_browser/__pycache__/*
+%{python3_sitelib}/qubes_virtual_browser/virtual_browser.py
+%{python3_sitelib}/qubes_virtual_browser/virtual_browser.glade
+
 %{_bindir}/qui-domains
 %{_bindir}/qui-devices
 %{_bindir}/qui-disk-space
@@ -229,10 +237,12 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 /usr/share/applications/qubes-global-config.desktop
 /usr/share/applications/qubes-new-qube.desktop
 /usr/share/applications/qubes-policy-editor-gui.desktop
+/usr/share/applications/qubes-virtual-browser.desktop
 
 %{_bindir}/qubes-new-qube
 %{_bindir}/qubes-global-config
 %{_bindir}/qubes-policy-editor-gui
+%{_bindir}/qubes-virtual-browser
 
 /usr/share/icons/hicolor/16x16/apps/qui-domains.png
 /usr/share/icons/hicolor/24x24/apps/qui-domains.png
