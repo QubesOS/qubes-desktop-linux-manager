@@ -74,7 +74,7 @@ def show_error(title, text):
     dialog = Gtk.MessageDialog(
         None, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.OK)
     dialog.set_title(title)
-    dialog.set_markup(text)
+    dialog.set_markup(GLib.markup_escape_text(text))
     dialog.connect("response", lambda *x: dialog.destroy())
     GLib.idle_add(dialog.show)
 
@@ -284,12 +284,11 @@ class InternalInfoItem(Gtk.MenuItem):
     def __init__(self):
         super().__init__()
         self.label = Gtk.Label(xalign=0)
-        self.label.set_markup(_(
-                '<b>Internal qube</b>'))
-        self.set_tooltip_text(
+        self.label.set_markup("<b>" + GLib.markup_escape_text(_("Internal qubes")) + "</b>")
+        self.set_tooltip_text(_(
             'Internal qubes are used by the operating system. Do not modify'
             ' them or run programs in them unless you really '
-            'know what you are doing.')
+            'know what you are doing.'))
         self.add(self.label)
         self.set_sensitive(False)
 
@@ -510,7 +509,7 @@ class DomainMenuItem(Gtk.ImageMenuItem):
         colormap = {'Paused': 'grey', 'Crashed': 'red', 'Transient': 'red'}
         if state in colormap:
             self.name.label.set_markup(
-                f'<span color=\'{colormap[state]}\'>{self.vm.name}</span>')
+                f'<span color=\'{colormap[state]}\'>{GLib.markup_escape_text(self.vm.name)}</span>')
         else:
             self.name.label.set_label(self.vm.name)
 

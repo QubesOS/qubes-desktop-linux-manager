@@ -36,7 +36,7 @@ import qubesadmin.events
 
 import gi
 gi.require_version('Gtk', '3.0')  # isort:skip
-from gi.repository import Gtk, Gio, Gdk  # isort:skip
+from gi.repository import Gtk, Gio, Gdk, GLib  # isort:skip
 
 import gbulb
 import pyinotify
@@ -45,7 +45,7 @@ import gettext
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
-from .utils import run_asyncio_and_show_errors
+from .utils import run_asyncio_and_show_errors, markup_format
 
 gbulb.install()
 
@@ -213,8 +213,8 @@ class NotificationApp(Gtk.Application):
 
         else:
             self.clipboard_label.set_markup(
-                _("<i>Global clipboard contents: {0} from "
-                  "<b>{1}</b></i>").format(size, vm))
+                markup_format(_("<i>Global clipboard contents: {0} from "
+                  "<b>{1}</b></i>", size, vm)))
             self.icon.set_from_icon_name("edit-copy")
 
         if message:
@@ -245,8 +245,8 @@ class NotificationApp(Gtk.Application):
 
         help_label = Gtk.Label(xalign=0)
         help_label.set_markup(
-            _("<i>Use <b>{copy}</b> to copy and "
-              "<b>{paste}</b> to paste.</i>").format(
+            markup_format(_("<i>Use <b>{copy}</b> to copy and "
+              "<b>{paste}</b> to paste.</i>"),
                 copy=self.copy_shortcut, paste=self.paste_shortcut))
         help_item = Gtk.MenuItem()
         help_item.set_margin_left(10)

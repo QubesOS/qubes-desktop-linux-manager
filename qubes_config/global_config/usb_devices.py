@@ -487,7 +487,7 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
     def disable_u2f(self, reason: str):
         self.problem_fatal_box.set_visible(True)
         self.problem_fatal_box.show_all()
-        self.problem_fatal_label.set_markup(reason)
+        self.problem_fatal_label.set_text(reason)
         self.enable_check.set_active(False)
         self.enable_check.set_sensitive(False)
         self.box.set_visible(False)

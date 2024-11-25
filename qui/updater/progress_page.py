@@ -528,7 +528,7 @@ class QubeUpdateDetails:
         else:
             self.details_label.set_text(l("Details for") + "  ")
             self.qube_icon.set_from_pixbuf(self.active_row.icon)
-            self.qube_label.set_markup(" " + str(self.active_row.color_name))
+            self.qube_label.set_text(" " + str(self.active_row.color_name))
         self.update_buffer()
 
         self.qube_icon.set_visible(row_activated)
