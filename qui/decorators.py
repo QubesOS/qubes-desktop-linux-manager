@@ -305,7 +305,7 @@ def device_domain_hbox(vm, attached: bool) -> Gtk.Box:
 
 
 def create_icon(name) -> Gtk.Image:
-    """ " Create an icon from string; tries for both the normal and -symbolic
+    """Create an icon from string; tries for both the normal and -symbolic
     variants, because some themes only have the symbolic variant. If not
     found, outputs a blank icon."""
 
