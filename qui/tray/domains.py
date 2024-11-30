@@ -2,25 +2,22 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position,import-error,superfluous-parens
 """ A menu listing domains """
-import abc
 import asyncio
+import os
 import subprocess
 import sys
-import os
-import threading
 import traceback
 
+import gi  # isort:skip
 import qubesadmin
 import qubesadmin.events
-import qui.utils
-import qui.decorators
-
 from qubesadmin import exc
 
-import gi  # isort:skip
+import qui.decorators
+import qui.utils
 
 gi.require_version("Gtk", "3.0")  # isort:skip
-from gi.repository import Gio, Gtk, GObject, GLib, GdkPixbuf  # isort:skip
+from gi.repository import Gio, Gtk, GLib, GdkPixbuf  # isort:skip
 
 import gbulb
 
@@ -85,38 +82,61 @@ def show_error(title, text):
     GLib.idle_add(dialog.show)
 
 
-class VMActionMenuItem(Gtk.ImageMenuItem):
-    def __init__(self, vm, icon_cache, icon_name, label):
+class ActionMenuItem(Gtk.MenuItem):
+    def __init__(self, label, img=None, icon_cache=None, icon_name=None):
         super().__init__()
+
+        # Create a container for the custom layout
+        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+
+        # Add an icon to the menu item
+        if icon_cache and icon_name:
+            img = Gtk.Image.new_from_pixbuf(icon_cache.get_icon(icon_name))
+        if img:
+            img.show()  # Ensure the image is visible
+            box.pack_start(img, False, False, 0)
+
+        # Add a label to the menu item
+        label_widget = Gtk.Label(label=label, xalign=0)
+        box.pack_start(label_widget, True, True, 0)
+
+        # Add the box to the menu item
+        self.add(box)
+
+        # Connect the "activate" signal to the async function
+        self.connect("activate", self.on_activate)
+
+    async def perform_action(self):
+        """
+        Action this item should perform (to be implemented by subclasses).
+        """
+        raise NotImplementedError("Subclasses must implement this method.")
+
+    def on_activate(self, *_args, **_kwargs):
+        asyncio.create_task(self.perform_action())
+
+
+class VMActionMenuItem(ActionMenuItem):
+    # pylint: disable=abstract-method
+    def __init__(self, vm, label, img=None, icon_cache=None, icon_name=None):
+        super().__init__(
+            label=label, img=img, icon_cache=icon_cache, icon_name=icon_name
+        )
         self.vm = vm
-
-        img = Gtk.Image.new_from_pixbuf(icon_cache.get_icon(icon_name))
-
-        self.set_image(img)
-        self.set_label(label)
-
-        self.connect("activate", self.instantiate_thread_with_function)
-
-    @abc.abstractmethod
-    def perform_action(self):
-        """
-        Action this item should perform.
-        """
-
-    def instantiate_thread_with_function(self, *_args, **_kwargs):
-        """Make a thread to run potentially slow processes like vm.kill in the
-        background"""
-        thread = threading.Thread(target=self.perform_action)
-        thread.start()
 
 
 class PauseItem(VMActionMenuItem):
     """Shutdown menu Item. When activated pauses the domain."""
 
     def __init__(self, vm, icon_cache):
-        super().__init__(vm, icon_cache, "pause", _("Emergency pause"))
+        super().__init__(
+            vm,
+            label=_("Emergency pause"),
+            icon_cache=icon_cache,
+            icon_name="pause",
+        )
 
-    def perform_action(self):
+    async def perform_action(self):
         try:
             self.vm.pause()
         except exc.QubesException as ex:
@@ -133,9 +153,11 @@ class UnpauseItem(VMActionMenuItem):
     """Unpause menu Item. When activated unpauses the domain."""
 
     def __init__(self, vm, icon_cache):
-        super().__init__(vm, icon_cache, "unpause", _("Unpause"))
+        super().__init__(
+            vm, label=_("Unpause"), icon_cache=icon_cache, icon_name="unpause"
+        )
 
-    def perform_action(self):
+    async def perform_action(self):
         try:
             self.vm.unpause()
         except exc.QubesException as ex:
@@ -152,9 +174,11 @@ class ShutdownItem(VMActionMenuItem):
     """Shutdown menu Item. When activated shutdowns the domain."""
 
     def __init__(self, vm, icon_cache):
-        super().__init__(vm, icon_cache, "shutdown", _("Shutdown"))
+        super().__init__(
+            vm, label=_("Shutdown"), icon_cache=icon_cache, icon_name="shutdown"
+        )
 
-    def perform_action(self):
+    async def perform_action(self):
         try:
             self.vm.shutdown()
         except exc.QubesException as ex:
@@ -167,26 +191,17 @@ class ShutdownItem(VMActionMenuItem):
             )
 
 
-class RestartItem(Gtk.ImageMenuItem):
+class RestartItem(VMActionMenuItem):
     """Restart menu Item. When activated shutdowns the domain and
     then starts it again."""
 
     def __init__(self, vm, icon_cache):
-        super().__init__()
-        self.vm = vm
-
-        img = Gtk.Image.new_from_pixbuf(icon_cache.get_icon("restart"))
-
-        self.set_image(img)
-        self.set_label(_("Restart"))
+        super().__init__(
+            vm, label=_("Restart"), icon_cache=icon_cache, icon_name="restart"
+        )
         self.restart_thread = None
 
-        self.connect("activate", self.restart)
-
-    def restart(self, *_args, **_kwargs):
-        asyncio.ensure_future(self.perform_restart())
-
-    async def perform_restart(self):
+    async def perform_action(self, *_args, **_kwargs):
         try:
             self.vm.shutdown()
             while self.vm.is_running():
@@ -211,9 +226,11 @@ class KillItem(VMActionMenuItem):
     """Kill domain menu Item. When activated kills the domain."""
 
     def __init__(self, vm, icon_cache):
-        super().__init__(vm, icon_cache, "kill", _("Kill"))
+        super().__init__(
+            vm, label=_("Kill"), icon_cache=icon_cache, icon_name="kill"
+        )
 
-    def perform_action(self, *_args, **_kwargs):
+    async def perform_action(self, *_args, **_kwargs):
         try:
             self.vm.kill()
         except exc.QubesException as ex:
@@ -230,47 +247,46 @@ class PreferencesItem(VMActionMenuItem):
     """Preferences menu Item. When activated shows preferences dialog"""
 
     def __init__(self, vm, icon_cache):
-        super().__init__(vm, icon_cache, "preferences", _("Settings"))
+        super().__init__(
+            vm,
+            label=_("Settings"),
+            icon_cache=icon_cache,
+            icon_name="preferences",
+        )
 
-    def perform_action(self):
+    async def perform_action(self):
         # pylint: disable=consider-using-with
-        subprocess.Popen(["qubes-vm-settings", self.vm.name])
+        await asyncio.create_subprocess_exec(
+            "qubes-vm-settings", self.vm.name, stderr=subprocess.PIPE
+        )
 
 
-class LogItem(Gtk.ImageMenuItem):
+class LogItem(ActionMenuItem):
     def __init__(self, name, path):
-        super().__init__()
-        self.path = path
-
         img = Gtk.Image.new_from_file(
             "/usr/share/icons/HighContrast/16x16/apps/logviewer.png"
         )
+        super().__init__(label=name, img=img)
+        self.path = path
 
-        self.set_image(img)
-        self.set_label(name)
-
-        self.connect("activate", self.launch_log_viewer)
-
-    def launch_log_viewer(self, *_args, **_kwargs):
-        # pylint: disable=consider-using-with
-        subprocess.Popen(["qubes-log-viewer", self.path])
+    async def perform_action(self):
+        await asyncio.create_subprocess_exec(
+            "qubes-log-viewer", self.path, stderr=subprocess.PIPE
+        )
 
 
-class RunTerminalItem(Gtk.ImageMenuItem):
+class RunTerminalItem(VMActionMenuItem):
     """Run Terminal menu Item. When activated runs a terminal emulator."""
 
     def __init__(self, vm, icon_cache):
-        super().__init__()
-        self.vm = vm
+        super().__init__(
+            vm,
+            label=_("Run Terminal"),
+            icon_cache=icon_cache,
+            icon_name="terminal",
+        )
 
-        img = Gtk.Image.new_from_pixbuf(icon_cache.get_icon("terminal"))
-
-        self.set_image(img)
-        self.set_label(_("Run Terminal"))
-
-        self.connect("activate", self.run_terminal)
-
-    def run_terminal(self, _item):
+    async def perform_action(self):
         try:
             self.vm.run_service("qubes.StartApp+qubes-run-terminal")
         except exc.QubesException as ex:
@@ -283,22 +299,19 @@ class RunTerminalItem(Gtk.ImageMenuItem):
             )
 
 
-class OpenFileManagerItem(Gtk.ImageMenuItem):
+class OpenFileManagerItem(VMActionMenuItem):
     """Attempts to open a file manager in the VM. If fails, displays an
     error message."""
 
     def __init__(self, vm, icon_cache):
-        super().__init__()
-        self.vm = vm
+        super().__init__(
+            vm,
+            label=_("Open File Manager"),
+            icon_cache=icon_cache,
+            icon_name="files",
+        )
 
-        img = Gtk.Image.new_from_pixbuf(icon_cache.get_icon("files"))
-
-        self.set_image(img)
-        self.set_label(_("Open File Manager"))
-
-        self.connect("activate", self.open_file_manager)
-
-    def open_file_manager(self, _item):
+    async def perform_action(self):
         try:
             self.vm.run_service("qubes.StartApp+qubes-open-file-manager")
         except exc.QubesException as ex:
@@ -428,27 +441,20 @@ class InternalMenu(Gtk.Menu):
         self.show_all()
 
 
-def run_manager(_item):
-    # pylint: disable=consider-using-with
-    subprocess.Popen(["qubes-qube-manager"])
-
-
-class QubesManagerItem(Gtk.ImageMenuItem):
+class QubesManagerItem(ActionMenuItem):
     def __init__(self):
-        super().__init__()
-
-        self.set_image(
-            Gtk.Image.new_from_icon_name("qubes-logo-icon", Gtk.IconSize.MENU)
-        )
-
-        self.set_label(_("Open Qube Manager"))
-
-        self.connect("activate", run_manager)
-
+        img = Gtk.Image.new_from_icon_name("qubes-logo-icon", Gtk.IconSize.MENU)
+        super().__init__(label=_("Open Qube Manager"), img=img)
         self.show_all()
 
+    async def perform_action(self):
+        # pylint: disable=consider-using-with
+        await asyncio.create_subprocess_exec(
+            "qubes-qube-manager", stderr=subprocess.PIPE
+        )
 
-class DomainMenuItem(Gtk.ImageMenuItem):
+
+class DomainMenuItem(Gtk.MenuItem):
     def __init__(self, vm, app, icon_cache, state=None):
         super().__init__()
         self.vm = vm
@@ -463,9 +469,15 @@ class DomainMenuItem(Gtk.ImageMenuItem):
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         # hbox.set_homogeneous(True)
 
+        iconbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        if self.decorator.icon():
+            iconbox.pack_start(self.decorator.icon(), False, True, 0)
+
+        hbox.pack_start(iconbox, False, True, 10)
+
         namebox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.name = self.decorator.name()
-        namebox.pack_start(self.name, True, True, 0)
+        namebox.pack_start(self.name, False, True, 0)
         self.spinner = Gtk.Spinner()
         namebox.pack_start(self.spinner, False, True, 0)
 
@@ -487,17 +499,14 @@ class DomainMenuItem(Gtk.ImageMenuItem):
             self.cpu.update_state(header=True)
             self.memory.update_state(header=True)
             self.show_all()  # header should always be visible
-        elif self.vm.klass == "AdminVM":  # no submenu for AdminVM
-            self.set_reserve_indicator(True)  # align with submenu triangles
         else:
-            if not state:
-                self.update_state(self.vm.get_power_state())
+            if self.vm.klass == "AdminVM":  # no submenu for AdminVM
+                self.set_reserve_indicator(True)  # align with submenu triangles
             else:
-                self.update_state(state)
-            self.set_label_icon()
-
-    def set_label_icon(self):
-        self.set_image(self.decorator.icon())
+                if not state:
+                    self.update_state(self.vm.get_power_state())
+                else:
+                    self.update_state(state)
 
     def _set_submenu(self, state):
         if self.vm.features.get("internal", False):
@@ -595,7 +604,7 @@ class DomainTray(Gtk.Application):
         self.pause_notification_out = False
 
         # add refreshing tooltips with storage info
-        GObject.timeout_add_seconds(120, self.refresh_tooltips)
+        GLib.timeout_add_seconds(120, self.refresh_tooltips)
 
         self.register_events()
         self.set_application_id(app_name)

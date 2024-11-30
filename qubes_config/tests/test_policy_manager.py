@@ -56,9 +56,7 @@ def test_conflict_files():
 
 
 @patch("qubes_config.global_config.policy_manager.PolicyClient.policy_get")
-@patch(
-    "qubes_config.global_config.policy_manager.PolicyClient.policy_replace"
-)
+@patch("qubes_config.global_config.policy_manager.PolicyClient.policy_replace")
 def test_get_policy_from_file_new_no_default(mock_replace, mock_get):
     manager = PolicyManager()
 
