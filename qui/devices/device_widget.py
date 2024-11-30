@@ -34,7 +34,8 @@ import qui
 import qui.utils
 
 import gi
-gi.require_version('Gtk', '3.0')  # isort:skip
+
+gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk, Gdk, Gio  # isort:skip
 
 from qui.devices import backend
@@ -43,27 +44,34 @@ from qui.devices import actionable_widgets
 from qubes_config.widgets.gtk_utils import is_theme_light
 
 import gbulb
+
 gbulb.install()
 
 import gettext
+
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
 
 # FUTURE: this should be moved to backend with new API changes
-DEV_TYPES = ['block', 'usb', 'mic']
+DEV_TYPES = ["block", "usb", "mic"]
 
 
 class DeviceMenu(Gtk.Menu):
     """Menu for handling a single device"""
-    def __init__(self, main_item: actionable_widgets.MainDeviceWidget,
-                 vms: List[backend.VM],
-                 dispvm_templates: List[backend.VM]):
+
+    def __init__(
+        self,
+        main_item: actionable_widgets.MainDeviceWidget,
+        vms: List[backend.VM],
+        dispvm_templates: List[backend.VM],
+    ):
         super().__init__()
 
         for child_widget in main_item.get_child_widgets(vms, dispvm_templates):
             item = actionable_widgets.generate_wrapper_widget(
-                Gtk.MenuItem, 'activate', child_widget)
+                Gtk.MenuItem, "activate", child_widget
+            )
             self.add(item)
 
         self.show_all()
@@ -71,6 +79,7 @@ class DeviceMenu(Gtk.Menu):
 
 class DevicesTray(Gtk.Application):
     """Tray application for handling devices."""
+
     def __init__(self, app_name, qapp, dispatcher):
         super().__init__()
         self.name: str = app_name
@@ -90,32 +99,38 @@ class DevicesTray(Gtk.Application):
         self.initialize_dev_data()
 
         for devclass in DEV_TYPES:
-            self.dispatcher.add_handler('device-attach:' + devclass,
-                                        self.device_attached)
-            self.dispatcher.add_handler('device-detach:' + devclass,
-                                        self.device_detached)
-            self.dispatcher.add_handler('device-list-change:' + devclass,
-                                        self.device_list_update)
+            self.dispatcher.add_handler(
+                "device-attach:" + devclass, self.device_attached
+            )
+            self.dispatcher.add_handler(
+                "device-detach:" + devclass, self.device_detached
+            )
+            self.dispatcher.add_handler(
+                "device-list-change:" + devclass, self.device_list_update
+            )
 
-        self.dispatcher.add_handler('domain-shutdown',
-                                    self.vm_shutdown)
-        self.dispatcher.add_handler('domain-start-failed',
-                                    self.vm_shutdown)
-        self.dispatcher.add_handler('domain-start', self.vm_start)
+        self.dispatcher.add_handler("domain-shutdown", self.vm_shutdown)
+        self.dispatcher.add_handler("domain-start-failed", self.vm_shutdown)
+        self.dispatcher.add_handler("domain-start", self.vm_start)
 
-        self.dispatcher.add_handler('property-set:template_for_dispvms',
-                                    self.vm_dispvm_template_change)
+        self.dispatcher.add_handler(
+            "property-set:template_for_dispvms", self.vm_dispvm_template_change
+        )
 
-        self.dispatcher.add_handler('property-reset:template_for_dispvms',
-                                    self.vm_dispvm_template_change)
-        self.dispatcher.add_handler('property-del:template_for_dispvms',
-                                    self.vm_dispvm_template_change)
+        self.dispatcher.add_handler(
+            "property-reset:template_for_dispvms",
+            self.vm_dispvm_template_change,
+        )
+        self.dispatcher.add_handler(
+            "property-del:template_for_dispvms", self.vm_dispvm_template_change
+        )
 
         self.widget_icon = Gtk.StatusIcon()
-        self.widget_icon.set_from_icon_name('qubes-devices')
-        self.widget_icon.connect('button-press-event', self.show_menu)
+        self.widget_icon.set_from_icon_name("qubes-devices")
+        self.widget_icon.connect("button-press-event", self.show_menu)
         self.widget_icon.set_tooltip_markup(
-            '<b>Qubes Devices</b>\nView and manage devices.')
+            "<b>Qubes Devices</b>\nView and manage devices."
+        )
 
     def device_list_update(self, vm, _event, **_kwargs):
 
@@ -126,7 +141,8 @@ class DevicesTray(Gtk.Application):
             for devclass in DEV_TYPES:
                 for device in vm.devices[devclass]:
                     changed_devices[str(device.port)] = backend.Device(
-                        device, self)
+                        device, self
+                    )
 
         except qubesadmin.exc.QubesException:
             changed_devices = {}  # VM was removed
@@ -139,7 +155,8 @@ class DevicesTray(Gtk.Application):
                     _("Device available"),
                     _("Device {} is available.").format(dev.description),
                     Gio.NotificationPriority.NORMAL,
-                    notification_id=dev.notification_id)
+                    notification_id=dev.notification_id,
+                )
 
         dev_to_remove = []
         for dev_port, dev in self.devices.items():
@@ -153,7 +170,8 @@ class DevicesTray(Gtk.Application):
                 _("Device removed"),
                 _("Device {} has been removed.").format(dev.description),
                 Gio.NotificationPriority.NORMAL,
-                notification_id=dev.notification_id)
+                notification_id=dev.notification_id,
+            )
             del self.devices[dev_port]
 
     def initialize_vm_data(self):
@@ -175,7 +193,8 @@ class DevicesTray(Gtk.Application):
                 try:
                     for device in domain.devices[devclass]:
                         self.devices[str(device.port)] = backend.Device(
-                            device, self)
+                            device, self
+                        )
                 except qubesadmin.exc.QubesException:
                     # we have no permission to access VM's devices
                     continue
@@ -184,15 +203,17 @@ class DevicesTray(Gtk.Application):
         for domain in self.qapp.domains:
             for devclass in DEV_TYPES:
                 try:
-                    for device in domain.devices[devclass
-                            ].get_attached_devices():
+                    for device in domain.devices[
+                        devclass
+                    ].get_attached_devices():
                         dev = str(device.port)
                         if dev in self.devices:
                             # occassionally ghost UnknownDevices appear when a
                             # device was removed but not detached from a VM
                             # FUTURE: is this still true after api changes?
                             self.devices[dev].attachments.add(
-                                backend.VM(domain))
+                                backend.VM(domain)
+                            )
                 except qubesadmin.exc.QubesException:
                     # we have no permission to access VM's devices
                     continue
@@ -256,6 +277,7 @@ class DevicesTray(Gtk.Application):
             self.dispvm_templates.add(wrapped_vm)
         else:
             self.dispvm_templates.discard(wrapped_vm)
+
     #
     # def on_label_changed(self, vm, _event, **_kwargs):
     #     if not vm:  # global properties changed
@@ -284,16 +306,18 @@ class DevicesTray(Gtk.Application):
         because it needs a realized widget.
         Returns light/dark variant used currently as 'light' or 'dark' string.
         """
-        theme = 'light' if is_theme_light(widget) else 'dark'
+        theme = "light" if is_theme_light(widget) else "dark"
         screen = Gdk.Screen.get_default()
         provider = Gtk.CssProvider()
-        css_file_ref = (importlib.resources.files('qui') /
-                        f'qubes-devices-{theme}.css')
+        css_file_ref = (
+            importlib.resources.files("qui") / f"qubes-devices-{theme}.css"
+        )
         with importlib.resources.as_file(css_file_ref) as css_file:
             provider.load_from_path(str(css_file))
 
         Gtk.StyleContext.add_provider_for_screen(
-            screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+            screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
 
         return theme
 
@@ -307,23 +331,24 @@ class DevicesTray(Gtk.Application):
         menu_items = []
         sorted_vms = sorted(self.vms)
         sorted_dispvms = sorted(self.dispvm_templates)
-        sorted_devices = sorted(self.devices.values(),
-                                key=lambda x: x.sorting_key)
+        sorted_devices = sorted(
+            self.devices.values(), key=lambda x: x.sorting_key
+        )
 
         for i, dev in enumerate(sorted_devices):
             if i == 0 or dev.device_group != sorted_devices[i - 1].device_group:
                 # add a header
-                menu_item = \
-                    actionable_widgets.generate_wrapper_widget(
-                        Gtk.MenuItem,
-                        'activate',
-                        actionable_widgets.InfoHeader(dev.device_group))
+                menu_item = actionable_widgets.generate_wrapper_widget(
+                    Gtk.MenuItem,
+                    "activate",
+                    actionable_widgets.InfoHeader(dev.device_group),
+                )
                 menu_items.append(menu_item)
 
             device_widget = actionable_widgets.MainDeviceWidget(dev, theme)
-            device_item = \
-                actionable_widgets.generate_wrapper_widget(
-                    Gtk.MenuItem, 'activate', device_widget)
+            device_item = actionable_widgets.generate_wrapper_widget(
+                Gtk.MenuItem, "activate", device_widget
+            )
             device_item.set_reserve_indicator(False)
 
             device_menu = DeviceMenu(device_widget, sorted_vms, sorted_dispvms)
@@ -338,15 +363,16 @@ class DevicesTray(Gtk.Application):
         tray_menu.show_all()
         tray_menu.popup_at_pointer(None)  # use current event
 
-    def emit_notification(self, title, message, priority, error=False,
-                          notification_id=None):
+    def emit_notification(
+        self, title, message, priority, error=False, notification_id=None
+    ):
         notification = Gio.Notification.new(title)
         notification.set_body(message)
         notification.set_priority(priority)
         if error:
-            notification.set_icon(Gio.ThemedIcon.new('dialog-error'))
+            notification.set_icon(Gio.ThemedIcon.new("dialog-error"))
             if notification_id:
-                notification_id += 'ERROR'
+                notification_id += "ERROR"
         self.send_notification(notification_id, notification)
 
 
@@ -355,16 +381,17 @@ def main():
     # qapp = qubesadmin.tests.mock_app.MockQubesComplete()
     dispatcher = qubesadmin.events.EventsDispatcher(qapp)
     # dispatcher = qubesadmin.tests.mock_app.MockDispatcher(qapp)
-    app = DevicesTray(
-        'org.qubes.qui.tray.Devices', qapp, dispatcher)
+    app = DevicesTray("org.qubes.qui.tray.Devices", qapp, dispatcher)
 
     loop = asyncio.get_event_loop()
     return_code = qui.utils.run_asyncio_and_show_errors(
-        loop, [asyncio.ensure_future(dispatcher.listen_for_events())],
-    "Qubes Devices Widget")
+        loop,
+        [asyncio.ensure_future(dispatcher.listen_for_events())],
+        "Qubes Devices Widget",
+    )
     del app
     return return_code
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

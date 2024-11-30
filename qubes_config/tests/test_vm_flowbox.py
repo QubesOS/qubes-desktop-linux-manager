@@ -21,12 +21,16 @@
 from unittest.mock import patch
 
 import gi
-gi.require_version('Gtk', '3.0')
-gi.require_version('GdkPixbuf', '2.0')
+
+gi.require_version("Gtk", "3.0")
+gi.require_version("GdkPixbuf", "2.0")
 from gi.repository import Gtk
 
-from ..global_config.vm_flowbox import VMFlowboxHandler, \
-    VMFlowBoxButton, PlaceholderText
+from ..global_config.vm_flowbox import (
+    VMFlowboxHandler,
+    VMFlowBoxButton,
+    PlaceholderText,
+)
 
 
 def get_visible_vms(flowbox_handler: VMFlowboxHandler):
@@ -45,23 +49,23 @@ def get_visible_vms(flowbox_handler: VMFlowboxHandler):
 
 
 def test_simple_flowbox_init_empty(test_qapp, test_builder):
-    flowbox_handler = VMFlowboxHandler(
-        test_builder, test_qapp, 'flowtest', [])
+    flowbox_handler = VMFlowboxHandler(test_builder, test_qapp, "flowtest", [])
     assert not flowbox_handler.is_changed()
 
-    assert len(flowbox_handler.flowbox.get_children()) == 1 # only placeholder
-    assert isinstance(flowbox_handler.flowbox.get_children()[0],
-                      PlaceholderText)
+    assert len(flowbox_handler.flowbox.get_children()) == 1  # only placeholder
+    assert isinstance(
+        flowbox_handler.flowbox.get_children()[0], PlaceholderText
+    )
     assert flowbox_handler.flowbox.get_children()[0].get_visible()
     assert not flowbox_handler.add_box.get_visible()
 
 
 def test_simple_flowbox_init_not_empty(test_qapp, test_builder):
-    initial_vms = [test_qapp.domains['test-vm'],
-                   test_qapp.domains['test-blue']]
+    initial_vms = [test_qapp.domains["test-vm"], test_qapp.domains["test-blue"]]
 
     flowbox_handler = VMFlowboxHandler(
-        test_builder, test_qapp, 'flowtest', initial_vms=initial_vms)
+        test_builder, test_qapp, "flowtest", initial_vms=initial_vms
+    )
 
     assert not flowbox_handler.is_changed()
 
@@ -73,28 +77,30 @@ def test_simple_flowbox_init_not_empty(test_qapp, test_builder):
     assert sorted(initial_vms) == flowbox_handler.selected_vms
 
 
-@patch('qubes_config.global_config.vm_flowbox.ask_question',
-       return_value=Gtk.ResponseType.YES)
+@patch(
+    "qubes_config.global_config.vm_flowbox.ask_question",
+    return_value=Gtk.ResponseType.YES,
+)
 def test_flowbox_remove_button(mock_question, test_qapp, test_builder):
-    initial_vms = [test_qapp.domains['test-vm'],
-                   test_qapp.domains['test-blue']]
+    initial_vms = [test_qapp.domains["test-vm"], test_qapp.domains["test-blue"]]
 
     flowbox_handler = VMFlowboxHandler(
-        test_builder, test_qapp, 'flowtest', initial_vms=initial_vms)
+        test_builder, test_qapp, "flowtest", initial_vms=initial_vms
+    )
 
     # remove test-vm
     assert not mock_question.mock_calls
     for child in flowbox_handler.flowbox.get_children():
-        if isinstance(child, VMFlowBoxButton) and child.vm.name == 'test-vm':
+        if isinstance(child, VMFlowBoxButton) and child.vm.name == "test-vm":
             child.get_child().clicked()
     assert len(mock_question.mock_calls) == 1
 
-    assert get_visible_vms(flowbox_handler) == [test_qapp.domains['test-blue']]
-    assert flowbox_handler.selected_vms == [test_qapp.domains['test-blue']]
+    assert get_visible_vms(flowbox_handler) == [test_qapp.domains["test-blue"]]
+    assert flowbox_handler.selected_vms == [test_qapp.domains["test-blue"]]
 
     # remove test-blue
     for child in flowbox_handler.flowbox.get_children():
-        if isinstance(child, VMFlowBoxButton) and child.vm.name == 'test-blue':
+        if isinstance(child, VMFlowBoxButton) and child.vm.name == "test-blue":
             child.get_child().clicked()
     assert len(mock_question.mock_calls) == 2
 
@@ -102,20 +108,21 @@ def test_flowbox_remove_button(mock_question, test_qapp, test_builder):
     assert not flowbox_handler.selected_vms
 
 
-@patch('qubes_config.global_config.vm_flowbox.ask_question',
-       return_value=Gtk.ResponseType.NO)
+@patch(
+    "qubes_config.global_config.vm_flowbox.ask_question",
+    return_value=Gtk.ResponseType.NO,
+)
 def test_flowbox_remove_button_no(mock_question, test_qapp, test_builder):
-    initial_vms = [test_qapp.domains['test-vm'],
-                   test_qapp.domains['test-blue']]
+    initial_vms = [test_qapp.domains["test-vm"], test_qapp.domains["test-blue"]]
 
     flowbox_handler = VMFlowboxHandler(
-        test_builder, test_qapp, 'flowtest', initial_vms=initial_vms)
+        test_builder, test_qapp, "flowtest", initial_vms=initial_vms
+    )
 
     # remove test-vm
     assert not mock_question.mock_calls
     for child in flowbox_handler.flowbox.get_children():
-        if isinstance(child,
-                      VMFlowBoxButton) and child.vm.name == 'test-vm':
+        if isinstance(child, VMFlowBoxButton) and child.vm.name == "test-vm":
             child.get_child().clicked()
     assert len(mock_question.mock_calls) == 1
 
@@ -124,16 +131,17 @@ def test_flowbox_remove_button_no(mock_question, test_qapp, test_builder):
 
 
 def test_flowbox_add_vm(test_qapp, test_builder):
-    initial_vms = [test_qapp.domains['test-vm']]
+    initial_vms = [test_qapp.domains["test-vm"]]
 
     flowbox_handler = VMFlowboxHandler(
-        test_builder, test_qapp, 'flowtest', initial_vms=initial_vms)
+        test_builder, test_qapp, "flowtest", initial_vms=initial_vms
+    )
 
     # try to add a VM and abort
     assert not flowbox_handler.add_box.get_visible()
     flowbox_handler.add_button.clicked()
     assert flowbox_handler.add_box.get_visible()
-    flowbox_handler.add_qube_model.select_value('test-blue')
+    flowbox_handler.add_qube_model.select_value("test-blue")
     flowbox_handler.add_cancel.clicked()
 
     assert not flowbox_handler.add_box.get_visible()
@@ -143,42 +151,48 @@ def test_flowbox_add_vm(test_qapp, test_builder):
     # now try to add and do not abort
     flowbox_handler.add_button.clicked()
     assert flowbox_handler.add_box.get_visible()
-    flowbox_handler.add_qube_model.select_value('test-blue')
+    flowbox_handler.add_qube_model.select_value("test-blue")
     flowbox_handler.add_confirm.clicked()
 
     assert not flowbox_handler.add_box.get_visible()
-    expected_vms = sorted([test_qapp.domains['test-vm'],
-                           test_qapp.domains['test-blue']])
+    expected_vms = sorted(
+        [test_qapp.domains["test-vm"], test_qapp.domains["test-blue"]]
+    )
     assert sorted(flowbox_handler.selected_vms) == expected_vms
     assert sorted(get_visible_vms(flowbox_handler)) == expected_vms
 
     # now try to add something that's already selected
     flowbox_handler.add_button.clicked()
     assert flowbox_handler.add_box.get_visible()
-    flowbox_handler.add_qube_model.select_value('test-blue')
-    with patch('qubes_config.global_config.vm_flowbox.show_error') as \
-            mock_error:
+    flowbox_handler.add_qube_model.select_value("test-blue")
+    with patch(
+        "qubes_config.global_config.vm_flowbox.show_error"
+    ) as mock_error:
         assert not mock_error.mock_calls
         flowbox_handler.add_confirm.clicked()
         assert mock_error.mock_calls
     # the box should not have hidden, maybe user wants to change selection
     assert flowbox_handler.add_box.get_visible()
-    expected_vms = sorted([test_qapp.domains['test-vm'],
-                           test_qapp.domains['test-blue']])
+    expected_vms = sorted(
+        [test_qapp.domains["test-vm"], test_qapp.domains["test-blue"]]
+    )
     assert sorted(flowbox_handler.selected_vms) == expected_vms
     assert sorted(get_visible_vms(flowbox_handler)) == expected_vms
 
 
-@patch('qubes_config.global_config.vm_flowbox.ask_question',
-       return_value=Gtk.ResponseType.YES)
+@patch(
+    "qubes_config.global_config.vm_flowbox.ask_question",
+    return_value=Gtk.ResponseType.YES,
+)
 def test_save_reset(_mock_question, test_qapp, test_builder):
-    test_vm = test_qapp.domains['test-vm']
-    blue_vm = test_qapp.domains['test-blue']
+    test_vm = test_qapp.domains["test-vm"]
+    blue_vm = test_qapp.domains["test-blue"]
 
     initial_vms = [test_vm]
 
     flowbox_handler = VMFlowboxHandler(
-        test_builder, test_qapp, 'flowtest', initial_vms=initial_vms)
+        test_builder, test_qapp, "flowtest", initial_vms=initial_vms
+    )
 
     assert not flowbox_handler.is_changed()
 
@@ -193,8 +207,7 @@ def test_save_reset(_mock_question, test_qapp, test_builder):
 
     # remove added qube
     for child in flowbox_handler.flowbox.get_children():
-        if isinstance(child,
-                      VMFlowBoxButton) and child.vm == blue_vm:
+        if isinstance(child, VMFlowBoxButton) and child.vm == blue_vm:
             child.get_child().clicked()
     assert flowbox_handler.selected_vms == [test_vm]
     assert get_visible_vms(flowbox_handler) == [test_vm]
@@ -204,8 +217,7 @@ def test_save_reset(_mock_question, test_qapp, test_builder):
 
     # remove more
     for child in flowbox_handler.flowbox.get_children():
-        if isinstance(child,
-                      VMFlowBoxButton) and child.vm == test_vm:
+        if isinstance(child, VMFlowBoxButton) and child.vm == test_vm:
             child.get_child().clicked()
     assert not flowbox_handler.selected_vms
     assert not get_visible_vms(flowbox_handler)
@@ -232,8 +244,10 @@ def test_save_reset(_mock_question, test_qapp, test_builder):
 
     # remove all and save
     for child in flowbox_handler.flowbox.get_children():
-        if isinstance(child,
-                      VMFlowBoxButton) and child.vm in [blue_vm, test_vm]:
+        if isinstance(child, VMFlowBoxButton) and child.vm in [
+            blue_vm,
+            test_vm,
+        ]:
             child.get_child().clicked()
     flowbox_handler.save()
     assert not flowbox_handler.selected_vms
@@ -253,19 +267,23 @@ def test_save_reset(_mock_question, test_qapp, test_builder):
 
 
 def test_flowbox_verify(test_qapp, test_builder):
-    test_vm = test_qapp.domains['test-vm']
-    red_vm = test_qapp.domains['test-red']
+    test_vm = test_qapp.domains["test-vm"]
+    red_vm = test_qapp.domains["test-red"]
 
     initial_vms = [test_vm]
 
     flowbox_handler = VMFlowboxHandler(
-        test_builder, test_qapp, 'flowtest', initial_vms=initial_vms,
-        verification_callback=lambda vm: vm.name != 'test-blue')
+        test_builder,
+        test_qapp,
+        "flowtest",
+        initial_vms=initial_vms,
+        verification_callback=lambda vm: vm.name != "test-blue",
+    )
 
     # attempt to add and see an erorr
     flowbox_handler.add_button.clicked()
     assert flowbox_handler.add_box.get_visible()
-    flowbox_handler.add_qube_model.select_value('test-blue')
+    flowbox_handler.add_qube_model.select_value("test-blue")
     # vm will not be added, but the verification callback is responsible
     # for messaging (it can propose additional actions)
     flowbox_handler.add_confirm.clicked()
@@ -276,7 +294,7 @@ def test_flowbox_verify(test_qapp, test_builder):
     # but adding correct stuff still works
     flowbox_handler.add_button.clicked()
     assert flowbox_handler.add_box.get_visible()
-    flowbox_handler.add_qube_model.select_value('test-red')
+    flowbox_handler.add_qube_model.select_value("test-red")
     flowbox_handler.add_confirm.clicked()
     assert flowbox_handler.selected_vms == [red_vm, test_vm]
     assert get_visible_vms(flowbox_handler) == [red_vm, test_vm]
@@ -284,11 +302,12 @@ def test_flowbox_verify(test_qapp, test_builder):
 
 
 def test_flowbox_visibility(test_qapp, test_builder):
-    test_vm = test_qapp.domains['test-vm']
+    test_vm = test_qapp.domains["test-vm"]
     initial_vms = [test_vm]
 
     flowbox_handler = VMFlowboxHandler(
-        test_builder, test_qapp, 'flowtest', initial_vms=initial_vms)
+        test_builder, test_qapp, "flowtest", initial_vms=initial_vms
+    )
 
     flowbox_handler.set_visible(True)
     assert flowbox_handler.selected_vms == [test_vm]
