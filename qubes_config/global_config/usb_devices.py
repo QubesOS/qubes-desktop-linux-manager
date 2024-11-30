@@ -400,7 +400,7 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
         response = ask_question(
             self.enable_check,
             _("U2F not enabled in qube"),
-            _("U2F is not enabled in this qube. Do you " "want to enable it?"),
+            _("U2F is not enabled in this qube. Do you want to enable it?"),
         )
         if response == Gtk.ResponseType.YES:
             self.enable_some_handler.add_selected_vm(vm)
@@ -725,7 +725,7 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
             or self.blanket_handler.selected_vms != self.initial_blanket_vms
         ):
             unsaved.append(
-                _("List of qubes with unrestricted U2F key " "access changed")
+                _("List of qubes with unrestricted U2F key access changed")
             )
         return "\n".join(unsaved)
 

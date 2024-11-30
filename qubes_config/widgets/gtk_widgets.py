@@ -117,7 +117,9 @@ class QubeName(Gtk.Box):
 
 
 class TraitSelector(abc.ABC):
-    """abstract class representing various widgets for selecting trait value."""
+    """
+    Abstract class representing various widgets for selecting trait value.
+    """
 
     @abc.abstractmethod
     def get_selected(self):

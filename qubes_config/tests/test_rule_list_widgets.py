@@ -277,7 +277,7 @@ def test_rule_delete_new(test_qapp):
 
     # the rule should not have exited the edit mode
     with patch.object(rule, "get_rule_errors", return_value="a"), patch(
-        "qubes_config.global_config.rule_list_widgets." "show_error"
+        "qubes_config.global_config.rule_list_widgets.show_error"
     ) as mock_error:
         rule_row.validate_and_save()
         assert mock_error.mock_calls

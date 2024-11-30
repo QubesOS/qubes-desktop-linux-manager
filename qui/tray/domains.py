@@ -692,14 +692,14 @@ class DomainTray(Gtk.Application):
     def emit_paused_notification(self):
         if not self.pause_notification_out:
             notification = Gio.Notification.new(
-                _("Your qubes have been " "paused!")
+                _("Your qubes have been paused!")
             )
             notification.set_body(
                 _(
-                    "All your qubes are currently paused. If this was an accident, "
-                    'simply click "Unpause All" to unpause them. Otherwise, '
-                    "you can unpause individual qubes via the Qubes Domains "
-                    "tray widget."
+                    "All your qubes are currently paused. If this was an "
+                    "accident, simply click 'Unpause All' to unpause them. "
+                    "Otherwise, you can unpause individual qubes via the "
+                    "Qubes Domains tray widget."
                 )
             )
             notification.set_icon(Gio.ThemedIcon.new("dialog-warning"))

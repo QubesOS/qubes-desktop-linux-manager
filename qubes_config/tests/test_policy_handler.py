@@ -60,7 +60,7 @@ def add_rule(
                 row.action_widget.model.select_value(action)
             if expect_error:
                 with patch(
-                    "qubes_config.global_config.rule_list_widgets." "show_error"
+                    "qubes_config.global_config.rule_list_widgets.show_error"
                 ) as mock_error:
                     assert not mock_error.mock_calls
                     row.validate_and_save()
@@ -928,7 +928,7 @@ TestService * @anyvm test-blue allow"""
     assert handler.add_select_box.get_visible()
     handler.select_qube_model.select_value("vault")
     with patch(
-        "qubes_config.global_config.policy_handler." "ask_question"
+        "qubes_config.global_config.policy_handler.ask_question"
     ) as mock_ask:
         handler.add_select_confirm.clicked()
         # vault is not networked
@@ -945,7 +945,7 @@ TestService * @anyvm vault ask"""
     assert handler.add_select_box.get_visible()
     handler.select_qube_model.select_value("test-red")
     with patch(
-        "qubes_config.global_config.policy_handler." "ask_question"
+        "qubes_config.global_config.policy_handler.ask_question"
     ) as mock_ask:
         handler.add_select_confirm.clicked()
         # test-red is networked
@@ -1113,7 +1113,7 @@ TestService * @anyvm vault ask"""
     for row in handler.main_list_box.get_children():
         if row.rule.target == "vault":
             with patch(
-                "qubes_config.global_config.rule_list_widgets." "ask_question"
+                "qubes_config.global_config.rule_list_widgets.ask_question"
             ) as mock_ask:
                 mock_ask.return_value = Gtk.ResponseType.YES
                 row._delete_self()  # pylint: disable=protected-access

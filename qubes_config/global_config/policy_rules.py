@@ -107,9 +107,8 @@ class AbstractRuleWrapper(abc.ABC):
         return self.source == other_source and self.target == other_target
 
     @staticmethod
-    def get_rule_errors(
-        source: str, target: str, action: str
-    ) -> Optional[str]:  # pylint: disable=unused-argument
+    # pylint: disable=unused-argument
+    def get_rule_errors(source: str, target: str, action: str) -> Optional[str]:
         """Return None if rule is valid and str describing error if not."""
         return None
 
@@ -245,12 +244,12 @@ class RuleTargetedAdminVM(AbstractRuleWrapper):
         if isinstance(rule.action, Ask):
             if rule.action.default_target != "@adminvm":
                 raise ValueError(
-                    _("If action is ask, " "default_target must be @adminvm")
+                    _("If action is ask, default_target must be @adminvm")
                 )
         if isinstance(rule.action, Allow):
             if rule.action.target:
                 raise ValueError(
-                    _("If action is allow, no " "parameters are allowed")
+                    _("If action is allow, no parameters are allowed")
                 )
 
     @property

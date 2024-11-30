@@ -314,7 +314,7 @@ class RuleListBoxRow(Gtk.ListBoxRow):
         enable_vm_edit: bool = True,
         initial_verb: str = _("will"),
         custom_deletion_warning: str = _(
-            "Are you sure you want to " "delete this rule?"
+            "Are you sure you want to delete this rule?"
         ),
         is_new_row: bool = False,
         enable_adminvm: bool = False,

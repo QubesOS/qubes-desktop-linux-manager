@@ -262,9 +262,9 @@ def test_new_file_action(test_policy_client):
     policy_editor.perform_setup()
 
     with patch(
-        "qubes_config.policy_editor.policy_editor." "Gtk.MessageDialog.run"
+        "qubes_config.policy_editor.policy_editor.Gtk.MessageDialog.run"
     ) as mock_run, patch(
-        "qubes_config.policy_editor.policy_editor." "Gtk.Entry.get_text"
+        "qubes_config.policy_editor.policy_editor.Gtk.Entry.get_text"
     ) as mock_get:
         mock_get.return_value = "new-file"
         mock_run.return_value = Gtk.ResponseType.OK
@@ -294,9 +294,9 @@ def test_new_file_action_invalid(test_policy_client):
     policy_editor.source_buffer.set_text("changed.service * vm1 vm2 allow")
 
     with patch(
-        "qubes_config.policy_editor.policy_editor." "Gtk.MessageDialog.run"
+        "qubes_config.policy_editor.policy_editor.Gtk.MessageDialog.run"
     ) as mock_run, patch(
-        "qubes_config.policy_editor.policy_editor." "Gtk.Entry.get_text"
+        "qubes_config.policy_editor.policy_editor.Gtk.Entry.get_text"
     ) as mock_get, patch(
         "qubes_config.policy_editor.policy_editor.show_error"
     ), patch(
@@ -318,9 +318,9 @@ def test_new_file_action_invalid(test_policy_client):
     )
 
     with patch(
-        "qubes_config.policy_editor.policy_editor." "Gtk.MessageDialog.run"
+        "qubes_config.policy_editor.policy_editor.Gtk.MessageDialog.run"
     ) as mock_run, patch(
-        "qubes_config.policy_editor.policy_editor." "Gtk.Entry.get_text"
+        "qubes_config.policy_editor.policy_editor.Gtk.Entry.get_text"
     ) as mock_get, patch(
         "qubes_config.policy_editor.policy_editor.show_error"
     ), patch(
@@ -415,7 +415,7 @@ def test_includes(test_policy_client):
     )
 
     policy_editor.source_buffer.set_text(
-        "!include include/include-2\n" "Test * vm1 vm2 allow"
+        "!include include/include-2\nTest * vm1 vm2 allow"
     )
 
     policy_editor.action_items["save"].activate()

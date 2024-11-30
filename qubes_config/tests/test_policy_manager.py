@@ -55,9 +55,9 @@ def test_conflict_files():
         assert not manager.get_conflicting_policy_files("other", "test")
 
 
-@patch("qubes_config.global_config.policy_manager." "PolicyClient.policy_get")
+@patch("qubes_config.global_config.policy_manager.PolicyClient.policy_get")
 @patch(
-    "qubes_config.global_config.policy_manager." "PolicyClient.policy_replace"
+    "qubes_config.global_config.policy_manager.PolicyClient.policy_replace"
 )
 def test_get_policy_from_file_new_no_default(mock_replace, mock_get):
     manager = PolicyManager()
@@ -105,7 +105,7 @@ def test_get_policy_from_file_existing():
         return "", ""
 
     with patch(
-        "qubes_config.global_config.policy_manager." "PolicyClient.policy_get"
+        "qubes_config.global_config.policy_manager.PolicyClient.policy_get"
     ) as mock_get:
         mock_get.side_effect = get_file
 

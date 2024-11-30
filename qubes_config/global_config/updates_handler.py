@@ -101,7 +101,7 @@ class RepoHandler:
             },
             {
                 "qubes-templates-community": self.template_community,
-                "qubes-templates-community-testing": self.template_community_testing,
+                "qubes-templates-community-testing": self.template_community_testing,  # pylint: disable=line-too-long
             },
         ]
         self.initial_state: Dict[str, bool] = {}
@@ -171,7 +171,7 @@ class RepoHandler:
         result = self._run_qrexec_repo(f"qubes.repos.{action}", repository)
         if result != "ok\n":
             raise RuntimeError(
-                'qrexec call stdout did not contain "ok"' " as expected"
+                "qrexec call stdout did not contain 'ok' as expected"
             )
 
     def get_unsaved(self) -> str:
@@ -340,7 +340,7 @@ class UpdateCheckerHandler:
             or self.flowbox_handler.is_changed()
         ):
             unsaved.append(
-                _("Qubes selected for unusual 'check for updates'" " behaviors")
+                _("Qubes selected for unusual 'check for updates' behaviors")
             )
         return "\n".join(unsaved)
 

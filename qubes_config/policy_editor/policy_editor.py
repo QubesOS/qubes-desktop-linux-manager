@@ -489,7 +489,7 @@ class PolicyEditor(Gtk.Application):
             )
         except subprocess.CalledProcessError as ex:
             err_msg = (
-                "An error occurred while trying to save the policy" " file:\n"
+                "An error occurred while trying to save the policy file:\n"
             )
             if ex.stdout:
                 err_msg += ex.stdout.decode()

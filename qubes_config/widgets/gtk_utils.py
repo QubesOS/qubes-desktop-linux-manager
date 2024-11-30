@@ -131,7 +131,8 @@ def show_dialog_with_icon(
     if response == Gtk.ResponseType.DELETE_EVENT:
         if Gtk.ResponseType.CANCEL in buttons.values():
             # treat exiting from the window as cancel if it's one of the
-            # available responses, then no if it's one of the available responses
+            # available responses, then no if it's one of the available
+            # responses
             return Gtk.ResponseType.CANCEL
         if Gtk.ResponseType.NO in buttons.values():
             return Gtk.ResponseType.NO

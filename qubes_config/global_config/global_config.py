@@ -590,7 +590,7 @@ class GlobalConfig(Gtk.Application):
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         label_1 = Gtk.Label()
         label_1.set_markup(
-            _("The following <b>unsaved changes</b> " "were found:")
+            _("The following <b>unsaved changes</b> were found:")
         )
         label_1.set_xalign(0)
         label_2 = Gtk.Label()

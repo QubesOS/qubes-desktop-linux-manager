@@ -819,7 +819,7 @@ def test_u2f_save_disable(test_qapp, test_policy_manager, real_builder):
     handler.enable_check.set_active(False)
 
     with patch.object(handler.policy_manager, "save_rules") as mock_save, patch(
-        "qubes_config.global_config.usb_devices." "apply_feature_change"
+        "qubes_config.global_config.usb_devices.apply_feature_change"
     ) as mock_apply:
         handler.save()
 
@@ -909,7 +909,7 @@ def test_u2f_handler_save_complex(test_qapp, test_policy_manager, real_builder):
     handler.blanket_handler.add_selected_vm(testvm)
 
     with patch.object(handler.policy_manager, "save_rules") as mock_save, patch(
-        "qubes_config.global_config.usb_devices." "apply_feature_change"
+        "qubes_config.global_config.usb_devices.apply_feature_change"
     ) as mock_apply:
         handler.save()
 
@@ -974,7 +974,7 @@ def test_u2f_handler_save_complex_2(
     handler.blanket_check.set_active(False)
 
     with patch.object(handler.policy_manager, "save_rules") as mock_save, patch(
-        "qubes_config.global_config.usb_devices." "apply_feature_change"
+        "qubes_config.global_config.usb_devices.apply_feature_change"
     ) as mock_apply:
         handler.save()
 
@@ -1027,7 +1027,7 @@ def test_u2f_handler_add_without_service(
     handler.register_some_handler.add_qube_model.select_value("fedora-35")
     # refuse
     with patch(
-        "qubes_config.global_config.usb_devices." "ask_question"
+        "qubes_config.global_config.usb_devices.ask_question"
     ) as mock_question:
         mock_question.return_value = Gtk.ResponseType.NO
         handler.register_some_handler.add_confirm.clicked()
@@ -1037,7 +1037,7 @@ def test_u2f_handler_add_without_service(
 
     # accept
     with patch(
-        "qubes_config.global_config.usb_devices." "ask_question"
+        "qubes_config.global_config.usb_devices.ask_question"
     ) as mock_question:
         mock_question.return_value = Gtk.ResponseType.YES
         handler.register_some_handler.add_confirm.clicked()

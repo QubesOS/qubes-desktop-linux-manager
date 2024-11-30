@@ -101,7 +101,7 @@ def test_global_config_init(
 
     # try to move away from page, we should get a warning
     with patch(show_dialog_with_icon_path) as mock_ask, patch(
-        "qubes_config.global_config.basics_handler." "apply_feature_change"
+        "qubes_config.global_config.basics_handler.apply_feature_change"
     ) as mock_apply:
         mock_ask.return_value = Gtk.ResponseType.YES
         app.main_notebook.set_current_page(clipboard_page_num + 1)

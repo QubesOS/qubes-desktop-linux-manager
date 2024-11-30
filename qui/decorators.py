@@ -161,7 +161,7 @@ class DomainDecorator(PropertiesDecorator):
 
                 if self.outdated:
                     tooltip += _(
-                        "\n\nRestart qube to " "apply changes in template."
+                        "\n\nRestart qube to apply changes in template."
                     )
 
                 if self.updates_available:

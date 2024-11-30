@@ -257,7 +257,7 @@ class Device:
             self.gtk_app.emit_notification(
                 _("Error"),
                 _(
-                    "Attaching device {0} to {1} failed. " "Error: {2} - {3}"
+                    "Attaching device {0} to {1} failed. Error: {2} - {3}"
                 ).format(self.description, vm, type(ex).__name__, ex),
                 Gio.NotificationPriority.HIGH,
                 error=True,
@@ -282,7 +282,7 @@ class Device:
         except qubesadmin.exc.QubesException as ex:
             self.gtk_app.emit_notification(
                 _("Error"),
-                _("Detaching device {0} from {1} failed. " "Error: {2}").format(
+                _("Detaching device {0} from {1} failed. Error: {2}").format(
                     self.description, vm, ex
                 ),
                 Gio.NotificationPriority.HIGH,
