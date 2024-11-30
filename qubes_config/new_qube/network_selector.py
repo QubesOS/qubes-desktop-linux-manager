@@ -28,16 +28,18 @@ from ..widgets.gtk_widgets import QubeName, VMListModeler, ExpanderHandler
 
 import gi
 
-gi.require_version('Gtk', '3.0')
+gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
-logger = logging.getLogger('qubes-new-qube')
-WHONIX_QUBE_NAME = 'sys-whonix'
+logger = logging.getLogger("qubes-new-qube")
+WHONIX_QUBE_NAME = "sys-whonix"
+
 
 class NetworkSelector:
     """
     Class that handles network configuration.
     """
+
     def __init__(self, gtk_builder: Gtk.Builder, qapp: qubesadmin.Qubes):
         """
         :param gtk_builder: Gtk.Builder object
@@ -50,63 +52,81 @@ class NetworkSelector:
         self.network_tor_icon: Optional[Gtk.Image] = None
         self.network_tor_name: Optional[Gtk.Label] = None
 
-        self.network_default_box: Gtk.Box = \
-            gtk_builder.get_object('network_default_box')
+        self.network_default_box: Gtk.Box = gtk_builder.get_object(
+            "network_default_box"
+        )
         self.network_default_box.pack_start(
-            QubeName(self.qapp.default_netvm), False, False, 0)
+            QubeName(self.qapp.default_netvm), False, False, 0
+        )
 
-        self.network_tor_box: Gtk.Box = \
-            gtk_builder.get_object('network_tor_box')
-        self.network_custom: Gtk.RadioButton = \
-            gtk_builder.get_object('network_custom')
-        self.network_custom_combo: Gtk.ComboBox = \
-            gtk_builder.get_object('network_custom_combo')
-        self.network_custom.connect('toggled', self._custom_toggled)
+        self.network_tor_box: Gtk.Box = gtk_builder.get_object(
+            "network_tor_box"
+        )
+        self.network_custom: Gtk.RadioButton = gtk_builder.get_object(
+            "network_custom"
+        )
+        self.network_custom_combo: Gtk.ComboBox = gtk_builder.get_object(
+            "network_custom_combo"
+        )
+        self.network_custom.connect("toggled", self._custom_toggled)
 
-        self.network_none: Gtk.RadioButton = \
-            gtk_builder.get_object('network_none')
-        self.network_tor: Gtk.RadioButton = \
-            gtk_builder.get_object('network_tor')
-        self.network_default: Gtk.RadioButton = \
-            gtk_builder.get_object('network_default')
+        self.network_none: Gtk.RadioButton = gtk_builder.get_object(
+            "network_none"
+        )
+        self.network_tor: Gtk.RadioButton = gtk_builder.get_object(
+            "network_tor"
+        )
+        self.network_default: Gtk.RadioButton = gtk_builder.get_object(
+            "network_default"
+        )
 
         if WHONIX_QUBE_NAME in self.qapp.domains:
             self.network_tor_box.pack_start(
-                QubeName(self.qapp.domains[WHONIX_QUBE_NAME]), False, False, 0)
+                QubeName(self.qapp.domains[WHONIX_QUBE_NAME]), False, False, 0
+            )
         else:
             self.network_tor_box.set_visible(False)
             self.network_tor_box.set_no_show_all(True)
 
         self.network_modeler = VMListModeler(
-            self.network_custom_combo, self.qapp,
-            lambda x: getattr(x, 'provides_network', False))
+            self.network_custom_combo,
+            self.qapp,
+            lambda x: getattr(x, "provides_network", False),
+        )
 
-        self.network_tor.connect('toggled', self._netvm_changed)
-        self.network_none.connect('toggled', self._netvm_changed)
-        self.network_default.connect('toggled', self._netvm_changed)
-        self.network_custom.connect('toggled', self._netvm_changed)
-        self.network_custom_combo.connect('changed', self._netvm_changed_combo)
+        self.network_tor.connect("toggled", self._netvm_changed)
+        self.network_none.connect("toggled", self._netvm_changed)
+        self.network_default.connect("toggled", self._netvm_changed)
+        self.network_custom.connect("toggled", self._netvm_changed)
+        self.network_custom_combo.connect("changed", self._netvm_changed_combo)
 
-        self.network_current_box: Gtk.Box = \
-            gtk_builder.get_object('box_network_current')
-        self.network_current_none: Gtk.Label = \
-            gtk_builder.get_object('label_current_network_none')
+        self.network_current_box: Gtk.Box = gtk_builder.get_object(
+            "box_network_current"
+        )
+        self.network_current_none: Gtk.Label = gtk_builder.get_object(
+            "label_current_network_none"
+        )
         self.network_current_widget = QubeName(self.qapp.default_netvm)
         self.network_current_box.pack_start(
-            self.network_current_widget, False, False, 3)
+            self.network_current_widget, False, False, 3
+        )
         self.network_current_none.set_visible(False)
 
-        self.button_toggle_settings: Gtk.Button = \
-            gtk_builder.get_object('event_button_network_current')
-        self.box_network_settings: Gtk.Box = \
-            gtk_builder.get_object('box_network_settings')
-        self.expander_image: Gtk.Image = \
-            gtk_builder.get_object('network_settings_expander_icon')
+        self.button_toggle_settings: Gtk.Button = gtk_builder.get_object(
+            "event_button_network_current"
+        )
+        self.box_network_settings: Gtk.Box = gtk_builder.get_object(
+            "box_network_settings"
+        )
+        self.expander_image: Gtk.Image = gtk_builder.get_object(
+            "network_settings_expander_icon"
+        )
 
         self.expander_handler = ExpanderHandler(
             event_button=self.button_toggle_settings,
             data_container=self.box_network_settings,
-            icon=self.expander_image)
+            icon=self.expander_image,
+        )
 
     def _custom_toggled(self, widget):
         self.network_custom_combo.set_sensitive(widget.get_active())
@@ -127,8 +147,9 @@ class NetworkSelector:
 
         if current_netvm:
             self.network_current_widget = QubeName(current_netvm)
-            self.network_current_box.pack_start(self.network_current_widget,
-                                                False, False, 3)
+            self.network_current_box.pack_start(
+                self.network_current_widget, False, False, 3
+            )
 
     def get_selected_netvm(self) -> Optional[qubesadmin.vm.QubesVM]:
         """Get which vm (if any) is selected as netvm"""

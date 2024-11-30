@@ -27,10 +27,12 @@ from qubesadmin.utils import size_to_human
 from qubesadmin.device_protocol import DeviceAssignment
 
 import gi
-gi.require_version('Gtk', '3.0')  # isort:skip
+
+gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk, Gio  # isort:skip
 
 import gettext
+
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
@@ -39,6 +41,7 @@ class VM:
     """
     Wrapper for various VMs that can serve as backend/frontend
     """
+
     def __init__(self, vm: qubesadmin.vm.QubesVM):
         self.__hash = hash(vm)
         self._vm = vm
@@ -61,23 +64,23 @@ class VM:
     def icon_name(self):
         """Name of the VM icon"""
         try:
-            return getattr(self._vm, 'icon', self._vm.label.icon)
+            return getattr(self._vm, "icon", self._vm.label.icon)
         except qubesadmin.exc.QubesException:
-            return 'appvm-black'
+            return "appvm-black"
 
     @property
     def is_dispvm_template(self) -> bool:
         """
         Is this VM a dispvm template?
         """
-        return getattr(self._vm, 'template_for_dispvms', False)
+        return getattr(self._vm, "template_for_dispvms", False)
 
     @property
     def is_attachable(self) -> bool:
         """
         Should this VM be listed as possible attachment target in the GUI?
         """
-        return self.vm_class != 'AdminVM' and self._vm.is_running()
+        return self.vm_class != "AdminVM" and self._vm.is_running()
 
     @property
     def vm_object(self):
@@ -95,36 +98,38 @@ class VM:
 
 
 class Device:
-    def __init__(self, dev: qubesadmin.devices.DeviceInfo,
-                 gtk_app: Gtk.Application):
+    def __init__(
+        self, dev: qubesadmin.devices.DeviceInfo, gtk_app: Gtk.Application
+    ):
         self.gtk_app: Gtk.Application = gtk_app
         self._dev: qubesadmin.devices.DeviceInfo = dev
         self.__hash = hash(dev)
-        self._port: str = ''
+        self._port: str = ""
         # Monotonic connection timestamp only for new devices
         self.connection_timestamp: float = None
 
-        self._dev_name: str = getattr(dev, 'description', 'unknown')
-        if dev.devclass == 'block' and 'size' in dev.data:
-            self._dev_name += " (" + size_to_human(int(dev.data['size'])) + ")"
+        self._dev_name: str = getattr(dev, "description", "unknown")
+        if dev.devclass == "block" and "size" in dev.data:
+            self._dev_name += " (" + size_to_human(int(dev.data["size"])) + ")"
 
-        self._ident: str = getattr(dev, 'port_id', 'unknown')
-        self._description: str = getattr(dev, 'description', 'unknown')
-        self._devclass: str = getattr(dev, 'devclass', 'unknown')
-        self._data: Dict = getattr(dev, 'data', {})
-        self._device_id = getattr(dev, 'device_id', '*')
+        self._ident: str = getattr(dev, "port_id", "unknown")
+        self._description: str = getattr(dev, "description", "unknown")
+        self._devclass: str = getattr(dev, "devclass", "unknown")
+        self._data: Dict = getattr(dev, "data", {})
+        self._device_id = getattr(dev, "device_id", "*")
         self.attachments: Set[VM] = set()
-        backend_domain = getattr(dev, 'backend_domain', None)
+        backend_domain = getattr(dev, "backend_domain", None)
         if backend_domain:
             self._backend_domain: Optional[VM] = VM(backend_domain)
         else:
             self._backend_domain: Optional[VM] = None
 
         try:
-            self.vm_icon: str = getattr(dev.backend_domain, 'icon',
-                                   dev.backend_domain.label.icon)
+            self.vm_icon: str = getattr(
+                dev.backend_domain, "icon", dev.backend_domain.label.icon
+            )
         except qubesadmin.exc.QubesException:
-            self.vm_icon: str = 'appvm-black'
+            self.vm_icon: str = "appvm-black"
 
     def __str__(self):
         return self._dev_name
@@ -163,11 +168,11 @@ class Device:
     @property
     def device_icon(self) -> str:
         """Device icon"""
-        if self.device_class == 'block':
-            return 'harddrive'
-        if self.device_class == 'mic':
-            return 'mic'
-        return ''
+        if self.device_class == "block":
+            return "harddrive"
+        if self.device_class == "mic":
+            return "mic"
+        return ""
 
     @property
     def backend_domain(self) -> Optional[VM]:
@@ -187,41 +192,41 @@ class Device:
     @property
     def device_group(self) -> str:
         """Device group for purposes of menus."""
-        if self._devclass == 'block':
-            return 'Data (Block) Devices'
-        if self._devclass == 'usb':
-            return 'USB Devices'
-        if self._devclass == 'mic':
-            return 'Microphones'
+        if self._devclass == "block":
+            return "Data (Block) Devices"
+        if self._devclass == "usb":
+            return "USB Devices"
+        if self._devclass == "mic":
+            return "Microphones"
         # TODO: those below come from new API, may need an update
-        if self._devclass == 'Other':
-            return 'Other Devices'
-        if self._devclass == 'Communication':
-            return 'Other Devices'  # eg. modems
-        if self._devclass in ('Input', 'Keyboard', 'Mouse'):
-            return 'Input Devices'
-        if self._devclass in ('Printer', 'Scanner'):
+        if self._devclass == "Other":
+            return "Other Devices"
+        if self._devclass == "Communication":
+            return "Other Devices"  # eg. modems
+        if self._devclass in ("Input", "Keyboard", "Mouse"):
+            return "Input Devices"
+        if self._devclass in ("Printer", "Scanner"):
             return "Printers and Scanners"
-        if self._devclass == 'Multimedia':
-            return 'Other Devices'
+        if self._devclass == "Multimedia":
+            return "Other Devices"
             # Multimedia = Audio, Video, Displays etc.
-        if self._devclass == 'Wireless':
-            return 'Other Devices'
-        if self._devclass == 'Bluetooth':
-            return 'Bluetooth Devices'
-        if self._devclass == 'Mass_Data':
-            return 'Other Devices'
-        if self._devclass == 'Network':
-            return 'Other Devices'
-        if self._devclass == 'Memory':
-            return 'Other Devices'
-        if self._devclass.startswith('PCI'):
-            return 'PCI Devices'
-        if self._devclass == 'Docking Station':
-            return 'Docking Station'
-        if self._devclass == 'Processor':
-            return 'Other Devices'
-        return 'Other Devices'
+        if self._devclass == "Wireless":
+            return "Other Devices"
+        if self._devclass == "Bluetooth":
+            return "Bluetooth Devices"
+        if self._devclass == "Mass_Data":
+            return "Other Devices"
+        if self._devclass == "Network":
+            return "Other Devices"
+        if self._devclass == "Memory":
+            return "Other Devices"
+        if self._devclass.startswith("PCI"):
+            return "PCI Devices"
+        if self._devclass == "Docking Station":
+            return "Docking Station"
+        if self._devclass == "Processor":
+            return "Other Devices"
+        return "Other Devices"
 
     @property
     def sorting_key(self) -> str:
@@ -233,27 +238,31 @@ class Device:
         Perform attachment to provided VM.
         """
         try:
-            assignment = DeviceAssignment.new(self.backend_domain,
-                port_id=self.id_string, devclass=self.device_class,
-                device_id=self._device_id)
+            assignment = DeviceAssignment.new(
+                self.backend_domain,
+                port_id=self.id_string,
+                devclass=self.device_class,
+                device_id=self._device_id,
+            )
 
             vm.vm_object.devices[self.device_class].attach(assignment)
             self.gtk_app.emit_notification(
                 _("Attaching device"),
                 _("Attaching {} to {}").format(self.description, vm),
                 Gio.NotificationPriority.NORMAL,
-                notification_id=self.notification_id)
+                notification_id=self.notification_id,
+            )
 
-        except Exception as ex: # pylint: disable=broad-except
+        except Exception as ex:  # pylint: disable=broad-except
             self.gtk_app.emit_notification(
                 _("Error"),
-                _("Attaching device {0} to {1} failed. "
-                  "Error: {2} - {3}").format(
-                    self.description, vm, type(ex).__name__,
-                    ex),
+                _(
+                    "Attaching device {0} to {1} failed. " "Error: {2} - {3}"
+                ).format(self.description, vm, type(ex).__name__, ex),
                 Gio.NotificationPriority.HIGH,
                 error=True,
-                notification_id=self.notification_id)
+                notification_id=self.notification_id,
+            )
 
     def detach_from_vm(self, vm: VM):
         """
@@ -263,19 +272,23 @@ class Device:
             _("Detaching device"),
             _("Detaching {} from {}").format(self.description, vm),
             Gio.NotificationPriority.NORMAL,
-            notification_id=self.notification_id)
+            notification_id=self.notification_id,
+        )
         try:
             assignment = DeviceAssignment.new(
-                self.backend_domain, self._ident, self.device_class)
+                self.backend_domain, self._ident, self.device_class
+            )
             vm.vm_object.devices[self.device_class].detach(assignment)
         except qubesadmin.exc.QubesException as ex:
             self.gtk_app.emit_notification(
                 _("Error"),
-                _("Detaching device {0} from {1} failed. "
-                  "Error: {2}").format(self.description, vm, ex),
+                _("Detaching device {0} from {1} failed. " "Error: {2}").format(
+                    self.description, vm, ex
+                ),
                 Gio.NotificationPriority.HIGH,
                 error=True,
-                notification_id=self.notification_id)
+                notification_id=self.notification_id,
+            )
 
     def detach_from_all(self):
         """

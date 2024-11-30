@@ -31,20 +31,23 @@ import qubesadmin
 import qubesadmin.vm
 import qubesadmin.exc
 
-gi.require_version('Gtk', '3.0')
+gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
 import gettext
+
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
+
 class PlaceholderText(Gtk.FlowBoxChild):
     """Placeholder to be shown if no qubes are selected"""
+
     def __init__(self):
         super().__init__()
         self.label = Gtk.Label()
-        self.label.set_text(_('No qubes selected'))
-        self.label.get_style_context().add_class('didascalia')
+        self.label.set_text(_("No qubes selected"))
+        self.label.get_style_context().add_class("didascalia")
         self.add(self.label)
         self.show_all()
 
@@ -54,35 +57,35 @@ class PlaceholderText(Gtk.FlowBoxChild):
 
 class VMFlowBoxButton(Gtk.FlowBoxChild):
     """Simple button  representing a VM that can be deleted."""
+
     def __init__(self, vm: qubesadmin.vm.QubesVM):
         super().__init__()
         self.vm = vm
 
         token_widget = QubeName(vm)
         button = Gtk.Button()
-        button.get_style_context().add_class('flat')
+        button.get_style_context().add_class("flat")
 
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         box.pack_start(token_widget, False, False, 0)
         remove_icon = Gtk.Image()
-        remove_icon.set_from_pixbuf(load_icon('qubes-delete', 14, 14))
+        remove_icon.set_from_pixbuf(load_icon("qubes-delete", 14, 14))
         box.pack_start(remove_icon, False, False, 10)
 
         button.add(box)
-        button.connect('clicked', self._remove_self)
+        button.connect("clicked", self._remove_self)
         self.add(button)
         self.show_all()
 
-
     def _remove_self(self, *_args):
         response = ask_question(
-            self, _("Delete"),
-            _("Are you sure you want to remove this qube?"))
+            self, _("Delete"), _("Are you sure you want to remove this qube?")
+        )
         if response == Gtk.ResponseType.NO:
             return
         parent = self.get_parent()
         parent.remove(self)
-        parent.emit('child-removed', None)
+        parent.emit("child-removed", None)
 
     def __str__(self):  # pylint: disable=arguments-differ
         return str(self.vm)
@@ -99,11 +102,18 @@ class VMFlowboxHandler:
     - {prefix}_add_confirm - confirm adding a new qube button
     - {prefix}_add_button - add new qube button
     """
-    def __init__(self, gtk_builder: Gtk.Builder, qapp: qubesadmin.Qubes,
-                 prefix: str, initial_vms: List[qubesadmin.vm.QubesVM],
-                 filter_function: Optional[Callable] = None,
-                 verification_callback:
-                 Optional[Callable[[qubesadmin.vm.QubesVM], bool]] = None):
+
+    def __init__(
+        self,
+        gtk_builder: Gtk.Builder,
+        qapp: qubesadmin.Qubes,
+        prefix: str,
+        initial_vms: List[qubesadmin.vm.QubesVM],
+        filter_function: Optional[Callable] = None,
+        verification_callback: Optional[
+            Callable[[qubesadmin.vm.QubesVM], bool]
+        ] = None,
+    ):
         """
         :param gtk_builder: Gtk.Builder
         :param qapp: qubesadmin.Qubes
@@ -117,27 +127,29 @@ class VMFlowboxHandler:
         self.qapp = qapp
         self.verification_callback = verification_callback
 
-        self.flowbox: Gtk.FlowBox = \
-            gtk_builder.get_object(f'{prefix}_flowbox')
-        self.box: Gtk.Box = \
-            gtk_builder.get_object(f'{prefix}_box')
-        self.add_box: Gtk.Box = \
-            gtk_builder.get_object(f'{prefix}_add_box')
+        self.flowbox: Gtk.FlowBox = gtk_builder.get_object(f"{prefix}_flowbox")
+        self.box: Gtk.Box = gtk_builder.get_object(f"{prefix}_box")
+        self.add_box: Gtk.Box = gtk_builder.get_object(f"{prefix}_add_box")
 
-        self.qube_combo: Gtk.ComboBox = \
-            gtk_builder.get_object(f'{prefix}_qube_combo')
+        self.qube_combo: Gtk.ComboBox = gtk_builder.get_object(
+            f"{prefix}_qube_combo"
+        )
 
-        self.add_cancel: Gtk.Button = \
-            gtk_builder.get_object(f'{prefix}_add_cancel')
-        self.add_confirm: Gtk.Button = \
-            gtk_builder.get_object(f'{prefix}_add_confirm')
-        self.add_button: Gtk.Button = \
-            gtk_builder.get_object(f'{prefix}_add_button')
+        self.add_cancel: Gtk.Button = gtk_builder.get_object(
+            f"{prefix}_add_cancel"
+        )
+        self.add_confirm: Gtk.Button = gtk_builder.get_object(
+            f"{prefix}_add_confirm"
+        )
+        self.add_button: Gtk.Button = gtk_builder.get_object(
+            f"{prefix}_add_button"
+        )
 
         self.add_qube_model = VMListModeler(
             combobox=self.qube_combo,
             qapp=self.qapp,
-            filter_function=filter_function)
+            filter_function=filter_function,
+        )
 
         self.flowbox.set_sort_func(self._sort_flowbox)
         self.placeholder = PlaceholderText()
@@ -150,14 +162,10 @@ class VMFlowboxHandler:
         self.placeholder.set_visible(not bool(self._initial_vms))
         self.add_box.set_visible(False)
 
-        self.add_button.connect('clicked',
-                                          self._add_button_clicked)
-        self.add_cancel.connect('clicked',
-                                          self._add_cancel_clicked)
-        self.add_confirm.connect('clicked',
-                                          self._add_confirm_clicked)
-        self.flowbox.connect('child-removed',
-                             self._vm_removed)
+        self.add_button.connect("clicked", self._add_button_clicked)
+        self.add_cancel.connect("clicked", self._add_cancel_clicked)
+        self.add_confirm.connect("clicked", self._add_confirm_clicked)
+        self.flowbox.connect("child-removed", self._vm_removed)
 
     @staticmethod
     def _sort_flowbox(child_1, child_2):
@@ -179,8 +187,11 @@ class VMFlowboxHandler:
             if not self.verification_callback(select_vm):
                 return
         if select_vm in self.selected_vms:
-            show_error(self.flowbox, _("Cannot add qube"),
-                       _("This qube is already selected."))
+            show_error(
+                self.flowbox,
+                _("Cannot add qube"),
+                _("This qube is already selected."),
+            )
             return
         self.flowbox.add(VMFlowBoxButton(select_vm))
         self.placeholder.set_visible(False)

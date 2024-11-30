@@ -26,8 +26,9 @@ from typing import Mapping, Union, Tuple, List
 from qubesadmin.tests import QubesTest
 
 import gi
-gi.require_version('Gtk', '3.0')
-gi.require_version('GdkPixbuf', '2.0')
+
+gi.require_version("Gtk", "3.0")
+gi.require_version("GdkPixbuf", "2.0")
 from gi.repository import Gtk
 
 from ..global_config.global_config import GlobalConfig
@@ -82,17 +83,17 @@ default_vm_properties = {
     "template": ("vm", False, "fedora-36"),
 }
 
-possible_tags = ['whonix-updatevm', 'anon-gateway']
+possible_tags = ["whonix-updatevm", "anon-gateway"]
 
 
-def add_expected_vm(qapp,
-                    name: str,
-                    klass: str,
-                    properties: Mapping[str,
-                                        Union[bool, str, int,
-                                              Tuple[str, bool, str]]],
-                    features,
-                    tags):
+def add_expected_vm(
+    qapp,
+    name: str,
+    klass: str,
+    properties: Mapping[str, Union[bool, str, int, Tuple[str, bool, str]]],
+    features,
+    tags,
+):
     """Generate expected_calls entries to get info about a VM
     :param qapp: QubesTest object
     :param name: name of the VM
@@ -104,11 +105,11 @@ def add_expected_vm(qapp,
     :param tags: list of tags
     :return:
     """
-    vm_list_call = ('dom0', 'admin.vm.List', None, None)
-    vm_list = b'0\x00'
+    vm_list_call = ("dom0", "admin.vm.List", None, None)
+    vm_list = b"0\x00"
     if vm_list_call in qapp.expected_calls:
         vm_list = qapp.expected_calls[vm_list_call]
-    vm_list += f'{name} class={klass} state=Halted\n'.encode()
+    vm_list += f"{name} class={klass} state=Halted\n".encode()
     qapp.expected_calls[vm_list_call] = vm_list
     properties_getall = b"0\x00"
     combined_properties = default_vm_properties.copy()
@@ -121,98 +122,128 @@ def add_expected_vm(qapp,
             except KeyError:
                 pass
         elif prop in combined_properties:
-            combined_properties[prop] = \
-                (combined_properties[prop][0],
-                 combined_properties[prop][1], str(value))
+            combined_properties[prop] = (
+                combined_properties[prop][0],
+                combined_properties[prop][1],
+                str(value),
+            )
         else:
             raise KeyError(f"Unknown property '{prop}'")
 
     for prop, value in combined_properties.items():
-        if prop == 'template' and klass in ("TemplateVM", "StandaloneVM"):
-            qapp.expected_calls[(name, "admin.vm.property.Get", prop, None)] = \
-                b'2\x00QubesNoSuchPropertyError\x00\x00No such property\x00'
+        if prop == "template" and klass in ("TemplateVM", "StandaloneVM"):
+            qapp.expected_calls[(name, "admin.vm.property.Get", prop, None)] = (
+                b"2\x00QubesNoSuchPropertyError\x00\x00No such property\x00"
+            )
             continue
         prop_line = f"default={value[1]} type={value[0]} {value[2]}"
         properties_getall += (f"{prop} " + prop_line + "\n").encode()
-        qapp.expected_calls[(name, "admin.vm.property.Get", prop, None)] = \
+        qapp.expected_calls[(name, "admin.vm.property.Get", prop, None)] = (
             b"0\x00" + prop_line.encode()
+        )
 
-    qapp.expected_calls[(name, "admin.vm.feature.List", None, None)] = \
-        ("0\x00" + "".join(f"{feature}\n" for feature, value in
-                           features.items() if value is not None)).encode()
+    qapp.expected_calls[(name, "admin.vm.feature.List", None, None)] = (
+        "0\x00"
+        + "".join(
+            f"{feature}\n"
+            for feature, value in features.items()
+            if value is not None
+        )
+    ).encode()
     for feature, value in features.items():
         if value is None:
             qapp.expected_calls[
-                (name, "admin.vm.feature.Get", feature, None)] = \
-                b'2\x00QubesFeatureNotFoundError\x00\x00' + \
-                str(feature).encode() + b'\x00'
+                (name, "admin.vm.feature.Get", feature, None)
+            ] = (
+                b"2\x00QubesFeatureNotFoundError\x00\x00"
+                + str(feature).encode()
+                + b"\x00"
+            )
         else:
             qapp.expected_calls[
-                (name, "admin.vm.feature.Get", feature, None)] = \
-                b"0\x00" + str(value).encode()
+                (name, "admin.vm.feature.Get", feature, None)
+            ] = (b"0\x00" + str(value).encode())
 
-    qapp.expected_calls[(name, "admin.vm.tag.List", None, None)] = \
-        ("0\x00" + "".join(f"{tag}\n" for tag in tags)).encode()
+    qapp.expected_calls[(name, "admin.vm.tag.List", None, None)] = (
+        "0\x00" + "".join(f"{tag}\n" for tag in tags)
+    ).encode()
 
     for tag in possible_tags:
-        qapp.expected_calls[(name, "admin.vm.tag.Get", tag, None)] = \
-            b"0\x000"
+        qapp.expected_calls[(name, "admin.vm.tag.Get", tag, None)] = b"0\x000"
 
     for tag in tags:
-        qapp.expected_calls[(name, "admin.vm.tag.Get", tag, None)] = \
-            b"0\x001"
+        qapp.expected_calls[(name, "admin.vm.tag.Get", tag, None)] = b"0\x001"
 
-    qapp.expected_calls[(name, "admin.vm.device.pci.List", None, None)] = \
+    qapp.expected_calls[(name, "admin.vm.device.pci.List", None, None)] = (
         b"0\x00"
+    )
+
 
 def add_dom0_vm_property(qapp, prop_name, prop_value):
     """Add a vm property to dom0"""
     if not prop_value:
         prop_value = ""
-    qapp.expected_calls[('dom0', 'admin.property.Get', prop_name, None)] = \
-        b'0\x00' + f'default=True type=vm {prop_value}'.encode()
+    qapp.expected_calls[("dom0", "admin.property.Get", prop_name, None)] = (
+        b"0\x00" + f"default=True type=vm {prop_value}".encode()
+    )
+
 
 def add_dom0_text_property(qapp, prop_name, prop_value):
     """Add a str property to dom0"""
-    qapp.expected_calls[('dom0', 'admin.property.Get', prop_name, None)] = \
-        b'0\x00' + f'default=True type=str {prop_value}'.encode()
+    qapp.expected_calls[("dom0", "admin.property.Get", prop_name, None)] = (
+        b"0\x00" + f"default=True type=str {prop_value}".encode()
+    )
 
 
 def add_dom0_feature(qapp, feature, feature_value):
     """Add dom0 feature"""
     if feature_value is not None:
-        qapp.expected_calls[('dom0', 'admin.vm.feature.Get', feature, None)] = \
-            b'0\x00' + f'{feature_value}'.encode()
+        qapp.expected_calls[("dom0", "admin.vm.feature.Get", feature, None)] = (
+            b"0\x00" + f"{feature_value}".encode()
+        )
     else:
-        qapp.expected_calls[('dom0', 'admin.vm.feature.Get', feature, None)] = \
-            b'2\x00QubesFeatureNotFoundError\x00\x00' \
-            + str(feature).encode() + b'\x00'
+        qapp.expected_calls[("dom0", "admin.vm.feature.Get", feature, None)] = (
+            b"2\x00QubesFeatureNotFoundError\x00\x00"
+            + str(feature).encode()
+            + b"\x00"
+        )
 
-def add_feature_with_template_to_all(qapp, feature_name,
-                                     enable_vm_names: List[str]):
+
+def add_feature_with_template_to_all(
+    qapp, feature_name, enable_vm_names: List[str]
+):
     """Add possibility of checking for a feature with templated to all qubes;
     those listed in enabled_vm_names will have it set to 1, others will
     have it absent."""
     for vm in qapp.domains:
         if vm.name in enable_vm_names:
-            result=b'0\x001'
+            result = b"0\x001"
         else:
-            result = b'2\x00QubesFeatureNotFoundError\x00\x00' + \
-                     str(feature_name).encode() + b'\x00'
-        qapp.expected_calls[(vm, 'admin.vm.feature.CheckWithTemplate',
-                             feature_name, None)] = result
+            result = (
+                b"2\x00QubesFeatureNotFoundError\x00\x00"
+                + str(feature_name).encode()
+                + b"\x00"
+            )
+        qapp.expected_calls[
+            (vm, "admin.vm.feature.CheckWithTemplate", feature_name, None)
+        ] = result
+
 
 def add_feature_to_all(qapp, feature_name, enable_vm_names: List[str]):
     """Add possibility of checking for a feature to all qubes; those listed
     in enabled_vm_names will have it set to 1, others will have it absent."""
     for vm in qapp.domains:
         if vm.name in enable_vm_names:
-            result=b'0\x001'
+            result = b"0\x001"
         else:
-            result = b'2\x00QubesFeatureNotFoundError\x00\x00' + \
-                     str(feature_name).encode() + b'\x00'
-        qapp.expected_calls[(vm, 'admin.vm.feature.Get',
-                             feature_name, None)] = result
+            result = (
+                b"2\x00QubesFeatureNotFoundError\x00\x00"
+                + str(feature_name).encode()
+                + b"\x00"
+            )
+        qapp.expected_calls[
+            (vm, "admin.vm.feature.Get", feature_name, None)
+        ] = result
 
 
 @pytest.fixture
@@ -223,93 +254,151 @@ def test_qapp():
 def test_qapp_impl():
     """Test QubesApp"""
     qapp = QubesTest()
-    qapp._local_name = 'dom0'  # pylint: disable=protected-access
+    qapp._local_name = "dom0"  # pylint: disable=protected-access
 
-    add_dom0_vm_property(qapp, 'clockvm', 'sys-net')
-    add_dom0_vm_property(qapp, 'updatevm', 'sys-net')
-    add_dom0_vm_property(qapp, 'default_netvm', 'sys-net')
-    add_dom0_vm_property(qapp, 'default_template', 'fedora-36')
-    add_dom0_vm_property(qapp, 'default_dispvm', 'fedora-36')
+    add_dom0_vm_property(qapp, "clockvm", "sys-net")
+    add_dom0_vm_property(qapp, "updatevm", "sys-net")
+    add_dom0_vm_property(qapp, "default_netvm", "sys-net")
+    add_dom0_vm_property(qapp, "default_template", "fedora-36")
+    add_dom0_vm_property(qapp, "default_dispvm", "fedora-36")
 
-    add_dom0_text_property(qapp, 'default_kernel', '1.1')
-    add_dom0_text_property(qapp, 'default_pool', 'file')
+    add_dom0_text_property(qapp, "default_kernel", "1.1")
+    add_dom0_text_property(qapp, "default_pool", "file")
 
-    add_dom0_feature(qapp, 'gui-default-allow-fullscreen', '')
-    add_dom0_feature(qapp, 'gui-default-allow-utf8-titles', '')
-    add_dom0_feature(qapp, 'gui-default-trayicon-mode', '')
+    add_dom0_feature(qapp, "gui-default-allow-fullscreen", "")
+    add_dom0_feature(qapp, "gui-default-allow-utf8-titles", "")
+    add_dom0_feature(qapp, "gui-default-trayicon-mode", "")
 
     # setup labels
-    qapp.expected_calls[('dom0', 'admin.label.List', None, None)] = \
-        b'0\x00red\nblue\ngreen\n'
+    qapp.expected_calls[("dom0", "admin.label.List", None, None)] = (
+        b"0\x00red\nblue\ngreen\n"
+    )
 
     # setup pools:
-    qapp.expected_calls[('dom0', 'admin.pool.List', None, None)] = \
-        b'0\x00linux-kernel\nlvm\nfile\n'
-    qapp.expected_calls[('dom0', 'admin.pool.volume.List',
-                         'linux-kernel', None)] = \
-        b'0\x001.1\nmisc\n4.2\n'
+    qapp.expected_calls[("dom0", "admin.pool.List", None, None)] = (
+        b"0\x00linux-kernel\nlvm\nfile\n"
+    )
+    qapp.expected_calls[
+        ("dom0", "admin.pool.volume.List", "linux-kernel", None)
+    ] = b"0\x001.1\nmisc\n4.2\n"
 
-    add_expected_vm(qapp, 'dom0', 'AdminVM',
-                    {}, {'service.qubes-update-check': 1,
-                         'config.default.qubes-update-check': None,
-                         'config-usbvm-name': None,
-                         'gui-default-secure-copy-sequence': None,
-                         'gui-default-secure-paste-sequence': None
-                         }, [])
-    add_expected_vm(qapp, 'sys-net', 'AppVM',
-                    {'provides_network': ('bool', False, 'True')},
-                    {'service.qubes-update-check': None,
-                     'service.qubes-updates-proxy': 1}, [])
+    add_expected_vm(
+        qapp,
+        "dom0",
+        "AdminVM",
+        {},
+        {
+            "service.qubes-update-check": 1,
+            "config.default.qubes-update-check": None,
+            "config-usbvm-name": None,
+            "gui-default-secure-copy-sequence": None,
+            "gui-default-secure-paste-sequence": None,
+        },
+        [],
+    )
+    add_expected_vm(
+        qapp,
+        "sys-net",
+        "AppVM",
+        {"provides_network": ("bool", False, "True")},
+        {"service.qubes-update-check": None, "service.qubes-updates-proxy": 1},
+        [],
+    )
 
-    add_expected_vm(qapp, 'sys-firewall', 'AppVM',
-                    {'provides_network': ('bool', False, 'True')},
-                    {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp,
+        "sys-firewall",
+        "AppVM",
+        {"provides_network": ("bool", False, "True")},
+        {"service.qubes-update-check": None},
+        [],
+    )
 
-    add_expected_vm(qapp, 'sys-usb', 'AppVM',
-                    {},
-                    {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp, "sys-usb", "AppVM", {}, {"service.qubes-update-check": None}, []
+    )
 
-    add_expected_vm(qapp, 'fedora-36', 'TemplateVM',
-                    {"netvm": ("vm", False, '')},
-                    {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp,
+        "fedora-36",
+        "TemplateVM",
+        {"netvm": ("vm", False, "")},
+        {"service.qubes-update-check": None},
+        [],
+    )
 
-    add_expected_vm(qapp, 'fedora-35', 'TemplateVM',
-                    {"netvm": ("vm", False, '')},
-                    {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp,
+        "fedora-35",
+        "TemplateVM",
+        {"netvm": ("vm", False, "")},
+        {"service.qubes-update-check": None},
+        [],
+    )
 
-    add_expected_vm(qapp, 'default-dvm', 'DispVM',
-                    {'template_for_dispvms': ('bool', False, 'True')},
-                    {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp,
+        "default-dvm",
+        "DispVM",
+        {"template_for_dispvms": ("bool", False, "True")},
+        {"service.qubes-update-check": None},
+        [],
+    )
 
-    add_expected_vm(qapp, 'test-vm', 'AppVM',
-                    {}, {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp, "test-vm", "AppVM", {}, {"service.qubes-update-check": None}, []
+    )
 
-    add_expected_vm(qapp, 'test-blue', 'AppVM',
-                    {'label': ('str', False, 'blue')},
-                    {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp,
+        "test-blue",
+        "AppVM",
+        {"label": ("str", False, "blue")},
+        {"service.qubes-update-check": None},
+        [],
+    )
 
-    add_expected_vm(qapp, 'test-red', 'AppVM',
-                    {'label': ('str', False, 'red')},
-                    {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp,
+        "test-red",
+        "AppVM",
+        {"label": ("str", False, "red")},
+        {"service.qubes-update-check": None},
+        [],
+    )
 
-    add_expected_vm(qapp, 'test-standalone', 'StandaloneVM',
-                    {'label': ('str', False, 'green')},
-                    {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp,
+        "test-standalone",
+        "StandaloneVM",
+        {"label": ("str", False, "green")},
+        {"service.qubes-update-check": None},
+        [],
+    )
 
-    add_expected_vm(qapp, 'vault', 'AppVM',
-                    {"netvm": ("vm", False, '')},
-                    {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp,
+        "vault",
+        "AppVM",
+        {"netvm": ("vm", False, "")},
+        {"service.qubes-update-check": None},
+        [],
+    )
 
-    add_feature_with_template_to_all(qapp, 'supported-service.qubes-u2f-proxy',
-                                     ['test-vm', 'fedora-35', 'sys-usb'])
-    add_feature_with_template_to_all(qapp, 'service.updates-proxy-setup',
-                                     ['fedora-36', 'fedora-35'])
-    add_feature_to_all(qapp, 'service.qubes-u2f-proxy',
-                                     ['test-vm'])
+    add_feature_with_template_to_all(
+        qapp,
+        "supported-service.qubes-u2f-proxy",
+        ["test-vm", "fedora-35", "sys-usb"],
+    )
+    add_feature_with_template_to_all(
+        qapp, "service.updates-proxy-setup", ["fedora-36", "fedora-35"]
+    )
+    add_feature_to_all(qapp, "service.qubes-u2f-proxy", ["test-vm"])
 
     for vm in qapp.domains:
         qapp.expected_calls[
-            (vm.name, 'admin.vm.device.pci.Attached', None, None)] = b'0\x00'
+            (vm.name, "admin.vm.device.pci.Attached", None, None)
+        ] = b"0\x00"
 
     return qapp
 
@@ -318,75 +407,116 @@ def test_qapp_impl():
 def test_qapp_whonix(test_qapp):  # pylint: disable=redefined-outer-name
     # pylint does not understand fixtures
     """Testing qapp with whonix vms added"""
-    add_expected_vm(test_qapp, 'sys-whonix', 'AppVM',
-                    {},
-                    {'service.qubes-update-check': None,
-                     'service.qubes-updates-proxy': 1}, ['anon-gateway'])
-    add_expected_vm(test_qapp, 'anon-whonix', 'AppVM',
-                    {},
-                    {'service.qubes-update-check': None}, ['anon-gateway'])
-    add_expected_vm(test_qapp, 'whonix-gw-15', 'TemplateVM',
-                    {"netvm": ("vm", False, '')},
-                    {'service.qubes-update-check': None}, ['whonix-updatevm'])
-    add_expected_vm(test_qapp, 'whonix-gw-14', 'TemplateVM',
-                    {"netvm": ("vm", False, '')},
-                    {'service.qubes-update-check': None}, ['whonix-updatevm'])
+    add_expected_vm(
+        test_qapp,
+        "sys-whonix",
+        "AppVM",
+        {},
+        {"service.qubes-update-check": None, "service.qubes-updates-proxy": 1},
+        ["anon-gateway"],
+    )
+    add_expected_vm(
+        test_qapp,
+        "anon-whonix",
+        "AppVM",
+        {},
+        {"service.qubes-update-check": None},
+        ["anon-gateway"],
+    )
+    add_expected_vm(
+        test_qapp,
+        "whonix-gw-15",
+        "TemplateVM",
+        {"netvm": ("vm", False, "")},
+        {"service.qubes-update-check": None},
+        ["whonix-updatevm"],
+    )
+    add_expected_vm(
+        test_qapp,
+        "whonix-gw-14",
+        "TemplateVM",
+        {"netvm": ("vm", False, "")},
+        {"service.qubes-update-check": None},
+        ["whonix-updatevm"],
+    )
     test_qapp.domains.clear_cache()
     add_feature_with_template_to_all(
-        test_qapp, 'service.updates-proxy-setup',
-        ['fedora-36', 'fedora-35', 'whonix-gw-15', 'whonix-gw-14'])
+        test_qapp,
+        "service.updates-proxy-setup",
+        ["fedora-36", "fedora-35", "whonix-gw-15", "whonix-gw-14"],
+    )
     return test_qapp
 
+
 @pytest.fixture
-def test_qapp_simple(): # pylint: disable=redefined-outer-name
+def test_qapp_simple():  # pylint: disable=redefined-outer-name
     """A qapp with only one template, one sys-net and that's all"""
     # pylint does not understand fixtures
     qapp = QubesTest()
-    qapp._local_name = 'dom0'  # pylint: disable=protected-access
+    qapp._local_name = "dom0"  # pylint: disable=protected-access
 
-    add_dom0_vm_property(qapp, 'clockvm', 'sys-net')
-    add_dom0_vm_property(qapp, 'updatevm', 'sys-net')
-    add_dom0_vm_property(qapp, 'default_netvm', 'sys-net')
-    add_dom0_vm_property(qapp, 'default_template', 'fedora-36')
-    add_dom0_vm_property(qapp, 'default_dispvm', 'fedora-36')
+    add_dom0_vm_property(qapp, "clockvm", "sys-net")
+    add_dom0_vm_property(qapp, "updatevm", "sys-net")
+    add_dom0_vm_property(qapp, "default_netvm", "sys-net")
+    add_dom0_vm_property(qapp, "default_template", "fedora-36")
+    add_dom0_vm_property(qapp, "default_dispvm", "fedora-36")
 
-    add_dom0_text_property(qapp, 'default_kernel', '1.1')
-    add_dom0_text_property(qapp, 'default_pool', 'file')
+    add_dom0_text_property(qapp, "default_kernel", "1.1")
+    add_dom0_text_property(qapp, "default_pool", "file")
 
-    add_dom0_feature(qapp, 'gui-default-allow-fullscreen', '')
-    add_dom0_feature(qapp, 'gui-default-allow-utf8-titles', '')
-    add_dom0_feature(qapp, 'gui-default-trayicon-mode', '')
+    add_dom0_feature(qapp, "gui-default-allow-fullscreen", "")
+    add_dom0_feature(qapp, "gui-default-allow-utf8-titles", "")
+    add_dom0_feature(qapp, "gui-default-trayicon-mode", "")
 
     # setup labels
-    qapp.expected_calls[('dom0', 'admin.label.List', None, None)] = \
-        b'0\x00red\nblue\ngreen\n'
+    qapp.expected_calls[("dom0", "admin.label.List", None, None)] = (
+        b"0\x00red\nblue\ngreen\n"
+    )
 
     # setup pools:
-    qapp.expected_calls[('dom0', 'admin.pool.List', None, None)] = \
-        b'0\x00linux-kernel\nlvm\nfile\n'
-    qapp.expected_calls[('dom0', 'admin.pool.volume.List',
-                         'linux-kernel', None)] = \
-        b'0\x001.1\nmisc\n4.2\n'
+    qapp.expected_calls[("dom0", "admin.pool.List", None, None)] = (
+        b"0\x00linux-kernel\nlvm\nfile\n"
+    )
+    qapp.expected_calls[
+        ("dom0", "admin.pool.volume.List", "linux-kernel", None)
+    ] = b"0\x001.1\nmisc\n4.2\n"
 
-    add_expected_vm(qapp, 'dom0', 'AdminVM',
-                    {}, {'service.qubes-update-check': 1,
-                         'config.default.qubes-update-check': None,
-                         'config-usbvm-name': None,
-                         'gui-default-secure-copy-sequence': None,
-                         'gui-default-secure-paste-sequence': None
-                         }, [])
-    add_expected_vm(qapp, 'sys-net', 'AppVM',
-                    {'provides_network': ('bool', False, 'True')},
-                    {'service.qubes-update-check': None,
-                     'service.qubes-updates-proxy': 1}, [])
+    add_expected_vm(
+        qapp,
+        "dom0",
+        "AdminVM",
+        {},
+        {
+            "service.qubes-update-check": 1,
+            "config.default.qubes-update-check": None,
+            "config-usbvm-name": None,
+            "gui-default-secure-copy-sequence": None,
+            "gui-default-secure-paste-sequence": None,
+        },
+        [],
+    )
+    add_expected_vm(
+        qapp,
+        "sys-net",
+        "AppVM",
+        {"provides_network": ("bool", False, "True")},
+        {"service.qubes-update-check": None, "service.qubes-updates-proxy": 1},
+        [],
+    )
 
-    add_expected_vm(qapp, 'fedora-36', 'TemplateVM',
-                    {"netvm": ("vm", False, '')},
-                    {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp,
+        "fedora-36",
+        "TemplateVM",
+        {"netvm": ("vm", False, "")},
+        {"service.qubes-update-check": None},
+        [],
+    )
 
     for vm in qapp.domains:
         qapp.expected_calls[
-            (vm.name, 'admin.vm.device.pci.Attached', None, None)] = b'0\x00'
+            (vm.name, "admin.vm.device.pci.Attached", None, None)
+        ] = b"0\x00"
 
     return qapp
 
@@ -396,44 +526,54 @@ def test_qapp_broken():  # pylint: disable=redefined-outer-name
     """A qapp with no templates, no sys-net"""
     # pylint does not understand fixtures
     qapp = QubesTest()
-    qapp._local_name = 'dom0'  # pylint: disable=protected-access
+    qapp._local_name = "dom0"  # pylint: disable=protected-access
 
-    add_dom0_vm_property(qapp, 'clockvm', None)
-    add_dom0_vm_property(qapp, 'updatevm', None)
-    add_dom0_vm_property(qapp, 'default_netvm', None)
-    add_dom0_vm_property(qapp, 'default_template', None)
-    add_dom0_vm_property(qapp, 'default_dispvm', None)
+    add_dom0_vm_property(qapp, "clockvm", None)
+    add_dom0_vm_property(qapp, "updatevm", None)
+    add_dom0_vm_property(qapp, "default_netvm", None)
+    add_dom0_vm_property(qapp, "default_template", None)
+    add_dom0_vm_property(qapp, "default_dispvm", None)
 
-    add_dom0_text_property(qapp, 'default_kernel', '1.1')
-    add_dom0_text_property(qapp, 'default_pool', 'file')
+    add_dom0_text_property(qapp, "default_kernel", "1.1")
+    add_dom0_text_property(qapp, "default_pool", "file")
 
-    add_dom0_feature(qapp, 'gui-default-allow-fullscreen', '')
-    add_dom0_feature(qapp, 'gui-default-allow-utf8-titles', '')
-    add_dom0_feature(qapp, 'gui-default-trayicon-mode', '')
+    add_dom0_feature(qapp, "gui-default-allow-fullscreen", "")
+    add_dom0_feature(qapp, "gui-default-allow-utf8-titles", "")
+    add_dom0_feature(qapp, "gui-default-trayicon-mode", "")
 
     # setup labels
-    qapp.expected_calls[('dom0', 'admin.label.List', None, None)] = \
-        b'0\x00red\nblue\ngreen\n'
+    qapp.expected_calls[("dom0", "admin.label.List", None, None)] = (
+        b"0\x00red\nblue\ngreen\n"
+    )
 
     # setup pools:
-    qapp.expected_calls[('dom0', 'admin.pool.List', None, None)] = \
-        b'0\x00linux-kernel\nlvm\nfile\n'
-    qapp.expected_calls[('dom0', 'admin.pool.volume.List',
-                         'linux-kernel', None)] = \
-        b'0\x001.1\nmisc\n4.2\n'
+    qapp.expected_calls[("dom0", "admin.pool.List", None, None)] = (
+        b"0\x00linux-kernel\nlvm\nfile\n"
+    )
+    qapp.expected_calls[
+        ("dom0", "admin.pool.volume.List", "linux-kernel", None)
+    ] = b"0\x001.1\nmisc\n4.2\n"
 
-    add_expected_vm(qapp, 'dom0', 'AdminVM',
-                    {}, {'service.qubes-update-check': 1,
-                         'config.default.qubes-update-check': None,
-                         'config-usbvm-name': None,
-                         'gui-default-secure-copy-sequence': None,
-                         'gui-default-secure-paste-sequence': None
-                         }, [])
+    add_expected_vm(
+        qapp,
+        "dom0",
+        "AdminVM",
+        {},
+        {
+            "service.qubes-update-check": 1,
+            "config.default.qubes-update-check": None,
+            "config-usbvm-name": None,
+            "gui-default-secure-copy-sequence": None,
+            "gui-default-secure-paste-sequence": None,
+        },
+        [],
+    )
 
     #
     for vm in qapp.domains:
         qapp.expected_calls[
-            (vm.name, 'admin.vm.device.pci.Attached', None, None)] = b'0\x00'
+            (vm.name, "admin.vm.device.pci.Attached", None, None)
+        ] = b"0\x00"
 
     return qapp
 
@@ -448,11 +588,11 @@ def test_builder():
         pass
     # test glade file contains very simple setup with correctly named widgets
     builder = Gtk.Builder()
-    glade_ref = (importlib.resources.files('qubes_config') /
-                 'tests/test.glade')
+    glade_ref = importlib.resources.files("qubes_config") / "tests/test.glade"
     with importlib.resources.as_file(glade_ref) as path:
         builder.add_from_file(str(path))
     return builder
+
 
 @pytest.fixture
 def real_builder():
@@ -464,8 +604,9 @@ def real_builder():
         pass
     # test glade file contains very simple setup with correctly named widgets
     builder = Gtk.Builder()
-    glade_ref = (importlib.resources.files('qubes_config') /
-                 'global_config.glade')
+    glade_ref = (
+        importlib.resources.files("qubes_config") / "global_config.glade"
+    )
     with importlib.resources.as_file(glade_ref) as path:
         builder.add_from_file(str(path))
     return builder
@@ -481,8 +622,7 @@ def new_qube_builder():
         pass
     # test glade file contains very simple setup with correctly named widgets
     builder = Gtk.Builder()
-    glade_ref = (importlib.resources.files('qubes_config') /
-                 'new_qube.glade')
+    glade_ref = importlib.resources.files("qubes_config") / "new_qube.glade"
     with importlib.resources.as_file(glade_ref) as path:
         builder.add_from_file(str(path))
     return builder
@@ -490,63 +630,58 @@ def new_qube_builder():
 
 class TestPolicyClient:
     """Testing policy client that does not interact with Policy API"""
+
     def __init__(self):
-        self.file_tokens = {
-            'a-test': 'a',
-            'b-test': 'b'
-        }
+        self.file_tokens = {"a-test": "a", "b-test": "b"}
         self.files = {
-            'a-test': """Test * @anyvm @anyvm deny""",
-            'b-test': """Test * test-vm @anyvm allow\n
-Test * test-red test-blue deny"""
+            "a-test": """Test * @anyvm @anyvm deny""",
+            "b-test": """Test * test-vm @anyvm allow\n
+Test * test-red test-blue deny""",
         }
-        self.service_to_files = {
-            'Test': ['a-test', 'b-test']
-        }
-        self.include_file_tokens = {
-            'include-1': 'c',
-            'include-2': 'd'
-        }
+        self.service_to_files = {"Test": ["a-test", "b-test"]}
+        self.include_file_tokens = {"include-1": "c", "include-2": "d"}
 
         self.include_files = {
-            'include-1': """!include include/include-2""",
-            'include-2': """Test.Test +argument @anyvm @anyvm allow"""
+            "include-1": """!include include/include-2""",
+            "include-2": """Test.Test +argument @anyvm @anyvm allow""",
         }
 
     def policy_get_files(self, service_name):
         """Get files connected to a given service; does not
         take into account policy_replace"""
-        return self.service_to_files.get(service_name, '')
+        return self.service_to_files.get(service_name, "")
 
     def policy_get(self, file_name):
         """Get file contents; takes into account policy_replace."""
         if file_name in self.files:
             return self.files[file_name], self.file_tokens[file_name]
-        raise subprocess.CalledProcessError(2, 'test')
+        raise subprocess.CalledProcessError(2, "test")
 
     def policy_include_get(self, file_name):
         """Get file contents; takes into account policy_replace."""
         if file_name in self.include_files:
-            return self.include_files[file_name], \
-                   self.include_file_tokens[file_name]
-        raise subprocess.CalledProcessError(2, 'test')
+            return (
+                self.include_files[file_name],
+                self.include_file_tokens[file_name],
+            )
+        raise subprocess.CalledProcessError(2, "test")
 
-    def policy_replace(self, filename, policy_text, token='any'):
+    def policy_replace(self, filename, policy_text, token="any"):
         """Replace file contents with provided contents."""
-        if token == 'new':
+        if token == "new":
             if filename in self.file_tokens:
-                raise subprocess.CalledProcessError(2, 'test')
-        elif token != 'any':
-            if token != self.file_tokens.get(filename, ''):
-                raise subprocess.CalledProcessError(2, 'test')
+                raise subprocess.CalledProcessError(2, "test")
+        elif token != "any":
+            if token != self.file_tokens.get(filename, ""):
+                raise subprocess.CalledProcessError(2, "test")
         self.files[filename] = policy_text
         self.file_tokens[filename] = str(len(policy_text))
 
-    def policy_include_replace(self, filename, policy_text, token='any'):
+    def policy_include_replace(self, filename, policy_text, token="any"):
         """Replace file contents with provided contents."""
-        if token != 'any':
-            if token != self.include_file_tokens.get(filename, ''):
-                raise subprocess.CalledProcessError(2, 'test')
+        if token != "any":
+            if token != self.include_file_tokens.get(filename, ""):
+                raise subprocess.CalledProcessError(2, "test")
         self.include_files[filename] = policy_text
         self.include_file_tokens[filename] = str(len(policy_text))
 
@@ -555,6 +690,7 @@ Test * test-red test-blue deny"""
 
     def policy_include_list(self):
         return list(self.include_files.keys())
+
 
 @pytest.fixture
 def test_policy_client():

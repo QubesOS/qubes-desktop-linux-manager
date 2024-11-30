@@ -25,13 +25,17 @@
 import time
 from unittest.mock import patch
 
-from ..global_config.global_config import GlobalConfig, ClipboardHandler,\
-    FileAccessHandler
+from ..global_config.global_config import (
+    GlobalConfig,
+    ClipboardHandler,
+    FileAccessHandler,
+)
 from ..global_config.basics_handler import BasicSettingsHandler
 
 import gi
-gi.require_version('Gtk', '3.0')
-gi.require_version('GdkPixbuf', '2.0')
+
+gi.require_version("Gtk", "3.0")
+gi.require_version("GdkPixbuf", "2.0")
 from gi.repository import Gtk
 
 # this entire file has a peculiar arrangement with mock signal registration:
@@ -40,15 +44,17 @@ from gi.repository import Gtk
 # signals in "test" mode
 
 
-show_dialog_with_icon_path = \
-    'qubes_config.global_config.global_config.show_dialog_with_icon'
+show_dialog_with_icon_path = (
+    "qubes_config.global_config.global_config.show_dialog_with_icon"
+)
 
 
-@patch('subprocess.check_output')
-@patch('qubes_config.global_config.global_config.show_error')
-def test_global_config_init(mock_error, mock_subprocess,
-                            test_qapp, test_policy_manager, test_builder):
-    mock_subprocess.return_value = b''
+@patch("subprocess.check_output")
+@patch("qubes_config.global_config.global_config.show_error")
+def test_global_config_init(
+    mock_error, mock_subprocess, test_qapp, test_policy_manager, test_builder
+):
+    mock_subprocess.return_value = b""
     app = GlobalConfig(test_qapp, test_policy_manager)
     # do not call do_activate - it will make Gtk confused and, in case
     # of errors, spawn an entire screenful of windows
@@ -56,23 +62,31 @@ def test_global_config_init(mock_error, mock_subprocess,
     assert test_builder
 
     # switch across pages, nothing should happen
-    while app.main_notebook.get_nth_page(
-            app.main_notebook.get_current_page()).get_name() != 'thisdevice':
+    while (
+        app.main_notebook.get_nth_page(
+            app.main_notebook.get_current_page()
+        ).get_name()
+        != "thisdevice"
+    ):
         app.main_notebook.next_page()
 
     # find clipboard
     app.main_notebook.set_current_page(0)
 
-    while app.main_notebook.get_nth_page(
-            app.main_notebook.get_current_page()).get_name() != 'clipboard':
+    while (
+        app.main_notebook.get_nth_page(
+            app.main_notebook.get_current_page()
+        ).get_name()
+        != "clipboard"
+    ):
         app.main_notebook.next_page()
 
     clipboard_page_num = app.main_notebook.get_current_page()
     handler = app.get_current_page()
     assert isinstance(handler, ClipboardHandler)
 
-    assert handler.copy_combo.get_active_id() == 'default (Ctrl+Shift+C)'
-    handler.copy_combo.set_active_id('Ctrl+Win+C')
+    assert handler.copy_combo.get_active_id() == "default (Ctrl+Shift+C)"
+    handler.copy_combo.set_active_id("Ctrl+Win+C")
 
     # try to move away from page, we should get a warning
     with patch(show_dialog_with_icon_path) as mock_ask:
@@ -82,35 +96,42 @@ def test_global_config_init(mock_error, mock_subprocess,
     assert app.main_notebook.get_current_page() == clipboard_page_num + 1
     app.main_notebook.set_current_page(clipboard_page_num)
 
-    assert handler.copy_combo.get_active_id() == 'default (Ctrl+Shift+C)'
-    handler.copy_combo.set_active_id('Ctrl+Win+C')
+    assert handler.copy_combo.get_active_id() == "default (Ctrl+Shift+C)"
+    handler.copy_combo.set_active_id("Ctrl+Win+C")
 
     # try to move away from page, we should get a warning
-    with patch(show_dialog_with_icon_path) as mock_ask, \
-            patch('qubes_config.global_config.basics_handler.'
-               'apply_feature_change') as mock_apply:
+    with patch(show_dialog_with_icon_path) as mock_ask, patch(
+        "qubes_config.global_config.basics_handler." "apply_feature_change"
+    ) as mock_apply:
         mock_ask.return_value = Gtk.ResponseType.YES
         app.main_notebook.set_current_page(clipboard_page_num + 1)
         mock_apply.assert_called_with(
-            test_qapp.domains['dom0'], 'gui-default-secure-copy-sequence',
-            'Ctrl-Mod4-c')
+            test_qapp.domains["dom0"],
+            "gui-default-secure-copy-sequence",
+            "Ctrl-Mod4-c",
+        )
 
     mock_error.assert_not_called()
 
 
-@patch('subprocess.check_output')
-@patch('qubes_config.global_config.global_config.show_error')
-def test_global_config_page_change(mock_error, mock_subprocess,
-                                  test_qapp, test_policy_manager, test_builder):
-    mock_subprocess.return_value = b''
+@patch("subprocess.check_output")
+@patch("qubes_config.global_config.global_config.show_error")
+def test_global_config_page_change(
+    mock_error, mock_subprocess, test_qapp, test_policy_manager, test_builder
+):
+    mock_subprocess.return_value = b""
     app = GlobalConfig(test_qapp, test_policy_manager)
     # do not call do_activate - it will make Gtk confused and, in case
     # of errors, spawn an entire screenful of windows
     app.perform_setup()
     assert test_builder
 
-    while app.main_notebook.get_nth_page(
-            app.main_notebook.get_current_page()).get_name() != 'file':
+    while (
+        app.main_notebook.get_nth_page(
+            app.main_notebook.get_current_page()
+        ).get_name()
+        != "file"
+    ):
         app.main_notebook.next_page()
 
     file_page_num = app.main_notebook.get_current_page()
@@ -124,11 +145,11 @@ def test_global_config_page_change(mock_error, mock_subprocess,
     for child in handler.filecopy_handler.current_rows:
         if child.editing:
             child.activate()
-            child.source_widget.model.select_value('sys-net')
+            child.source_widget.model.select_value("sys-net")
             child.validate_and_save()
 
     for row in handler.filecopy_handler.current_rows:
-        if row.rule.source == 'sys-net':
+        if row.rule.source == "sys-net":
             break
     else:
         assert False  # didn't find the change
@@ -149,7 +170,7 @@ def test_global_config_page_change(mock_error, mock_subprocess,
 
     # changes should not be made
     for row in handler.filecopy_handler.current_rows:
-        assert row.rule.source != 'sys-net'
+        assert row.rule.source != "sys-net"
 
     # make changes and try to stick to them
     handler.filecopy_handler.enable_radio.set_active(True)
@@ -158,15 +179,17 @@ def test_global_config_page_change(mock_error, mock_subprocess,
     for child in handler.filecopy_handler.current_rows:
         if child.editing:
             child.activate()
-            child.source_widget.model.select_value('sys-net')
+            child.source_widget.model.select_value("sys-net")
             child.validate_and_save()
             break
     else:
         assert False
 
     # file should not yet exist
-    assert handler.filecopy_handler.policy_file_name not in \
-           test_policy_manager.policy_client.files
+    assert (
+        handler.filecopy_handler.policy_file_name
+        not in test_policy_manager.policy_client.files
+    )
 
     # save changes
     with patch(show_dialog_with_icon_path) as mock_ask:
@@ -179,17 +202,22 @@ def test_global_config_page_change(mock_error, mock_subprocess,
     time.sleep(0.1)
 
     # changes should have been done
-    assert 'sys-net' in test_policy_manager.policy_client.files[
-        handler.filecopy_handler.policy_file_name]
+    assert (
+        "sys-net"
+        in test_policy_manager.policy_client.files[
+            handler.filecopy_handler.policy_file_name
+        ]
+    )
 
     mock_error.assert_not_called()
 
 
-@patch('subprocess.check_output')
-@patch('qubes_config.global_config.global_config.show_error')
-def test_global_config_failure(mock_error, mock_subprocess,
-                               test_qapp, test_policy_manager, test_builder):
-    mock_subprocess.return_value = b''
+@patch("subprocess.check_output")
+@patch("qubes_config.global_config.global_config.show_error")
+def test_global_config_failure(
+    mock_error, mock_subprocess, test_qapp, test_policy_manager, test_builder
+):
+    mock_subprocess.return_value = b""
     app = GlobalConfig(test_qapp, test_policy_manager)
     # do not call do_activate - it will make Gtk confused and, in case
     # of errors, spawn an entire screenful of windows
@@ -203,12 +231,12 @@ def test_global_config_failure(mock_error, mock_subprocess,
     assert isinstance(handler, BasicSettingsHandler)
 
     # change something manually
-    handler.fullscreen_combo.set_active_id('disallow')
+    handler.fullscreen_combo.set_active_id("disallow")
 
     # try to switch pages, error will occur on saving
-    with patch(show_dialog_with_icon_path) as mock_ask, \
-            patch('qubes_config.global_config.global_config.GLib.timeout_add') \
-                    as mock_timeout:
+    with patch(show_dialog_with_icon_path) as mock_ask, patch(
+        "qubes_config.global_config.global_config.GLib.timeout_add"
+    ) as mock_timeout:
         mock_ask.return_value = Gtk.ResponseType.YES
         app.main_notebook.next_page()
         mock_ask.assert_called()
@@ -220,12 +248,16 @@ def test_global_config_failure(mock_error, mock_subprocess,
         mock_timeout.assert_called()
 
 
-@patch('subprocess.check_output')
-@patch('qubes_config.global_config.global_config.show_error')
-def test_global_config_broken_system(mock_error, mock_subprocess,
-                                     test_qapp_broken, test_policy_manager,
-                                     test_builder):
-    mock_subprocess.return_value = b''
+@patch("subprocess.check_output")
+@patch("qubes_config.global_config.global_config.show_error")
+def test_global_config_broken_system(
+    mock_error,
+    mock_subprocess,
+    test_qapp_broken,
+    test_policy_manager,
+    test_builder,
+):
+    mock_subprocess.return_value = b""
     app = GlobalConfig(test_qapp_broken, test_policy_manager)
     # do not call do_activate - it will make Gtk confused and, in case
     # of errors, spawn an entire screenful of windows
@@ -233,26 +265,30 @@ def test_global_config_broken_system(mock_error, mock_subprocess,
     assert test_builder
 
     # switch across pages, nothing should happen
-    while app.main_notebook.get_nth_page(
-            app.main_notebook.get_current_page()).get_name() != 'thisdevice':
+    while (
+        app.main_notebook.get_nth_page(
+            app.main_notebook.get_current_page()
+        ).get_name()
+        != "thisdevice"
+    ):
         app.main_notebook.next_page()
 
     mock_error.assert_not_called()
 
 
-@patch('subprocess.check_output')
-@patch('qubes_config.global_config.global_config.show_error')
+@patch("subprocess.check_output")
+@patch("qubes_config.global_config.global_config.show_error")
 def test_global_config_open_at(
-        mock_error, mock_subprocess,
-        test_qapp, test_policy_manager, real_builder):
-    mock_subprocess.return_value = b''
+    mock_error, mock_subprocess, test_qapp, test_policy_manager, real_builder
+):
+    mock_subprocess.return_value = b""
     app = GlobalConfig(test_qapp, test_policy_manager)
     # do not call do_activate - it will make Gtk confused and, in case
     # of errors, spawn an entire screenful of windows
     app.perform_setup()
     assert real_builder
 
-    with patch('builtins.print', side_effect=print) as mock_print:
+    with patch("builtins.print", side_effect=print) as mock_print:
         app.scroll_to_location("basics")
         mock_print.assert_not_called()
         app.scroll_to_location("basics#default_qubes")

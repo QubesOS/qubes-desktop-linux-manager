@@ -35,9 +35,13 @@ from ..widgets.gtk_widgets import ProgressBarDialog, ViewportHandler
 from ..widgets.utils import open_url_in_disposable
 from .page_handler import PageHandler
 from .policy_handler import PolicyHandler, VMSubsetPolicyHandler
-from .policy_rules import RuleSimple, \
-    RuleSimpleAskIsAllow, RuleTargeted, SimpleVerbDescription, \
-    RuleSimpleNoAllow
+from .policy_rules import (
+    RuleSimple,
+    RuleSimpleAskIsAllow,
+    RuleTargeted,
+    SimpleVerbDescription,
+    RuleSimpleNoAllow,
+)
 from .policy_manager import PolicyManager
 from .updates_handler import UpdatesHandler
 from .usb_devices import DevicesHandler
@@ -47,41 +51,59 @@ from .thisdevice_handler import ThisDeviceHandler
 
 import gi
 
-gi.require_version('Gtk', '3.0')
+gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GLib, GObject, Gio
 
-logger = logging.getLogger('qubes-global-config')
+logger = logging.getLogger("qubes-global-config")
 
 import gettext
+
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
 # in order to add more places as referencable locations, you need to add
 # a focusable widget to the UI and then add its name here
-LOCATIONS = ["default_qubes", "window_management", "memory_balancing",
-             "linux_kernel", "usb_input", "u2f", "dom0_updates",
-             "check_for_updates", "update_proxy", "template_repositories",
-             "clipboard_shortcut", "clipboard_policy", "filecopy_policy",
-             "open_in_vm"]
+LOCATIONS = [
+    "default_qubes",
+    "window_management",
+    "memory_balancing",
+    "linux_kernel",
+    "usb_input",
+    "u2f",
+    "dom0_updates",
+    "check_for_updates",
+    "update_proxy",
+    "template_repositories",
+    "clipboard_shortcut",
+    "clipboard_policy",
+    "filecopy_policy",
+    "open_in_vm",
+]
 
 
 class ClipboardHandler(PageHandler):
     """Handler for Clipboard policy. Adds a couple of comboboxes to a
     normal policy handler."""
-    COPY_FEATURE = 'gui-default-secure-copy-sequence'
-    PASTE_FEATURE = 'gui-default-secure-paste-sequence'
 
-    def __init__(self, qapp: qubesadmin.Qubes,
-                 gtk_builder: Gtk.Builder,
-                 policy_manager: PolicyManager):
+    COPY_FEATURE = "gui-default-secure-copy-sequence"
+    PASTE_FEATURE = "gui-default-secure-paste-sequence"
+
+    def __init__(
+        self,
+        qapp: qubesadmin.Qubes,
+        gtk_builder: Gtk.Builder,
+        policy_manager: PolicyManager,
+    ):
         self.qapp = qapp
         self.policy_manager = policy_manager
         self.vm = self.qapp.domains[self.qapp.local_name]
 
-        self.copy_combo: Gtk.ComboBoxText = \
-            gtk_builder.get_object('clipboard_copy_combo')
-        self.paste_combo: Gtk.ComboBoxText = \
-            gtk_builder.get_object('clipboard_paste_combo')
+        self.copy_combo: Gtk.ComboBoxText = gtk_builder.get_object(
+            "clipboard_copy_combo"
+        )
+        self.paste_combo: Gtk.ComboBoxText = gtk_builder.get_object(
+            "clipboard_paste_combo"
+        )
 
         self.handlers: List[Union[PolicyHandler, FeatureHandler]] = [
             PolicyHandler(
@@ -89,36 +111,44 @@ class ClipboardHandler(PageHandler):
                 gtk_builder=gtk_builder,
                 policy_manager=policy_manager,
                 prefix="clipboard",
-                service_name='qubes.ClipboardPaste',
-                policy_file_name='50-config-clipboard',
+                service_name="qubes.ClipboardPaste",
+                policy_file_name="50-config-clipboard",
                 default_policy="""qubes.ClipboardPaste * @adminvm @anyvm ask\n
 qubes.ClipboardPaste * @anyvm @anyvm ask\n""",
-                verb_description=SimpleVerbDescription({
-                    "ask": _('be allowed to paste\n into clipboard of'),
-                    "deny": _('be allowed to paste\n into clipboard of')
-                }),
+                verb_description=SimpleVerbDescription(
+                    {
+                        "ask": _("be allowed to paste\n into clipboard of"),
+                        "deny": _("be allowed to paste\n into clipboard of"),
+                    }
+                ),
                 rule_class=RuleSimpleAskIsAllow,
-                include_admin_vm=True
+                include_admin_vm=True,
             ),
             FeatureHandler(
-                trait_holder=self.vm, trait_name=self.COPY_FEATURE,
+                trait_holder=self.vm,
+                trait_name=self.COPY_FEATURE,
                 widget=self.copy_combo,
-                options={_('default (Ctrl+Shift+C)'): None,
-                         _('Ctrl+Shift+C'): 'Ctrl-Shift-c',
-                         _('Ctrl+Win+C'): 'Ctrl-Mod4-c',
-                         _("Win+C"): 'Mod4-c'},
-                readable_name=_("Global Clipboard copy shortcut")
+                options={
+                    _("default (Ctrl+Shift+C)"): None,
+                    _("Ctrl+Shift+C"): "Ctrl-Shift-c",
+                    _("Ctrl+Win+C"): "Ctrl-Mod4-c",
+                    _("Win+C"): "Mod4-c",
+                },
+                readable_name=_("Global Clipboard copy shortcut"),
             ),
             FeatureHandler(
-                trait_holder=self.vm, trait_name=self.PASTE_FEATURE,
+                trait_holder=self.vm,
+                trait_name=self.PASTE_FEATURE,
                 widget=self.paste_combo,
-                options= {_('default (Ctrl+Shift+V)'): None,
-                          _('Ctrl+Shift+V'): 'Ctrl-Shift-V',
-                          _('Ctrl+Win+V'): 'Ctrl-Mod4-v',
-                          _('Ctrl+Insert'): 'Ctrl-Ins',
-                          _('Win+V'): 'Mod4-v'},
-                readable_name=_("Global Clipboard paste shortcut")
-            )
+                options={
+                    _("default (Ctrl+Shift+V)"): None,
+                    _("Ctrl+Shift+V"): "Ctrl-Shift-V",
+                    _("Ctrl+Win+V"): "Ctrl-Mod4-v",
+                    _("Ctrl+Insert"): "Ctrl-Ins",
+                    _("Win+V"): "Mod4-v",
+                },
+                readable_name=_("Global Clipboard paste shortcut"),
+            ),
         ]
 
     def reset(self):
@@ -141,9 +171,13 @@ qubes.ClipboardPaste * @anyvm @anyvm ask\n""",
 class FileAccessHandler(PageHandler):
     """Handler for FileAccess page. Requires separate handler because
     it combines two policies in itself."""
-    def __init__(self, qapp: qubesadmin.Qubes,
-                 gtk_builder: Gtk.Builder,
-                 policy_manager: PolicyManager):
+
+    def __init__(
+        self,
+        qapp: qubesadmin.Qubes,
+        gtk_builder: Gtk.Builder,
+        policy_manager: PolicyManager,
+    ):
         self.qapp = qapp
         self.policy_manager = policy_manager
 
@@ -156,12 +190,15 @@ class FileAccessHandler(PageHandler):
 qubes.Filecopy * @anyvm @anyvm ask""",
             service_name="qubes.Filecopy",
             policy_file_name="50-config-filecopy",
-            verb_description=SimpleVerbDescription({
-                "ask": _("to be allowed to copy files to"),
-                "allow": _("allow files to be copied to"),
-                "deny": _("be allowed to copy files to")
-            }),
-            rule_class=RuleSimple)
+            verb_description=SimpleVerbDescription(
+                {
+                    "ask": _("to be allowed to copy files to"),
+                    "allow": _("allow files to be copied to"),
+                    "deny": _("be allowed to copy files to"),
+                }
+            ),
+            rule_class=RuleSimple,
+        )
 
         self.openinvm_handler = DispvmExceptionHandler(
             gtk_builder=gtk_builder,
@@ -193,13 +230,16 @@ class GlobalConfig(Gtk.Application):
     """
     Main Gtk.Application for new qube widget.
     """
+
     def __init__(self, qapp: qubesadmin.Qubes, policy_manager: PolicyManager):
         """
         :param qapp: qubesadmin.Qubes object
         :param policy_manager: PolicyManager object
         """
-        super().__init__(application_id='org.qubesos.globalconfig',
-                         flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
+        super().__init__(
+            application_id="org.qubesos.globalconfig",
+            flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE,
+        )
         self.qapp: qubesadmin.Qubes = qapp
         self.policy_manager = policy_manager
 
@@ -215,7 +255,8 @@ class GlobalConfig(Gtk.Application):
         self.open_at: Optional[str] = None
 
         self.progress_bar_dialog = ProgressBarDialog(
-            self, _("Loading system settings..."))
+            self, _("Loading system settings...")
+        )
         self.handlers: Dict[str, PageHandler] = {}
 
     def do_command_line(self, command_line):
@@ -250,15 +291,20 @@ class GlobalConfig(Gtk.Application):
         assert self.main_window
         self.main_window.show()
         # resize to screen size
-        if self.main_window.get_allocated_width() > \
-                self.main_window.get_screen().get_width():
+        if (
+            self.main_window.get_allocated_width()
+            > self.main_window.get_screen().get_width()
+        ):
             width = int(self.main_window.get_screen().get_width() * 0.9)
         else:
             # try to have at least 1100 pixels
-            width = min(int(self.main_window.get_screen().get_width() * 0.9),
-                        1100)
-        if self.main_window.get_allocated_height() > \
-                self.main_window.get_screen().get_height() * 0.9:
+            width = min(
+                int(self.main_window.get_screen().get_width() * 0.9), 1100
+            )
+        if (
+            self.main_window.get_allocated_height()
+            > self.main_window.get_screen().get_height() * 0.9
+        ):
             height = int(self.main_window.get_screen().get_height() * 0.9)
         else:
             height = self.main_window.get_allocated_height()
@@ -303,21 +349,30 @@ class GlobalConfig(Gtk.Application):
     @staticmethod
     def register_signals():
         """Register necessary Gtk signals"""
-        GObject.signal_new('rules-changed',
-                           Gtk.ListBox,
-                           GObject.SignalFlags.RUN_LAST, GObject.TYPE_PYOBJECT,
-                           (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new(
+            "rules-changed",
+            Gtk.ListBox,
+            GObject.SignalFlags.RUN_LAST,
+            GObject.TYPE_PYOBJECT,
+            (GObject.TYPE_PYOBJECT,),
+        )
 
         # signal that informs other pages that a given page has been changed
-        GObject.signal_new('page-changed',
-                           Gtk.Window,
-                           GObject.SignalFlags.RUN_LAST, GObject.TYPE_PYOBJECT,
-                           (GObject.TYPE_STRING,))
+        GObject.signal_new(
+            "page-changed",
+            Gtk.Window,
+            GObject.SignalFlags.RUN_LAST,
+            GObject.TYPE_PYOBJECT,
+            (GObject.TYPE_STRING,),
+        )
 
-        GObject.signal_new('child-removed',
-                           Gtk.FlowBox,
-                           GObject.SignalFlags.RUN_LAST, GObject.TYPE_PYOBJECT,
-                           (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new(
+            "child-removed",
+            Gtk.FlowBox,
+            GObject.SignalFlags.RUN_LAST,
+            GObject.TYPE_PYOBJECT,
+            (GObject.TYPE_PYOBJECT,),
+        )
 
     def perform_setup(self):
         # pylint: disable=attribute-defined-outside-init
@@ -325,85 +380,97 @@ class GlobalConfig(Gtk.Application):
         The function that performs actual widget realization and setup.
         """
         self.builder = Gtk.Builder()
-        glade_ref = (importlib.resources.files('qubes_config') /
-                     'global_config.glade')
+        glade_ref = (
+            importlib.resources.files("qubes_config") / "global_config.glade"
+        )
         with importlib.resources.as_file(glade_ref) as path:
             self.builder.add_from_file(str(path))
 
-        self.main_window: Gtk.Window = self.builder.get_object('main_window')
-        self.main_notebook: Gtk.Notebook = \
-            self.builder.get_object('main_notebook')
+        self.main_window: Gtk.Window = self.builder.get_object("main_window")
+        self.main_notebook: Gtk.Notebook = self.builder.get_object(
+            "main_notebook"
+        )
 
-        load_theme(widget=self.main_window,
-                   package_name='qubes_config',
-                   light_file_name='qubes-global-config-light.css',
-                   dark_file_name='qubes-global-config-dark.css')
+        load_theme(
+            widget=self.main_window,
+            package_name="qubes_config",
+            light_file_name="qubes-global-config-light.css",
+            dark_file_name="qubes-global-config-dark.css",
+        )
 
         self.progress_bar_dialog.show_all()
         self.progress_bar_dialog.update_progress(0)
 
-        self.apply_button: Gtk.Button = self.builder.get_object('apply_button')
-        self.cancel_button: Gtk.Button = \
-            self.builder.get_object('cancel_button')
-        self.ok_button: Gtk.Button = self.builder.get_object('ok_button')
+        self.apply_button: Gtk.Button = self.builder.get_object("apply_button")
+        self.cancel_button: Gtk.Button = self.builder.get_object(
+            "cancel_button"
+        )
+        self.ok_button: Gtk.Button = self.builder.get_object("ok_button")
 
-        self.apply_button.connect('clicked', self._apply)
-        self.cancel_button.connect('clicked', self._quit)
-        self.ok_button.connect('clicked', self._ok)
+        self.apply_button.connect("clicked", self._apply)
+        self.cancel_button.connect("clicked", self._quit)
+        self.ok_button.connect("clicked", self._ok)
 
-        self.main_window.connect('delete-event', self._ask_to_quit)
+        self.main_window.connect("delete-event", self._ask_to_quit)
 
         page_progress = 1 / self.main_notebook.get_n_pages()
 
         # match page by widget name to handler
-        self.handlers['basics'] = BasicSettingsHandler(self.builder, self.qapp)
+        self.handlers["basics"] = BasicSettingsHandler(self.builder, self.qapp)
         self.progress_bar_dialog.update_progress(page_progress)
 
-        self.handlers['usb'] = DevicesHandler(
-            self.qapp, self.policy_manager, self.builder)
+        self.handlers["usb"] = DevicesHandler(
+            self.qapp, self.policy_manager, self.builder
+        )
         self.progress_bar_dialog.update_progress(page_progress)
 
-        self.handlers['updates'] = UpdatesHandler(
-                qapp=self.qapp,
-                policy_manager=self.policy_manager,
-                gtk_builder=self.builder)
+        self.handlers["updates"] = UpdatesHandler(
+            qapp=self.qapp,
+            policy_manager=self.policy_manager,
+            gtk_builder=self.builder,
+        )
         self.progress_bar_dialog.update_progress(page_progress)
 
-        self.handlers['splitgpg'] = VMSubsetPolicyHandler(
-                qapp=self.qapp,
-                gtk_builder=self.builder,
-                policy_manager=self.policy_manager,
-                prefix="splitgpg",
-                service_name='qubes.Gpg',
-                policy_file_name='50-config-splitgpg',
-                default_policy="",
-                main_rule_class=RuleSimpleNoAllow,
-                main_verb_description=SimpleVerbDescription({
+        self.handlers["splitgpg"] = VMSubsetPolicyHandler(
+            qapp=self.qapp,
+            gtk_builder=self.builder,
+            policy_manager=self.policy_manager,
+            prefix="splitgpg",
+            service_name="qubes.Gpg",
+            policy_file_name="50-config-splitgpg",
+            default_policy="",
+            main_rule_class=RuleSimpleNoAllow,
+            main_verb_description=SimpleVerbDescription(
+                {
                     "ask": _("ask to access GPG\nkeys from"),
-                    "deny": _("access GPG\nkeys from")
-                }),
-                exception_rule_class=RuleTargeted,
-                exception_verb_description=SimpleVerbDescription({
-                    "allow": _('access GPG\nkeys from'),
-                    "ask": _('to access GPG\nkeys from'),
-                    "deny": _('access GPG\nkeys from')
-                }))
+                    "deny": _("access GPG\nkeys from"),
+                }
+            ),
+            exception_rule_class=RuleTargeted,
+            exception_verb_description=SimpleVerbDescription(
+                {
+                    "allow": _("access GPG\nkeys from"),
+                    "ask": _("to access GPG\nkeys from"),
+                    "deny": _("access GPG\nkeys from"),
+                }
+            ),
+        )
         self.progress_bar_dialog.update_progress(page_progress)
 
-        self.handlers['clipboard'] = ClipboardHandler(
-                qapp=self.qapp,
-                gtk_builder=self.builder,
-                policy_manager=self.policy_manager
-            )
+        self.handlers["clipboard"] = ClipboardHandler(
+            qapp=self.qapp,
+            gtk_builder=self.builder,
+            policy_manager=self.policy_manager,
+        )
         self.progress_bar_dialog.update_progress(page_progress)
 
-        self.handlers['file'] = FileAccessHandler(
-                qapp=self.qapp,
-                gtk_builder=self.builder,
-                policy_manager=self.policy_manager
-            )
+        self.handlers["file"] = FileAccessHandler(
+            qapp=self.qapp,
+            gtk_builder=self.builder,
+            policy_manager=self.policy_manager,
+        )
         self.progress_bar_dialog.update_progress(page_progress)
-        self.handlers['url'] = DispvmExceptionHandler(
+        self.handlers["url"] = DispvmExceptionHandler(
             gtk_builder=self.builder,
             qapp=self.qapp,
             service_name="qubes.OpenURL",
@@ -413,9 +480,9 @@ class GlobalConfig(Gtk.Application):
         )
         self.progress_bar_dialog.update_progress(page_progress)
 
-        self.handlers['thisdevice'] = ThisDeviceHandler(self.qapp,
-                                                        self.builder,
-                                                        self.policy_manager)
+        self.handlers["thisdevice"] = ThisDeviceHandler(
+            self.qapp, self.builder, self.policy_manager
+        )
         self.progress_bar_dialog.update_progress(page_progress)
 
         self.main_notebook.connect("switch-page", self._page_switched)
@@ -428,25 +495,33 @@ class GlobalConfig(Gtk.Application):
 
         self.viewport_handler = ViewportHandler(
             self.main_window,
-            [self.builder.get_object('basics_scrolled_window'),
-             self.builder.get_object('usb_scrolled_window'),
-             self.builder.get_object('updates_scrolled_window'),
-             self.builder.get_object('splitgpg_scrolled_window'),
-             self.builder.get_object('clipboard_scrolled_window'),
-             self.builder.get_object('file_scrolled_window'),
-             self.builder.get_object('url_scrolled_window'),
-             self.builder.get_object('thisdevice_scrolled_window'),
-             ])
+            [
+                self.builder.get_object("basics_scrolled_window"),
+                self.builder.get_object("usb_scrolled_window"),
+                self.builder.get_object("updates_scrolled_window"),
+                self.builder.get_object("splitgpg_scrolled_window"),
+                self.builder.get_object("clipboard_scrolled_window"),
+                self.builder.get_object("file_scrolled_window"),
+                self.builder.get_object("url_scrolled_window"),
+                self.builder.get_object("thisdevice_scrolled_window"),
+            ],
+        )
 
         self.progress_bar_dialog.update_progress(1)
         self.progress_bar_dialog.hide()
         self.progress_bar_dialog.destroy()
 
     def _handle_urls(self):
-        url_label_ids = ["basics_info", "u2fproxy_info", "splitgpg_info2",
-                         "copymove_info", "openinvm_info", "url_info",
-                         "thisdevice_certified_yes_info",
-                         "thisdevice_security_info"]
+        url_label_ids = [
+            "basics_info",
+            "u2fproxy_info",
+            "splitgpg_info2",
+            "copymove_info",
+            "openinvm_info",
+            "url_info",
+            "thisdevice_certified_yes_info",
+            "thisdevice_security_info",
+        ]
         for url_label_id in url_label_ids:
             label: Gtk.Label = self.builder.get_object(url_label_id)
             label.connect("activate-link", self._activate_link)
@@ -459,7 +534,8 @@ class GlobalConfig(Gtk.Application):
         """Get currently visible page."""
         page_num = self.main_notebook.get_current_page()
         return self.handlers.get(
-            self.main_notebook.get_nth_page(page_num).get_name(), None)
+            self.main_notebook.get_nth_page(page_num).get_name(), None
+        )
 
     def save_page(self, page: PageHandler) -> bool:
         """Save provided page and emit any necessary signals;
@@ -473,13 +549,16 @@ class GlobalConfig(Gtk.Application):
             page.save()
             for name, handler in self.handlers.items():
                 if handler == page:
-                    self.main_window.emit('page-changed', name)
+                    self.main_window.emit("page-changed", name)
                     break
             self.qapp._invalidate_cache_all()
             page.reset()
         except Exception as ex:
-            show_error(self.main_window, _("Could not save changes"),
-                       _("The following error occurred: ") + escape(str(ex)))
+            show_error(
+                self.main_window,
+                _("Could not save changes"),
+                _("The following error occurred: ") + escape(str(ex)),
+            )
             return False
         return True
 
@@ -489,7 +568,7 @@ class GlobalConfig(Gtk.Application):
         page = self.get_current_page()
         if page:
             unsaved = page.get_unsaved()
-            if unsaved != '':
+            if unsaved != "":
                 response = self._ask_unsaved(unsaved)
                 if response == Gtk.ResponseType.YES:
                     return self.save_page(page)
@@ -503,18 +582,21 @@ class GlobalConfig(Gtk.Application):
         old_page_num = self.main_notebook.get_current_page()
         allow_switch = self.verify_changes()
         if not allow_switch:
-            GLib.timeout_add(1, lambda: self.main_notebook.set_current_page(
-                old_page_num))
+            GLib.timeout_add(
+                1, lambda: self.main_notebook.set_current_page(old_page_num)
+            )
 
     def _ask_unsaved(self, description: str) -> Gtk.ResponseType:
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         label_1 = Gtk.Label()
-        label_1.set_markup(_("The following <b>unsaved changes</b> "
-                             "were found:"))
+        label_1.set_markup(
+            _("The following <b>unsaved changes</b> " "were found:")
+        )
         label_1.set_xalign(0)
         label_2 = Gtk.Label()
         label_2.set_text(
-            "\n".join([f'- {row}' for row in description.split('\n')]))
+            "\n".join([f"- {row}" for row in description.split("\n")])
+        )
         label_2.set_margin_start(20)
         label_2.set_xalign(0)
         label_3 = Gtk.Label()
@@ -525,12 +607,16 @@ class GlobalConfig(Gtk.Application):
         box.pack_start(label_3, False, False, 10)
 
         response = show_dialog_with_icon(
-            parent=self.main_window, title=_("Unsaved changes"), text=box,
+            parent=self.main_window,
+            title=_("Unsaved changes"),
+            text=box,
             buttons={
                 _("_Save changes"): Gtk.ResponseType.YES,
                 _("_Discard changes"): Gtk.ResponseType.NO,
                 _("_Cancel"): Gtk.ResponseType.CANCEL,
-            }, icon_name="qubes-ask")
+            },
+            icon_name="qubes-ask",
+        )
 
         return response
 
@@ -578,5 +664,5 @@ def main():
     app.run(sys.argv)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

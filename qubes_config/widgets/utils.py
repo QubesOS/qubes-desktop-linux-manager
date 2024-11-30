@@ -28,6 +28,7 @@ from qrexec.policy.parser import Rule
 from typing import Optional, Any, Dict, List
 
 import gettext
+
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
@@ -38,6 +39,7 @@ def get_feature(vm, feature_name, default_value=None):
         return vm.features.get(feature_name, default_value)
     except qubesadmin.exc.QubesDaemonAccessError:
         return default_value
+
 
 def get_boolean_feature(vm, feature_name, default=False):
     """helper function to get a feature converted to a Bool if it does exist.
@@ -50,16 +52,20 @@ def get_boolean_feature(vm, feature_name, default=False):
         result = default
     return result
 
-def apply_feature_change_from_widget(widget, vm: qubesadmin.vm.QubesVM,
-                                     feature_name:str):
+
+def apply_feature_change_from_widget(
+    widget, vm: qubesadmin.vm.QubesVM, feature_name: str
+):
     """Change a feature value, taking into account weirdness with None.
     Widget must support is_changed and get_selected methods."""
     if widget.is_changed():
         value = widget.get_selected()
         apply_feature_change(vm, feature_name, value)
 
-def apply_feature_change(vm: qubesadmin.vm.QubesVM,
-                         feature_name: str, new_value: Optional[Any]):
+
+def apply_feature_change(
+    vm: qubesadmin.vm.QubesVM, feature_name: str, new_value: Optional[Any]
+):
     """Change a feature value, taking into account weirdness with None."""
     try:
         if new_value is None:
@@ -70,13 +76,17 @@ def apply_feature_change(vm: qubesadmin.vm.QubesVM,
     except qubesadmin.exc.QubesDaemonAccessError:
         # pylint: disable=raise-missing-from
         raise qubesadmin.exc.QubesException(
-            _("Failed to set {feature_name} due to insufficient "
-            "permissions").format(feature_name=feature_name))
+            _(
+                "Failed to set {feature_name} due to insufficient "
+                "permissions"
+            ).format(feature_name=feature_name)
+        )
 
 
 class BiDictionary(dict):
     """Helper bi-directional dictionary. By design, duplicate values
     cause errors."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.inverted: Dict[Any, Any] = {}
@@ -98,8 +108,9 @@ class BiDictionary(dict):
         super().__delitem__(key)
 
 
-def compare_rule_lists(rule_list_1: List[Rule],
-                       rule_list_2: List[Rule]) -> bool:
+def compare_rule_lists(
+    rule_list_1: List[Rule], rule_list_2: List[Rule]
+) -> bool:
     """Check if two provided rule lists are the same. Return True if yes."""
     if len(rule_list_1) != len(rule_list_2):
         return False
@@ -108,17 +119,28 @@ def compare_rule_lists(rule_list_1: List[Rule],
             return False
     return True
 
+
 def _open_url_in_dvm(url, default_dvm: qubesadmin.vm.QubesVM):
     subprocess.run(
-        ['qvm-run', '-p', '--service', f'--dispvm={default_dvm}',
-         'qubes.OpenURL'], input=url.encode(), check=False,
-        stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+        [
+            "qvm-run",
+            "-p",
+            "--service",
+            f"--dispvm={default_dvm}",
+            "qubes.OpenURL",
+        ],
+        input=url.encode(),
+        check=False,
+        stderr=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+    )
+
 
 def open_url_in_disposable(url: str, qapp: qubesadmin.Qubes):
     """Open provided url in disposable qube based on default disposable
     template"""
     default_dvm = qapp.default_dispvm
-    open_thread = threading.Thread(group=None,
-                                   target=_open_url_in_dvm,
-                                   args=[url, default_dvm])
+    open_thread = threading.Thread(
+        group=None, target=_open_url_in_dvm, args=[url, default_dvm]
+    )
     open_thread.start()

@@ -20,8 +20,10 @@
 """Abstract class representing Settings pages."""
 import abc
 
+
 class PageHandler(abc.ABC):
     """abstract class for page handlers"""
+
     @abc.abstractmethod
     def save(self):
         """Save all changes. This should raise exceptions if save was

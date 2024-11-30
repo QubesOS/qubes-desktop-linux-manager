@@ -23,7 +23,7 @@ from unittest.mock import Mock
 import gi
 import pytest
 
-gi.require_version('Gtk', '3.0')  # isort:skip
+gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk
 
 from qui.updater.updater_settings import Settings
@@ -31,15 +31,28 @@ from qui.updater.updater_settings import Settings
 
 def init_features(test_qapp):
     test_qapp.expected_calls[
-        ('dom0', 'admin.vm.feature.Get', 'qubes-vm-update-restart-servicevms', None)
-    ] = b"0\x00" + str(1).encode()
+        (
+            "dom0",
+            "admin.vm.feature.Get",
+            "qubes-vm-update-restart-servicevms",
+            None,
+        )
+    ] = (
+        b"0\x00" + str(1).encode()
+    )
     test_qapp.expected_calls[
-        ('dom0', 'admin.vm.feature.Get', 'qubes-vm-update-restart-other', None)
-    ] = b"0\x00" + str(1).encode()
+        ("dom0", "admin.vm.feature.Get", "qubes-vm-update-restart-other", None)
+    ] = (b"0\x00" + str(1).encode())
     test_qapp.expected_calls[
         (
-        'dom0', 'admin.vm.feature.Get', 'qubes-vm-update-max-concurrency', None)
-    ] = b"0\x00" + str(1).encode()
+            "dom0",
+            "admin.vm.feature.Get",
+            "qubes-vm-update-max-concurrency",
+            None,
+        )
+    ] = (
+        b"0\x00" + str(1).encode()
+    )
 
 
 def test_show_and_hide(test_qapp):
@@ -55,14 +68,28 @@ def test_update_if_stale(test_qapp):
     sut = Settings(Gtk.Window(), test_qapp, mock_log, lambda *args: None)
     assert sut.update_if_stale == 7
     test_qapp.expected_calls[
-        ('dom0', 'admin.vm.feature.Get', 'qubes-vm-update-update-if-stale', None)
-    ] = b"0\x00" + str(32).encode()
+        (
+            "dom0",
+            "admin.vm.feature.Get",
+            "qubes-vm-update-update-if-stale",
+            None,
+        )
+    ] = (
+        b"0\x00" + str(32).encode()
+    )
     assert sut.update_if_stale == 32
     test_qapp.expected_calls[
         (
-        'dom0', 'admin.vm.feature.Get', 'qubes-vm-update-update-if-stale', None)
-    ] = b'2\x00QubesFeatureNotFoundError\x00\x00' \
-            + b'qubes-vm-update-update-if-stale' + b'\x00'
+            "dom0",
+            "admin.vm.feature.Get",
+            "qubes-vm-update-update-if-stale",
+            None,
+        )
+    ] = (
+        b"2\x00QubesFeatureNotFoundError\x00\x00"
+        + b"qubes-vm-update-update-if-stale"
+        + b"\x00"
+    )
     assert sut.update_if_stale == 7
 
 
@@ -70,23 +97,48 @@ def test_restart_service_vms(test_qapp):
     mock_log = Mock()
     sut = Settings(Gtk.Window(), test_qapp, mock_log, lambda *args: None)
     test_qapp.expected_calls[
-        ('dom0', 'admin.vm.feature.Get', 'qubes-vm-update-restart-servicevms', None)
-    ] = b'2\x00QubesFeatureNotFoundError\x00\x00' \
-        + b'qubes-vm-update-restart-servicevms' + b'\x00'
+        (
+            "dom0",
+            "admin.vm.feature.Get",
+            "qubes-vm-update-restart-servicevms",
+            None,
+        )
+    ] = (
+        b"2\x00QubesFeatureNotFoundError\x00\x00"
+        + b"qubes-vm-update-restart-servicevms"
+        + b"\x00"
+    )
     test_qapp.expected_calls[
-        ('dom0', 'admin.vm.feature.Get', 'qubes-vm-update-restart-system', None)
-    ] = b'2\x00QubesFeatureNotFoundError\x00\x00' \
-        + b'qubes-vm-update-restart-system' + b'\x00'
+        ("dom0", "admin.vm.feature.Get", "qubes-vm-update-restart-system", None)
+    ] = (
+        b"2\x00QubesFeatureNotFoundError\x00\x00"
+        + b"qubes-vm-update-restart-system"
+        + b"\x00"
+    )
     assert sut.restart_service_vms
     test_qapp.expected_calls[
-        ('dom0', 'admin.vm.feature.Get', 'qubes-vm-update-restart-servicevms', None)
-    ] = b"0\x00" + ''.encode()
+        (
+            "dom0",
+            "admin.vm.feature.Get",
+            "qubes-vm-update-restart-servicevms",
+            None,
+        )
+    ] = (
+        b"0\x00" + "".encode()
+    )
     assert not sut.restart_service_vms
     test_qapp.expected_calls[
         (
-        'dom0', 'admin.vm.feature.Get', 'qubes-vm-update-restart-servicevms', None)
-    ] = b'2\x00QubesFeatureNotFoundError\x00\x00' \
-            + b'qubes-vm-update-restart-servicevms' + b'\x00'
+            "dom0",
+            "admin.vm.feature.Get",
+            "qubes-vm-update-restart-servicevms",
+            None,
+        )
+    ] = (
+        b"2\x00QubesFeatureNotFoundError\x00\x00"
+        + b"qubes-vm-update-restart-servicevms"
+        + b"\x00"
+    )
     assert sut.restart_service_vms
 
 
@@ -94,19 +146,24 @@ def test_restart_other_vms(test_qapp):
     mock_log = Mock()
     sut = Settings(Gtk.Window(), test_qapp, mock_log, lambda *args: None)
     test_qapp.expected_calls[
-        ('dom0', 'admin.vm.feature.Get', 'qubes-vm-update-restart-other', None)
-    ] = b'2\x00QubesFeatureNotFoundError\x00\x00' \
-        + b'qubes-vm-update-restart-other' + b'\x00'
+        ("dom0", "admin.vm.feature.Get", "qubes-vm-update-restart-other", None)
+    ] = (
+        b"2\x00QubesFeatureNotFoundError\x00\x00"
+        + b"qubes-vm-update-restart-other"
+        + b"\x00"
+    )
     assert not sut.restart_other_vms
     test_qapp.expected_calls[
-        ('dom0', 'admin.vm.feature.Get', 'qubes-vm-update-restart-other', None)
-    ] = b"0\x00" + '1'.encode()
+        ("dom0", "admin.vm.feature.Get", "qubes-vm-update-restart-other", None)
+    ] = (b"0\x00" + "1".encode())
     assert sut.restart_other_vms
     test_qapp.expected_calls[
-        (
-        'dom0', 'admin.vm.feature.Get', 'qubes-vm-update-restart-other', None)
-    ] = b'2\x00QubesFeatureNotFoundError\x00\x00' \
-            + b'qubes-vm-update-restart-other' + b'\x00'
+        ("dom0", "admin.vm.feature.Get", "qubes-vm-update-restart-other", None)
+    ] = (
+        b"2\x00QubesFeatureNotFoundError\x00\x00"
+        + b"qubes-vm-update-restart-other"
+        + b"\x00"
+    )
     assert not sut.restart_other_vms
 
 
@@ -114,21 +171,41 @@ def test_max_concurrency(test_qapp):
     mock_log = Mock()
     sut = Settings(Gtk.Window(), test_qapp, mock_log, lambda *args: None)
     test_qapp.expected_calls[
-        ('dom0', 'admin.vm.feature.Get',
-         'qubes-vm-update-max-concurrency', None)
-    ] = b'2\x00QubesFeatureNotFoundError\x00\x00' \
-        + b'qubes-vm-update-max-concurrency' + b'\x00'
+        (
+            "dom0",
+            "admin.vm.feature.Get",
+            "qubes-vm-update-max-concurrency",
+            None,
+        )
+    ] = (
+        b"2\x00QubesFeatureNotFoundError\x00\x00"
+        + b"qubes-vm-update-max-concurrency"
+        + b"\x00"
+    )
     assert sut.max_concurrency is None
     test_qapp.expected_calls[
-        ('dom0', 'admin.vm.feature.Get',
-         'qubes-vm-update-max-concurrency', None)
-    ] = b"0\x00" + '8'.encode()
+        (
+            "dom0",
+            "admin.vm.feature.Get",
+            "qubes-vm-update-max-concurrency",
+            None,
+        )
+    ] = (
+        b"0\x00" + "8".encode()
+    )
     assert sut.max_concurrency == 8
     test_qapp.expected_calls[
-        ('dom0', 'admin.vm.feature.Get',
-         'qubes-vm-update-max-concurrency', None)
-    ] = b'2\x00QubesFeatureNotFoundError\x00\x00' \
-            + b'qubes-vm-update-max-concurrency' + b'\x00'
+        (
+            "dom0",
+            "admin.vm.feature.Get",
+            "qubes-vm-update-max-concurrency",
+            None,
+        )
+    ] = (
+        b"2\x00QubesFeatureNotFoundError\x00\x00"
+        + b"qubes-vm-update-max-concurrency"
+        + b"\x00"
+    )
     assert sut.max_concurrency is None
 
 
@@ -145,12 +222,24 @@ class MockCallback:
 @pytest.mark.parametrize(
     "feature, default_value, new_value, button_name",
     (
-        pytest.param("update-if-stale", Settings.DEFAULT_UPDATE_IF_STALE, 30,
-                     "days_without_update_button"),
-        pytest.param("restart-servicevms", Settings.DEFAULT_RESTART_SERVICEVMS,
-                     False, "restart_servicevms_checkbox"),
-        pytest.param("restart-other", Settings.DEFAULT_RESTART_OTHER_VMS,
-                     True, "restart_other_checkbox"),
+        pytest.param(
+            "update-if-stale",
+            Settings.DEFAULT_UPDATE_IF_STALE,
+            30,
+            "days_without_update_button",
+        ),
+        pytest.param(
+            "restart-servicevms",
+            Settings.DEFAULT_RESTART_SERVICEVMS,
+            False,
+            "restart_servicevms_checkbox",
+        ),
+        pytest.param(
+            "restart-other",
+            Settings.DEFAULT_RESTART_OTHER_VMS,
+            True,
+            "restart_other_checkbox",
+        ),
     ),
 )
 def test_save(feature, default_value, new_value, test_qapp, button_name):
@@ -162,10 +251,17 @@ def test_save(feature, default_value, new_value, test_qapp, button_name):
 
     # set the backwards-compatible feature appropriately
     test_qapp.expected_calls[
-        ('dom0', 'admin.vm.feature.Get',
-         f'qubes-vm-update-restart-system', None)
-    ] = b'2\x00QubesFeatureNotFoundError\x00\x00' \
-        + f'qubes-vm-update-restart-system'.encode() + b'\x00'
+        (
+            "dom0",
+            "admin.vm.feature.Get",
+            f"qubes-vm-update-restart-system",
+            None,
+        )
+    ] = (
+        b"2\x00QubesFeatureNotFoundError\x00\x00"
+        + f"qubes-vm-update-restart-system".encode()
+        + b"\x00"
+    )
 
     sut.show()
     sut.save_and_close(None)
@@ -179,19 +275,23 @@ def test_save(feature, default_value, new_value, test_qapp, button_name):
     button = getattr(sut, button_name)
     if button_name.endswith("checkbox"):
         button.set_active(new_value)
-        new_value_str = '1' if new_value else ''
+        new_value_str = "1" if new_value else ""
     else:
         button.set_value(new_value)
         new_value_str = str(new_value)
 
     test_qapp.expected_calls[
-        ('dom0', 'admin.vm.feature.Set',
-         f'qubes-vm-update-{feature}', new_value_str.encode())
-    ] = b'0\x00'
+        (
+            "dom0",
+            "admin.vm.feature.Set",
+            f"qubes-vm-update-{feature}",
+            new_value_str.encode(),
+        )
+    ] = b"0\x00"
     sut.save_and_close(None)
     test_qapp.expected_calls[
-        ('dom0', 'admin.vm.feature.Get', f'qubes-vm-update-{feature}', None)
-    ] = b"0\x00" + str(new_value).encode()
+        ("dom0", "admin.vm.feature.Get", f"qubes-vm-update-{feature}", None)
+    ] = (b"0\x00" + str(new_value).encode())
 
     assert mock_callback.call_num == 2
     if feature == "update-if-stale":
@@ -204,23 +304,25 @@ def test_save(feature, default_value, new_value, test_qapp, button_name):
     else:
         button.set_value(default_value)
     test_qapp.expected_calls[
-        ('dom0', 'admin.vm.feature.Set',
-         f'qubes-vm-update-{feature}', None)
-    ] = b'0\x00'
+        ("dom0", "admin.vm.feature.Set", f"qubes-vm-update-{feature}", None)
+    ] = b"0\x00"
     sut.save_and_close(None)
     assert mock_callback.call_num == 3
     if feature == "update-if-stale":
         assert mock_callback.value == new_value
     test_qapp.expected_calls[
-        ('dom0', 'admin.vm.feature.Get',
-         f'qubes-vm-update-{feature}', None)
-    ] = b'2\x00QubesFeatureNotFoundError\x00\x00' \
-        + f'qubes-vm-update-{feature}'.encode() + b'\x00'
+        ("dom0", "admin.vm.feature.Get", f"qubes-vm-update-{feature}", None)
+    ] = (
+        b"2\x00QubesFeatureNotFoundError\x00\x00"
+        + f"qubes-vm-update-{feature}".encode()
+        + b"\x00"
+    )
 
     # do not set adminVM feature if nothing change
     sut.show()
-    del test_qapp.expected_calls[('dom0', 'admin.vm.feature.Set',
-         f'qubes-vm-update-{feature}', None)]
+    del test_qapp.expected_calls[
+        ("dom0", "admin.vm.feature.Set", f"qubes-vm-update-{feature}", None)
+    ]
     if button_name.endswith("checkbox"):
         button.set_active(default_value)
     else:
@@ -232,10 +334,17 @@ def test_save(feature, default_value, new_value, test_qapp, button_name):
 
 
 def test_limit_concurrency(test_qapp):
-    dom0_set_max_concurrency = ('dom0', 'admin.vm.feature.Set',
-                                'qubes-vm-update-max-concurrency',)
-    dom0_get_max_concurrency = ('dom0', 'admin.vm.feature.Get',
-                                'qubes-vm-update-max-concurrency', None)
+    dom0_set_max_concurrency = (
+        "dom0",
+        "admin.vm.feature.Set",
+        "qubes-vm-update-max-concurrency",
+    )
+    dom0_get_max_concurrency = (
+        "dom0",
+        "admin.vm.feature.Get",
+        "qubes-vm-update-max-concurrency",
+        None,
+    )
 
     mock_log = Mock()
     sut = Settings(Gtk.Window(), test_qapp, mock_log, lambda *args: None)
@@ -249,20 +358,22 @@ def test_limit_concurrency(test_qapp):
     sut.limit_concurrency_checkbox.set_active(True)
     test_qapp.expected_calls[
         (*dom0_set_max_concurrency, sut.DEFAULT_CONCURRENCY)
-    ] = b'0\x00'
+    ] = b"0\x00"
     sut.save_and_close(None)
-    test_qapp.expected_calls[dom0_get_max_concurrency] = \
+    test_qapp.expected_calls[dom0_get_max_concurrency] = (
         b"0\x00" + str(sut.DEFAULT_CONCURRENCY).encode()
+    )
 
     # Set concurrency to max value
     sut.show()
     sut.max_concurrency_button.set_value(sut.MAX_CONCURRENCY)
     test_qapp.expected_calls[
         (*dom0_set_max_concurrency, str(sut.MAX_CONCURRENCY).encode())
-    ] = b'0\x00'
+    ] = b"0\x00"
     sut.save_and_close(None)
-    test_qapp.expected_calls[dom0_get_max_concurrency] = \
+    test_qapp.expected_calls[dom0_get_max_concurrency] = (
         b"0\x00" + str(sut.MAX_CONCURRENCY).encode()
+    )
 
     # Set concurrency to max value again
     sut.show()
@@ -275,10 +386,5 @@ def test_limit_concurrency(test_qapp):
     # Set False
     sut.show()
     sut.limit_concurrency_checkbox.set_active(False)
-    test_qapp.expected_calls[
-        (*dom0_set_max_concurrency, None)
-    ] = b'0\x00'
+    test_qapp.expected_calls[(*dom0_set_max_concurrency, None)] = b"0\x00"
     sut.save_and_close(None)
-
-
-

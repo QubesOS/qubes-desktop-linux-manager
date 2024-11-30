@@ -1,5 +1,7 @@
 include:
   - project: 'QubesOS/qubes-continuous-integration'
+    file: '/common.yml'
+  - project: 'QubesOS/qubes-continuous-integration'
     file: '/r4.3/gitlab-base.yml'
   - project: 'QubesOS/qubes-continuous-integration'
     file: '/r4.3/gitlab-host.yml'
@@ -24,6 +26,7 @@ checks:tests:
     - ci/codecov-wrapper
 
 checks:pylint:
+  stage: checks
   before_script:
   - sudo dnf install -y python3-gobject gtk3 xorg-x11-server-Xvfb python3-mypy gtksourceview4 python3-pip curl
   - pip3 install --quiet -r ci/requirements.txt
@@ -36,4 +39,10 @@ checks:pylint:
   script:
   - PYTHONPATH=~/core-admin-client:~/core-qrexec python3 -m pylint --rcfile=.pylintrc qui qubes_config
   - mypy
+
+checks:black:
+  extends: .lint
   stage: checks
+  variables:
+    DIR: .
+    SKIP_PYLINT: 1

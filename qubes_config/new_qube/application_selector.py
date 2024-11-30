@@ -29,23 +29,31 @@ from ..widgets.gtk_utils import load_icon
 
 import gi
 
-gi.require_version('Gtk', '3.0')
+gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, Pango
 
 import gettext
+
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
 
-logger = logging.getLogger('qubes-new-qube')
-WHONIX_QUBE_NAME = 'sys-whonix'
+logger = logging.getLogger("qubes-new-qube")
+WHONIX_QUBE_NAME = "sys-whonix"
+
 
 class ApplicationData:
     """
     Class representing information about an available application.
     """
-    def __init__(self, name: str, ident: str, comment: Optional[str] = None,
-                 template: Optional[qubesadmin.vm.QubesVM] = None):
+
+    def __init__(
+        self,
+        name: str,
+        ident: str,
+        comment: Optional[str] = None,
+        template: Optional[qubesadmin.vm.QubesVM] = None,
+    ):
         """
         :param name: application name
         :param ident: application id (as expected by qvm-appmenus)
@@ -57,10 +65,11 @@ class ApplicationData:
         self.template = template
         additional_description = ".desktop filename: " + str(self.ident)
 
-        file_name_root = self.ident[:-len('.desktop')]
+        file_name_root = self.ident[: -len(".desktop")]
         self.icon_path = os.path.expanduser(
-            f'~/.local/share/qubes-appmenus/{template}'
-            f'/apps.tempicons/{file_name_root}.png')
+            f"~/.local/share/qubes-appmenus/{template}"
+            f"/apps.tempicons/{file_name_root}.png"
+        )
 
         if not comment:
             self.comment = additional_description
@@ -72,7 +81,7 @@ class ApplicationData:
         """
         Create object from output line of qvm-appmenus, with optional template.
         """
-        ident, name, comment = line.split('|', maxsplit=3)
+        ident, name, comment = line.split("|", maxsplit=3)
         return cls(name=name, ident=ident, comment=comment, template=template)
 
 
@@ -80,6 +89,7 @@ class ApplicationRow(Gtk.ListBoxRow):
     """
     Row representing an app in current template.
     """
+
     def __init__(self, appdata: ApplicationData, **properties):
         """
         :param app_info: ApplicationInfo obj with data about related app file
@@ -106,6 +116,7 @@ class OtherTemplateApplicationRow(Gtk.ListBoxRow):
     """
     Row representing an app in another template.
     """
+
     def __init__(self, appdata: ApplicationData, **properties):
         """
         :param app_info: ApplicationInfo obj with data about related app file
@@ -135,6 +146,7 @@ class ApplicationButton(Gtk.FlowBoxChild):
     """
     Button representing a selected application.
     """
+
     def __init__(self, appdata: ApplicationData):
         """
         :param appdata: ApplicationData object
@@ -159,13 +171,14 @@ class ApplicationButton(Gtk.FlowBoxChild):
         self.box.pack_start(self.label, False, False, 3)
 
         self.remove_icon = Gtk.Image()
-        self.remove_icon.set_from_pixbuf(load_icon('qubes-delete', 14, 14))
+        self.remove_icon.set_from_pixbuf(load_icon("qubes-delete", 14, 14))
         self.remove_icon.set_tooltip_text(
-            _('Click to remove this application from selection'))
+            _("Click to remove this application from selection")
+        )
         self.box.pack_end(self.remove_icon, False, False, 3)
 
-        self.connect('activate', self._remove_self)
-        self.button.connect('clicked', self._activate_self)
+        self.connect("activate", self._remove_self)
+        self.button.connect("clicked", self._activate_self)
 
         self.show_all()
 
@@ -184,13 +197,14 @@ class AddButton(Gtk.FlowBoxChild):
     """
     Button to open 'select apps' window.
     """
+
     def __init__(self):
         super().__init__()
         self.button = Gtk.Button()
         self.button.set_label("+")
         self.add(self.button)
 
-        self.button.connect('clicked', self._activate_self)
+        self.button.connect("clicked", self._activate_self)
 
     def _activate_self(self, *_args):
         self.activate()
@@ -200,66 +214,80 @@ class ApplicationBoxHandler:
     """
     Class to handle popup application box.
     """
+
     def __init__(self, gtk_builder: Gtk.Builder, template_selector):
         """
         :param gtk_builder: Gtk.Builder to get relevant objects
         :param template_selector: TemplateHandler object
         """
         self.template_selector = template_selector
-        self.flowbox: Gtk.Flowbox = gtk_builder.get_object('applications')
-        self.apps_window = gtk_builder.get_object('applications_popup')
-        self.apps_list: Gtk.ListBox = gtk_builder.get_object('apps_list')
-        self.label_apps: Gtk.Label = gtk_builder.get_object('label_apps')
+        self.flowbox: Gtk.Flowbox = gtk_builder.get_object("applications")
+        self.apps_window = gtk_builder.get_object("applications_popup")
+        self.apps_list: Gtk.ListBox = gtk_builder.get_object("apps_list")
+        self.label_apps: Gtk.Label = gtk_builder.get_object("label_apps")
         self.label_apps_explain: Gtk.Label = gtk_builder.get_object(
-            'label_apps_explain')
-        self.apps_close: Gtk.Button = gtk_builder.get_object('apps_close')
-        self.apps_search: Gtk.SearchEntry = \
-            gtk_builder.get_object('apps_search')
-        self.apps_list_placeholder: Gtk.Label = \
-            gtk_builder.get_object('apps_list_placeholder')
-        self.apps_list_other: Gtk.ListBox = \
-            gtk_builder.get_object('apps_list_other_templates')
+            "label_apps_explain"
+        )
+        self.apps_close: Gtk.Button = gtk_builder.get_object("apps_close")
+        self.apps_search: Gtk.SearchEntry = gtk_builder.get_object(
+            "apps_search"
+        )
+        self.apps_list_placeholder: Gtk.Label = gtk_builder.get_object(
+            "apps_list_placeholder"
+        )
+        self.apps_list_other: Gtk.ListBox = gtk_builder.get_object(
+            "apps_list_other_templates"
+        )
         self.label_other_templates: Gtk.Label = gtk_builder.get_object(
-            'label_other_templates')
-        self.load_all_button: Gtk.Button = \
-            gtk_builder.get_object('apps_list_load_all')
+            "label_other_templates"
+        )
+        self.load_all_button: Gtk.Button = gtk_builder.get_object(
+            "apps_list_load_all"
+        )
 
         self.change_template_msg: Gtk.Dialog = gtk_builder.get_object(
-            'msg_change_template')
+            "msg_change_template"
+        )
         self.change_template_ok: Gtk.Button = gtk_builder.get_object(
-            'change_template_ok')
+            "change_template_ok"
+        )
         self.change_template_cancel: Gtk.Button = gtk_builder.get_object(
-            'change_template_cancel')
+            "change_template_cancel"
+        )
         self.change_template_box: Gtk.Box = gtk_builder.get_object(
-            'change_template_box')
+            "change_template_box"
+        )
         self.target_template_name_widget: Optional[Gtk.Widget] = None
 
         self.change_template_cancel.connect(
-            'clicked', self._hide_template_change)
-        self.change_template_ok.connect('clicked', self._do_template_change)
+            "clicked", self._hide_template_change
+        )
+        self.change_template_ok.connect("clicked", self._do_template_change)
         self.change_template_msg.connect(
-            'key_press_event', self._keypress_change_template)
+            "key_press_event", self._keypress_change_template
+        )
 
-        self.apps_window.connect('key_press_event', self._keypress_event)
-        self.apps_list.connect('row-activated', self._row_activated)
+        self.apps_window.connect("key_press_event", self._keypress_event)
+        self.apps_list.connect("row-activated", self._row_activated)
 
         self.fill_app_list(default=True)
         self._fill_flow_list()
-        self.apps_close.connect('clicked', self._hide_window)
+        self.apps_close.connect("clicked", self._hide_window)
         self.apps_list.set_sort_func(self._sort_func_app_list)
-        self.apps_search.connect('search-changed', self._do_search)
+        self.apps_search.connect("search-changed", self._do_search)
         self.template_selector.main_window.connect(
-            'template-changed', self.template_change_registered)
+            "template-changed", self.template_change_registered
+        )
 
         self.apps_list.set_filter_func(self._filter_func_app_list)
         self.apps_list.set_sort_func(self._sort_func_app_list)
         self.apps_list_other.set_sort_func(self._sort_func_app_list)
         self.apps_list_other.set_filter_func(self._filter_func_other_list)
-        self.load_all_button.connect('clicked', self._load_all_apps)
+        self.load_all_button.connect("clicked", self._load_all_apps)
 
         self.flowbox.set_sort_func(self._sort_flowbox)
 
-        self.apps_window.connect('delete-event', self._hide_window)
+        self.apps_window.connect("delete-event", self._hide_window)
         self._fill_others_list()
 
     @staticmethod
@@ -274,8 +302,9 @@ class ApplicationBoxHandler:
     def _sort_func_app_list(self, x: ApplicationRow, y: ApplicationRow):
         # negation because True > False, and we want the selected rows to be
         # at the top
-        selection_comparison = self._cmp(not x.is_selected(),
-                                         not y.is_selected())
+        selection_comparison = self._cmp(
+            not x.is_selected(), not y.is_selected()
+        )
         if selection_comparison == 0:
             return self._cmp(x.appdata.name, y.appdata.name)
         return selection_comparison
@@ -297,7 +326,8 @@ class ApplicationBoxHandler:
         if not self.apps_list_placeholder.get_mapped():
             return False
         if not self.template_selector.is_given_template_available(
-                x.appdata.template):
+            x.appdata.template
+        ):
             return False
         return self._filter_func_app_list(x)
 
@@ -355,7 +385,8 @@ class ApplicationBoxHandler:
             return
 
         available_applications = self.template_selector.get_available_apps(
-            template_vm)
+            template_vm
+        )
         selected = []
         if default:
             selected = self.template_selector.get_default_apps(template_vm)
@@ -379,7 +410,7 @@ class ApplicationBoxHandler:
             row = OtherTemplateApplicationRow(app)
             self.apps_list_other.add(row)
         self.apps_list_other.set_visible(False)
-        self.apps_list_other.connect('row-activated', self._ask_template_change)
+        self.apps_list_other.connect("row-activated", self._ask_template_change)
 
     def _hide_template_change(self, *_args):
         self.change_template_msg.hide()
@@ -387,7 +418,8 @@ class ApplicationBoxHandler:
     def _do_template_change(self, *_args):
         if self.target_template_name_widget:
             self.template_selector.select_template(
-                self.target_template_name_widget.vm)
+                self.target_template_name_widget.vm
+            )
         self._hide_template_change()
         self._hide_window()
 
@@ -397,7 +429,8 @@ class ApplicationBoxHandler:
 
         self.target_template_name_widget = QubeName(row.appdata.template)
         self.change_template_box.pack_start(
-            self.target_template_name_widget, False, False, 0)
+            self.target_template_name_widget, False, False, 0
+        )
 
         self.change_template_msg.show()
 
@@ -424,7 +457,7 @@ class ApplicationBoxHandler:
                 button = ApplicationButton(child.appdata)
                 self.flowbox.add(button)
         plus_button = AddButton()
-        plus_button.connect('activate', self._choose_apps)
+        plus_button.connect("activate", self._choose_apps)
         # need interaction with Template object
         self.flowbox.add(plus_button)
         self.flowbox.show_all()

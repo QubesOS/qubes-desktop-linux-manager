@@ -37,24 +37,30 @@ import gi
 from ..widgets.gtk_widgets import QubeName
 from ..widgets.utils import compare_rule_lists
 
-gi.require_version('Gtk', '3.0')
+gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
 import gettext
+
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
+
 
 class PolicyExceptionsHandler:
     """
     Class for handling a list of policy exceptions
     """
-    def __init__(self, gtk_builder: Gtk.Builder, prefix: str,
-                 policy_manager,
-                 row_func: Callable[[Rule, bool], Gtk.ListBoxRow],
-                 new_rule: Callable[..., Rule],
-                 exclude_rule: Optional[Callable[[Rule], bool]] = None,
-                 enable_raw: bool = True
-                 ):
+
+    def __init__(
+        self,
+        gtk_builder: Gtk.Builder,
+        prefix: str,
+        policy_manager,
+        row_func: Callable[[Rule, bool], Gtk.ListBoxRow],
+        new_rule: Callable[..., Rule],
+        exclude_rule: Optional[Callable[[Rule], bool]] = None,
+        enable_raw: bool = True,
+    ):
         """
         :param gtk_builder: Gtk.Builder instance
         :param prefix: prefix for widgets; expects a prefix_exception_list
@@ -73,28 +79,32 @@ class PolicyExceptionsHandler:
 
         self.initial_rules: List[Rule] = []
         self.rule_list: Gtk.ListBox = gtk_builder.get_object(
-            f'{prefix}_exception_list')
+            f"{prefix}_exception_list"
+        )
 
         self.add_button: Gtk.Button = gtk_builder.get_object(
-            f'{prefix}_add_rule_button')
+            f"{prefix}_add_rule_button"
+        )
 
         self.error_handler = ErrorHandler(gtk_builder, prefix)
 
         if enable_raw:
-            self.raw_handler: Optional[RawPolicyTextHandler] = \
+            self.raw_handler: Optional[RawPolicyTextHandler] = (
                 RawPolicyTextHandler(
                     gtk_builder=gtk_builder,
                     prefix=prefix,
                     policy_manager=self.policy_manager,
                     error_handler=self.error_handler,
                     callback_on_open_raw=self.close_all_edits,
-                    callback_on_save_raw=self.populate_rule_lists)
+                    callback_on_save_raw=self.populate_rule_lists,
+                )
+            )
         else:
             self.raw_handler = None
 
         # connect events
-        self.rule_list.connect('row-activated', self._rule_clicked)
-        self.rule_list.connect('rules-changed', self._fill_raw_rules)
+        self.rule_list.connect("row-activated", self._rule_clicked)
+        self.rule_list.connect("rules-changed", self._fill_raw_rules)
         self.add_button.connect("clicked", self.add_new_rule)
 
     def initialize_with_rules(self, rules: List[Rule]):
@@ -159,8 +169,9 @@ class PolicyExceptionsHandler:
 
     @property
     def current_rules(self) -> List[Rule]:
-        rules = [row.rule.raw_rule for row in self.current_rows if
-                 not row.is_new_row]
+        rules = [
+            row.rule.raw_rule for row in self.current_rows if not row.is_new_row
+        ]
         return rules
 
     def close_all_edits(self, *_args):
@@ -168,10 +179,13 @@ class PolicyExceptionsHandler:
         PolicyHandler.close_rows_in_list(self.rule_list.get_children())
 
     @staticmethod
-    def verify_rule_against_rows(other_rows: List[RuleListBoxRow],
-                                 row: RuleListBoxRow,
-                                 new_source: str, new_target: str,
-                                 new_action: str) -> Optional[str]:
+    def verify_rule_against_rows(
+        other_rows: List[RuleListBoxRow],
+        row: RuleListBoxRow,
+        new_source: str,
+        new_target: str,
+        new_action: str,
+    ) -> Optional[str]:
         """
         Verify correctness of a rule with new_source, new_target and new_action
         if it was to be associated with provided row. Return None if rule would
@@ -180,31 +194,39 @@ class PolicyExceptionsHandler:
         for other_row in other_rows:
             if other_row == row:
                 continue
-            if other_row.rule.is_rule_conflicting(new_source, new_target,
-                                                  new_action):
+            if other_row.rule.is_rule_conflicting(
+                new_source, new_target, new_action
+            ):
                 return str(other_row)
         return None
 
-    def verify_new_rule(self, row: RuleListBoxRow,
-                        new_source: str, new_target: str,
-                        new_action: str) -> Optional[str]:
+    def verify_new_rule(
+        self,
+        row: RuleListBoxRow,
+        new_source: str,
+        new_target: str,
+        new_action: str,
+    ) -> Optional[str]:
         """
         Verify correctness of a rule with new_source, new_target and new_action
         if it was to be associated with provided row. Return None if rule would
         be correct, and string description of error otherwise.
         """
-        return self.verify_rule_against_rows(self.current_rows, row,
-                                      new_source, new_target, new_action)
+        return self.verify_rule_against_rows(
+            self.current_rows, row, new_source, new_target, new_action
+        )
 
 
 class DispvmExceptionHandler(PageHandler):
-    def __init__(self, gtk_builder: Gtk.Builder,
-                 qapp: qubesadmin.Qubes,
-                 service_name: str,
-                 prefix: str,
-                 policy_manager,
-                 policy_file_name: str
-                 ):
+    def __init__(
+        self,
+        gtk_builder: Gtk.Builder,
+        qapp: qubesadmin.Qubes,
+        service_name: str,
+        prefix: str,
+        policy_manager,
+        policy_file_name: str,
+    ):
         """
         Handler for various dispvm-related exception lists
         :param gtk_builder: Gtk.Builder instance
@@ -231,15 +253,19 @@ class DispvmExceptionHandler(PageHandler):
             prefix=prefix,
             policy_manager=self.policy_manager,
             row_func=self._get_row,
-            new_rule=self._new_rule)
+            new_rule=self._new_rule,
+        )
 
         self.current_state_box: Gtk.Box = gtk_builder.get_object(
-            f'{prefix}_current_state_box')
+            f"{prefix}_current_state_box"
+        )
         self.current_state_widget: Optional[Gtk.Box] = None
 
-        self.initial_rules, self.current_token = \
+        self.initial_rules, self.current_token = (
             self.policy_manager.get_rules_from_filename(
-                self.policy_file_name, "")
+                self.policy_file_name, ""
+            )
+        )
 
         self.initialize()
 
@@ -258,19 +284,23 @@ class DispvmExceptionHandler(PageHandler):
             parent_handler=self.list_handler,
             rule=RuleDispVM(rule),
             qapp=self.qapp,
-            verb_description=SimpleVerbDescription({
-                "ask": _("and default to"),
-                "allow": _("use"),
-                "deny": _("open in disposable qube")
-            }),
+            verb_description=SimpleVerbDescription(
+                {
+                    "ask": _("and default to"),
+                    "allow": _("use"),
+                    "deny": _("open in disposable qube"),
+                }
+            ),
             is_new_row=new,
         )
 
     def _new_rule(self) -> Rule:
         return self.policy_manager.new_rule(
-            service=self.service_name, source='@anyvm',
-            target='@dispvm',
-            action='allow target=@dispvm')
+            service=self.service_name,
+            source="@anyvm",
+            target="@dispvm",
+            action="allow target=@dispvm",
+        )
 
     def get_unsaved(self) -> str:
         if self.list_handler.get_unsaved() != "":
@@ -283,10 +313,14 @@ class DispvmExceptionHandler(PageHandler):
     def save(self):
         self.policy_manager.save_rules(
             self.policy_file_name,
-            self.list_handler.current_rules, self.current_token)
+            self.list_handler.current_rules,
+            self.current_token,
+        )
 
-        _rules, self.current_token = \
+        _rules, self.current_token = (
             self.policy_manager.get_rules_from_filename(
-                self.policy_file_name, "")
+                self.policy_file_name, ""
+            )
+        )
 
         self.initial_rules = deepcopy(self.list_handler.current_rules)

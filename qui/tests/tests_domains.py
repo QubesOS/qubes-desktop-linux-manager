@@ -23,12 +23,13 @@ from gi.repository import Gtk
 import qui.tray.domains as domains_widget
 from qubesadmin import Qubes
 
+
 class DomainsWidgetTest(unittest.TestCase):
 
     def setUp(self):
         super(DomainsWidgetTest, self).setUp()
 
-        self.widget = domains_widget.DomainTray('org.qubes.ui.tray.Domains')
+        self.widget = domains_widget.DomainTray("org.qubes.ui.tray.Domains")
         self.widget.initialize_menu()
 
         self.qapp = Qubes()
@@ -45,23 +46,26 @@ class DomainsWidgetTest(unittest.TestCase):
         # are all running VMs listed
         domains_in_widget = []
         for menu_item in self.widget.tray_menu:
-            domain = self.qapp.domains[menu_item.vm['name']]
+            domain = self.qapp.domains[menu_item.vm["name"]]
             domains_in_widget.append(domain)
-            self.assertTrue(domain.is_running(),
-                            "halted domain listed incorrectly")
+            self.assertTrue(
+                domain.is_running(), "halted domain listed incorrectly"
+            )
         for domain in self.qapp.domains:
-            if domain.klass != 'AdminVM':
-                self.assertEqual(domain in domains_in_widget,
-                                 domain.is_running(),
-                                 "domain missing from list")
+            if domain.klass != "AdminVM":
+                self.assertEqual(
+                    domain in domains_in_widget,
+                    domain.is_running(),
+                    "domain missing from list",
+                )
 
     def test_02_stop_vm(self):
-        domain_to_stop = self.qapp.domains['test-running']
+        domain_to_stop = self.qapp.domains["test-running"]
 
         if not domain_to_stop.is_running():
             domain_to_stop.start()
-            while domain_to_stop.get_power_state() != 'Running':
-                    time.sleep(1)
+            while domain_to_stop.get_power_state() != "Running":
+                time.sleep(1)
             time.sleep(10)
 
         menu_item = self.__find_menu_item(domain_to_stop)
@@ -71,7 +75,7 @@ class DomainsWidgetTest(unittest.TestCase):
 
         countdown = 100
 
-        while domain_to_stop.get_power_state() != 'Halted' and countdown > 0:
+        while domain_to_stop.get_power_state() != "Halted" and countdown > 0:
             time.sleep(1)
             countdown -= 1
 
@@ -81,11 +85,11 @@ class DomainsWidgetTest(unittest.TestCase):
         self.assertIsNone(menu_item, "stopped item still incorrectly listed")
 
     def test_03_start_vm(self):
-        domain_to_start = self.qapp.domains['test-halted']
+        domain_to_start = self.qapp.domains["test-halted"]
 
         if domain_to_start.is_running():
             domain_to_start.shutdown()
-            while domain_to_start.get_power_state() != 'Halted':
+            while domain_to_start.get_power_state() != "Halted":
                 time.sleep(1)
             time.sleep(10)
 
@@ -99,15 +103,16 @@ class DomainsWidgetTest(unittest.TestCase):
         # should finish starting
         countdown = 100
         while countdown > 0:
-            if domain_to_start.get_power_state() == 'Running':
+            if domain_to_start.get_power_state() == "Running":
                 self.__refresh_gui(45)
                 item = self.__find_menu_item(domain_to_start)
-                self.assertIsNotNone(item,
-                                     "domain not listed as started")
+                self.assertIsNotNone(item, "domain not listed as started")
                 self.assertIsNotNone(item, "item incorrectly not listed")
-                self.assertIsInstance(item.get_submenu(),
-                                      domains_widget.StartedMenu,
-                                      "incorrect menu (debug not start)")
+                self.assertIsInstance(
+                    item.get_submenu(),
+                    domains_widget.StartedMenu,
+                    "incorrect menu (debug not start)",
+                )
                 break
             time.sleep(1)
             countdown -= 1
@@ -116,7 +121,7 @@ class DomainsWidgetTest(unittest.TestCase):
 
     def __find_menu_item(self, vm):
         for menu_item in self.widget.tray_menu:
-            menu_domain = self.qapp.domains[menu_item.vm['name']]
+            menu_domain = self.qapp.domains[menu_item.vm["name"]]
             if menu_domain == vm:
                 return menu_item
         return None
@@ -125,7 +130,7 @@ class DomainsWidgetTest(unittest.TestCase):
     def __refresh_gui(delay=0):
         time.sleep(delay)
         while Gtk.events_pending():
-                Gtk.main_iteration_do(blocking=True)
+            Gtk.main_iteration_do(blocking=True)
 
 
 if __name__ == "__main__":

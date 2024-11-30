@@ -24,18 +24,24 @@ from typing import Optional, Union, Callable
 import importlib.resources
 import gi
 
-gi.require_version('Gtk', '3.0')  # isort:skip
+gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk, GObject
 
 from qubes_config.global_config.vm_flowbox import VMFlowboxHandler
-from qubes_config.widgets.utils import get_boolean_feature, \
-    apply_feature_change, get_feature
+from qubes_config.widgets.utils import (
+    get_boolean_feature,
+    apply_feature_change,
+    get_feature,
+)
 
 
-GObject.signal_new('child-removed',
-                   Gtk.FlowBox,
-                   GObject.SignalFlags.RUN_LAST, GObject.TYPE_PYOBJECT,
-                   (GObject.TYPE_PYOBJECT,))
+GObject.signal_new(
+    "child-removed",
+    Gtk.FlowBox,
+    GObject.SignalFlags.RUN_LAST,
+    GObject.TYPE_PYOBJECT,
+    (GObject.TYPE_PYOBJECT,),
+)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -57,12 +63,12 @@ class Settings:
     DEFAULT_HIDE_UPDATED = False
 
     def __init__(
-            self,
-            main_window,
-            qapp,
-            log,
-            refresh_callback: Callable,
-            overrides: OverriddenSettings = OverriddenSettings(),
+        self,
+        main_window,
+        qapp,
+        log,
+        refresh_callback: Callable,
+        overrides: OverriddenSettings = OverriddenSettings(),
     ):
         self.qapp = qapp
         self.log = log
@@ -73,72 +79,103 @@ class Settings:
         self.builder = Gtk.Builder()
         self.builder.set_translation_domain("desktop-linux-manager")
 
-        glade_ref = (importlib.resources.files('qui') /
-                     'updater_settings.glade')
+        glade_ref = importlib.resources.files("qui") / "updater_settings.glade"
         with importlib.resources.as_file(glade_ref) as path:
             self.builder.add_from_file(str(path))
 
         self.settings_window: Gtk.Window = self.builder.get_object(
-            "main_window")
+            "main_window"
+        )
 
         self.settings_window.set_transient_for(main_window)
         self.settings_window.connect("delete-event", self.close_without_saving)
 
         self.cancel_button: Gtk.Button = self.builder.get_object(
-            "button_settings_cancel")
+            "button_settings_cancel"
+        )
         self.cancel_button.connect(
-            "clicked", lambda _: self.settings_window.close())
+            "clicked", lambda _: self.settings_window.close()
+        )
 
         self.save_button: Gtk.Button = self.builder.get_object(
-            "button_settings_save")
+            "button_settings_save"
+        )
         self.save_button.connect("clicked", self.save_and_close)
 
-        self.days_without_update_button: Gtk.SpinButton = \
+        self.days_without_update_button: Gtk.SpinButton = (
             self.builder.get_object("days_without_update")
+        )
         adj = Gtk.Adjustment(
-            Settings.DEFAULT_UPDATE_IF_STALE, 1, Settings.MAX_UPDATE_IF_STALE,
-            1, 1, 1
+            Settings.DEFAULT_UPDATE_IF_STALE,
+            1,
+            Settings.MAX_UPDATE_IF_STALE,
+            1,
+            1,
+            1,
         )
         self.days_without_update_button.configure(adj, 1, 0)
 
-        self.restart_servicevms_checkbox: Gtk.CheckButton = \
+        self.restart_servicevms_checkbox: Gtk.CheckButton = (
             self.builder.get_object("restart_servicevms")
+        )
         self.restart_servicevms_checkbox.connect(
-            "toggled", self._show_restart_exceptions)
+            "toggled", self._show_restart_exceptions
+        )
 
         self.restart_other_checkbox: Gtk.CheckButton = self.builder.get_object(
-            "restart_other")
+            "restart_other"
+        )
         self.restart_other_checkbox.connect(
-            "toggled", self._show_restart_exceptions)
+            "toggled", self._show_restart_exceptions
+        )
 
-        self.hide_skipped_checkbox: Gtk.CheckButton = \
-            self.builder.get_object("hide_skipped")
+        self.hide_skipped_checkbox: Gtk.CheckButton = self.builder.get_object(
+            "hide_skipped"
+        )
 
-        self.hide_updated_checkbox: Gtk.CheckButton = \
-            self.builder.get_object("hide_updated")
+        self.hide_updated_checkbox: Gtk.CheckButton = self.builder.get_object(
+            "hide_updated"
+        )
 
         self.available_vms = [
-            vm for vm in self.qapp.domains
-            if vm.klass == 'DispVM' and not vm.auto_cleanup
-            or vm.klass == 'AppVM']
+            vm
+            for vm in self.qapp.domains
+            if vm.klass == "DispVM"
+            and not vm.auto_cleanup
+            or vm.klass == "AppVM"
+        ]
         self.excluded_vms = [
-            vm for vm in self.available_vms
-            if not get_boolean_feature(vm, 'restart-after-update', True)]
+            vm
+            for vm in self.available_vms
+            if not get_boolean_feature(vm, "restart-after-update", True)
+        ]
         self.exceptions = VMFlowboxHandler(
-            self.builder, self.qapp, "restart_exceptions",
-            self.excluded_vms, lambda vm: vm in self.available_vms)
+            self.builder,
+            self.qapp,
+            "restart_exceptions",
+            self.excluded_vms,
+            lambda vm: vm in self.available_vms,
+        )
         self.restart_exceptions_page: Gtk.Box = self.builder.get_object(
-            "restart_exceptions_page")
+            "restart_exceptions_page"
+        )
 
-        self.limit_concurrency_checkbox: Gtk.CheckButton = \
+        self.limit_concurrency_checkbox: Gtk.CheckButton = (
             self.builder.get_object("limit_concurrency")
+        )
         self.limit_concurrency_checkbox.connect(
-            "toggled", self._limit_concurrency_toggled)
-        self.max_concurrency_button: Gtk.SpinButton = \
-            self.builder.get_object("max_concurrency")
+            "toggled", self._limit_concurrency_toggled
+        )
+        self.max_concurrency_button: Gtk.SpinButton = self.builder.get_object(
+            "max_concurrency"
+        )
         adj = Gtk.Adjustment(
-            Settings.DEFAULT_CONCURRENCY, 1, Settings.MAX_CONCURRENCY + 1,
-            1, 1, 1
+            Settings.DEFAULT_CONCURRENCY,
+            1,
+            Settings.MAX_CONCURRENCY + 1,
+            1,
+            1,
+            1,
         )
         self.max_concurrency_button.configure(adj, 1, 0)
 
@@ -155,8 +192,13 @@ class Settings:
         """Return the current (set by this window or manually) option value."""
         if self.overrides.update_if_stale is not None:
             return self.overrides.update_if_stale
-        return int(get_feature(self.vm, "qubes-vm-update-update-if-stale",
-                               Settings.DEFAULT_UPDATE_IF_STALE))
+        return int(
+            get_feature(
+                self.vm,
+                "qubes-vm-update-update-if-stale",
+                Settings.DEFAULT_UPDATE_IF_STALE,
+            )
+        )
 
     @property
     def restart_service_vms(self) -> bool:
@@ -165,16 +207,18 @@ class Settings:
             return self.overrides.apply_to_sys
 
         result = get_boolean_feature(
-            self.vm, "qubes-vm-update-restart-servicevms",
-            None)
+            self.vm, "qubes-vm-update-restart-servicevms", None
+        )
         # TODO
         #  If not set, try to use a deprecated flag instead of
         #  the default value. This is only for backward compatibility
         #  and should be removed in future (e.g. Qubes 5.0 or later)
         if result is None:
             result = get_boolean_feature(
-                self.vm, "qubes-vm-update-restart-system",
-                Settings.DEFAULT_RESTART_SERVICEVMS)
+                self.vm,
+                "qubes-vm-update-restart-system",
+                Settings.DEFAULT_RESTART_SERVICEVMS,
+            )
 
         return result
 
@@ -184,20 +228,26 @@ class Settings:
         if self.overrides.apply_to_other is not None:
             return self.overrides.apply_to_other
         return get_boolean_feature(
-            self.vm, "qubes-vm-update-restart-other",
-            Settings.DEFAULT_RESTART_OTHER_VMS)
+            self.vm,
+            "qubes-vm-update-restart-other",
+            Settings.DEFAULT_RESTART_OTHER_VMS,
+        )
 
     @property
     def hide_skipped(self) -> bool:
         return get_boolean_feature(
-            self.vm, "qubes-vm-update-hide-skipped",
-            Settings.DEFAULT_HIDE_SKIPPED)
+            self.vm,
+            "qubes-vm-update-hide-skipped",
+            Settings.DEFAULT_HIDE_SKIPPED,
+        )
 
     @property
     def hide_updated(self) -> bool:
         return get_boolean_feature(
-            self.vm, "qubes-vm-update-hide-updated",
-            Settings.DEFAULT_HIDE_UPDATED)
+            self.vm,
+            "qubes-vm-update-hide-updated",
+            Settings.DEFAULT_HIDE_UPDATED,
+        )
 
     @property
     def max_concurrency(self) -> Optional[int]:
@@ -213,23 +263,28 @@ class Settings:
         self._init_update_if_stale = self.update_if_stale
         self.days_without_update_button.set_value(self._init_update_if_stale)
         self.days_without_update_button.set_sensitive(
-            not self.overrides.update_if_stale)
+            not self.overrides.update_if_stale
+        )
 
         self._init_restart_servicevms = self.restart_service_vms
         self._init_restart_other_vms = self.restart_other_vms
         self.restart_servicevms_checkbox.set_sensitive(
-            not self.overrides.apply_to_sys)
+            not self.overrides.apply_to_sys
+        )
         self.restart_servicevms_checkbox.set_active(
-            self._init_restart_servicevms)
+            self._init_restart_servicevms
+        )
         self.restart_other_checkbox.set_active(self._init_restart_other_vms)
         self.restart_other_checkbox.set_sensitive(
-            not self.overrides.apply_to_other)
+            not self.overrides.apply_to_other
+        )
 
         self._init_max_concurrency = self.max_concurrency
         self._init_limit_concurrency = self._init_max_concurrency is not None
         self.limit_concurrency_checkbox.set_active(self._init_limit_concurrency)
         self.limit_concurrency_checkbox.set_sensitive(
-            not self.overrides.max_concurrency)
+            not self.overrides.max_concurrency
+        )
         if self._init_limit_concurrency:
             self.max_concurrency_button.set_value(self._init_max_concurrency)
 
@@ -269,14 +324,14 @@ class Settings:
             name="update-if-stale",
             value=int(self.days_without_update_button.get_value()),
             init=self._init_update_if_stale,
-            default=Settings.DEFAULT_UPDATE_IF_STALE
+            default=Settings.DEFAULT_UPDATE_IF_STALE,
         )
 
         self._save_option(
             name="restart-servicevms",
             value=self.restart_servicevms_checkbox.get_active(),
             init=self._init_restart_servicevms,
-            default=Settings.DEFAULT_RESTART_SERVICEVMS
+            default=Settings.DEFAULT_RESTART_SERVICEVMS,
         )
         # TODO
         #  Make sure that the deprecated flag is unset.
@@ -287,21 +342,21 @@ class Settings:
             name="restart-other",
             value=self.restart_other_checkbox.get_active(),
             init=self._init_restart_other_vms,
-            default=Settings.DEFAULT_RESTART_OTHER_VMS
+            default=Settings.DEFAULT_RESTART_OTHER_VMS,
         )
 
         self._save_option(
             name="hide-skipped",
             value=self.hide_skipped_checkbox.get_active(),
             init=self._init_hide_skipped,
-            default=Settings.DEFAULT_HIDE_SKIPPED
+            default=Settings.DEFAULT_HIDE_SKIPPED,
         )
 
         self._save_option(
             name="hide-updated",
             value=self.hide_updated_checkbox.get_active(),
             init=self._init_hide_updated,
-            default=Settings.DEFAULT_HIDE_UPDATED
+            default=Settings.DEFAULT_HIDE_UPDATED,
         )
 
         limit_concurrency = self.limit_concurrency_checkbox.get_active()
@@ -312,23 +367,25 @@ class Settings:
                 max_concurrency = None
             if self._init_max_concurrency != max_concurrency:
                 apply_feature_change(
-                    self.vm, "qubes-vm-update-max-concurrency", max_concurrency)
+                    self.vm, "qubes-vm-update-max-concurrency", max_concurrency
+                )
 
         if self.exceptions.is_changed():
             for vm in self.exceptions.added_vms:
-                apply_feature_change(vm, 'restart-after-update', False)
+                apply_feature_change(vm, "restart-after-update", False)
             for vm in self.exceptions.removed_vms:
-                apply_feature_change(vm, 'restart-after-update', None)
+                apply_feature_change(vm, "restart-after-update", None)
             self.exceptions.save()
 
         self.refresh_callback(self.update_if_stale)
         self.settings_window.close()
 
     def _save_option(
-            self, name: str,
-            value: Union[int, bool],
-            init: Union[int, bool],
-            default: Union[int, bool]
+        self,
+        name: str,
+        value: Union[int, bool],
+        init: Union[int, bool],
+        default: Union[int, bool],
     ):
         if value != init:
             if value == default:

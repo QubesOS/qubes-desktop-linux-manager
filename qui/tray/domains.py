@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position,import-error,superfluous-parens
-''' A menu listing domains '''
+""" A menu listing domains """
 import abc
 import asyncio
 import subprocess
@@ -18,39 +18,42 @@ import qui.decorators
 from qubesadmin import exc
 
 import gi  # isort:skip
-gi.require_version('Gtk', '3.0')  # isort:skip
+
+gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gio, Gtk, GObject, GLib, GdkPixbuf  # isort:skip
 
 import gbulb
+
 gbulb.install()
 
 import gettext
+
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
 STATE_DICTIONARY = {
-    'domain-pre-start': 'Transient',
-    'domain-start': 'Running',
-    'domain-start-failed': 'Halted',
-    'domain-paused': 'Paused',
-    'domain-unpaused': 'Running',
-    'domain-shutdown': 'Halted',
-    'domain-pre-shutdown': 'Transient',
-    'domain-shutdown-failed': 'Running'
+    "domain-pre-start": "Transient",
+    "domain-start": "Running",
+    "domain-start-failed": "Halted",
+    "domain-paused": "Paused",
+    "domain-unpaused": "Running",
+    "domain-shutdown": "Halted",
+    "domain-pre-shutdown": "Transient",
+    "domain-shutdown-failed": "Running",
 }
 
 
 class IconCache:
     def __init__(self):
         self.icon_files = {
-            'pause': 'media-playback-pause',
-            'terminal': 'utilities-terminal',
-            'preferences': 'preferences-system',
-            'kill': 'media-record',
-            'shutdown': 'media-playback-stop',
-            'unpause': 'media-playback-start',
-            'files': 'system-file-manager',
-            'restart': 'edit-redo'
+            "pause": "media-playback-pause",
+            "terminal": "utilities-terminal",
+            "preferences": "preferences-system",
+            "kill": "media-record",
+            "shutdown": "media-playback-stop",
+            "unpause": "media-playback-start",
+            "files": "system-file-manager",
+            "restart": "edit-redo",
         }
         self.icons = {}
 
@@ -60,11 +63,13 @@ class IconCache:
         else:
             try:
                 icon = Gtk.IconTheme.get_default().load_icon(
-                    self.icon_files[icon_name], 16, 0)
+                    self.icon_files[icon_name], 16, 0
+                )
                 self.icons[icon_name] = icon
             except (TypeError, GLib.Error):
-                icon = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB,
-                                            True, 8, 16, 16)
+                icon = GdkPixbuf.Pixbuf.new(
+                    GdkPixbuf.Colorspace.RGB, True, 8, 16, 16
+                )
                 icon.fill(0)
                 self.icons[icon_name] = icon
         return icon
@@ -72,7 +77,8 @@ class IconCache:
 
 def show_error(title, text):
     dialog = Gtk.MessageDialog(
-        None, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.OK)
+        None, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.OK
+    )
     dialog.set_title(title)
     dialog.set_markup(text)
     dialog.connect("response", lambda *x: dialog.destroy())
@@ -89,8 +95,7 @@ class VMActionMenuItem(Gtk.ImageMenuItem):
         self.set_image(img)
         self.set_label(label)
 
-        self.connect(
-            'activate', self.instantiate_thread_with_function)
+        self.connect("activate", self.instantiate_thread_with_function)
 
     @abc.abstractmethod
     def perform_action(self):
@@ -106,66 +111,77 @@ class VMActionMenuItem(Gtk.ImageMenuItem):
 
 
 class PauseItem(VMActionMenuItem):
-    ''' Shutdown menu Item. When activated pauses the domain. '''
+    """Shutdown menu Item. When activated pauses the domain."""
 
     def __init__(self, vm, icon_cache):
-        super().__init__(vm, icon_cache, 'pause', _('Emergency pause'))
+        super().__init__(vm, icon_cache, "pause", _("Emergency pause"))
 
     def perform_action(self):
         try:
             self.vm.pause()
         except exc.QubesException as ex:
-            show_error(_("Error pausing qube"),
-                       _("The following error occurred while "
-                       "attempting to pause qube {0}:\n{1}").format(
-                           self.vm.name, str(ex)))
+            show_error(
+                _("Error pausing qube"),
+                _(
+                    "The following error occurred while "
+                    "attempting to pause qube {0}:\n{1}"
+                ).format(self.vm.name, str(ex)),
+            )
 
 
 class UnpauseItem(VMActionMenuItem):
-    ''' Unpause menu Item. When activated unpauses the domain. '''
+    """Unpause menu Item. When activated unpauses the domain."""
+
     def __init__(self, vm, icon_cache):
-        super().__init__(vm, icon_cache, 'unpause', _('Unpause'))
+        super().__init__(vm, icon_cache, "unpause", _("Unpause"))
 
     def perform_action(self):
         try:
             self.vm.unpause()
         except exc.QubesException as ex:
-            show_error(_("Error unpausing qube"),
-                       _("The following error occurred while attempting "
-                       "to unpause qube {0}:\n{1}").format(
-                           self.vm.name, str(ex)))
+            show_error(
+                _("Error unpausing qube"),
+                _(
+                    "The following error occurred while attempting "
+                    "to unpause qube {0}:\n{1}"
+                ).format(self.vm.name, str(ex)),
+            )
 
 
 class ShutdownItem(VMActionMenuItem):
-    ''' Shutdown menu Item. When activated shutdowns the domain. '''
+    """Shutdown menu Item. When activated shutdowns the domain."""
+
     def __init__(self, vm, icon_cache):
-        super().__init__(vm, icon_cache, 'shutdown', _('Shutdown'))
+        super().__init__(vm, icon_cache, "shutdown", _("Shutdown"))
 
     def perform_action(self):
         try:
             self.vm.shutdown()
         except exc.QubesException as ex:
-            show_error(_("Error shutting down qube"),
-                       _("The following error occurred while attempting to "
-                       "shut down qube {0}:\n{1}").format(
-                           self.vm.name, str(ex)))
+            show_error(
+                _("Error shutting down qube"),
+                _(
+                    "The following error occurred while attempting to "
+                    "shut down qube {0}:\n{1}"
+                ).format(self.vm.name, str(ex)),
+            )
 
 
 class RestartItem(Gtk.ImageMenuItem):
-    ''' Restart menu Item. When activated shutdowns the domain and
-    then starts it again. '''
+    """Restart menu Item. When activated shutdowns the domain and
+    then starts it again."""
 
     def __init__(self, vm, icon_cache):
         super().__init__()
         self.vm = vm
 
-        img = Gtk.Image.new_from_pixbuf(icon_cache.get_icon('restart'))
+        img = Gtk.Image.new_from_pixbuf(icon_cache.get_icon("restart"))
 
         self.set_image(img)
-        self.set_label(_('Restart'))
+        self.set_label(_("Restart"))
         self.restart_thread = None
 
-        self.connect('activate', self.restart)
+        self.connect("activate", self.restart)
 
     def restart(self, *_args, **_kwargs):
         asyncio.ensure_future(self.perform_restart())
@@ -176,39 +192,49 @@ class RestartItem(Gtk.ImageMenuItem):
             while self.vm.is_running():
                 await asyncio.sleep(1)
             proc = await asyncio.create_subprocess_exec(
-                'qvm-start', self.vm.name, stderr=subprocess.PIPE)
+                "qvm-start", self.vm.name, stderr=subprocess.PIPE
+            )
             _stdout, stderr = await proc.communicate()
             if proc.returncode != 0:
                 raise exc.QubesException(stderr)
         except exc.QubesException as ex:
-            show_error(_("Error restarting qube"),
-                       _("The following error occurred while attempting to "
-                       "restart qube {0}:\n{1}").format(
-                           self.vm.name, str(ex)))
+            show_error(
+                _("Error restarting qube"),
+                _(
+                    "The following error occurred while attempting to "
+                    "restart qube {0}:\n{1}"
+                ).format(self.vm.name, str(ex)),
+            )
 
 
 class KillItem(VMActionMenuItem):
-    ''' Kill domain menu Item. When activated kills the domain. '''
+    """Kill domain menu Item. When activated kills the domain."""
+
     def __init__(self, vm, icon_cache):
-        super().__init__(vm, icon_cache, 'kill', _('Kill'))
+        super().__init__(vm, icon_cache, "kill", _("Kill"))
 
     def perform_action(self, *_args, **_kwargs):
         try:
             self.vm.kill()
         except exc.QubesException as ex:
-            show_error(_("Error shutting down qube"),
-                       _("The following error occurred while attempting to shut"
-                       "down qube {0}:\n{1}").format(self.vm.name, str(ex)))
+            show_error(
+                _("Error shutting down qube"),
+                _(
+                    "The following error occurred while attempting to shut"
+                    "down qube {0}:\n{1}"
+                ).format(self.vm.name, str(ex)),
+            )
 
 
 class PreferencesItem(VMActionMenuItem):
-    ''' Preferences menu Item. When activated shows preferences dialog '''
+    """Preferences menu Item. When activated shows preferences dialog"""
+
     def __init__(self, vm, icon_cache):
-        super().__init__(vm, icon_cache, 'preferences', _('Settings'))
+        super().__init__(vm, icon_cache, "preferences", _("Settings"))
 
     def perform_action(self):
         # pylint: disable=consider-using-with
-        subprocess.Popen(['qubes-vm-settings', self.vm.name])
+        subprocess.Popen(["qubes-vm-settings", self.vm.name])
 
 
 class LogItem(Gtk.ImageMenuItem):
@@ -217,38 +243,44 @@ class LogItem(Gtk.ImageMenuItem):
         self.path = path
 
         img = Gtk.Image.new_from_file(
-            "/usr/share/icons/HighContrast/16x16/apps/logviewer.png")
+            "/usr/share/icons/HighContrast/16x16/apps/logviewer.png"
+        )
 
         self.set_image(img)
         self.set_label(name)
 
-        self.connect('activate', self.launch_log_viewer)
+        self.connect("activate", self.launch_log_viewer)
 
     def launch_log_viewer(self, *_args, **_kwargs):
         # pylint: disable=consider-using-with
-        subprocess.Popen(['qubes-log-viewer', self.path])
+        subprocess.Popen(["qubes-log-viewer", self.path])
 
 
 class RunTerminalItem(Gtk.ImageMenuItem):
-    ''' Run Terminal menu Item. When activated runs a terminal emulator. '''
+    """Run Terminal menu Item. When activated runs a terminal emulator."""
+
     def __init__(self, vm, icon_cache):
         super().__init__()
         self.vm = vm
 
-        img = Gtk.Image.new_from_pixbuf(icon_cache.get_icon('terminal'))
+        img = Gtk.Image.new_from_pixbuf(icon_cache.get_icon("terminal"))
 
         self.set_image(img)
-        self.set_label(_('Run Terminal'))
+        self.set_label(_("Run Terminal"))
 
-        self.connect('activate', self.run_terminal)
+        self.connect("activate", self.run_terminal)
 
     def run_terminal(self, _item):
         try:
-            self.vm.run_service('qubes.StartApp+qubes-run-terminal')
+            self.vm.run_service("qubes.StartApp+qubes-run-terminal")
         except exc.QubesException as ex:
-            show_error(_("Error starting terminal"),
-                       _("The following error occurred while attempting to "
-                       "run terminal {0}:\n{1}").format(self.vm.name, str(ex)))
+            show_error(
+                _("Error starting terminal"),
+                _(
+                    "The following error occurred while attempting to "
+                    "run terminal {0}:\n{1}"
+                ).format(self.vm.name, str(ex)),
+            )
 
 
 class OpenFileManagerItem(Gtk.ImageMenuItem):
@@ -259,43 +291,45 @@ class OpenFileManagerItem(Gtk.ImageMenuItem):
         super().__init__()
         self.vm = vm
 
-        img = Gtk.Image.new_from_pixbuf(
-            icon_cache.get_icon('files'))
+        img = Gtk.Image.new_from_pixbuf(icon_cache.get_icon("files"))
 
         self.set_image(img)
-        self.set_label(_('Open File Manager'))
+        self.set_label(_("Open File Manager"))
 
-        self.connect('activate', self.open_file_manager)
+        self.connect("activate", self.open_file_manager)
 
     def open_file_manager(self, _item):
         try:
-            self.vm.run_service('qubes.StartApp+qubes-open-file-manager')
+            self.vm.run_service("qubes.StartApp+qubes-open-file-manager")
         except exc.QubesException as ex:
-            show_error(_("Error opening file manager"),
-                       _("The following error occurred while attempting to "
-                       "open file manager {0}:\n{1}").format(
-                           self.vm.name, str(ex)))
+            show_error(
+                _("Error opening file manager"),
+                _(
+                    "The following error occurred while attempting to "
+                    "open file manager {0}:\n{1}"
+                ).format(self.vm.name, str(ex)),
+            )
 
 
 class InternalInfoItem(Gtk.MenuItem):
-    ''' Restart menu Item. When activated shutdowns the domain and
-    then starts it again. '''
+    """Restart menu Item. When activated shutdowns the domain and
+    then starts it again."""
 
     def __init__(self):
         super().__init__()
         self.label = Gtk.Label(xalign=0)
-        self.label.set_markup(_(
-                '<b>Internal qube</b>'))
+        self.label.set_markup(_("<b>Internal qube</b>"))
         self.set_tooltip_text(
-            'Internal qubes are used by the operating system. Do not modify'
-            ' them or run programs in them unless you really '
-            'know what you are doing.')
+            "Internal qubes are used by the operating system. Do not modify"
+            " them or run programs in them unless you really "
+            "know what you are doing."
+        )
         self.add(self.label)
         self.set_sensitive(False)
 
 
 class StartedMenu(Gtk.Menu):
-    ''' The sub-menu for a started domain'''
+    """The sub-menu for a started domain"""
 
     def __init__(self, vm, app, icon_cache):
         super().__init__()
@@ -307,14 +341,14 @@ class StartedMenu(Gtk.Menu):
         self.add(PreferencesItem(self.vm, icon_cache))
         self.add(PauseItem(self.vm, icon_cache))
         self.add(ShutdownItem(self.vm, icon_cache))
-        if self.vm.klass != 'DispVM' or not self.vm.auto_cleanup:
+        if self.vm.klass != "DispVM" or not self.vm.auto_cleanup:
             self.add(RestartItem(self.vm, icon_cache))
 
         self.show_all()
 
 
 class PausedMenu(Gtk.Menu):
-    ''' The sub-menu for a paused domain'''
+    """The sub-menu for a paused domain"""
 
     def __init__(self, vm, icon_cache):
         super().__init__()
@@ -328,7 +362,7 @@ class PausedMenu(Gtk.Menu):
 
 
 class DebugMenu(Gtk.Menu):
-    ''' Sub-menu providing multiple MenuItem for domain logs. '''
+    """Sub-menu providing multiple MenuItem for domain logs."""
 
     def __init__(self, vm, icon_cache):
         super().__init__()
@@ -337,11 +371,15 @@ class DebugMenu(Gtk.Menu):
         self.add(PreferencesItem(self.vm, icon_cache))
 
         logs = [
-            (_("Console Log"),
-             "/var/log/xen/console/guest-" + vm.name + ".log"),
-            (_("QEMU Console Log"),
-             "/var/log/xen/console/guest-" + vm.name + "-dm.log"),
-            ]
+            (
+                _("Console Log"),
+                "/var/log/xen/console/guest-" + vm.name + ".log",
+            ),
+            (
+                _("QEMU Console Log"),
+                "/var/log/xen/console/guest-" + vm.name + "-dm.log",
+            ),
+        ]
 
         for name, path in logs:
             if os.path.isfile(path):
@@ -354,6 +392,7 @@ class DebugMenu(Gtk.Menu):
 
 class InternalMenu(Gtk.Menu):
     """Sub-menu for Internal qubes"""
+
     def __init__(self, vm, icon_cache, working_correctly=True):
         """
         :param vm: relevant Internal qube
@@ -367,11 +406,15 @@ class InternalMenu(Gtk.Menu):
         self.add(InternalInfoItem())
 
         logs = [
-            (_("Console Log"),
-             "/var/log/xen/console/guest-" + vm.name + ".log"),
-            (_("QEMU Console Log"),
-             "/var/log/xen/console/guest-" + vm.name + "-dm.log"),
-            ]
+            (
+                _("Console Log"),
+                "/var/log/xen/console/guest-" + vm.name + ".log",
+            ),
+            (
+                _("QEMU Console Log"),
+                "/var/log/xen/console/guest-" + vm.name + "-dm.log",
+            ),
+        ]
 
         for name, path in logs:
             if os.path.isfile(path):
@@ -387,19 +430,20 @@ class InternalMenu(Gtk.Menu):
 
 def run_manager(_item):
     # pylint: disable=consider-using-with
-    subprocess.Popen(['qubes-qube-manager'])
+    subprocess.Popen(["qubes-qube-manager"])
 
 
 class QubesManagerItem(Gtk.ImageMenuItem):
     def __init__(self):
         super().__init__()
 
-        self.set_image(Gtk.Image.new_from_icon_name('qubes-logo-icon',
-                                                    Gtk.IconSize.MENU))
+        self.set_image(
+            Gtk.Image.new_from_icon_name("qubes-logo-icon", Gtk.IconSize.MENU)
+        )
 
-        self.set_label(_('Open Qube Manager'))
+        self.set_label(_("Open Qube Manager"))
 
-        self.connect('activate', run_manager)
+        self.connect("activate", run_manager)
 
         self.show_all()
 
@@ -443,7 +487,7 @@ class DomainMenuItem(Gtk.ImageMenuItem):
             self.cpu.update_state(header=True)
             self.memory.update_state(header=True)
             self.show_all()  # header should always be visible
-        elif self.vm.klass == 'AdminVM':  # no submenu for AdminVM
+        elif self.vm.klass == "AdminVM":  # no submenu for AdminVM
             self.set_reserve_indicator(True)  # align with submenu triangles
         else:
             if not state:
@@ -456,12 +500,13 @@ class DomainMenuItem(Gtk.ImageMenuItem):
         self.set_image(self.decorator.icon())
 
     def _set_submenu(self, state):
-        if self.vm.features.get('internal', False):
-            submenu = InternalMenu(self.vm, self.icon_cache,
-                                   working_correctly=(state == 'Running'))
-        elif state == 'Running':
+        if self.vm.features.get("internal", False):
+            submenu = InternalMenu(
+                self.vm, self.icon_cache, working_correctly=(state == "Running")
+            )
+        elif state == "Running":
             submenu = StartedMenu(self.vm, self.app, self.icon_cache)
-        elif state == 'Paused':
+        elif state == "Paused":
             submenu = PausedMenu(self.vm, self.icon_cache)
         else:
             submenu = DebugMenu(self.vm, self.icon_cache)
@@ -485,9 +530,9 @@ class DomainMenuItem(Gtk.ImageMenuItem):
         self.spinner.hide()
 
     def update_state(self, state):
-        vm_klass = getattr(self.vm, 'klass', None)
+        vm_klass = getattr(self.vm, "klass", None)
 
-        if not self.vm or vm_klass == 'AdminVM':
+        if not self.vm or vm_klass == "AdminVM":
             # it's a header or an AdminVM, no need to do anything
             return
 
@@ -498,19 +543,20 @@ class DomainMenuItem(Gtk.ImageMenuItem):
             return
 
         # if VM is not running, hide it
-        if state == 'Halted':
+        if state == "Halted":
             self.hide()
             return
         self.show_all()
 
-        if state in ['Running', 'Paused']:
+        if state in ["Running", "Paused"]:
             self.hide_spinner()
         else:
             self.show_spinner()
-        colormap = {'Paused': 'grey', 'Crashed': 'red', 'Transient': 'red'}
+        colormap = {"Paused": "grey", "Crashed": "red", "Transient": "red"}
         if state in colormap:
             self.name.label.set_markup(
-                f'<span color=\'{colormap[state]}\'>{self.vm.name}</span>')
+                f"<span color='{colormap[state]}'>{self.vm.name}</span>"
+            )
         else:
             self.name.label.set_label(self.vm.name)
 
@@ -522,7 +568,7 @@ class DomainMenuItem(Gtk.ImageMenuItem):
 
 
 class DomainTray(Gtk.Application):
-    ''' A tray icon application listing all but halted domains. ” '''
+    """A tray icon application listing all but halted domains. ”"""
 
     def __init__(self, app_name, qapp, dispatcher, stats_dispatcher):
         super().__init__()
@@ -531,10 +577,11 @@ class DomainTray(Gtk.Application):
         self.stats_dispatcher = stats_dispatcher
 
         self.widget_icon: Gtk.StatusIcon = Gtk.StatusIcon()
-        self.widget_icon.set_from_icon_name('qui-domains-scalable')
-        self.widget_icon.connect('button-press-event', self.show_menu)
+        self.widget_icon.set_from_icon_name("qui-domains-scalable")
+        self.widget_icon.connect("button-press-event", self.show_menu)
         self.widget_icon.set_tooltip_markup(
-            _('<b>Qubes Domains</b>\nView and manage running domains.'))
+            _("<b>Qubes Domains</b>\nView and manage running domains.")
+        )
 
         self.tray_menu = Gtk.Menu()
 
@@ -542,8 +589,8 @@ class DomainTray(Gtk.Application):
 
         self.menu_items = {}
 
-        self.unpause_all_action = Gio.SimpleAction.new('do-unpause-all', None)
-        self.unpause_all_action.connect('activate', self.do_unpause_all)
+        self.unpause_all_action = Gio.SimpleAction.new("do-unpause-all", None)
+        self.unpause_all_action.connect("activate", self.do_unpause_all)
         self.add_action(self.unpause_all_action)
         self.pause_notification_out = False
 
@@ -555,99 +602,115 @@ class DomainTray(Gtk.Application):
         self.register()  # register Gtk Application
 
     def register_events(self):
-        self.dispatcher.add_handler('connection-established', self.refresh_all)
-        self.dispatcher.add_handler('domain-pre-start', self.update_domain_item)
-        self.dispatcher.add_handler('domain-start', self.update_domain_item)
-        self.dispatcher.add_handler('domain-start-failed',
-                                    self.update_domain_item)
-        self.dispatcher.add_handler('domain-paused', self.update_domain_item)
-        self.dispatcher.add_handler('domain-unpaused', self.update_domain_item)
-        self.dispatcher.add_handler('domain-shutdown', self.update_domain_item)
-        self.dispatcher.add_handler('domain-pre-shutdown',
-                                    self.update_domain_item)
-        self.dispatcher.add_handler('domain-shutdown-failed',
-                                    self.update_domain_item)
+        self.dispatcher.add_handler("connection-established", self.refresh_all)
+        self.dispatcher.add_handler("domain-pre-start", self.update_domain_item)
+        self.dispatcher.add_handler("domain-start", self.update_domain_item)
+        self.dispatcher.add_handler(
+            "domain-start-failed", self.update_domain_item
+        )
+        self.dispatcher.add_handler("domain-paused", self.update_domain_item)
+        self.dispatcher.add_handler("domain-unpaused", self.update_domain_item)
+        self.dispatcher.add_handler("domain-shutdown", self.update_domain_item)
+        self.dispatcher.add_handler(
+            "domain-pre-shutdown", self.update_domain_item
+        )
+        self.dispatcher.add_handler(
+            "domain-shutdown-failed", self.update_domain_item
+        )
 
-        self.dispatcher.add_handler('domain-add', self.add_domain_item)
-        self.dispatcher.add_handler('domain-delete', self.remove_domain_item)
+        self.dispatcher.add_handler("domain-add", self.add_domain_item)
+        self.dispatcher.add_handler("domain-delete", self.remove_domain_item)
 
-        self.dispatcher.add_handler('domain-pre-start', self.emit_notification)
-        self.dispatcher.add_handler('domain-start', self.emit_notification)
-        self.dispatcher.add_handler('domain-start-failed',
-                                    self.emit_notification)
-        self.dispatcher.add_handler('domain-pre-shutdown',
-                                    self.emit_notification)
-        self.dispatcher.add_handler('domain-shutdown', self.emit_notification)
-        self.dispatcher.add_handler('domain-shutdown-failed',
-                                    self.emit_notification)
+        self.dispatcher.add_handler("domain-pre-start", self.emit_notification)
+        self.dispatcher.add_handler("domain-start", self.emit_notification)
+        self.dispatcher.add_handler(
+            "domain-start-failed", self.emit_notification
+        )
+        self.dispatcher.add_handler(
+            "domain-pre-shutdown", self.emit_notification
+        )
+        self.dispatcher.add_handler("domain-shutdown", self.emit_notification)
+        self.dispatcher.add_handler(
+            "domain-shutdown-failed", self.emit_notification
+        )
 
-        self.dispatcher.add_handler('domain-start', self.check_pause_notify)
-        self.dispatcher.add_handler('domain-paused', self.check_pause_notify)
-        self.dispatcher.add_handler('domain-unpaused', self.check_pause_notify)
-        self.dispatcher.add_handler('domain-shutdown', self.check_pause_notify)
+        self.dispatcher.add_handler("domain-start", self.check_pause_notify)
+        self.dispatcher.add_handler("domain-paused", self.check_pause_notify)
+        self.dispatcher.add_handler("domain-unpaused", self.check_pause_notify)
+        self.dispatcher.add_handler("domain-shutdown", self.check_pause_notify)
 
-        self.dispatcher.add_handler('domain-feature-set:updates-available',
-                                    self.feature_change)
-        self.dispatcher.add_handler('domain-feature-delete:updates-available',
-                                    self.feature_change)
-        self.dispatcher.add_handler('property-set:netvm', self.property_change)
-        self.dispatcher.add_handler('property-set:label', self.property_change)
+        self.dispatcher.add_handler(
+            "domain-feature-set:updates-available", self.feature_change
+        )
+        self.dispatcher.add_handler(
+            "domain-feature-delete:updates-available", self.feature_change
+        )
+        self.dispatcher.add_handler("property-set:netvm", self.property_change)
+        self.dispatcher.add_handler("property-set:label", self.property_change)
 
-        self.stats_dispatcher.add_handler('vm-stats', self.update_stats)
+        self.stats_dispatcher.add_handler("vm-stats", self.update_stats)
 
     def show_menu(self, _unused, event):
         self.tray_menu.popup_at_pointer(event)  # None means current event
 
     def emit_notification(self, vm, event, **kwargs):
-        notification = Gio.Notification.new(_(
-            "Qube Status: {}"). format(vm.name))
+        notification = Gio.Notification.new(
+            _("Qube Status: {}").format(vm.name)
+        )
         notification.set_priority(Gio.NotificationPriority.NORMAL)
 
-        if event == 'domain-start-failed':
-            notification.set_body(_('Qube {} has failed to start: {}').format(
-                vm.name, kwargs['reason']))
-            notification.set_priority(Gio.NotificationPriority.HIGH)
-            notification.set_icon(
-                Gio.ThemedIcon.new('dialog-warning'))
-        elif event == 'domain-pre-start':
-            notification.set_body(_('Qube {} is starting.').format(vm.name))
-        elif event == 'domain-start':
-            notification.set_body(_('Qube {} has started.').format(vm.name))
-        elif event == 'domain-pre-shutdown':
+        if event == "domain-start-failed":
             notification.set_body(
-                _('Qube {} is attempting to shut down.').format(vm.name))
-        elif event == 'domain-shutdown':
-            notification.set_body(_('Qube {} has shut down.').format(vm.name))
-        elif event == 'domain-shutdown-failed':
-            notification.set_body(
-                _('Qube {} failed to shut down: {}').format(
-                    vm.name, kwargs['reason']))
+                _("Qube {} has failed to start: {}").format(
+                    vm.name, kwargs["reason"]
+                )
+            )
             notification.set_priority(Gio.NotificationPriority.HIGH)
-            notification.set_icon(
-                Gio.ThemedIcon.new('dialog-warning'))
+            notification.set_icon(Gio.ThemedIcon.new("dialog-warning"))
+        elif event == "domain-pre-start":
+            notification.set_body(_("Qube {} is starting.").format(vm.name))
+        elif event == "domain-start":
+            notification.set_body(_("Qube {} has started.").format(vm.name))
+        elif event == "domain-pre-shutdown":
+            notification.set_body(
+                _("Qube {} is attempting to shut down.").format(vm.name)
+            )
+        elif event == "domain-shutdown":
+            notification.set_body(_("Qube {} has shut down.").format(vm.name))
+        elif event == "domain-shutdown-failed":
+            notification.set_body(
+                _("Qube {} failed to shut down: {}").format(
+                    vm.name, kwargs["reason"]
+                )
+            )
+            notification.set_priority(Gio.NotificationPriority.HIGH)
+            notification.set_icon(Gio.ThemedIcon.new("dialog-warning"))
         else:
             return
         self.send_notification(None, notification)
 
     def emit_paused_notification(self):
         if not self.pause_notification_out:
-            notification = Gio.Notification.new(_("Your qubes have been "
-                "paused!"))
-            notification.set_body(_(
-                "All your qubes are currently paused. If this was an accident, "
-                "simply click \"Unpause All\" to unpause them. Otherwise, "
-                "you can unpause individual qubes via the Qubes Domains "
-                "tray widget."))
-            notification.set_icon(
-                Gio.ThemedIcon.new('dialog-warning'))
-            notification.add_button(_('Unpause All'), 'app.do-unpause-all')
+            notification = Gio.Notification.new(
+                _("Your qubes have been " "paused!")
+            )
+            notification.set_body(
+                _(
+                    "All your qubes are currently paused. If this was an accident, "
+                    'simply click "Unpause All" to unpause them. Otherwise, '
+                    "you can unpause individual qubes via the Qubes Domains "
+                    "tray widget."
+                )
+            )
+            notification.set_icon(Gio.ThemedIcon.new("dialog-warning"))
+            notification.add_button(_("Unpause All"), "app.do-unpause-all")
             notification.set_priority(Gio.NotificationPriority.HIGH)
-            self.send_notification('vms-paused', notification)
+            self.send_notification("vms-paused", notification)
             self.pause_notification_out = True
 
     def withdraw_paused_notification(self):
         if self.pause_notification_out:
-            self.withdraw_notification('vms-paused')
+            self.withdraw_notification("vms-paused")
             self.pause_notification_out = False
 
     def do_unpause_all(self, _vm, *_args, **_kwargs):
@@ -667,7 +730,7 @@ class DomainTray(Gtk.Application):
     def have_running_and_all_are_paused(self):
         found_paused = False
         for vm in self.qapp.domains:
-            if vm.klass != 'AdminVM':
+            if vm.klass != "AdminVM":
                 if vm.is_running():
                     if vm.is_paused():
                         # a running that is paused
@@ -679,9 +742,9 @@ class DomainTray(Gtk.Application):
 
     def add_domain_item(self, _submitter, event, vm, **_kwargs):
         """Add a DomainMenuItem to menu; if event is None, this was fired
-         manually (mot due to domain-add event, and it is assumed the menu items
-         are created in alphabetical order. Otherwise, this method will
-         attempt to sort menu items correctly."""
+        manually (mot due to domain-add event, and it is assumed the menu items
+        are created in alphabetical order. Otherwise, this method will
+        attempt to sort menu items correctly."""
         # check if it already exists
         try:
             vm = self.qapp.domains[str(vm)]
@@ -701,7 +764,7 @@ class DomainTray(Gtk.Application):
                 if vm not in self.qapp.domains:
                     return
                 # or we might not have permission to access its power state
-                state = 'Halted'
+                state = "Halted"
 
         domain_item = DomainMenuItem(vm, self, self.icon_cache, state=state)
         if not event:  # menu item creation at widget start; we can assume
@@ -710,12 +773,12 @@ class DomainTray(Gtk.Application):
         else:
             position = 0
             for i in self.tray_menu:  # pylint: disable=not-an-iterable
-                if not hasattr(i, 'vm'):  # we reached the end
+                if not hasattr(i, "vm"):  # we reached the end
                     break
                 if not i.vm:  # header should be skipper
                     position += 1
                     continue
-                if i.vm.klass == 'AdminVM':
+                if i.vm.klass == "AdminVM":
                     # AdminVM(s) should be skipped
                     position += 1
                     continue
@@ -729,9 +792,9 @@ class DomainTray(Gtk.Application):
     def property_change(self, vm, event, *_args, **_kwargs):
         if vm not in self.menu_items:
             return
-        if event == 'property-set:netvm':
+        if event == "property-set:netvm":
             self.menu_items[vm].name.update_tooltip(netvm_changed=True)
-        elif event == 'property-set:label':
+        elif event == "property-set:label":
             self.menu_items[vm].set_label_icon()
 
     def feature_change(self, vm, *_args, **_kwargs):
@@ -756,7 +819,7 @@ class DomainTray(Gtk.Application):
 
     def handle_domain_shutdown(self, vm):
         try:
-            if getattr(vm, 'klass', None) == 'TemplateVM':
+            if getattr(vm, "klass", None) == "TemplateVM":
                 for menu_item in self.menu_items.values():
                     try:
                         if not menu_item.vm.is_running():
@@ -765,9 +828,10 @@ class DomainTray(Gtk.Application):
                             continue
                     except exc.QubesPropertyAccessError:
                         continue
-                    if getattr(menu_item.vm, 'template', None) == vm and \
-                            any(vol.is_outdated()
-                                for vol in menu_item.vm.volumes.values()):
+                    if getattr(menu_item.vm, "template", None) == vm and any(
+                        vol.is_outdated()
+                        for vol in menu_item.vm.volumes.values()
+                    ):
                         menu_item.name.update_outdated(True)
         except exc.QubesVMNotFoundError:
             # attribute not available anymore as VM was removed
@@ -775,8 +839,8 @@ class DomainTray(Gtk.Application):
             pass
 
     def update_domain_item(self, vm, event, **kwargs):
-        ''' Update the menu item with the started menu for
-        the specified vm in the tray'''
+        """Update the menu item with the started menu for
+        the specified vm in the tray"""
         try:
             item = self.menu_items[vm]
         except exc.QubesPropertyAccessError:
@@ -796,41 +860,44 @@ class DomainTray(Gtk.Application):
         else:
             try:
                 state = vm.get_power_state()
-            except Exception: # pylint: disable=broad-except
+            except Exception:  # pylint: disable=broad-except
                 # it's a fragile DispVM
                 state = "Transient"
 
         item.update_state(state)
 
-        if event == 'domain-shutdown':
+        if event == "domain-shutdown":
             self.handle_domain_shutdown(vm)
             # if the VM was shut down, it is no longer outdated
             item.name.update_outdated(False)
 
-        if event in ('domain-start', 'domain-pre-start'):
+        if event in ("domain-start", "domain-pre-start"):
             # A newly started VM should not be outdated.
             item.name.update_outdated(False)
             item.show_all()
-        if event == 'domain-shutdown':
+        if event == "domain-shutdown":
             item.hide()
 
     def update_stats(self, vm, _event, **kwargs):
         if vm not in self.menu_items:
             return
         self.menu_items[vm].update_stats(
-            kwargs['memory_kb'], kwargs['cpu_usage'])
+            kwargs["memory_kb"], kwargs["cpu_usage"]
+        )
 
     def initialize_menu(self):
         self.tray_menu.add(DomainMenuItem(None, self, self.icon_cache))
 
         # Add AdminVMS
-        for vm in sorted([vm for vm in self.qapp.domains
-                          if vm.klass == "AdminVM"]):
+        for vm in sorted(
+            [vm for vm in self.qapp.domains if vm.klass == "AdminVM"]
+        ):
             self.add_domain_item(None, None, vm)
 
         # and the rest of them
-        for vm in sorted([vm for vm in self.qapp.domains
-                          if vm.klass != 'AdminVM']):
+        for vm in sorted(
+            [vm for vm in self.qapp.domains if vm.klass != "AdminVM"]
+        ):
             self.add_domain_item(None, None, vm)
 
         for item in self.menu_items.values():
@@ -846,7 +913,7 @@ class DomainTray(Gtk.Application):
         self.tray_menu.add(Gtk.SeparatorMenuItem())
         self.tray_menu.add(QubesManagerItem())
 
-        self.connect('shutdown', self._disconnect_signals)
+        self.connect("shutdown", self._disconnect_signals)
 
     def refresh_all(self, _subject, _event, **_kwargs):
         items_to_delete = []
@@ -856,71 +923,91 @@ class DomainTray(Gtk.Application):
         for vm in items_to_delete:
             self.remove_domain_item(None, None, vm)
         for vm in self.qapp.domains:
-            self.update_domain_item(vm, '')
+            self.update_domain_item(vm, "")
 
     def run(self):  # pylint: disable=arguments-differ
         self.initialize_menu()
 
     def _disconnect_signals(self, _event):
-        self.dispatcher.remove_handler('connection-established',
-                                       self.refresh_all)
-        self.dispatcher.remove_handler('domain-pre-start',
-                                       self.update_domain_item)
-        self.dispatcher.remove_handler('domain-start', self.update_domain_item)
-        self.dispatcher.remove_handler('domain-start-failed',
-                                       self.update_domain_item)
-        self.dispatcher.remove_handler('domain-paused', self.update_domain_item)
-        self.dispatcher.remove_handler('domain-unpaused',
-                                       self.update_domain_item)
-        self.dispatcher.remove_handler('domain-shutdown',
-                                       self.update_domain_item)
-        self.dispatcher.remove_handler('domain-pre-shutdown',
-                                       self.update_domain_item)
-        self.dispatcher.remove_handler('domain-shutdown-failed',
-                                       self.update_domain_item)
-
-        self.dispatcher.remove_handler('domain-add', self.add_domain_item)
-        self.dispatcher.remove_handler('domain-delete', self.remove_domain_item)
-
-        self.dispatcher.remove_handler('domain-pre-start',
-                                       self.emit_notification)
-        self.dispatcher.remove_handler('domain-start', self.emit_notification)
-        self.dispatcher.remove_handler('domain-start-failed',
-                                       self.emit_notification)
-        self.dispatcher.remove_handler('domain-pre-shutdown',
-                                       self.emit_notification)
-        self.dispatcher.remove_handler('domain-shutdown',
-                                       self.emit_notification)
-        self.dispatcher.remove_handler('domain-shutdown-failed',
-                                       self.emit_notification)
-
-        self.dispatcher.remove_handler('domain-start', self.check_pause_notify)
-        self.dispatcher.remove_handler('domain-paused', self.check_pause_notify)
-        self.dispatcher.remove_handler('domain-unpaused',
-                                       self.check_pause_notify)
-        self.dispatcher.remove_handler('domain-shutdown',
-                                       self.check_pause_notify)
-
-        self.dispatcher.remove_handler('domain-feature-set:updates-available',
-                                       self.feature_change)
         self.dispatcher.remove_handler(
-            'domain-feature-delete:updates-available', self.feature_change)
-        self.dispatcher.remove_handler('property-set:netvm',
-                                       self.property_change)
-        self.dispatcher.remove_handler('property-set:label',
-                                       self.property_change)
+            "connection-established", self.refresh_all
+        )
+        self.dispatcher.remove_handler(
+            "domain-pre-start", self.update_domain_item
+        )
+        self.dispatcher.remove_handler("domain-start", self.update_domain_item)
+        self.dispatcher.remove_handler(
+            "domain-start-failed", self.update_domain_item
+        )
+        self.dispatcher.remove_handler("domain-paused", self.update_domain_item)
+        self.dispatcher.remove_handler(
+            "domain-unpaused", self.update_domain_item
+        )
+        self.dispatcher.remove_handler(
+            "domain-shutdown", self.update_domain_item
+        )
+        self.dispatcher.remove_handler(
+            "domain-pre-shutdown", self.update_domain_item
+        )
+        self.dispatcher.remove_handler(
+            "domain-shutdown-failed", self.update_domain_item
+        )
 
-        self.stats_dispatcher.remove_handler('vm-stats', self.update_stats)
+        self.dispatcher.remove_handler("domain-add", self.add_domain_item)
+        self.dispatcher.remove_handler("domain-delete", self.remove_domain_item)
+
+        self.dispatcher.remove_handler(
+            "domain-pre-start", self.emit_notification
+        )
+        self.dispatcher.remove_handler("domain-start", self.emit_notification)
+        self.dispatcher.remove_handler(
+            "domain-start-failed", self.emit_notification
+        )
+        self.dispatcher.remove_handler(
+            "domain-pre-shutdown", self.emit_notification
+        )
+        self.dispatcher.remove_handler(
+            "domain-shutdown", self.emit_notification
+        )
+        self.dispatcher.remove_handler(
+            "domain-shutdown-failed", self.emit_notification
+        )
+
+        self.dispatcher.remove_handler("domain-start", self.check_pause_notify)
+        self.dispatcher.remove_handler("domain-paused", self.check_pause_notify)
+        self.dispatcher.remove_handler(
+            "domain-unpaused", self.check_pause_notify
+        )
+        self.dispatcher.remove_handler(
+            "domain-shutdown", self.check_pause_notify
+        )
+
+        self.dispatcher.remove_handler(
+            "domain-feature-set:updates-available", self.feature_change
+        )
+        self.dispatcher.remove_handler(
+            "domain-feature-delete:updates-available", self.feature_change
+        )
+        self.dispatcher.remove_handler(
+            "property-set:netvm", self.property_change
+        )
+        self.dispatcher.remove_handler(
+            "property-set:label", self.property_change
+        )
+
+        self.stats_dispatcher.remove_handler("vm-stats", self.update_stats)
 
 
 def main():
-    ''' main function '''
+    """main function"""
     qapp = qubesadmin.Qubes()
     dispatcher = qubesadmin.events.EventsDispatcher(qapp)
     stats_dispatcher = qubesadmin.events.EventsDispatcher(
-        qapp, api_method='admin.vm.Stats')
+        qapp, api_method="admin.vm.Stats"
+    )
     app = DomainTray(
-        'org.qubes.qui.tray.Domains', qapp, dispatcher, stats_dispatcher)
+        "org.qubes.qui.tray.Domains", qapp, dispatcher, stats_dispatcher
+    )
     app.run()
 
     loop = asyncio.get_event_loop()
@@ -929,9 +1016,10 @@ def main():
         asyncio.ensure_future(stats_dispatcher.listen_for_events()),
     ]
 
-    return qui.utils.run_asyncio_and_show_errors(loop, tasks,
-                                                 "Qubes Domains Widget")
+    return qui.utils.run_asyncio_and_show_errors(
+        loop, tasks, "Qubes Domains Widget"
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

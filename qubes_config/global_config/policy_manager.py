@@ -26,6 +26,7 @@ from qrexec.policy.parser import StringPolicy, Rule
 from qubes_config.widgets.utils import compare_rule_lists
 
 import gettext
+
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
@@ -35,13 +36,16 @@ class PolicyManager:
     Single manager for interacting with Qubes Policy.
     Should be used as a singleton.
     """
+
     def __init__(self):
         self.policy_client = PolicyClient()
-        self.policy_disclaimer = _("""
+        self.policy_disclaimer = _(
+            """
 # THIS IS AN AUTOMATICALLY GENERATED POLICY FILE.
 # Any changes made manually may be overwritten by Qubes Configuration Tools.
 
-""")
+"""
+        )
 
     def get_all_policy_files(self, service: str) -> List[str]:
         """Just get a straightforward list of all relevant policy files."""
@@ -50,8 +54,9 @@ class PolicyManager:
         except subprocess.CalledProcessError:
             return []
 
-    def get_conflicting_policy_files(self, service: str,
-                                     own_file: str) -> List[str]:
+    def get_conflicting_policy_files(
+        self, service: str, own_file: str
+    ) -> List[str]:
         """
         Get a list of policy files (as str) that apply to the selected service
         and are before it in load order.
@@ -71,8 +76,9 @@ class PolicyManager:
             conflicting_files.append(f)
         return conflicting_files
 
-    def get_rules_from_filename(self, filename: str, default_policy: str) -> \
-            Tuple[List[Rule], Optional[str]]:
+    def get_rules_from_filename(
+        self, filename: str, default_policy: str
+    ) -> Tuple[List[Rule], Optional[str]]:
         """Get rules contained in a provided file. If the file does not exist,
         return default policy.
         Return list of Rule objects and str of the PolicyClient's token
@@ -94,16 +100,21 @@ class PolicyManager:
         return compare_rule_lists(rules, second_rules)
 
     @staticmethod
-    def new_rule(service: str, source: str, target: str, action: str,
-                 argument: str = "*") -> Rule:
+    def new_rule(
+        service: str, source: str, target: str, action: str, argument: str = "*"
+    ) -> Rule:
         """Create a new Rule object from given parameters: service, source,
         target and action should be provided according to policy file specs."""
         return Rule.from_line(
-            None, f"{service}\t{argument}\t{source}\t{target}\t{action}",
-            filepath=None, lineno=0)
+            None,
+            f"{service}\t{argument}\t{source}\t{target}\t{action}",
+            filepath=None,
+            lineno=0,
+        )
 
-    def save_rules(self, file_name: str, rules_list: List[Rule],
-                   token: Optional[str]):
+    def save_rules(
+        self, file_name: str, rules_list: List[Rule], token: Optional[str]
+    ):
         """Save provided list of rules to a file. Must provide
         a token corresponding to last file access, to avoid unexpected
         overwriting."""
@@ -112,10 +123,13 @@ class PolicyManager:
 
     def rules_to_text(self, rules_list: List[Rule]) -> str:
         """Convert list of Rules to text ready to be stored in a file."""
-        return self.policy_disclaimer + \
-               '\n'.join([str(rule) for rule in rules_list]) + '\n'
+        return (
+            self.policy_disclaimer
+            + "\n".join([str(rule) for rule in rules_list])
+            + "\n"
+        )
 
     @staticmethod
     def text_to_rules(text: str) -> List[Rule]:
         """Convert policy file text to a list of Rules."""
-        return StringPolicy(policy={'__main__': text}).rules
+        return StringPolicy(policy={"__main__": text}).rules
