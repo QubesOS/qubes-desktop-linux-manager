@@ -232,8 +232,9 @@ def test_new_template_cloned(mock_error, mock_subprocess,
 
 
 @patch('subprocess.check_output', side_effect = mock_output)
+@patch('subprocess.check_call')
 @patch('qubes_config.new_qube.new_qube_app.show_error')
-def test_new_standalone(mock_error, mock_subprocess,
+def test_new_standalone(mock_error, mock_check_call, mock_subprocess,
                         test_qapp, new_qube_builder):
     # the builder fixture must be called to register needed signals and
     # only do it once
@@ -284,7 +285,7 @@ def test_new_standalone(mock_error, mock_subprocess,
         assert mock_dialog.mock_calls  # called to tell us about the success
 
         assert call(['qubes-vm-boot-from-device', 'test']) \
-               in mock_popen.mock_calls  # called install system to qube
+               in mock_check_call.mock_calls  # called install system to qube
 
         # but no apps were added
         assert call(['qvm-appmenus', '--set-whitelist', '-',
@@ -359,8 +360,9 @@ def test_new_disposable(mock_error, mock_subprocess,
 
 
 @patch('subprocess.check_output', side_effect = mock_output)
+@patch('subprocess.check_call')
 @patch('qubes_config.new_qube.new_qube_app.show_error')
-def test_advanced_new_qube(mock_error, mock_subprocess,
+def test_advanced_new_qube(mock_error, _mock_check_call, mock_subprocess,
                          test_qapp, new_qube_builder):
     # the builder fixture must be called to register needed signals and
     # only do it once
