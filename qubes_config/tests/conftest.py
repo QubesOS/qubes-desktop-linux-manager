@@ -254,7 +254,8 @@ def test_qapp_impl():
                          'config.default.qubes-update-check': None,
                          'config-usbvm-name': None,
                          'gui-default-secure-copy-sequence': None,
-                         'gui-default-secure-paste-sequence': None
+                         'gui-default-secure-paste-sequence': None,
+                         'virtual-browser-action': None
                          }, [])
     add_expected_vm(qapp, 'sys-net', 'AppVM',
                     {'provides_network': ('bool', False, 'True')},
@@ -373,7 +374,8 @@ def test_qapp_simple(): # pylint: disable=redefined-outer-name
                          'config.default.qubes-update-check': None,
                          'config-usbvm-name': None,
                          'gui-default-secure-copy-sequence': None,
-                         'gui-default-secure-paste-sequence': None
+                         'gui-default-secure-paste-sequence': None,
+                         'virtual-browser-action': None
                          }, [])
     add_expected_vm(qapp, 'sys-net', 'AppVM',
                     {'provides_network': ('bool', False, 'True')},
@@ -427,7 +429,8 @@ def test_qapp_broken():  # pylint: disable=redefined-outer-name
                          'config.default.qubes-update-check': None,
                          'config-usbvm-name': None,
                          'gui-default-secure-copy-sequence': None,
-                         'gui-default-secure-paste-sequence': None
+                         'gui-default-secure-paste-sequence': None,
+                         'virtual-browser-action': None
                          }, [])
 
     #

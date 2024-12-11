@@ -13,7 +13,7 @@ checks:tests:
   before_script: &before-script
     - "PATH=$PATH:$HOME/.local/bin"
     - sudo dnf install -y python3-gobject gtk3 python3-pytest gtksourceview4
-      python3-coverage xorg-x11-server-Xvfb python3-pip
+      python3-coverage xorg-x11-server-Xvfb python3-pip xdg-utils
     - pip3 install --quiet -r ci/requirements.txt
     - git clone https://github.com/QubesOS/qubes-core-admin-client ~/core-admin-client
     - git clone https://github.com/QubesOS/qubes-core-qrexec ~/core-qrexec

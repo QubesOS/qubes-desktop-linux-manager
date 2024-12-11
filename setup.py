@@ -20,6 +20,7 @@ class InstallWithLocale(setuptools.command.install.install):
                         for f in next(os.walk(d))[2]
                         if os.path.splitext(f)[1] == '.po']
             for po_file in po_files:
+                # pylint: disable=unused-variable
                 filename, extension = os.path.splitext(po_file)
                 mo_file = filename + '.mo'
                 msgfmt_cmd = 'msgfmt {} -o {}'.format(
@@ -76,7 +77,7 @@ setuptools.setup(
     packages=["qui", "qui.updater", "qui.devices", "qui.tools", "qui.tray",
               "qubes_config", "qubes_config.global_config",
               "qubes_config.widgets", "qubes_config.new_qube",
-              'qubes_config.policy_editor'],
+              'qubes_config.policy_editor','qubes_virtual_browser'],
     entry_points={
         'gui_scripts': [
             'qui-domains = qui.tray.domains:main',
@@ -86,8 +87,11 @@ setuptools.setup(
             'qubes-update-gui = qui.updater.updater:main',
             'qui-clipboard = qui.clipboard:main',
             'qubes-new-qube = qubes_config.new_qube.new_qube_app:main',
-            'qubes-global-config = qubes_config.global_config.global_config:main',
-            'qubes-policy-editor-gui = qubes_config.policy_editor.policy_editor:main'
+            'qubes-global-config = ' \
+                'qubes_config.global_config.global_config:main',
+            'qubes-policy-editor-gui = ' \
+                'qubes_config.policy_editor.policy_editor:main',
+            'qubes-virtual-browser = qubes_virtual_browser.virtual_browser:main'
         ]
     },
     package_data={'qui': ["updater.glade",
@@ -115,7 +119,8 @@ setuptools.setup(
                                    "qubes-policy-editor-light.css",
                                    "qubes-policy-editor-dark.css",
                                    "policy_editor.glade",
-                                   "policy_editor/policy_help.txt"]},
+                                   "policy_editor/policy_help.txt"],
+                  'qubes_virtual_browser': ["virtual_browser.glade"]},
     cmdclass={
         'install': InstallWithLocale
     },

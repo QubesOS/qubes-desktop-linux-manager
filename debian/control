@@ -19,6 +19,7 @@ Package: qubes-desktop-linux-manager
 Architecture: any
 Depends:
  python3-qui,
+ xdg-utils,
  ${misc:Depends}
 Description: Qubes UI Applications
  A collection of GUI application for enhancing the Qubes UX.

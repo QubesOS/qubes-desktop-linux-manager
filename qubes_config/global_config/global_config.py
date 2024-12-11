@@ -32,7 +32,7 @@ import qubesadmin.exc
 import qubesadmin.vm
 from ..widgets.gtk_utils import show_error, show_dialog_with_icon, load_theme
 from ..widgets.gtk_widgets import ProgressBarDialog, ViewportHandler
-from ..widgets.utils import open_url_in_disposable
+from ..widgets.utils import open_url_in_disposable, apply_feature_change
 from .page_handler import PageHandler
 from .policy_handler import PolicyHandler, VMSubsetPolicyHandler
 from .policy_rules import RuleSimple, \
@@ -49,6 +49,7 @@ import gi
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GLib, GObject, Gio
+from gi.repository.GdkPixbuf import Pixbuf
 
 logger = logging.getLogger('qubes-global-config')
 
@@ -186,6 +187,138 @@ qubes.Filecopy * @anyvm @anyvm ask""",
             unsaved_changes = handler.get_unsaved()
             if unsaved_changes:
                 unsaved.append(unsaved_changes)
+        return "\n".join(unsaved)
+
+
+class UrlPageHandler(PageHandler):
+    """Handler for URL page. Requires separate handler because it combines
+    qubes-virtual-browser settings with qubes.OpenURL policies. """
+    def __init__(self, qapp: qubesadmin.Qubes,
+                 gtk_builder: Gtk.Builder,
+                 policy_manager: PolicyManager):
+        self.qapp = qapp
+        self.builder = gtk_builder
+        self.policy_manager = policy_manager
+        self.browser_action = qapp.domains[qapp.local_name].features.get( \
+            "virtual-browser-action", "")
+
+        self.virtual_browser_ask: Gtk.RadioButton = \
+            gtk_builder.get_object('virtual_browser_ask')
+        self.virtual_browser_dispvm: Gtk.RadioButton = \
+            gtk_builder.get_object('virtual_browser_dispvm')
+        self.virtual_browser_clipboard: Gtk.RadioButton = \
+            gtk_builder.get_object('virtual_browser_clipboard')
+        self.virtual_browser_discard: Gtk.RadioButton = \
+            gtk_builder.get_object('virtual_browser_discard')
+
+        self.virtual_browser_dispvms: Gtk.ComboBox = \
+            gtk_builder.get_object('virtual_browser_dispvms')
+        self.disposables = Gtk.ListStore(object, Pixbuf, str)
+        self.virtual_browser_dispvms.set_model(self.disposables)
+        self.renderer_icon = Gtk.CellRendererPixbuf()
+        self.renderer_vmname = Gtk.CellRendererText()
+        self.virtual_browser_dispvms.pack_start(self.renderer_icon, True)
+        self.virtual_browser_dispvms.pack_start(self.renderer_vmname, True)
+        self.virtual_browser_dispvms.add_attribute( \
+            self.renderer_icon, "pixbuf", 1)
+        self.virtual_browser_dispvms.add_attribute( \
+            self.renderer_vmname, "text", 2)
+
+        default_dispvm = getattr(self.qapp, "default_dispvm", None)
+        for domain in qapp.domains:
+            if getattr(domain, "template_for_dispvms", False):
+                # pylint: disable=no-member
+                try:
+                    icon = Gtk.IconTheme.get_default().load_icon(
+                        getattr(domain, "icon", "qubes-manager"), 32, 0)
+                except gi.repository.GLib.GError:
+                    # Use Adwaita's Qube like icon if original icon is missing
+                    icon = Gtk.IconTheme.get_default().load_icon(
+                        "insert-object-symbolic", 32, 0)
+                row = self.disposables.append([domain, icon, domain.name])
+                if domain.name == default_dispvm:
+                    self.disposables[row][2] += " (Default DispVM Template)"
+
+        self._reset_virtual_browser_choice()
+        self.virtual_browser_dispvms.connect("changed", self._dispvm_selected)
+
+        # Allocating a list of handlers in case we want to add more in future
+        self.handlers: List[Union[DispvmExceptionHandler, FeatureHandler]] = [
+            DispvmExceptionHandler(
+                gtk_builder=self.builder,
+                qapp=self.qapp,
+                service_name="qubes.OpenURL",
+                policy_file_name="50-config-openurl",
+                prefix="url",
+                policy_manager=self.policy_manager,
+            )
+        ]
+
+    def _dispvm_selected(self, combo):
+        # pylint: disable=unused-argument
+        self.virtual_browser_dispvm.set_active(True)
+
+    def _reset_virtual_browser_choice(self):
+        if self.browser_action is not None \
+                and self.browser_action.startswith('disposable:') \
+                and self.browser_action[11:] in self.qapp.domains:
+            self.virtual_browser_dispvm.set_active(True)
+        elif self.browser_action == 'clipboard':
+            self.virtual_browser_clipboard.set_active(True)
+        elif self.browser_action == 'discard':
+            self.virtual_browser_discard.set_active(True)
+        else:
+            self.virtual_browser_ask.set_active(True)
+
+        default_dispvm = getattr(self.qapp, "default_dispvm", None)
+        for index, disposable in enumerate(self.disposables):
+            if self.virtual_browser_dispvm.get_active():
+                if disposable[0].name == self.browser_action[11:]:
+                    self.virtual_browser_dispvms.set_active(index)
+            elif disposable[0].name == default_dispvm:
+                self.virtual_browser_dispvms.set_active(index)
+
+    def reset(self):
+        for handler in self.handlers:
+            handler.reset()
+        self._reset_virtual_browser_choice()
+
+    def save(self):
+        for handler in self.handlers:
+            handler.save()
+        if self.virtual_browser_ask.get_active():
+            self.browser_action = None
+        elif self.virtual_browser_dispvm.get_active():
+            tree_iter = self.virtual_browser_dispvms.get_active_iter()
+            self.browser_action = "disposable:" + \
+                    self.disposables[tree_iter][0].name
+        elif self.virtual_browser_clipboard.get_active():
+            self.browser_action = "clipboard"
+        elif self.virtual_browser_discard.get_active():
+            self.browser_action = "discard"
+        apply_feature_change(self.qapp.domains[self.qapp.local_name], \
+            "virtual-browser-action", self.browser_action)
+
+    def _virtual_browser_choice(self) -> str:
+        if self.virtual_browser_ask.get_active():
+            return ""
+        if self.virtual_browser_dispvm.get_active():
+            tree_iter = self.virtual_browser_dispvms.get_active_iter()
+            return "disposable:" + self.disposables[tree_iter][0].name
+        if self.virtual_browser_clipboard.get_active():
+            return "clipboard"
+        if self.virtual_browser_discard.get_active():
+            return "discard"
+        return ""
+
+    def get_unsaved(self) -> str:
+        unsaved = []
+        for handler in self.handlers:
+            unsaved_changes = handler.get_unsaved()
+            if unsaved_changes:
+                unsaved.append(unsaved_changes)
+        if self.browser_action != self._virtual_browser_choice():
+            unsaved.append(_("Qubes Virtual Browser default action"))
         return "\n".join(unsaved)
 
 
@@ -403,14 +536,12 @@ class GlobalConfig(Gtk.Application):
                 policy_manager=self.policy_manager
             )
         self.progress_bar_dialog.update_progress(page_progress)
-        self.handlers['url'] = DispvmExceptionHandler(
-            gtk_builder=self.builder,
-            qapp=self.qapp,
-            service_name="qubes.OpenURL",
-            policy_file_name="50-config-openurl",
-            prefix="url",
-            policy_manager=self.policy_manager,
-        )
+
+        self.handlers['url'] = UrlPageHandler(
+                qapp=self.qapp,
+                gtk_builder=self.builder,
+                policy_manager=self.policy_manager
+            )
         self.progress_bar_dialog.update_progress(page_progress)
 
         self.handlers['thisdevice'] = ThisDeviceHandler(self.qapp,
@@ -452,7 +583,7 @@ class GlobalConfig(Gtk.Application):
             label.connect("activate-link", self._activate_link)
 
     def _activate_link(self, _widget, url):
-        open_url_in_disposable(url, self.qapp)
+        open_url_in_disposable(url)
         return True
 
     def get_current_page(self) -> Optional[PageHandler]:
@@ -520,9 +651,9 @@ class GlobalConfig(Gtk.Application):
         label_3 = Gtk.Label()
         label_3.set_text(_("Do you want to save changes?"))
         label_3.set_xalign(0)
-        box.pack_start(label_1, False, False, 10)
-        box.pack_start(label_2, False, False, 10)
-        box.pack_start(label_3, False, False, 10)
+        box.pack_start(label_1, False, False, 10)   # pylint: disable=no-member
+        box.pack_start(label_2, False, False, 10)   # pylint: disable=no-member
+        box.pack_start(label_3, False, False, 10)   # pylint: disable=no-member
 
         response = show_dialog_with_icon(
             parent=self.main_window, title=_("Unsaved changes"), text=box,
