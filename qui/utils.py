@@ -24,6 +24,7 @@ import json
 import sys
 import traceback
 from html import escape
+from typing import Union
 
 from qubesadmin import exc
 
@@ -37,7 +38,7 @@ _ = t.gettext
 
 import gi  # isort:skip
 gi.require_version('Gtk', '3.0')  # isort:skip
-from gi.repository import Gtk  # isort:skip
+from gi.repository import Gtk, GLib  # isort:skip
 
 with importlib.resources.files('qui').joinpath('eol.json').open() as stream:
     EOL_DATES = json.load(stream)
@@ -60,9 +61,9 @@ def run_asyncio_and_show_errors(loop, tasks, name, restart=True):
     exit_code = 0
 
     message = _("<b>Whoops. A critical error in {} has occurred.</b>"
-                " This is most likely a bug.").format(name)
+                " This is most likely a bug.").format(escape(name))
     if restart:
-        message += _(" {} will restart itself.").format(name)
+        message += _(" {} will restart itself.").format(escape(name))
 
     for d in done:  # pylint: disable=invalid-name
         try:
@@ -76,11 +77,12 @@ def run_asyncio_and_show_errors(loop, tasks, name, restart=True):
             exc_value_descr = escape(str(exc_value))
             traceback_descr = escape(traceback.format_exc(limit=10))
             exc_description = "\n<b>{}</b>: {}\n{}".format(
-                   exc_type.__name__, exc_value_descr, traceback_descr)
+                   escape(exc_type.__name__), exc_value_descr, traceback_descr)
             dialog.format_secondary_markup(exc_description)
             dialog.run()
             exit_code = 1
     return exit_code
+
 
 def check_update(vm) -> bool:
     """Return true if the given template/standalone vm is updated or not
@@ -95,6 +97,20 @@ def check_update(vm) -> bool:
     except exc.QubesException:
         return True
     return False
+
+def _escape_str(s: Union[str, float, int]) -> Union[str, float, int]:
+    # pylint: disable=unidiomatic-typecheck
+    if type(s) is str:
+        return GLib.markup_escape_text(s)
+    # pylint: disable=unidiomatic-typecheck
+    if type(s) in (float, int, bool):
+        return s
+    raise TypeError(f"Unsupported input type {type(s)}")
+
+def markup_format(s, *args, **kwargs) -> str:
+    escaped_args = [_escape_str(i) for i in args]
+    escaped_kwargs = {k: _escape_str(v) for k, v in kwargs.items()}
+    return s.format(*escaped_args, **escaped_kwargs)
 
 def check_support(vm) -> bool:
     """Return true if the given template/standalone vm is still supported, by
