@@ -19,6 +19,7 @@ _ = t.gettext
 WARN_LEVEL = 0.9
 URGENT_WARN_LEVEL = 0.95
 
+from .gross_gtk3_bug_workaround import DisgustingX11FullscreenWindowHack
 
 class VMUsage:
     def __init__(self, vm):
@@ -338,6 +339,7 @@ class DiskSpace(Gtk.Application):
     def __init__(self, **properties):
         super().__init__(**properties)
 
+        self.disgusting_hack = DisgustingX11FullscreenWindowHack()
         self.pool_warned = False
         self.vms_warned = set()
 
@@ -423,6 +425,7 @@ class DiskSpace(Gtk.Application):
         vm_data = VMUsageData(self.qubes_app)
 
         menu = Gtk.Menu()
+        self.disgusting_hack.show_for_widget(self.menu)
 
         menu.append(self.make_top_box(pool_data))
 

@@ -23,6 +23,7 @@ import gettext
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
+from .gross_gtk3_bug_workaround import DisgustingX11FullscreenWindowHack
 
 class TextItem(Gtk.MenuItem):
     def __init__(self, text):
@@ -59,6 +60,7 @@ class UpdatesTray(Gtk.Application):
         super().__init__()
         self.name = app_name
 
+        self.disgusting_hack = DisgustingX11FullscreenWindowHack()
         self.dispatcher = dispatcher
         self.qapp = qapp
 
@@ -76,6 +78,7 @@ class UpdatesTray(Gtk.Application):
         self.obsolete_vms = set()
 
         self.tray_menu = Gtk.Menu()
+        self.disgusting_hack.show_for_widget(self.tray_menu)
 
     def run(self):  # pylint: disable=arguments-differ
         self.check_vms_needing_update()
