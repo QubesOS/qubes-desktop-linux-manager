@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position,import-error
-''' A widget that monitors update availability and notifies the user
- about new updates to templates and standalone VMs'''
+""" A widget that monitors update availability and notifies the user
+ about new updates to templates and standalone VMs"""
 import asyncio
 import sys
 import subprocess
@@ -13,13 +13,16 @@ import qui.utils
 from qubesadmin import exc
 
 import gi  # isort:skip
-gi.require_version('Gtk', '3.0')  # isort:skip
+
+gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk, Gio  # isort:skip
 
 import gbulb
+
 gbulb.install()
 
 import gettext
+
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
@@ -51,7 +54,7 @@ class RunItem(Gtk.MenuItem):
         self.set_margin_bottom(5)
         self.add(title_label)
         self.show_all()
-        self.connect('activate', command)
+        self.connect("activate", command)
 
 
 class UpdatesTray(Gtk.Application):
@@ -66,11 +69,12 @@ class UpdatesTray(Gtk.Application):
         self.register()  # register Gtk Application
 
         self.widget_icon = Gtk.StatusIcon()
-        self.widget_icon.set_from_icon_name('software-update-available')
+        self.widget_icon.set_from_icon_name("software-update-available")
         self.widget_icon.set_visible(False)
-        self.widget_icon.connect('button-press-event', self.show_menu)
-        self.widget_icon.set_tooltip_markup(_(
-            '<b>Qubes Update</b>\nUpdates are available.'))
+        self.widget_icon.connect("button-press-event", self.show_menu)
+        self.widget_icon.set_tooltip_markup(
+            _("<b>Qubes Update</b>\nUpdates are available.")
+        )
 
         self.vms_needing_update = set()
         self.obsolete_vms = set()
@@ -88,20 +92,31 @@ class UpdatesTray(Gtk.Application):
 
         if self.vms_needing_update:
             self.tray_menu.append(TextItem(_("<b>Qube updates available!</b>")))
-            self.tray_menu.append(RunItem(
-                _("Updates for {} qubes are available!\n"
-                  "<b>Launch updater</b>").format(
-                    len(self.vms_needing_update)), self.launch_updater))
+            self.tray_menu.append(
+                RunItem(
+                    _(
+                        "Updates for {} qubes are available!\n"
+                        "<b>Launch updater</b>"
+                    ).format(len(self.vms_needing_update)),
+                    self.launch_updater,
+                )
+            )
 
         if self.obsolete_vms:
-            self.tray_menu.append(TextItem(
-                _("<b>Some qubes are no longer supported!</b>")))
-            obsolete_text = _("The following qubes are based on distributions "
-                              "that are no longer supported:\n")\
-                + ", ".join([str(vm) for vm in self.obsolete_vms])\
-                + _("\n<b>Install new templates with Template Manager</b>")
             self.tray_menu.append(
-                RunItem(obsolete_text, self.launch_template_manager))
+                TextItem(_("<b>Some qubes are no longer supported!</b>"))
+            )
+            obsolete_text = (
+                _(
+                    "The following qubes are based on distributions "
+                    "that are no longer supported:\n"
+                )
+                + ", ".join([str(vm) for vm in self.obsolete_vms])
+                + _("\n<b>Install new templates with Template Manager</b>")
+            )
+            self.tray_menu.append(
+                RunItem(obsolete_text, self.launch_template_manager)
+            )
 
         self.tray_menu.show_all()
 
@@ -115,12 +130,12 @@ class UpdatesTray(Gtk.Application):
     @staticmethod
     def launch_updater(*_args, **_kwargs):
         # pylint: disable=consider-using-with
-        subprocess.Popen(['qubes-update-gui'])
+        subprocess.Popen(["qubes-update-gui"])
 
     @staticmethod
     def launch_template_manager(*_args, **_kwargs):
         # pylint: disable=consider-using-with
-        subprocess.Popen(['qvm-template-gui'])
+        subprocess.Popen(["qvm-template-gui"])
 
     def check_vms_needing_update(self):
         self.vms_needing_update.clear()
@@ -134,18 +149,23 @@ class UpdatesTray(Gtk.Application):
                 self.obsolete_vms.add(vm.name)
 
     def connect_events(self):
-        self.dispatcher.add_handler('domain-feature-set:updates-available',
-                                    self.feature_change)
-        self.dispatcher.add_handler('domain-feature-delete:updates-available',
-                                    self.feature_change)
-        self.dispatcher.add_handler('domain-feature-set:skip-update',
-                                    self.feature_change)
-        self.dispatcher.add_handler('domain-feature-delete:skip-update',
-                                    self.feature_change)
-        self.dispatcher.add_handler('domain-add', self.domain_added)
-        self.dispatcher.add_handler('domain-delete', self.domain_removed)
-        self.dispatcher.add_handler('domain-feature-set:os-eol',
-                                    self.feature_change)
+        self.dispatcher.add_handler(
+            "domain-feature-set:updates-available", self.feature_change
+        )
+        self.dispatcher.add_handler(
+            "domain-feature-delete:updates-available", self.feature_change
+        )
+        self.dispatcher.add_handler(
+            "domain-feature-set:skip-update", self.feature_change
+        )
+        self.dispatcher.add_handler(
+            "domain-feature-delete:skip-update", self.feature_change
+        )
+        self.dispatcher.add_handler("domain-add", self.domain_added)
+        self.dispatcher.add_handler("domain-delete", self.domain_removed)
+        self.dispatcher.add_handler(
+            "domain-feature-set:os-eol", self.feature_change
+        )
 
     def domain_added(self, _submitter, _event, vm, *_args, **_kwargs):
         try:
@@ -180,7 +200,8 @@ class UpdatesTray(Gtk.Application):
         if not updated and vm not in self.vms_needing_update:
             self.vms_needing_update.add(vm)
             notification = Gio.Notification.new(
-                _("New updates are available for {}.").format(vm.name))
+                _("New updates are available for {}.").format(vm.name)
+            )
             notification.set_priority(Gio.NotificationPriority.NORMAL)
             self.send_notification(None, notification)
         elif updated and vm in self.vms_needing_update:
@@ -203,15 +224,17 @@ class UpdatesTray(Gtk.Application):
 def main():
     qapp = qubesadmin.Qubes()
     dispatcher = qubesadmin.events.EventsDispatcher(qapp)
-    app = UpdatesTray(
-        'org.qubes.qui.tray.Updates', qapp, dispatcher)
+    app = UpdatesTray("org.qubes.qui.tray.Updates", qapp, dispatcher)
     app.run()
 
     loop = asyncio.get_event_loop()
 
-    return qui.utils.run_asyncio_and_show_errors(loop, [asyncio.ensure_future(
-        dispatcher.listen_for_events())], "Qubes Update Widget")
+    return qui.utils.run_asyncio_and_show_errors(
+        loop,
+        [asyncio.ensure_future(dispatcher.listen_for_events())],
+        "Qubes Update Widget",
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

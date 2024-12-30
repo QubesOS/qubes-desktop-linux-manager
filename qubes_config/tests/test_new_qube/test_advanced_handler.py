@@ -60,11 +60,10 @@ def test_advanced_handler(test_qapp, new_qube_builder):
     assert not handler.launch_settings_check.get_active()
     assert not handler.get_launch_settings()
 
-    handler._template_changed(None, 'fedora-35')
+    handler._template_changed(None, "fedora-35")
 
     assert not handler.install_system_check.get_sensitive()
     assert not handler.get_install_system()
-
 
     # init ram
 
@@ -82,10 +81,10 @@ def test_advanced_handler(test_qapp, new_qube_builder):
     # storage pool
     assert handler.get_pool() is None
     # defaults from conftest
-    assert handler.pool.get_active_id() == 'default (file)'
+    assert handler.pool.get_active_id() == "default (file)"
 
-    handler.pool.set_active_id('lvm')
-    assert handler.get_pool() == 'lvm'
+    handler.pool.set_active_id("lvm")
+    assert handler.get_pool() == "lvm"
 
-    handler.pool.set_active_id('default (file)')
+    handler.pool.set_active_id("default (file)")
     assert handler.get_pool() is None

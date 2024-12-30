@@ -26,12 +26,14 @@ import time
 import gi
 from typing import Dict, List
 
-gi.require_version('Gtk', '3.0')  # isort:skip
+gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk, Gdk, GLib, GObject  # isort:skip
 from locale import gettext as l
 
-from qubes_config.widgets.gtk_utils import copy_to_global_clipboard, \
-    load_icon_at_gtk_size
+from qubes_config.widgets.gtk_utils import (
+    copy_to_global_clipboard,
+    load_icon_at_gtk_size,
+)
 from qui.updater.updater_settings import Settings
 from qui.updater.utils import UpdateStatus, RowWrapper
 
@@ -39,13 +41,7 @@ from qui.updater.utils import UpdateStatus, RowWrapper
 class ProgressPage:
 
     def __init__(
-            self,
-            builder,
-            log,
-            header_label,
-            next_button,
-            cancel_button,
-            callback
+        self, builder, log, header_label, next_button, cancel_button, callback
     ):
         self.builder = builder
         self.log = log
@@ -66,16 +62,19 @@ class ProgressPage:
         progress_store = self.progressbar.get_model()
         progress_store.append([0])
         self.total_progress = progress_store[-1]
-        self.progressbar_renderer: Gtk.CellRendererProgress = \
+        self.progressbar_renderer: Gtk.CellRendererProgress = (
             self.builder.get_object("progressbar_renderer")
+        )
         self.progressbar_renderer.set_fixed_size(-1, 26)
 
         self.progress_list: Gtk.TreeView = self.builder.get_object(
-            "progress_list")
+            "progress_list"
+        )
         self.selection: Gtk.TreeSelection = self.progress_list.get_selection()
         self.progress_list.connect("row-activated", self.row_selected)
         progress_column: Gtk.TreeViewColumn = self.builder.get_object(
-            "progress_column")
+            "progress_column"
+        )
         renderer = CellRendererProgressWithResult()
         renderer.props.ypad = 10
         progress_column.pack_start(renderer, True)
@@ -102,8 +101,7 @@ class ProgressPage:
         self.header_label.set_halign(Gtk.Align.CENTER)
 
         self.update_thread = threading.Thread(
-            target=self.perform_update,
-            args=(settings,)
+            target=self.perform_update, args=(settings,)
         )
         self.update_thread.start()
 
@@ -113,15 +111,18 @@ class ProgressPage:
         """
         self.log.debug("Interrupting updates")
         self.exit_triggered = True
-        GLib.idle_add(self.header_label.set_text,
-                      l("Interrupting the update..."))
+        GLib.idle_add(
+            self.header_label.set_text, l("Interrupting the update...")
+        )
 
     def perform_update(self, settings):
         """Updates dom0 and then other vms."""
-        admins = [row for row in self.vms_to_update
-                  if row.vm.klass == 'AdminVM']
-        templs = [row for row in self.vms_to_update
-                  if row.vm.klass != 'AdminVM']
+        admins = [
+            row for row in self.vms_to_update if row.vm.klass == "AdminVM"
+        ]
+        templs = [
+            row for row in self.vms_to_update if row.vm.klass != "AdminVM"
+        ]
         GLib.idle_add(self.set_total_progress, 0)
 
         if admins:
@@ -143,37 +144,39 @@ class ProgressPage:
             GLib.idle_add(admin.set_status, UpdateStatus.Cancelled)
             GLib.idle_add(
                 admin.append_text_view,
-                l("Canceled update for {}\n").format(admin.vm.name))
+                l("Canceled update for {}\n").format(admin.vm.name),
+            )
             self.update_details.update_buffer()
             return
         self.log.debug("Start adminVM updating")
 
         info = f"Checking for available updates for {admin.name}...\n"
-        GLib.idle_add(
-            admin.append_text_view,
-            l(info).format(admin.name))
+        GLib.idle_add(admin.append_text_view, l(info).format(admin.name))
         GLib.idle_add(admin.set_status, UpdateStatus.ProgressUnknown)
 
         self.update_details.update_buffer()
 
         def qubes_dom0_update(*args):
-            with subprocess.Popen(['sudo', 'qubes-dom0-update'] + list(args),
-                    stderr=subprocess.PIPE, stdout=subprocess.PIPE) as subproc:
+            with subprocess.Popen(
+                ["sudo", "qubes-dom0-update"] + list(args),
+                stderr=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+            ) as subproc:
 
                 read_err_thread = threading.Thread(
-                    target=self.dump_to_textview,
-                    args=(subproc.stderr, admin)
+                    target=self.dump_to_textview, args=(subproc.stderr, admin)
                 )
                 read_out_thread = threading.Thread(
-                    target=self.dump_to_textview,
-                    args=(subproc.stdout, admin)
+                    target=self.dump_to_textview, args=(subproc.stdout, admin)
                 )
                 read_err_thread.start()
                 read_out_thread.start()
 
-                while subproc.poll() is None \
-                        or read_out_thread.is_alive() \
-                        or read_err_thread.is_alive():
+                while (
+                    subproc.poll() is None
+                    or read_out_thread.is_alive()
+                    or read_err_thread.is_alive()
+                ):
                     time.sleep(1)
                     if self.exit_triggered and subproc.poll() is None:
                         subproc.send_signal(signal.SIGINT)
@@ -187,17 +190,18 @@ class ProgressPage:
             with Ticker(admin):
                 curr_pkg = self._get_packages_admin()
 
-                returncode = qubes_dom0_update('--refresh', '--check-only')
+                returncode = qubes_dom0_update("--refresh", "--check-only")
                 if returncode != 100:
                     if returncode != 0:
                         GLib.idle_add(admin.set_status, UpdateStatus.Error)
                     else:
                         GLib.idle_add(
-                            admin.set_status, UpdateStatus.NoUpdatesFound)
+                            admin.set_status, UpdateStatus.NoUpdatesFound
+                        )
                     self.update_details.update_buffer()
                     return
 
-                returncode = qubes_dom0_update('-y')
+                returncode = qubes_dom0_update("-y")
                 if returncode != 0:
                     GLib.idle_add(admin.set_status, UpdateStatus.Error)
                     self.update_details.update_buffer()
@@ -213,7 +217,9 @@ class ProgressPage:
             GLib.idle_add(
                 admin.append_text_view,
                 l("Error on updating {}: {}\n{}").format(
-                    admin.vm.name, str(ex), ex.output.decode()))
+                    admin.vm.name, str(ex), ex.output.decode()
+                ),
+            )
             GLib.idle_add(admin.set_status, UpdateStatus.Error)
 
         self.update_details.update_buffer()
@@ -224,8 +230,12 @@ class ProgressPage:
         Use rpm to return the installed packages and their versions.
         """
 
-        cmd = ["rpm", "-qa", "--queryformat",
-               "%{NAME} %{VERSION}-%{RELEASE}\n",]
+        cmd = [
+            "rpm",
+            "-qa",
+            "--queryformat",
+            "%{NAME} %{VERSION}-%{RELEASE}\n",
+        ]
         # EXAMPLE OUTPUT:
         # qubes-core-agent 4.1.351.fc34
         package_list = subprocess.check_output(cmd).decode().splitlines()
@@ -240,7 +250,7 @@ class ProgressPage:
 
     @staticmethod
     def _compare_packages(
-            old: Dict[str, List[str]], new: Dict[str, List[str]]
+        old: Dict[str, List[str]], new: Dict[str, List[str]]
     ) -> Dict[str, Dict]:
         """
         Compare installed packages and return dictionary with differences.
@@ -248,12 +258,15 @@ class ProgressPage:
         :param old: Dict[package_name, version] packages before update
         :param new: Dict[package_name, version] packages after update
         """
-        return {"installed": {pkg: new[pkg] for pkg in new if pkg not in old},
-                "updated": {pkg: {"old": old[pkg], "new": new[pkg]}
-                            for pkg in new
-                            if pkg in old and old[pkg] != new[pkg]
-                            },
-                "removed": {pkg: old[pkg] for pkg in old if pkg not in new}}
+        return {
+            "installed": {pkg: new[pkg] for pkg in new if pkg not in old},
+            "updated": {
+                pkg: {"old": old[pkg], "new": new[pkg]}
+                for pkg in new
+                if pkg in old and old[pkg] != new[pkg]
+            },
+            "removed": {pkg: old[pkg] for pkg in old if pkg not in new},
+        }
 
     @staticmethod
     def _print_changes(changes: Dict[str, Dict]) -> str:
@@ -270,7 +283,7 @@ class ProgressPage:
             for pkg in changes["updated"]:
                 old_ver = str(changes["updated"][pkg]["old"])[2:-2]
                 new_ver = str(changes["updated"][pkg]["new"])[2:-2]
-                result += f'{pkg} {old_ver} -> {new_ver}\n'
+                result += f"{pkg} {old_ver} -> {new_ver}\n"
         else:
             result += "None\n"
 
@@ -290,7 +303,8 @@ class ProgressPage:
                 GLib.idle_add(row.set_status, UpdateStatus.Cancelled)
                 GLib.idle_add(
                     row.append_text_view,
-                    l("Canceled update for {}\n").format(row.vm.name))
+                    l("Canceled update for {}\n").format(row.vm.name),
+                )
                 GLib.idle_add(self.set_total_progress, 100)
                 self.update_details.update_buffer()
                 return
@@ -298,8 +312,8 @@ class ProgressPage:
 
         for row in to_update:
             GLib.idle_add(
-                row.append_text_view,
-                l("Updating {}\n").format(row.name))
+                row.append_text_view, l("Updating {}\n").format(row.name)
+            )
             GLib.idle_add(row.set_status, UpdateStatus.InProgress)
         self.update_details.update_buffer()
 
@@ -312,45 +326,51 @@ class ProgressPage:
                 GLib.idle_add(
                     row.append_text_view,
                     l("Error on updating {}: {}\n{}").format(
-                        row.name, str(ex), ex.output.decode()))
+                        row.name, str(ex), ex.output.decode()
+                    ),
+                )
                 GLib.idle_add(row.set_status, UpdateStatus.Error)
         self.update_details.update_buffer()
 
     def do_update_templates(
-            self, rows: Dict[str, RowWrapper], settings: Settings):
+        self, rows: Dict[str, RowWrapper], settings: Settings
+    ):
         """Runs `qubes-vm-update` command."""
         targets = ",".join((name for name in rows.keys()))
 
         args = []
         if settings.max_concurrency is not None:
-            args.extend(
-                ('--max-concurrency',
-                 str(settings.max_concurrency)))
+            args.extend(("--max-concurrency", str(settings.max_concurrency)))
 
         # pylint: disable=consider-using-with
         proc = subprocess.Popen(
-            ['qubes-vm-update',
-             '--show-output',
-             '--just-print-progress',
-             '--force-update',
-             *args,
-             '--targets', targets],
-            stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+            [
+                "qubes-vm-update",
+                "--show-output",
+                "--just-print-progress",
+                "--force-update",
+                *args,
+                "--targets",
+                targets,
+            ],
+            stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+        )
 
         read_err_thread = threading.Thread(
-            target=self.read_stderrs,
-            args=(proc, rows)
+            target=self.read_stderrs, args=(proc, rows)
         )
         read_out_thread = threading.Thread(
-            target=self.read_stdouts,
-            args=(proc, rows)
+            target=self.read_stdouts, args=(proc, rows)
         )
         read_err_thread.start()
         read_out_thread.start()
 
-        while proc.poll() is None \
-                or read_out_thread.is_alive() \
-                or read_err_thread.is_alive():
+        while (
+            proc.poll() is None
+            or read_out_thread.is_alive()
+            or read_err_thread.is_alive()
+        ):
             time.sleep(1)
             if self.exit_triggered and proc.poll() is None:
                 proc.send_signal(signal.SIGINT)
@@ -360,7 +380,7 @@ class ProgressPage:
         self.retcode = proc.returncode
 
     def read_stderrs(self, proc, rows):
-        for untrusted_line in iter(proc.stderr.readline, ''):
+        for untrusted_line in iter(proc.stderr.readline, ""):
             if untrusted_line:
                 self.handle_err_line(untrusted_line, rows)
             else:
@@ -375,8 +395,8 @@ class ProgressPage:
                 progress = int(float(info))
                 GLib.idle_add(rows[name].set_update_progress, progress)
                 total_progress = sum(
-                    row.get_update_progress()
-                    for row in rows.values()) / len(rows)
+                    row.get_update_progress() for row in rows.values()
+                ) / len(rows)
                 GLib.idle_add(self.set_total_progress, total_progress)
 
         except ValueError:
@@ -392,17 +412,19 @@ class ProgressPage:
 
     def read_stdouts(self, proc, rows):
         curr_name_out = ""
-        for untrusted_line in iter(proc.stdout.readline, ''):
+        for untrusted_line in iter(proc.stdout.readline, ""):
             if untrusted_line:
                 line = self._sanitize_line(untrusted_line)
-                maybe_name, text = line.split(' ', 1)
+                maybe_name, text = line.split(" ", 1)
                 suffix = len(":out:")
                 if maybe_name[:-suffix] in rows.keys():
                     curr_name_out = maybe_name[:-suffix]
                 if curr_name_out:
                     rows[curr_name_out].append_text_view(text)
-                if (self.update_details.active_row is not None and
-                        curr_name_out == self.update_details.active_row.name):
+                if (
+                    self.update_details.active_row is not None
+                    and curr_name_out == self.update_details.active_row.name
+                ):
                     self.update_details.update_buffer()
             else:
                 break
@@ -411,13 +433,15 @@ class ProgressPage:
 
     def dump_to_textview(self, stream, row):
         curr_name_out = row.name
-        for untrusted_line in iter(stream.readline, ''):
+        for untrusted_line in iter(stream.readline, ""):
             if untrusted_line:
                 text = self._sanitize_line(untrusted_line)
                 if curr_name_out:
                     row.append_text_view(text)
-                if (self.update_details.active_row is not None and
-                        curr_name_out == self.update_details.active_row.name):
+                if (
+                    self.update_details.active_row is not None
+                    and curr_name_out == self.update_details.active_row.name
+                ):
                     self.update_details.update_buffer()
             else:
                 break
@@ -426,8 +450,8 @@ class ProgressPage:
 
     @staticmethod
     def _sanitize_line(untrusted_line: bytes) -> str:
-        ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -/]*[@-~]')
-        line = ansi_escape.sub('', untrusted_line.decode())
+        ansi_escape = re.compile(r"(\x9B|\x1B\[)[0-?]*[ -/]*[@-~]")
+        line = ansi_escape.sub("", untrusted_line.decode())
         return line
 
     def set_total_progress(self, progress):
@@ -456,7 +480,8 @@ class ProgressPage:
         self.selection.unselect_all()
         self.selection.select_path(path)
         self.update_details.set_active_row(
-            self.vms_to_update[path.get_indices()[0]])
+            self.vms_to_update[path.get_indices()[0]]
+        )
 
     def get_update_summary(self):
         """Returns update summary.
@@ -467,22 +492,39 @@ class ProgressPage:
         3. vms that update was canceled before starting.
         """
         updated = len(
-            [row for row in self.vms_to_update
-             if row.status == UpdateStatus.Success])
+            [
+                row
+                for row in self.vms_to_update
+                if row.status == UpdateStatus.Success
+            ]
+        )
         no_updates = len(
-            [row for row in self.vms_to_update
-             if row.status == UpdateStatus.NoUpdatesFound])
+            [
+                row
+                for row in self.vms_to_update
+                if row.status == UpdateStatus.NoUpdatesFound
+            ]
+        )
         failed = len(
-            [row for row in self.vms_to_update
-             if row.status == UpdateStatus.Error])
+            [
+                row
+                for row in self.vms_to_update
+                if row.status == UpdateStatus.Error
+            ]
+        )
         cancelled = len(
-            [row for row in self.vms_to_update
-             if row.status == UpdateStatus.Cancelled])
+            [
+                row
+                for row in self.vms_to_update
+                if row.status == UpdateStatus.Cancelled
+            ]
+        )
         return updated, no_updates, failed, cancelled
 
 
 class Ticker:
     """Helper for dom0 progressbar."""
+
     def __init__(self, *args):
         self.ticker_done = False
         self.args = args
@@ -517,9 +559,11 @@ class QubeUpdateDetails:
         self.copy_button.connect("clicked", self.copy_content)
 
         self.progress_textview: Gtk.TextView = self.builder.get_object(
-            "progress_textview")
-        self.progress_scrolled_window: Gtk.ScrolledWindow = \
+            "progress_textview"
+        )
+        self.progress_scrolled_window: Gtk.ScrolledWindow = (
             self.builder.get_object("progress_scrolled_window")
+        )
 
     def copy_content(self, _emitter):
         if self.active_row is None:
@@ -558,15 +602,15 @@ class QubeUpdateDetails:
     def _autoscroll(self):
         adjustment = self.progress_scrolled_window.get_vadjustment()
         adjustment.set_value(
-            adjustment.get_upper() - adjustment.get_page_size())
+            adjustment.get_upper() - adjustment.get_page_size()
+        )
 
 
-class CellRendererProgressWithResult(
-    Gtk.CellRendererProgress
-):
+class CellRendererProgressWithResult(Gtk.CellRendererProgress):
     """
     Custom Cell Renderer to show progressbar or finish icon.
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._status = None
@@ -581,20 +625,22 @@ class CellRendererProgressWithResult(
 
     # pylint: disable=arguments-differ
     def do_render(self, context, widget, background_area, cell_area, flags):
-        status: UpdateStatus = self.get_property('status')
+        status: UpdateStatus = self.get_property("status")
         if status == UpdateStatus.Success:
-            self.draw_icon('qubes-check-yes', context, cell_area)
+            self.draw_icon("qubes-check-yes", context, cell_area)
         elif status == UpdateStatus.NoUpdatesFound:
-            self.draw_icon('qubes-check-maybe', context, cell_area)
+            self.draw_icon("qubes-check-maybe", context, cell_area)
         elif status in (UpdateStatus.Error, UpdateStatus.Cancelled):
-            self.draw_icon('qubes-delete-x', context, cell_area)
+            self.draw_icon("qubes-delete-x", context, cell_area)
         elif status == UpdateStatus.ProgressUnknown:
             Gtk.CellRendererProgress.do_render(
-                self, context, widget, background_area, cell_area, flags)
+                self, context, widget, background_area, cell_area, flags
+            )
         else:
             self.set_property("pulse", -1)
             Gtk.CellRendererProgress.do_render(
-                self, context, widget, background_area, cell_area, flags)
+                self, context, widget, background_area, cell_area, flags
+            )
 
     def draw_icon(self, icon_name: str, context, cell_area):
         # pylint: disable=no-member
@@ -603,6 +649,6 @@ class CellRendererProgressWithResult(
             context,
             pixbuf,
             cell_area.x + self.props.xpad,
-            cell_area.y + self.props.ypad
+            cell_area.y + self.props.ypad,
         )
         context.paint()

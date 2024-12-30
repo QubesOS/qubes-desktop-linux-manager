@@ -43,7 +43,9 @@ import gbulb
 from qrexec.server import SocketService
 from qrexec.utils import sanitize_domain_name
 from qrexec.tools.qrexec_policy_agent import (
-    VMListModeler, RPCConfirmationWindow)
+    VMListModeler,
+    RPCConfirmationWindow,
+)
 from qubesadmin.device_protocol import DeviceSerializer
 
 
@@ -59,7 +61,7 @@ class VMAndPortListModeler(VMListModeler):
         self._entries = {}
         for name, vm in self._domains_info.items():
             if name.startswith("@dispvm:"):
-                vm_name = name[len("@dispvm:"):]
+                vm_name = name[len("@dispvm:") :]
                 prefix = "Disposable VM: "
             else:
                 vm_name = name
@@ -79,14 +81,16 @@ class VMAndPortListModeler(VMListModeler):
     def apply_icon(self, entry, qube_name):
         if isinstance(entry, Gtk.Entry):
             for vm_info in self._entries.values():
-                if qube_name == vm_info['api_name']:
+                if qube_name == vm_info["api_name"]:
                     entry.set_icon_from_pixbuf(
-                        Gtk.EntryIconPosition.PRIMARY, vm_info["icon"],
+                        Gtk.EntryIconPosition.PRIMARY,
+                        vm_info["icon"],
                     )
                     break
             else:
                 raise ValueError(
-                    f"The following source qube does not exist: {qube_name}")
+                    f"The following source qube does not exist: {qube_name}"
+                )
         else:
             raise TypeError(
                 "Only expecting Gtk.Entry objects to want our icon."
@@ -96,7 +100,8 @@ class VMAndPortListModeler(VMListModeler):
 class AttachmentConfirmationWindow(RPCConfirmationWindow):
     # pylint: disable=too-few-public-methods,too-many-instance-attributes
     _source_file_ref = importlib.resources.files("qui").joinpath(
-        os.path.join("devices", "AttachConfirmationWindow.glade"))
+        os.path.join("devices", "AttachConfirmationWindow.glade")
+    )
 
     _source_id = {
         "window": "AttachConfirmationWindow",
@@ -114,13 +119,20 @@ class AttachmentConfirmationWindow(RPCConfirmationWindow):
     # pylint: disable=super-init-not-called
     def __init__(
         self,
-        entries_info, source, device_name, argument, targets_list, target=None
+        entries_info,
+        source,
+        device_name,
+        argument,
+        targets_list,
+        target=None,
     ):
         # pylint: disable=too-many-arguments
         sanitize_domain_name(source, assert_sanitized=True)
         DeviceSerializer.sanitize_str(
-            device_name, DeviceSerializer.ALLOWED_CHARS_PARAM,
-            error_message="Invalid device name")
+            device_name,
+            DeviceSerializer.ALLOWED_CHARS_PARAM,
+            error_message="Invalid device name",
+        )
 
         self._gtk_builder = Gtk.Builder()
         with importlib.resources.as_file(self._source_file_ref) as path:
@@ -157,8 +169,11 @@ class AttachmentConfirmationWindow(RPCConfirmationWindow):
 
         self._entries_info = entries_info
 
-        options = {name: " " + options for vm_data in targets_list
-                   for name, _, options in (vm_data.partition(" "),)}
+        options = {
+            name: " " + options
+            for vm_data in targets_list
+            for name, _, options in (vm_data.partition(" "),)
+        }
         list_modeler = self._new_vm_list_modeler_overridden(options)
 
         list_modeler.apply_model(

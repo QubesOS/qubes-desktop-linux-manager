@@ -25,117 +25,146 @@ from .test_policy_handler import add_rule
 from ..widgets.utils import compare_rule_lists
 
 import gi
-gi.require_version('Gtk', '3.0')
-gi.require_version('GdkPixbuf', '2.0')
+
+gi.require_version("Gtk", "3.0")
+gi.require_version("GdkPixbuf", "2.0")
 from gi.repository import Gtk
 
 # policyexctest  -> missing tests!
 # dispvmexctest
 
 
-show_dialog_with_icon_path = \
-    'qubes_config.global_config.policy_handler.show_dialog_with_icon'
+show_dialog_with_icon_path = (
+    "qubes_config.global_config.policy_handler.show_dialog_with_icon"
+)
 
 
 def test_policy_exc_handler_empty(test_builder, test_qapp, test_policy_manager):
     handler = DispvmExceptionHandler(
         qapp=test_qapp,
         gtk_builder=test_builder,
-        prefix='dispvmexctest',
+        prefix="dispvmexctest",
         policy_manager=test_policy_manager,
         service_name="Test2",
-        policy_file_name="test")
+        policy_file_name="test",
+    )
 
     # this should have completely empty policy
     assert not handler.list_handler.current_rules
 
 
 def test_policy_exc_handler_load_state(
-        test_builder, test_qapp, test_policy_manager: PolicyManager):
+    test_builder, test_qapp, test_policy_manager: PolicyManager
+):
     current_policy = """TestService * test-vm @dispvm allow target=@dispvm
 TestService * test-red @dispvm deny
 TestService * test-blue @dispvm ask default_target=@dispvm:default-dvm"""
-    test_policy_manager.policy_client.policy_replace('c-test',
-                                                     current_policy, 'any')
+    test_policy_manager.policy_client.policy_replace(
+        "c-test", current_policy, "any"
+    )
 
     handler = DispvmExceptionHandler(
         qapp=test_qapp,
         gtk_builder=test_builder,
-        prefix='dispvmexctest',
+        prefix="dispvmexctest",
         policy_manager=test_policy_manager,
         service_name="TestService",
-        policy_file_name="c-test")
+        policy_file_name="c-test",
+    )
 
     assert handler.list_handler.current_rules
-    rules = [str(rule).replace("\t", " ")
-             for rule in handler.list_handler.current_rules]
-    expected_rules = [rule.replace("\t", " ")
-                      for rule in current_policy.split('\n')]
+    rules = [
+        str(rule).replace("\t", " ")
+        for rule in handler.list_handler.current_rules
+    ]
+    expected_rules = [
+        rule.replace("\t", " ") for rule in current_policy.split("\n")
+    ]
     assert sorted(rules) == sorted(expected_rules)
 
 
 def test_policy_exc_add_rule(
-        test_builder, test_qapp, test_policy_manager: PolicyManager):
+    test_builder, test_qapp, test_policy_manager: PolicyManager
+):
     current_policy = """TestService * test-vm @dispvm allow target=@dispvm
 TestService * test-red @dispvm deny"""
     current_policy_rules = test_policy_manager.text_to_rules(current_policy)
-    test_policy_manager.policy_client.policy_replace('c-test',
-                                                     current_policy, 'any')
+    test_policy_manager.policy_client.policy_replace(
+        "c-test", current_policy, "any"
+    )
 
     handler = DispvmExceptionHandler(
         qapp=test_qapp,
         gtk_builder=test_builder,
-        prefix='dispvmexctest',
+        prefix="dispvmexctest",
         policy_manager=test_policy_manager,
         service_name="TestService",
-        policy_file_name="c-test")
+        policy_file_name="c-test",
+    )
 
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              current_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, current_policy_rules
+    )
 
-    add_rule(handler.list_handler,
-             source='test-blue', action='ask', target='default-dvm')
+    add_rule(
+        handler.list_handler,
+        source="test-blue",
+        action="ask",
+        target="default-dvm",
+    )
 
     expected_policy = """TestService * test-vm @dispvm allow target=@dispvm
 TestService * test-red @dispvm deny
 TestService * test-blue @dispvm ask default_target=@dispvm:default-dvm"""
     expected_policy_rules = test_policy_manager.text_to_rules(expected_policy)
 
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              expected_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, expected_policy_rules
+    )
 
     handler.save()
     assert compare_rule_lists(
-        test_policy_manager.get_rules_from_filename('c-test', '')[0],
-        expected_policy_rules)
+        test_policy_manager.get_rules_from_filename("c-test", "")[0],
+        expected_policy_rules,
+    )
 
 
 def test_policy_exc_add_rule_error(
-        test_builder, test_qapp, test_policy_manager: PolicyManager):
+    test_builder, test_qapp, test_policy_manager: PolicyManager
+):
     current_policy = """TestService * test-vm @dispvm allow target=@dispvm
 TestService * test-red @dispvm deny"""
     current_policy_rules = test_policy_manager.text_to_rules(current_policy)
-    test_policy_manager.policy_client.policy_replace('c-test',
-                                                     current_policy, 'any')
+    test_policy_manager.policy_client.policy_replace(
+        "c-test", current_policy, "any"
+    )
 
     handler = DispvmExceptionHandler(
         qapp=test_qapp,
         gtk_builder=test_builder,
-        prefix='dispvmexctest',
+        prefix="dispvmexctest",
         policy_manager=test_policy_manager,
         service_name="TestService",
-        policy_file_name="c-test")
+        policy_file_name="c-test",
+    )
 
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              current_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, current_policy_rules
+    )
 
     # error should have occurred
-    add_rule(handler.list_handler, source='test-red', target='default-dvm',
-             action='allow', expect_error=True)
+    add_rule(
+        handler.list_handler,
+        source="test-red",
+        target="default-dvm",
+        action="allow",
+        expect_error=True,
+    )
 
     # no superfluous rules were added
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              current_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, current_policy_rules
+    )
 
     # but the row is being edited
     edited_row = None
@@ -147,7 +176,7 @@ TestService * test-red @dispvm deny"""
 
     # and it can be fixed
     assert edited_row
-    edited_row.source_widget.model.select_value('test-blue')
+    edited_row.source_widget.model.select_value("test-blue")
     edited_row.validate_and_save()
 
     expected_policy = """TestService * test-vm @dispvm allow target=@dispvm
@@ -156,35 +185,42 @@ TestService * test-blue @dispvm allow target=@dispvm:default-dvm"""
 
     expected_policy_rules = test_policy_manager.text_to_rules(expected_policy)
 
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              expected_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, expected_policy_rules
+    )
+
 
 def test_policy_exc_add_rule_twice(
-        test_builder, test_qapp, test_policy_manager: PolicyManager):
+    test_builder, test_qapp, test_policy_manager: PolicyManager
+):
     current_policy = """TestService * test-vm @dispvm allow target=@dispvm
 TestService * test-red @dispvm deny"""
     current_policy_rules = test_policy_manager.text_to_rules(current_policy)
-    test_policy_manager.policy_client.policy_replace('c-test',
-                                                     current_policy, 'any')
+    test_policy_manager.policy_client.policy_replace(
+        "c-test", current_policy, "any"
+    )
 
     handler = DispvmExceptionHandler(
         qapp=test_qapp,
         gtk_builder=test_builder,
-        prefix='dispvmexctest',
+        prefix="dispvmexctest",
         policy_manager=test_policy_manager,
         service_name="TestService",
-        policy_file_name="c-test")
+        policy_file_name="c-test",
+    )
 
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              current_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, current_policy_rules
+    )
 
     # click add_rule twice
     handler.list_handler.add_button.clicked()
     handler.list_handler.add_button.clicked()
 
     # no superfluous rules were yet added
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              current_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, current_policy_rules
+    )
 
     # but there is a singular row is being edited
     edited_row = None
@@ -206,76 +242,86 @@ TestService * test-red @dispvm deny"""
             assert False  # wrong, we just closed an edited row
 
     # no superfluous rules were added
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              current_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, current_policy_rules
+    )
 
 
 def test_policy_exc_edit_rule(
-        test_builder, test_qapp, test_policy_manager: PolicyManager):
+    test_builder, test_qapp, test_policy_manager: PolicyManager
+):
     current_policy = """TestService * test-vm @dispvm allow target=@dispvm
 TestService * test-red @dispvm deny"""
     current_policy_rules = test_policy_manager.text_to_rules(current_policy)
-    test_policy_manager.policy_client.policy_replace('c-test',
-                                                     current_policy, 'any')
+    test_policy_manager.policy_client.policy_replace(
+        "c-test", current_policy, "any"
+    )
 
     handler = DispvmExceptionHandler(
         qapp=test_qapp,
         gtk_builder=test_builder,
-        prefix='dispvmexctest',
+        prefix="dispvmexctest",
         policy_manager=test_policy_manager,
         service_name="TestService",
-        policy_file_name="c-test")
+        policy_file_name="c-test",
+    )
 
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              current_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, current_policy_rules
+    )
 
     for row in handler.list_handler.current_rows:
-        if row.rule.source == 'test-red':
+        if row.rule.source == "test-red":
             row.activate()
             assert row.editing
             # not visible combobox - we have deny here
             assert not row.target_widget.combobox.get_visible()
-            row.action_widget.model.select_value('allow')
+            row.action_widget.model.select_value("allow")
             # now it should be visible
             assert row.target_widget.combobox.get_visible()
-            row.target_widget.model.select_value('default-dvm')
+            row.target_widget.model.select_value("default-dvm")
             row.validate_and_save()
             break
     else:
-        assert False # expected rule to edit not found!
+        assert False  # expected rule to edit not found!
 
     expected_policy = """TestService * test-vm @dispvm allow target=@dispvm
 TestService * test-red @dispvm allow target=@dispvm:default-dvm"""
     expected_policy_rules = test_policy_manager.text_to_rules(expected_policy)
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              expected_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, expected_policy_rules
+    )
 
 
 def test_policy_exc_edit_double_click(
-        test_builder, test_qapp, test_policy_manager: PolicyManager):
+    test_builder, test_qapp, test_policy_manager: PolicyManager
+):
     current_policy = """TestService * test-vm @dispvm allow target=@dispvm
 TestService * test-red @dispvm ask default_target=@dispvm:default-dvm"""
     current_policy_rules = test_policy_manager.text_to_rules(current_policy)
-    test_policy_manager.policy_client.policy_replace('c-test',
-                                                     current_policy, 'any')
+    test_policy_manager.policy_client.policy_replace(
+        "c-test", current_policy, "any"
+    )
 
     handler = DispvmExceptionHandler(
         qapp=test_qapp,
         gtk_builder=test_builder,
-        prefix='dispvmexctest',
+        prefix="dispvmexctest",
         policy_manager=test_policy_manager,
         service_name="TestService",
-        policy_file_name="c-test")
+        policy_file_name="c-test",
+    )
 
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              current_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, current_policy_rules
+    )
 
     for row in handler.list_handler.current_rows:
-        if row.rule.source == 'test-red':
+        if row.rule.source == "test-red":
             row.activate()
             assert row.editing
             assert row.target_widget.combobox.get_visible()
-            row.target_widget.model.select_value('@dispvm')
+            row.target_widget.model.select_value("@dispvm")
             # second activation cannot cause the changes to be discarded
             with patch(show_dialog_with_icon_path) as mock_ask:
                 row.activate()
@@ -284,48 +330,54 @@ TestService * test-red @dispvm ask default_target=@dispvm:default-dvm"""
             row.validate_and_save()
             break
     else:
-        assert False # expected rule to edit not found!
+        assert False  # expected rule to edit not found!
 
     expected_policy = """TestService * test-vm @dispvm allow target=@dispvm
 TestService * test-red @dispvm ask default_target=@dispvm"""
     expected_policy_rules = test_policy_manager.text_to_rules(expected_policy)
 
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              expected_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, expected_policy_rules
+    )
 
 
 def test_policy_exc_edit_cancel(
-        test_builder, test_qapp, test_policy_manager: PolicyManager):
+    test_builder, test_qapp, test_policy_manager: PolicyManager
+):
     current_policy = """TestService * test-vm @dispvm allow target=@dispvm
 TestService * test-red @dispvm ask default_target=@dispvm:default-dvm"""
     current_policy_rules = test_policy_manager.text_to_rules(current_policy)
-    test_policy_manager.policy_client.policy_replace('c-test',
-                                                     current_policy, 'any')
+    test_policy_manager.policy_client.policy_replace(
+        "c-test", current_policy, "any"
+    )
 
     handler = DispvmExceptionHandler(
         qapp=test_qapp,
         gtk_builder=test_builder,
-        prefix='dispvmexctest',
+        prefix="dispvmexctest",
         policy_manager=test_policy_manager,
         service_name="TestService",
-        policy_file_name="c-test")
+        policy_file_name="c-test",
+    )
 
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              current_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, current_policy_rules
+    )
 
     for row in handler.list_handler.current_rows:
-        if row.rule.source == 'test-red':
+        if row.rule.source == "test-red":
             found_row = row
             row.activate()
             assert row.editing
             assert row.target_widget.combobox.get_visible()
-            row.target_widget.model.select_value('@dispvm')
+            row.target_widget.model.select_value("@dispvm")
             break
     else:
-        assert False # expected rule to edit not found!
+        assert False  # expected rule to edit not found!
 
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              current_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, current_policy_rules
+    )
 
     # click another row, dismiss message
     with patch(show_dialog_with_icon_path) as mock_ask:
@@ -336,22 +388,23 @@ TestService * test-red @dispvm ask default_target=@dispvm:default-dvm"""
                 break
         assert mock_ask.mock_calls
 
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              current_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, current_policy_rules
+    )
 
     # now do the same, but do not dismiss the message
     for row in handler.list_handler.current_rows:
-        if row.rule.source == 'test-red':
+        if row.rule.source == "test-red":
             found_row = row
             row.activate()
             assert row.editing
             assert row.target_widget.combobox.get_visible()
             # check the old selection was reset
-            assert str(row.target_widget.model.get_selected()) == 'default-dvm'
-            row.target_widget.model.select_value('@dispvm')
+            assert str(row.target_widget.model.get_selected()) == "default-dvm"
+            row.target_widget.model.select_value("@dispvm")
             break
     else:
-        assert False # expected rule to edit not found!
+        assert False  # expected rule to edit not found!
 
     with patch(show_dialog_with_icon_path) as mock_ask:
         mock_ask.return_value = Gtk.ResponseType.YES
@@ -365,44 +418,49 @@ TestService * test-red @dispvm ask default_target=@dispvm:default-dvm"""
 TestService * test-red @dispvm ask default_target=@dispvm"""
     expected_policy_rules = test_policy_manager.text_to_rules(expected_policy)
 
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              expected_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, expected_policy_rules
+    )
 
 
 def test_policy_exc_close_all_fail(
-        test_builder, test_qapp, test_policy_manager: PolicyManager):
+    test_builder, test_qapp, test_policy_manager: PolicyManager
+):
     current_policy = """TestService * test-vm @dispvm allow target=@dispvm
 TestService * test-red @dispvm ask default_target=@dispvm:default-dvm"""
     current_policy_rules = test_policy_manager.text_to_rules(current_policy)
-    test_policy_manager.policy_client.policy_replace('c-test',
-                                                     current_policy, 'any')
+    test_policy_manager.policy_client.policy_replace(
+        "c-test", current_policy, "any"
+    )
 
     handler = DispvmExceptionHandler(
         qapp=test_qapp,
         gtk_builder=test_builder,
-        prefix='dispvmexctest',
+        prefix="dispvmexctest",
         policy_manager=test_policy_manager,
         service_name="TestService",
-        policy_file_name="c-test")
+        policy_file_name="c-test",
+    )
 
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              current_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, current_policy_rules
+    )
 
     for row in handler.list_handler.current_rows:
-        if row.rule.source == 'test-red':
+        if row.rule.source == "test-red":
             found_row = row
             row.activate()
             assert row.editing
             assert row.source_widget.combobox.get_visible()
-            row.source_widget.model.select_value('test-vm')
+            row.source_widget.model.select_value("test-vm")
             break
     else:
-        assert False # expected rule to edit not found!
+        assert False  # expected rule to edit not found!
 
     # click another row, but, say you want to save changes, fail
-    with patch(show_dialog_with_icon_path) as mock_ask, \
-            patch('qubes_config.global_config.rule_list_widgets.show_error') \
-                    as mock_error:
+    with patch(show_dialog_with_icon_path) as mock_ask, patch(
+        "qubes_config.global_config.rule_list_widgets.show_error"
+    ) as mock_error:
         mock_ask.return_value = Gtk.ResponseType.YES
         for row in handler.list_handler.current_rows:
             if row != found_row:
@@ -411,63 +469,75 @@ TestService * test-red @dispvm ask default_target=@dispvm:default-dvm"""
         assert mock_ask.mock_calls
         assert mock_error.mock_calls
 
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              current_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, current_policy_rules
+    )
 
 
 def test_policy_handler_reset(
-        test_builder, test_qapp, test_policy_manager: PolicyManager):
+    test_builder, test_qapp, test_policy_manager: PolicyManager
+):
     current_policy = """TestService * test-vm @dispvm allow target=@dispvm
 TestService * test-red @dispvm ask default_target=@dispvm:default-dvm"""
     current_policy_rules = test_policy_manager.text_to_rules(current_policy)
-    test_policy_manager.policy_client.policy_replace('c-test',
-                                                     current_policy, 'any')
+    test_policy_manager.policy_client.policy_replace(
+        "c-test", current_policy, "any"
+    )
 
     handler = DispvmExceptionHandler(
         qapp=test_qapp,
         gtk_builder=test_builder,
-        prefix='dispvmexctest',
+        prefix="dispvmexctest",
         policy_manager=test_policy_manager,
         service_name="TestService",
-        policy_file_name="c-test")
+        policy_file_name="c-test",
+    )
 
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              current_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, current_policy_rules
+    )
 
-    add_rule(handler.list_handler, source='test-blue', action='deny')
+    add_rule(handler.list_handler, source="test-blue", action="deny")
 
     expected_policy = """TestService * test-vm @dispvm allow target=@dispvm
 TestService * test-red @dispvm ask default_target=@dispvm:default-dvm
 TestService * test-blue @dispvm deny"""
     expected_policy_rules = test_policy_manager.text_to_rules(expected_policy)
 
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              expected_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, expected_policy_rules
+    )
 
     handler.reset()
-    assert compare_rule_lists(handler.list_handler.current_rules,
-                              current_policy_rules)
+    assert compare_rule_lists(
+        handler.list_handler.current_rules, current_policy_rules
+    )
 
     handler.save()
     assert compare_rule_lists(
-        test_policy_manager.get_rules_from_filename('c-test', '')[0],
-        current_policy_rules)
+        test_policy_manager.get_rules_from_filename("c-test", "")[0],
+        current_policy_rules,
+    )
+
 
 def test_policy_exc_get_unsupported(
-        test_builder, test_qapp, test_policy_manager: PolicyManager):
+    test_builder, test_qapp, test_policy_manager: PolicyManager
+):
     current_policy = """TestService * test-vm @anyvm allow target=@dispvm
 TestService * test-red @dispvm ask default_target=@dispvm:default-dvm"""
     # current_policy_rules = test_policy_manager.text_to_rules(current_policy)
-    test_policy_manager.policy_client.policy_replace('c-test',
-                                                     current_policy, 'any')
+    test_policy_manager.policy_client.policy_replace(
+        "c-test", current_policy, "any"
+    )
 
     handler = DispvmExceptionHandler(
         qapp=test_qapp,
         gtk_builder=test_builder,
-        prefix='dispvmexctest',
+        prefix="dispvmexctest",
         policy_manager=test_policy_manager,
         service_name="TestService",
-        policy_file_name="c-test")
+        policy_file_name="c-test",
+    )
 
     assert not handler.get_unsaved()
     assert handler.list_handler.error_handler.get_errors()

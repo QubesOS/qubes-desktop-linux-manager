@@ -24,12 +24,13 @@
 import qubesadmin
 from ...new_qube.network_selector import NetworkSelector
 
+
 def test_network_handler(test_qapp, new_qube_builder):
     handler = NetworkSelector(new_qube_builder, test_qapp)
 
     assert handler.get_selected_netvm() == qubesadmin.DEFAULT
     assert handler.network_current_widget.vm == test_qapp.default_netvm
-    assert handler.network_current_widget.vm == test_qapp.domains['sys-net']
+    assert handler.network_current_widget.vm == test_qapp.domains["sys-net"]
     assert not handler.network_current_none.get_visible()
 
     # select none
@@ -39,13 +40,12 @@ def test_network_handler(test_qapp, new_qube_builder):
     assert handler.network_current_none.get_visible()
 
     handler.network_custom.set_active(True)
-    assert handler.get_selected_netvm() != test_qapp.domains['sys-net']
-    handler.network_modeler.select_value('sys-net')
+    assert handler.get_selected_netvm() != test_qapp.domains["sys-net"]
+    handler.network_modeler.select_value("sys-net")
     assert not handler.network_current_none.get_visible()
 
-    assert handler.get_selected_netvm() == test_qapp.domains['sys-net']
-    assert handler.network_current_widget.vm == \
-           test_qapp.domains['sys-net']
+    assert handler.get_selected_netvm() == test_qapp.domains["sys-net"]
+    assert handler.network_current_widget.vm == test_qapp.domains["sys-net"]
 
     handler.network_default.set_active(True)
     assert handler.get_selected_netvm() == qubesadmin.DEFAULT
@@ -59,7 +59,10 @@ def test_network_handler_whonix(test_qapp_whonix, new_qube_builder):
 
     handler.network_tor.set_active(True)
 
-    assert handler.get_selected_netvm() == \
-           test_qapp_whonix.domains['sys-whonix']
-    assert handler.network_current_widget.vm == \
-           test_qapp_whonix.domains['sys-whonix']
+    assert (
+        handler.get_selected_netvm() == test_qapp_whonix.domains["sys-whonix"]
+    )
+    assert (
+        handler.network_current_widget.vm
+        == test_qapp_whonix.domains["sys-whonix"]
+    )

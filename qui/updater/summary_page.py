@@ -26,19 +26,31 @@ from gettext import ngettext
 
 import gi
 
-gi.require_version('Gtk', '3.0')  # isort:skip
+gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk  # isort:skip
 from typing import Optional, Any
 
 import qubesadmin
 from qubesadmin.events.utils import wait_for_domain_shutdown
 
-from qubes_config.widgets.gtk_utils import load_icon, show_dialog, \
-    show_dialog_with_icon, show_error, RESPONSES_OK
+from qubes_config.widgets.gtk_utils import (
+    load_icon,
+    show_dialog,
+    show_dialog_with_icon,
+    show_error,
+    RESPONSES_OK,
+)
 from qubes_config.widgets.utils import get_boolean_feature
-from qui.updater.utils import disable_checkboxes, pass_through_event_window, \
-    HeaderCheckbox, QubeClass, QubeName, \
-    RowWrapper, ListWrapper, on_head_checkbox_toggled
+from qui.updater.utils import (
+    disable_checkboxes,
+    pass_through_event_window,
+    HeaderCheckbox,
+    QubeClass,
+    QubeName,
+    RowWrapper,
+    ListWrapper,
+    on_head_checkbox_toggled,
+)
 
 from locale import gettext as l
 
@@ -51,12 +63,7 @@ class SummaryPage:
     """
 
     def __init__(
-            self,
-            builder,
-            log,
-            next_button,
-            cancel_button,
-            back_by_row_selection
+        self, builder, log, next_button, cancel_button, back_by_row_selection
     ):
         self.builder = builder
         self.log = log
@@ -70,38 +77,43 @@ class SummaryPage:
         self.updated_tmpls: Optional[list] = None
 
         self.restart_list: Gtk.TreeView = self.builder.get_object(
-            "restart_list")
+            "restart_list"
+        )
         self.list_store: Optional[ListWrapper] = None
 
         self.stack: Gtk.Stack = self.builder.get_object("main_stack")
         self.page: Gtk.Box = self.builder.get_object("restart_page")
         self.label_summary: Gtk.Label = self.builder.get_object("label_summary")
 
-        self.restart_list.connect("row-activated",
-                                  self.on_checkbox_toggled)
+        self.restart_list.connect("row-activated", self.on_checkbox_toggled)
         self.app_vm_list: Gtk.ListStore = self.builder.get_object(
-            "restart_list_store")
+            "restart_list_store"
+        )
         restart_checkbox_column: Gtk.TreeViewColumn = self.builder.get_object(
-            "restart_checkbox_column")
-        restart_checkbox_column.connect("clicked",
-                                        self.on_header_toggled)
+            "restart_checkbox_column"
+        )
+        restart_checkbox_column.connect("clicked", self.on_header_toggled)
         restart_header_button: Gtk.Button = restart_checkbox_column.get_button()
-        restart_header_button.connect('realize', pass_through_event_window)
+        restart_header_button.connect("realize", pass_through_event_window)
         self.restart_header: Gtk.Label = self.builder.get_object(
-            "restart_header")
-        self.restart_scrolled_window: Gtk.ScrolledWindow = \
+            "restart_header"
+        )
+        self.restart_scrolled_window: Gtk.ScrolledWindow = (
             self.builder.get_object("restart_scrolled_window")
+        )
 
         self.head_checkbox_button: Gtk.CheckButton = self.builder.get_object(
-            "restart_checkbox_header")
+            "restart_checkbox_header"
+        )
         self.head_checkbox_button.set_inconsistent(True)
-        self.head_checkbox_button.connect(
-            "toggled", self.on_header_toggled)
+        self.head_checkbox_button.connect("toggled", self.on_header_toggled)
         self.head_checkbox = RestartHeaderCheckbox(
-            self.head_checkbox_button, self.next_button)
+            self.head_checkbox_button, self.next_button
+        )
 
         self.summary_list: Gtk.TreeView = self.builder.get_object(
-            "summary_list")
+            "summary_list"
+        )
         self.summary_list.connect("row-activated", back_by_row_selection)
 
     @disable_checkboxes
@@ -117,8 +129,7 @@ class SummaryPage:
         """Refresh additional info column and finish button info."""
         for row in self.list_store:
             row.refresh_additional_info()
-        selected_num = sum(
-            row.selected for row in self.list_store)
+        selected_num = sum(row.selected for row in self.list_store)
         if selected_num == 0:
             self.head_checkbox.state = HeaderCheckbox.NONE
         elif selected_num == len(self.list_store):
@@ -141,7 +152,8 @@ class SummaryPage:
         the cycle will start from (1).
         """
         on_head_checkbox_toggled(
-            self.list_store, self.head_checkbox, self.select_rows)
+            self.list_store, self.head_checkbox, self.select_rows
+        )
 
     @property
     def is_populated(self) -> bool:
@@ -155,10 +167,10 @@ class SummaryPage:
 
     @disable_checkboxes
     def show(
-            self,
-            qube_updated_num: int,
-            qube_no_updates_num: int,
-            qube_failed_num: int
+        self,
+        qube_updated_num: int,
+        qube_no_updates_num: int,
+        qube_failed_num: int,
     ):
         """Show this page and handle buttons."""
         self.log.debug("Show summary page")
@@ -166,15 +178,18 @@ class SummaryPage:
         summary_1 = ngettext(
             "%(num)d qube updated successfully.",
             "%(num)d qubes updated successfully.",
-            qube_updated_num) % {'num': qube_updated_num}
+            qube_updated_num,
+        ) % {"num": qube_updated_num}
         summary_2 = ngettext(
             "%(num)d qube attempted to update but found no updates.",
             "%(num)d qubes attempted to update but found no updates.",
-            qube_no_updates_num) % {'num': qube_no_updates_num}
+            qube_no_updates_num,
+        ) % {"num": qube_no_updates_num}
         summary_3 = ngettext(
             "%(num)d qube failed to update.",
             "%(num)d qubes failed to update.",
-            qube_failed_num) % {'num': qube_failed_num}
+            qube_failed_num,
+        ) % {"num": qube_failed_num}
         summary = "\n".join((summary_1, summary_2, summary_3))
         self.label_summary.set_label(summary)
         self.cancel_button.set_label(l("_Back"))
@@ -194,7 +209,8 @@ class SummaryPage:
         self.log.debug("populate restart list")
         self.summary_list.set_model(vm_updated.list_store_raw)
         self.updated_tmpls = [
-            row for row in vm_updated
+            row
+            for row in vm_updated
             if bool(row.status)
             and QubeClass[row.vm.klass] == QubeClass.TemplateVM
         ]
@@ -203,11 +219,13 @@ class SummaryPage:
             possibly_changed_vms.update(template.vm.derived_vms)
 
         self.list_store = ListWrapper(
-            RestartRowWrapper, self.restart_list.get_model())
+            RestartRowWrapper, self.restart_list.get_model()
+        )
 
         for vm in possibly_changed_vms:
             if vm.is_running() and (
-                    vm.klass != 'DispVM' or not vm.auto_cleanup):
+                vm.klass != "DispVM" or not vm.auto_cleanup
+            ):
                 self.list_store.append_vm(vm)
 
         if settings.restart_service_vms:
@@ -226,22 +244,18 @@ class SummaryPage:
     def select_rows(self):
         for row in self.list_store:
             row.selected = (
-                    row.is_service_qube
-                    and not row.is_excluded
-                    and AppVMType.SERVICEVM in self.head_checkbox.allowed
-                    or
-                    not row.is_service_qube
-                    and not row.is_excluded
-                    and AppVMType.NON_SERVICEVM in self.head_checkbox.allowed
-                    or
-                    AppVMType.EXCLUDED in self.head_checkbox.allowed
+                row.is_service_qube
+                and not row.is_excluded
+                and AppVMType.SERVICEVM in self.head_checkbox.allowed
+                or not row.is_service_qube
+                and not row.is_excluded
+                and AppVMType.NON_SERVICEVM in self.head_checkbox.allowed
+                or AppVMType.EXCLUDED in self.head_checkbox.allowed
             )
 
     def restart_selected_vms(self, show_only_error: bool):
         self.log.debug("Start restarting")
-        self.restart_thread = threading.Thread(
-            target=self.perform_restart
-        )
+        self.restart_thread = threading.Thread(target=self.perform_restart)
 
         self.restart_thread.start()
 
@@ -254,9 +268,13 @@ class SummaryPage:
             # show waiting dialog
             spinner = Gtk.Spinner()
             spinner.start()
-            dialog = show_dialog(None, l("Applying updates to qubes"), l(
-                "Waiting for qubes to be restarted/shutdown."),
-                                 {}, spinner)
+            dialog = show_dialog(
+                None,
+                l("Applying updates to qubes"),
+                l("Waiting for qubes to be restarted/shutdown."),
+                {},
+                spinner,
+            )
             dialog.set_deletable(False)
             dialog.show()
             self.log.debug("Show restart dialog")
@@ -276,24 +294,26 @@ class SummaryPage:
 
     def perform_restart(self):
 
-        tmpls_to_shutdown = [row.vm
-                             for row in self.updated_tmpls
-                             if row.vm.is_running()]
-        to_restart = [qube_row.vm
-                      for qube_row in self.list_store
-                      if qube_row.selected
-                      and qube_row.is_service_qube]
-        to_shutdown = [qube_row.vm
-                       for qube_row in self.list_store
-                       if qube_row.selected
-                       and not qube_row.is_service_qube]
+        tmpls_to_shutdown = [
+            row.vm for row in self.updated_tmpls if row.vm.is_running()
+        ]
+        to_restart = [
+            qube_row.vm
+            for qube_row in self.list_store
+            if qube_row.selected and qube_row.is_service_qube
+        ]
+        to_shutdown = [
+            qube_row.vm
+            for qube_row in self.list_store
+            if qube_row.selected and not qube_row.is_service_qube
+        ]
 
         if not any([tmpls_to_shutdown, to_restart, to_shutdown]):
             self.status = RestartStatus.NOTHING_TO_DO
             return
 
         # clear err and perform shutdown/start
-        self.err = ''
+        self.err = ""
         self.shutdown_domains(tmpls_to_shutdown)
         self.restart_vms(to_restart)
         self.shutdown_domains(to_shutdown)
@@ -312,9 +332,10 @@ class SummaryPage:
                 wait_for.append(vm)
                 self.log.info("Shutdown %s", vm.name)
             except qubesadmin.exc.QubesVMError as err:
-                self.err += vm.name + " cannot shutdown: " + str(err) + '\n'
-                self.log.error("Cannot shutdown %s because %s",
-                               vm.name, str(err))
+                self.err += vm.name + " cannot shutdown: " + str(err) + "\n"
+                self.log.error(
+                    "Cannot shutdown %s because %s", vm.name, str(err)
+                )
                 self.status = RestartStatus.ERROR_TMPL_DOWN
 
         asyncio.run(wait_for_domain_shutdown(wait_for))
@@ -333,7 +354,7 @@ class SummaryPage:
                 vm.start()
                 self.log.info("Restart %s", vm.name)
             except qubesadmin.exc.QubesVMError as err:
-                self.err += vm.name + " cannot start: " + str(err) + '\n'
+                self.err += vm.name + " cannot start: " + str(err) + "\n"
                 self.log.error("Cannot start %s because %s", vm.name, str(err))
                 self.status = RestartStatus.ERROR_APP_DOWN
 
@@ -344,13 +365,14 @@ class SummaryPage:
                 l("Success"),
                 l("All qubes were restarted/shutdown successfully."),
                 buttons=RESPONSES_OK,
-                icon_name="qubes-check-yes"
+                icon_name="qubes-check-yes",
             )
         elif self.status.is_error():
-            show_error(None, "Failure",
-                       l("During restarting following errors occurs: ")
-                       + self.err
-                       )
+            show_error(
+                None,
+                "Failure",
+                l("During restarting following errors occurs: ") + self.err,
+            )
             self.log.error("Restart error: %s", self.err)
             self.status = RestartStatus.ERROR_APP_START
 
@@ -367,7 +389,7 @@ class RestartRowWrapper(RowWrapper):
             False,
             load_icon(vm.icon),
             QubeName(vm.name, str(vm.label)),
-            '',
+            "",
         ]
         super().__init__(list_store, vm, raw_row)
 
@@ -381,14 +403,16 @@ class RestartRowWrapper(RowWrapper):
         self.refresh_additional_info()
 
     def refresh_additional_info(self):
-        self.raw_row[RestartRowWrapper._ADDITIONAL_INFO] = ''
+        self.raw_row[RestartRowWrapper._ADDITIONAL_INFO] = ""
         if self.selected and not self.is_service_qube:
-            self.raw_row[RestartRowWrapper._ADDITIONAL_INFO] = \
-                'This qube and all running applications within will be shutdown'
+            self.raw_row[RestartRowWrapper._ADDITIONAL_INFO] = (
+                "This qube and all running applications within will be shutdown"
+            )
         if self.selected and self.is_excluded:
-            self.raw_row[RestartRowWrapper._ADDITIONAL_INFO] = \
-                '<span foreground="red">This qube has been explicitly ' \
-                'disabled from restarting in settings</span>'
+            self.raw_row[RestartRowWrapper._ADDITIONAL_INFO] = (
+                '<span foreground="red">This qube has been explicitly '
+                "disabled from restarting in settings</span>"
+            )
 
     @property
     def icon(self):
@@ -408,11 +432,11 @@ class RestartRowWrapper(RowWrapper):
 
     @property
     def is_service_qube(self):
-        return get_boolean_feature(self.vm, 'servicevm', False)
+        return get_boolean_feature(self.vm, "servicevm", False)
 
     @property
     def is_excluded(self):
-        return not get_boolean_feature(self.vm, 'restart-after-update', True)
+        return not get_boolean_feature(self.vm, "restart-after-update", True)
 
 
 class AppVMType:
@@ -429,16 +453,19 @@ class RestartStatus(Enum):
     ERROR_APP_DOWN = 12
     ERROR_APP_START = 13
 
-    def is_error(self: 'RestartStatus') -> bool:
+    def is_error(self: "RestartStatus") -> bool:
         return self in [
-            RestartStatus.ERROR_TMPL_DOWN, RestartStatus.ERROR_APP_DOWN,
-            RestartStatus.ERROR_APP_START]
+            RestartStatus.ERROR_TMPL_DOWN,
+            RestartStatus.ERROR_APP_DOWN,
+            RestartStatus.ERROR_APP_START,
+        ]
 
 
 class RestartHeaderCheckbox(HeaderCheckbox):
     def __init__(self, checkbox_column_button, next_button):
-        super().__init__(checkbox_column_button,
-                         [None, None, AppVMType.EXCLUDED])
+        super().__init__(
+            checkbox_column_button, [None, None, AppVMType.EXCLUDED]
+        )
         self.next_button = next_button
 
     def allow_service_vms(self, value=True):
@@ -455,9 +482,11 @@ class RestartHeaderCheckbox(HeaderCheckbox):
 
     # pylint: disable=arguments-differ
     def all_action(self, num, *args, **kwargs):
-        text = ngettext("_Finish and restart/shutdown %(num)d qube",
-                        "_Finish and restart/shutdown %(num)d qubes",
-                        num) % {'num': num}
+        text = ngettext(
+            "_Finish and restart/shutdown %(num)d qube",
+            "_Finish and restart/shutdown %(num)d qubes",
+            num,
+        ) % {"num": num}
         self.next_button.set_label(text)
 
     def inconsistent_action(self, *args, **kwargs):

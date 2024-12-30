@@ -22,30 +22,42 @@ import pytest
 from unittest.mock import patch, call, Mock
 
 import gi
-gi.require_version('Gtk', '3.0')  # isort:skip
+
+gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk  # isort:skip
 
 from qubes_config.widgets.gtk_utils import RESPONSES_OK
 from qui.updater.intro_page import UpdateRowWrapper
 
-from qui.updater.summary_page import SummaryPage, AppVMType, RestartStatus, \
-    RestartRowWrapper
+from qui.updater.summary_page import (
+    SummaryPage,
+    AppVMType,
+    RestartStatus,
+    RestartRowWrapper,
+)
 from qui.updater.utils import HeaderCheckbox, UpdateStatus, ListWrapper
 
 
-@patch('qui.updater.summary_page.SummaryPage.refresh_buttons')
+@patch("qui.updater.summary_page.SummaryPage.refresh_buttons")
 def test_show(
-        refresh_buttons, real_builder, test_qapp, appvms_list,
-        mock_next_button, mock_cancel_button
+    refresh_buttons,
+    real_builder,
+    test_qapp,
+    appvms_list,
+    mock_next_button,
+    mock_cancel_button,
 ):
     test_qapp.expected_calls[
-        ('test-blue', "admin.vm.feature.Get", 'restart-after-update', None)
-    ] = b"0\x00" + "".encode()
+        ("test-blue", "admin.vm.feature.Get", "restart-after-update", None)
+    ] = (b"0\x00" + "".encode())
 
     mock_log = Mock()
     sut = SummaryPage(
-        real_builder, mock_log, mock_next_button, mock_cancel_button,
-        back_by_row_selection=lambda *args: None  # callback
+        real_builder,
+        mock_log,
+        mock_next_button,
+        mock_cancel_button,
+        back_by_row_selection=lambda *args: None,  # callback
     )
 
     sut.list_store = appvms_list
@@ -53,27 +65,30 @@ def test_show(
     sut.show(0, 1, 2)
 
     assert sut.stack.get_visible_child() == sut.page
-    assert sut.label_summary.get_text() == \
-           "0 qubes updated successfully.\n" \
-           "1 qube attempted to update but found no updates.\n" \
-           "2 qubes failed to update."
+    assert (
+        sut.label_summary.get_text() == "0 qubes updated successfully.\n"
+        "1 qube attempted to update but found no updates.\n"
+        "2 qubes failed to update."
+    )
     assert sut.cancel_button.visible
     assert sut.cancel_button.label == "_Back"
     refresh_buttons.assert_called_once()
 
 
 def test_on_header_toggled(
-        real_builder, test_qapp, appvms_list,
-        mock_next_button, mock_cancel_button
+    real_builder, test_qapp, appvms_list, mock_next_button, mock_cancel_button
 ):
     test_qapp.expected_calls[
-        ('test-blue', "admin.vm.feature.Get", 'restart-after-update', None)
-    ] = b"0\x00" + "".encode()
+        ("test-blue", "admin.vm.feature.Get", "restart-after-update", None)
+    ] = (b"0\x00" + "".encode())
 
     mock_log = Mock()
     sut = SummaryPage(
-        real_builder, mock_log, mock_next_button, mock_cancel_button,
-        back_by_row_selection=lambda *args: None  # callback
+        real_builder,
+        mock_log,
+        mock_next_button,
+        mock_cancel_button,
+        back_by_row_selection=lambda *args: None,  # callback
     )
 
     sut.list_store = appvms_list
@@ -88,24 +103,33 @@ def test_on_header_toggled(
     for expected in (0, service_num, non_excluded_num, all_num, 0):
         selected_num = len([row for row in sut.list_store if row.selected])
         assert selected_num == expected
-        assert sut.head_checkbox_button.get_inconsistent() \
-               and expected not in (0, all_num) \
-               or sut.head_checkbox_button.get_active() \
-               and expected == all_num \
-               or not sut.head_checkbox_button.get_active() \
-               and expected == 0
+        assert (
+            sut.head_checkbox_button.get_inconsistent()
+            and expected not in (0, all_num)
+            or sut.head_checkbox_button.get_active()
+            and expected == all_num
+            or not sut.head_checkbox_button.get_active()
+            and expected == 0
+        )
 
         sut.on_header_toggled(None)
 
 
 def test_on_checkbox_toggled(
-        real_builder, test_qapp, appvms_list,
-        mock_next_button, mock_cancel_button, mock_settings
+    real_builder,
+    test_qapp,
+    appvms_list,
+    mock_next_button,
+    mock_cancel_button,
+    mock_settings,
 ):
     mock_log = Mock()
     sut = SummaryPage(
-        real_builder, mock_log, mock_next_button, mock_cancel_button,
-        back_by_row_selection=lambda *args: None  # callback
+        real_builder,
+        mock_log,
+        mock_next_button,
+        mock_cancel_button,
+        back_by_row_selection=lambda *args: None,  # callback
     )
 
     sut.list_store = appvms_list
@@ -171,21 +195,32 @@ UP_APP_VMS = 4
     ),
 )
 def test_populate_restart_list(
-        restart_service_vms, restart_other_vms, excluded, expected,
-        real_builder, test_qapp, updatable_vms_list,
-        mock_next_button, mock_cancel_button, mock_settings, mock_tree_view
+    restart_service_vms,
+    restart_other_vms,
+    excluded,
+    expected,
+    real_builder,
+    test_qapp,
+    updatable_vms_list,
+    mock_next_button,
+    mock_cancel_button,
+    mock_settings,
+    mock_tree_view,
 ):
     mock_settings.restart_other_vms = restart_other_vms
     mock_settings.restart_service_vms = restart_service_vms
     for exclude in excluded:
         test_qapp.expected_calls[
-            (exclude, "admin.vm.feature.Get", 'restart-after-update', None)
-        ] = b"0\x00" + "".encode()
+            (exclude, "admin.vm.feature.Get", "restart-after-update", None)
+        ] = (b"0\x00" + "".encode())
 
     mock_log = Mock()
     sut = SummaryPage(
-        real_builder, mock_log, mock_next_button, mock_cancel_button,
-        back_by_row_selection=lambda *args: None  # callback
+        real_builder,
+        mock_log,
+        mock_next_button,
+        mock_cancel_button,
+        back_by_row_selection=lambda *args: None,  # callback
     )
     sut.summary_list = mock_tree_view
 
@@ -204,28 +239,40 @@ def test_populate_restart_list(
     assert sum(row.selected for row in sut.list_store) == expected
 
 
-@patch('qubes_config.widgets.gtk_utils.show_dialog')
-@patch('qui.updater.summary_page.show_dialog')
-@patch('gi.repository.Gtk.Image.new_from_pixbuf')
-@patch('threading.Thread')
+@patch("qubes_config.widgets.gtk_utils.show_dialog")
+@patch("qui.updater.summary_page.show_dialog")
+@patch("gi.repository.Gtk.Image.new_from_pixbuf")
+@patch("threading.Thread")
 @pytest.mark.parametrize(
     "alive_requests_max, status",
-    (pytest.param(3, RestartStatus.OK),
-     pytest.param(0, RestartStatus.OK),
-     pytest.param(1, RestartStatus.ERROR_TMPL_DOWN),
-     pytest.param(1, RestartStatus.NOTHING_TO_DO),
-     ),
+    (
+        pytest.param(3, RestartStatus.OK),
+        pytest.param(0, RestartStatus.OK),
+        pytest.param(1, RestartStatus.ERROR_TMPL_DOWN),
+        pytest.param(1, RestartStatus.NOTHING_TO_DO),
+    ),
 )
 def test_restart_selected_vms(
-        mock_threading, mock_new_from_pixbuf, mock_show_dialog_qui,
-        mock_show_dialog, alive_requests_max, status, mock_thread, test_qapp,
-        real_builder, mock_next_button, mock_cancel_button
+    mock_threading,
+    mock_new_from_pixbuf,
+    mock_show_dialog_qui,
+    mock_show_dialog,
+    alive_requests_max,
+    status,
+    mock_thread,
+    test_qapp,
+    real_builder,
+    mock_next_button,
+    mock_cancel_button,
 ):
     # ARRANGE
     mock_log = Mock()
     sut = SummaryPage(
-        real_builder, mock_log, mock_next_button, mock_cancel_button,
-        back_by_row_selection=lambda *args: None  # callback
+        real_builder,
+        mock_log,
+        mock_next_button,
+        mock_cancel_button,
+        back_by_row_selection=lambda *args: None,  # callback
     )
     mock_thread.alive_requests_max = alive_requests_max
     mock_threading.return_value = mock_thread
@@ -285,45 +332,81 @@ def test_restart_selected_vms(
 
         calls = []
         if status == RestartStatus.OK:
-            calls = [call(None, "Success",
-                          "All qubes were restarted/shutdown successfully.",
-                          RESPONSES_OK, icon)]
+            calls = [
+                call(
+                    None,
+                    "Success",
+                    "All qubes were restarted/shutdown successfully.",
+                    RESPONSES_OK,
+                    icon,
+                )
+            ]
         if status.is_error():
-            calls = [call(None, "Failure",
-                          "During restarting following errors occurs: " + sut.err,
-                          RESPONSES_OK, icon)]
+            calls = [
+                call(
+                    None,
+                    "Failure",
+                    "During restarting following errors occurs: " + sut.err,
+                    RESPONSES_OK,
+                    icon,
+                )
+            ]
         mock_show_dialog.assert_has_calls(calls)
 
 
 @patch("qui.updater.summary_page.wait_for_domain_shutdown")
 def test_perform_restart(
-        _mock_wait_for_domain_shutdown, test_qapp,
-        real_builder, mock_next_button, mock_cancel_button, mock_list_store
+    _mock_wait_for_domain_shutdown,
+    test_qapp,
+    real_builder,
+    mock_next_button,
+    mock_cancel_button,
+    mock_list_store,
 ):
     # ARRANGE
 
-    expected_state_calls = [(tmpl, 'admin.vm.CurrentState', None, None)
-                            for tmpl in ('fedora-35', 'fedora-36')]
+    expected_state_calls = [
+        (tmpl, "admin.vm.CurrentState", None, None)
+        for tmpl in ("fedora-35", "fedora-36")
+    ]
     for call_ in expected_state_calls:
-        test_qapp.expected_calls[call_] = b'0\x00power_state=Running mem=1024'
+        test_qapp.expected_calls[call_] = b"0\x00power_state=Running mem=1024"
 
-    to_shutdown = ('fedora-35', 'fedora-36', 'sys-firewall', 'sys-net',
-                   'sys-usb', 'test-blue', 'test-red', 'test-vm', 'vault')
-    expected_shutdown_calls = [(tmpl, 'admin.vm.Shutdown', 'force', None)
-                               for tmpl in to_shutdown]
+    to_shutdown = (
+        "fedora-35",
+        "fedora-36",
+        "sys-firewall",
+        "sys-net",
+        "sys-usb",
+        "test-blue",
+        "test-red",
+        "test-vm",
+        "vault",
+    )
+    expected_shutdown_calls = [
+        (tmpl, "admin.vm.Shutdown", "force", None) for tmpl in to_shutdown
+    ]
     for call_ in expected_shutdown_calls:
-        test_qapp.expected_calls[call_] = b'0\x00'
+        test_qapp.expected_calls[call_] = b"0\x00"
 
-    to_start = ('sys-firewall', 'sys-net', 'sys-usb',)
-    expected_start_calls = [(tmpl, 'admin.vm.Start', None, None)
-                               for tmpl in to_start]
+    to_start = (
+        "sys-firewall",
+        "sys-net",
+        "sys-usb",
+    )
+    expected_start_calls = [
+        (tmpl, "admin.vm.Start", None, None) for tmpl in to_start
+    ]
     for call_ in expected_start_calls:
-        test_qapp.expected_calls[call_] = b'0\x00'
+        test_qapp.expected_calls[call_] = b"0\x00"
 
     mock_log = Mock()
     sut = SummaryPage(
-        real_builder, mock_log, mock_next_button, mock_cancel_button,
-        back_by_row_selection=lambda *args: None  # callback
+        real_builder,
+        mock_log,
+        mock_next_button,
+        mock_cancel_button,
+        back_by_row_selection=lambda *args: None,  # callback
     )
 
     sut.updated_tmpls = ListWrapper(UpdateRowWrapper, mock_list_store)
@@ -339,6 +422,9 @@ def test_perform_restart(
     sut.perform_restart()
 
     # ASSERT
-    assert all(item in test_qapp.actual_calls
-               for item in expected_state_calls + expected_shutdown_calls
-               + expected_start_calls)
+    assert all(
+        item in test_qapp.actual_calls
+        for item in expected_state_calls
+        + expected_shutdown_calls
+        + expected_start_calls
+    )

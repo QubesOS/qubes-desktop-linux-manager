@@ -4,7 +4,8 @@ import subprocess
 from typing import List
 
 import gi
-gi.require_version('Gtk', '3.0')  # isort:skip
+
+gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk, GObject, Gio, GLib  # isort:skip
 from qubesadmin import Qubes
 from qubesadmin.utils import size_to_human
@@ -12,6 +13,7 @@ from qubesadmin import exc
 from qubesadmin.storage import Pool
 
 import gettext
+
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
@@ -29,9 +31,9 @@ class VMUsage:
 
     def check_usage(self):
         self.problem_volumes = {}
-        volumes_to_check = ['private']
-        if not hasattr(self.vm, 'template'):
-            volumes_to_check.append('root')
+        volumes_to_check = ["private"]
+        if not hasattr(self.vm, "template"):
+            volumes_to_check.append("root")
         for volume_name in volumes_to_check:
             try:
                 if volume_name in self.vm.volumes:
@@ -57,8 +59,7 @@ class VMUsageData:
                     usage_data = VMUsage(vm)
                     if usage_data.problem_volumes:
                         self.problematic_vms.append(usage_data)
-            except (exc.QubesPropertyAccessError,
-                    exc.QubesVMNotFoundError) :
+            except (exc.QubesPropertyAccessError, exc.QubesVMNotFoundError):
                 continue
 
     def get_vms_widgets(self):
@@ -71,9 +72,9 @@ class VMUsageData:
 
         # icon widget
         try:
-            icon = getattr(vm, 'icon', vm.label.icon)
+            icon = getattr(vm, "icon", vm.label.icon)
         except exc.QubesPropertyAccessError:
-            icon = 'appvm-black'
+            icon = "appvm-black"
         icon_vm = Gtk.IconTheme.get_default().load_icon(icon, 16, 0)
         icon_img = Gtk.Image.new_from_pixbuf(icon_vm)
 
@@ -84,8 +85,9 @@ class VMUsageData:
 
         for volume_name, usage in vm_usage.problem_volumes.items():
             # pylint: disable=consider-using-f-string
-            label_contents.append(_('volume <b>{}</b> is {:.1%} full').format(
-                volume_name, usage))
+            label_contents.append(
+                _("volume <b>{}</b> is {:.1%} full").format(volume_name, usage)
+            )
 
         label_text = f"<b>{vm.name}</b>: " + ", ".join(label_contents)
         label_widget.set_markup(label_text)
@@ -98,15 +100,15 @@ class SettingsItem(Gtk.MenuItem):
         super().__init__()
         self.vm = vm
 
-        self.set_label(_('Open Qube Settings'))
+        self.set_label(_("Open Qube Settings"))
 
-        self.connect('activate', launch_preferences_dialog, self.vm.name)
+        self.connect("activate", launch_preferences_dialog, self.vm.name)
 
 
 def launch_preferences_dialog(_, vm):
-    vm = str(vm).strip('\'')
+    vm = str(vm).strip("'")
     # pylint: disable=consider-using-with
-    subprocess.Popen(['qubes-vm-settings', vm])
+    subprocess.Popen(["qubes-vm-settings", vm])
 
 
 class NeverNotifyItem(Gtk.CheckMenuItem):
@@ -114,23 +116,24 @@ class NeverNotifyItem(Gtk.CheckMenuItem):
         super().__init__()
         self.vm = vm
 
-        self.set_label(_('Do not show notifications about this qube'))
+        self.set_label(_("Do not show notifications about this qube"))
 
         try:
             self.set_active(
-                self.vm.features.get('disk-space-not-notify', False))
+                self.vm.features.get("disk-space-not-notify", False)
+            )
         except exc.QubesDaemonCommunicationError:
             self.set_active(False)
             self.set_sensitive(False)
 
-        self.connect('toggled', self.toggle_state)
+        self.connect("toggled", self.toggle_state)
 
     def toggle_state(self, _item):
         try:
             if self.get_active():
-                self.vm.features['disk-space-not-notify'] = 1
+                self.vm.features["disk-space-not-notify"] = 1
             else:
-                del self.vm.features['disk-space-not-notify']
+                del self.vm.features["disk-space-not-notify"]
         except exc.QubesDaemonAccessError:
             self.set_sensitive(False)
 
@@ -148,17 +151,18 @@ class VMMenu(Gtk.Menu):
 
 class PoolWrapper:
     """Wrapper for pools, to manage various exceptions thrown by properties."""
+
     def __init__(self, pool: Pool):
         self.pool = pool
         self.has_error = False
-        self.size = self._get_attribute('size', None)
-        self.usage = self._get_attribute('usage', None)
-        self.config = self._get_attribute('config', {})
-        self.usage_details = self._get_attribute('usage_details', {})
-        self.name = self._get_attribute('name', 'ERROR: pool name unknown')
+        self.size = self._get_attribute("size", None)
+        self.usage = self._get_attribute("usage", None)
+        self.config = self._get_attribute("config", {})
+        self.usage_details = self._get_attribute("usage_details", {})
+        self.name = self._get_attribute("name", "ERROR: pool name unknown")
 
-        self.metadata_size = self.usage_details.get('metadata_size', None)
-        self.metadata_usage = self.usage_details.get('metadata_usage', None)
+        self.metadata_size = self.usage_details.get("metadata_size", None)
+        self.metadata_usage = self.usage_details.get("metadata_usage", None)
 
         if self.size and self.usage:
             self.usage_perc = self.usage / self.size
@@ -201,8 +205,11 @@ class PoolUsageData:
             if wrapped_pool.has_error:
                 continue
 
-            if not wrapped_pool.size or not wrapped_pool.usage or \
-                    'included_in' in wrapped_pool.config:
+            if (
+                not wrapped_pool.size
+                or not wrapped_pool.usage
+                or "included_in" in wrapped_pool.config
+            ):
                 continue
             self.total_size += wrapped_pool.size
             self.used_size += wrapped_pool.usage
@@ -210,14 +217,18 @@ class PoolUsageData:
             if wrapped_pool.usage_perc >= URGENT_WARN_LEVEL:
                 self.warning_message.append(
                     _("\n{:.1%} space left in pool {}").format(
-                        1-wrapped_pool.usage_perc, wrapped_pool.name))
+                        1 - wrapped_pool.usage_perc, wrapped_pool.name
+                    )
+                )
 
             if wrapped_pool.metadata_perc >= URGENT_WARN_LEVEL:
                 # pylint: disable=consider-using-f-string
-                self.warning_message.append(_(
-                    "\nMetadata space for pool {} is running out. "
-                    "Current usage: {:.0%}").format(
-                        wrapped_pool.name, wrapped_pool.metadata_perc))
+                self.warning_message.append(
+                    _(
+                        "\nMetadata space for pool {} is running out. "
+                        "Current usage: {:.0%}"
+                    ).format(wrapped_pool.name, wrapped_pool.metadata_perc)
+                )
 
     def get_pools_widgets(self):
         for p in self.pools:
@@ -228,7 +239,7 @@ class PoolUsageData:
 
     def get_usage(self):
         if self.total_size > 0:
-            return self.used_size/self.total_size
+            return self.used_size / self.total_size
         return 0
 
     @staticmethod
@@ -241,21 +252,20 @@ class PoolUsageData:
 
         if pool.has_error:
             # Pool with errors
-            formatted_name = \
-                f'<span color=\'red\'><b>{pool.name}</b></span>'
-        elif pool.size and 'included_in' not in pool.config:
+            formatted_name = f"<span color='red'><b>{pool.name}</b></span>"
+        elif pool.size and "included_in" not in pool.config:
             # normal pool
-            formatted_name = f'<b>{pool.name}</b>'
+            formatted_name = f"<b>{pool.name}</b>"
         else:
             # pool without data or included in another pool
-            formatted_name = f'<span color=\'grey\'><i>{pool.name}</i></span>'
+            formatted_name = f"<span color='grey'><i>{pool.name}</i></span>"
 
         pool_name.set_markup(formatted_name)
         pool_name.set_margin_left(20)
 
         name_box.pack_start(pool_name, True, True, 0)
 
-        if not pool.size or 'included_in' in pool.config:
+        if not pool.size or "included_in" in pool.config:
             return name_box, percentage_box, usage_box
 
         if pool.has_error:
@@ -288,15 +298,15 @@ class PoolUsageData:
 
         if pool.metadata_perc:
             metadata_label = Gtk.Label()
-            metadata_label.set_markup(colored_percentage(
-                pool.metadata_perc))
+            metadata_label.set_markup(colored_percentage(pool.metadata_perc))
             percentage_box.pack_start(metadata_label, True, True, 0)
 
         numeric_label = Gtk.Label()
         numeric_label.set_markup(
-            '<span color=\'grey\'><i>'
-            f'{size_to_human(pool.usage or 0)}/'
-            f'{size_to_human(pool.size or 0)}</i></span>')
+            "<span color='grey'><i>"
+            f"{size_to_human(pool.usage or 0)}/"
+            f"{size_to_human(pool.size or 0)}</i></span>"
+        )
         numeric_label.set_justify(Gtk.Justification.RIGHT)
 
         # pack with empty labels to guarantee proper alignment
@@ -309,14 +319,14 @@ class PoolUsageData:
 
 def colored_percentage(value):
     if value < WARN_LEVEL:
-        color = 'green'
+        color = "green"
     elif value < URGENT_WARN_LEVEL:
-        color = 'orange'
+        color = "orange"
     else:
-        color = 'red'
+        color = "red"
 
     # pylint: disable=consider-using-f-string
-    result = '<span color=\'{}\'>{:.1%}</span>'.format(color, value)
+    result = "<span color='{}'>{:.1%}</span>".format(color, value)
 
     return result
 
@@ -325,11 +335,12 @@ def emit_notification(gtk_app, title, text, vm=None):
     notification = Gio.Notification.new(title)
     notification.set_priority(Gio.NotificationPriority.HIGH)
     notification.set_body(text)
-    notification.set_icon(Gio.ThemedIcon.new('dialog-warning'))
+    notification.set_icon(Gio.ThemedIcon.new("dialog-warning"))
 
     if vm:
-        notification.add_button(_('Open qube settings'),
-                                f"app.prefs::{vm.name}")
+        notification.add_button(
+            _("Open qube settings"), f"app.prefs::{vm.name}"
+        )
 
     gtk_app.send_notification(None, notification)
 
@@ -353,7 +364,7 @@ class DiskSpace(Gtk.Application):
         self.add_action(prefs_action)
 
         self.icon = Gtk.StatusIcon()
-        self.icon.connect('button-press-event', self.make_menu)
+        self.icon.connect("button-press-event", self.make_menu)
         self.refresh_icon()
 
         GObject.timeout_add_seconds(120, self.refresh_icon)
@@ -367,8 +378,7 @@ class DiskSpace(Gtk.Application):
         vm_warning = vm_data.problematic_vms
 
         # set icon
-        self.set_icon_state(pool_warning=pool_warning,
-                            vm_warning=vm_warning)
+        self.set_icon_state(pool_warning=pool_warning, vm_warning=vm_warning)
 
         # emit notification
         if pool_warning:
@@ -376,8 +386,9 @@ class DiskSpace(Gtk.Application):
                 emit_notification(
                     self,
                     _("Disk usage warning!"),
-                    _("You are running out of disk space.") + ''.join(
-                        pool_warning))
+                    _("You are running out of disk space.")
+                    + "".join(pool_warning),
+                )
                 self.pool_warned = True
         else:
             self.pool_warned = False
@@ -385,17 +396,22 @@ class DiskSpace(Gtk.Application):
         if vm_warning:
             currently_problematic_vms = [x.vm for x in vm_warning]
 
-            self.vms_warned = {vm for vm in self.vms_warned if vm in
-                               currently_problematic_vms}
+            self.vms_warned = {
+                vm for vm in self.vms_warned if vm in currently_problematic_vms
+            }
             for vm in currently_problematic_vms:
-                if not vm.features.get('disk-space-not-notify', False) and vm\
-                        not in self.vms_warned:
+                if (
+                    not vm.features.get("disk-space-not-notify", False)
+                    and vm not in self.vms_warned
+                ):
                     emit_notification(
                         self,
                         _("Qube usage warning"),
                         _("Qube {} is running out of storage space.").format(
-                            vm.name),
-                        vm=vm)
+                            vm.name
+                        ),
+                        vm=vm,
+                    )
                     self.vms_warned.add(vm)
         else:
             self.vms_warned = set()
@@ -407,16 +423,19 @@ class DiskSpace(Gtk.Application):
             self.icon.set_from_icon_name("dialog-warning")
             text = _("<b>Qubes Disk Space Monitor</b>\n\nWARNING!")
             if pool_warning:
-                text += _('\nYou are running out of disk space.\n') + \
-                        ''.join(pool_warning)
+                text += _("\nYou are running out of disk space.\n") + "".join(
+                    pool_warning
+                )
             if vm_warning:
-                text += _('\nThe following qubes are running out of space: ') \
-                        + ', '.join([x.vm.name for x in vm_warning])
+                text += _(
+                    "\nThe following qubes are running out of space: "
+                ) + ", ".join([x.vm.name for x in vm_warning])
             self.icon.set_tooltip_markup(text)
         else:
             self.icon.set_from_icon_name("drive-harddisk")
             self.icon.set_tooltip_markup(
-                _('<b>Qubes Disk Space Monitor</b>\nView free disk space.'))
+                _("<b>Qubes Disk Space Monitor</b>\nView free disk space.")
+            )
 
     def make_menu(self, _unused, _event):
         pool_data = PoolUsageData(self.qubes_app)
@@ -426,11 +445,11 @@ class DiskSpace(Gtk.Application):
 
         menu.append(self.make_top_box(pool_data))
 
-        menu.append(self.make_title_item('Volumes'))
+        menu.append(self.make_title_item("Volumes"))
 
         grid = Gtk.Grid()
         col_no = 0
-        for (label1, label2, label3) in pool_data.get_pools_widgets():
+        for label1, label2, label3 in pool_data.get_pools_widgets():
             grid.attach(label1, 0, col_no, 1, 1)
             grid.attach(label2, 1, col_no, 1, 1)
             grid.attach(label3, 2, col_no, 1, 1)
@@ -443,9 +462,9 @@ class DiskSpace(Gtk.Application):
         menu.append(grid_menu_item)
 
         if vm_data.problematic_vms:
-            menu.append(self.make_title_item(_('Qubes warnings')))
+            menu.append(self.make_title_item(_("Qubes warnings")))
 
-            for (vm, label1, label2) in vm_data.get_vms_widgets():
+            for vm, label1, label2 in vm_data.get_vms_widgets():
                 hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
                 hbox.pack_start(label1, False, False, 0)
                 hbox.pack_start(label2, False, False, 5)
@@ -485,7 +504,7 @@ class DiskSpace(Gtk.Application):
         progress_bar = Gtk.LevelBar()
         progress_bar.set_min_value(0)
         progress_bar.set_max_value(100)
-        progress_bar.set_value(pool_data.get_usage()*100)
+        progress_bar.set_value(pool_data.get_usage() * 100)
         progress_bar.set_vexpand(True)
         progress_bar.set_hexpand(True)
         progress_bar.set_margin_left(20)
@@ -509,5 +528,5 @@ def main():
     app.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

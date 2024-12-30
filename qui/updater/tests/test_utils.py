@@ -20,22 +20,30 @@
 from qui.utils import check_support
 from qubesadmin.tests.mock_app import MockQubes, MockQube
 
+
 def test_check_support():
     qapp = MockQubes()
-    vm_supported = MockQube("test-qube-1", qapp,
-                            features={"os-eol": "2060-01-01"})
-    vm_not_supported = MockQube("test-qube-2", qapp,
-                            features={"os-eol": "1990-01-01"})
-    fedora_min = MockQube("test-qube-3", qapp,
-                          features={"template-name": "fedora-36-minimal"})
-    fedora_xfce = MockQube("test-qube-4", qapp,
-                          features={"template-name": "fedora-35-xfce"})
-    wrong_name = MockQube("test-qube-5", qapp,
-                          features={"template-name": "faedora-66"})
-    debian_minimal = MockQube("test-qube-6", qapp,
-                          features={"template-name": "debian-9-minimal"})
-    normal_debian = MockQube("test-qube-7", qapp,
-                          features={"template-name": "debian-8"})
+    vm_supported = MockQube(
+        "test-qube-1", qapp, features={"os-eol": "2060-01-01"}
+    )
+    vm_not_supported = MockQube(
+        "test-qube-2", qapp, features={"os-eol": "1990-01-01"}
+    )
+    fedora_min = MockQube(
+        "test-qube-3", qapp, features={"template-name": "fedora-36-minimal"}
+    )
+    fedora_xfce = MockQube(
+        "test-qube-4", qapp, features={"template-name": "fedora-35-xfce"}
+    )
+    wrong_name = MockQube(
+        "test-qube-5", qapp, features={"template-name": "faedora-66"}
+    )
+    debian_minimal = MockQube(
+        "test-qube-6", qapp, features={"template-name": "debian-9-minimal"}
+    )
+    normal_debian = MockQube(
+        "test-qube-7", qapp, features={"template-name": "debian-8"}
+    )
     nothing_special = MockQube("test-qube-8", qapp)
 
     qapp.update_vm_calls()
@@ -49,4 +57,3 @@ def test_check_support():
     assert not check_support(debian_minimal)
     assert not check_support(normal_debian)
     assert check_support(nothing_special)
-

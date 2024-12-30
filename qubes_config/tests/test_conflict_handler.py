@@ -21,94 +21,129 @@
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-class-docstring
 
-from ..global_config.conflict_handler import ConflictFileListRow,\
-    ConflictFileHandler
+from ..global_config.conflict_handler import (
+    ConflictFileListRow,
+    ConflictFileHandler,
+)
 
 
 def test_row_normal_and_legacy():
-    row_normal = ConflictFileListRow('test1')
-    row_legacy = ConflictFileListRow('/etc/qubes-rpc/test')
+    row_normal = ConflictFileListRow("test1")
+    row_legacy = ConflictFileListRow("/etc/qubes-rpc/test")
 
-    assert row_normal.get_style_context().has_class('problem_row')
-    assert row_legacy.get_style_context().has_class('problem_row')
+    assert row_normal.get_style_context().has_class("problem_row")
+    assert row_legacy.get_style_context().has_class("problem_row")
 
-    assert not row_normal.get_tooltip_text() or \
-           not 'a legacy file' in row_normal.get_tooltip_text()
-    assert 'a legacy file' in row_legacy.get_tooltip_text()
+    assert (
+        not row_normal.get_tooltip_text()
+        or not "a legacy file" in row_normal.get_tooltip_text()
+    )
+    assert "a legacy file" in row_legacy.get_tooltip_text()
 
 
 def test_conflict_handler_simple(test_builder, test_policy_manager):
-    test_policy_manager.policy_client.service_to_files['ConflictTest'] = \
-        ['a', 'b', 'test', 'z']
-    test_policy_manager.policy_client.service_to_files['ConflictLegacy'] = \
-        ['/etc/qubes-rpc/test', 'test', 'z']
+    test_policy_manager.policy_client.service_to_files["ConflictTest"] = [
+        "a",
+        "b",
+        "test",
+        "z",
+    ]
+    test_policy_manager.policy_client.service_to_files["ConflictLegacy"] = [
+        "/etc/qubes-rpc/test",
+        "test",
+        "z",
+    ]
 
     conflict_handler = ConflictFileHandler(
         gtk_builder=test_builder,
         prefix="policytest",
-        service_names=['ConflictTest'],
-        own_file_name='test',
-        policy_manager=test_policy_manager
+        service_names=["ConflictTest"],
+        own_file_name="test",
+        policy_manager=test_policy_manager,
     )
 
     assert conflict_handler.problem_box.get_visible()
-    children_labels = [str(child) for child in
-                       conflict_handler.problem_list.get_children()]
-    assert children_labels == ['a', 'b']
+    children_labels = [
+        str(child) for child in conflict_handler.problem_list.get_children()
+    ]
+    assert children_labels == ["a", "b"]
 
 
 def test_conflict_handler_legacy(test_builder, test_policy_manager):
-    test_policy_manager.policy_client.service_to_files['ConflictTest'] = \
-        ['a', 'b', 'test', 'z']
-    test_policy_manager.policy_client.service_to_files['ConflictLegacy'] = \
-        ['/etc/qubes-rpc/test', 'test', 'z']
+    test_policy_manager.policy_client.service_to_files["ConflictTest"] = [
+        "a",
+        "b",
+        "test",
+        "z",
+    ]
+    test_policy_manager.policy_client.service_to_files["ConflictLegacy"] = [
+        "/etc/qubes-rpc/test",
+        "test",
+        "z",
+    ]
 
     conflict_handler = ConflictFileHandler(
         gtk_builder=test_builder,
         prefix="policytest",
-        service_names=['ConflictLegacy'],
-        own_file_name='test',
-        policy_manager=test_policy_manager
+        service_names=["ConflictLegacy"],
+        own_file_name="test",
+        policy_manager=test_policy_manager,
     )
 
     assert conflict_handler.problem_box.get_visible()
-    children_labels = [str(child) for child in
-                       conflict_handler.problem_list.get_children()]
-    assert children_labels == ['/etc/qubes-rpc/test']
+    children_labels = [
+        str(child) for child in conflict_handler.problem_list.get_children()
+    ]
+    assert children_labels == ["/etc/qubes-rpc/test"]
 
 
 def test_conflict_handler_multiple(test_builder, test_policy_manager):
-    test_policy_manager.policy_client.service_to_files['ConflictTest'] = \
-        ['a', 'b', 'test', 'z']
-    test_policy_manager.policy_client.service_to_files['ConflictLegacy'] = \
-        ['/etc/qubes-rpc/test', 'test', 'z']
+    test_policy_manager.policy_client.service_to_files["ConflictTest"] = [
+        "a",
+        "b",
+        "test",
+        "z",
+    ]
+    test_policy_manager.policy_client.service_to_files["ConflictLegacy"] = [
+        "/etc/qubes-rpc/test",
+        "test",
+        "z",
+    ]
 
     conflict_handler = ConflictFileHandler(
         gtk_builder=test_builder,
         prefix="policytest",
-        service_names=['ConflictTest', 'ConflictLegacy'],
-        own_file_name='test',
-        policy_manager=test_policy_manager
+        service_names=["ConflictTest", "ConflictLegacy"],
+        own_file_name="test",
+        policy_manager=test_policy_manager,
     )
 
     assert conflict_handler.problem_box.get_visible()
-    children_labels = [str(child) for child in
-                       conflict_handler.problem_list.get_children()]
-    assert sorted(children_labels) == sorted(['a', 'b', '/etc/qubes-rpc/test'])
+    children_labels = [
+        str(child) for child in conflict_handler.problem_list.get_children()
+    ]
+    assert sorted(children_labels) == sorted(["a", "b", "/etc/qubes-rpc/test"])
 
 
 def test_conflict_handler_empty(test_builder, test_policy_manager):
-    test_policy_manager.policy_client.service_to_files['ConflictTest'] = \
-        ['a', 'b', 'test', 'z']
-    test_policy_manager.policy_client.service_to_files['ConflictLegacy'] = \
-        ['/etc/qubes-rpc/test', 'test', 'z']
+    test_policy_manager.policy_client.service_to_files["ConflictTest"] = [
+        "a",
+        "b",
+        "test",
+        "z",
+    ]
+    test_policy_manager.policy_client.service_to_files["ConflictLegacy"] = [
+        "/etc/qubes-rpc/test",
+        "test",
+        "z",
+    ]
 
     conflict_handler = ConflictFileHandler(
         gtk_builder=test_builder,
         prefix="policytest",
-        service_names=['ConflictTest'],
-        own_file_name='a',
-        policy_manager=test_policy_manager
+        service_names=["ConflictTest"],
+        own_file_name="a",
+        policy_manager=test_policy_manager,
     )
 
     assert not conflict_handler.problem_box.get_visible()

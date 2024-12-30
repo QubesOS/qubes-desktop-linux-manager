@@ -26,17 +26,24 @@ import gi
 from datetime import datetime, timedelta
 from typing import Optional
 
-gi.require_version('Gtk', '3.0')  # isort:skip
+gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk  # isort:skip
 
 from qubes_config.widgets.gtk_utils import load_icon
 from qubesadmin import exc
 
 from qui.utils import check_support
-from qui.updater.utils import disable_checkboxes, HeaderCheckbox, \
-    pass_through_event_window, \
-    QubeName, label_color_theme, UpdateStatus, RowWrapper, \
-    ListWrapper, on_head_checkbox_toggled
+from qui.updater.utils import (
+    disable_checkboxes,
+    HeaderCheckbox,
+    pass_through_event_window,
+    QubeName,
+    label_color_theme,
+    UpdateStatus,
+    RowWrapper,
+    ListWrapper,
+    on_head_checkbox_toggled,
+)
 
 
 class IntroPage:
@@ -59,14 +66,16 @@ class IntroPage:
         self.list_store: Optional[ListWrapper] = None
 
         checkbox_column: Gtk.TreeViewColumn = self.builder.get_object(
-            "checkbox_column")
+            "checkbox_column"
+        )
         checkbox_column.connect("clicked", self.on_header_toggled)
         header_button = checkbox_column.get_button()
 
-        header_button.connect('realize', pass_through_event_window)
+        header_button.connect("realize", pass_through_event_window)
 
         self.checkbox_column_button: Gtk.CheckButton = self.builder.get_object(
-            "checkbox_header")
+            "checkbox_header"
+        )
         self.checkbox_column_button.set_inconsistent(True)
         self.checkbox_column_button.connect("toggled", self.on_header_toggled)
         self.head_checkbox = UpdateHeaderCheckbox(
@@ -76,49 +85,59 @@ class IntroPage:
         self.vm_list.connect("row-activated", self.on_checkbox_toggled)
 
         self.info_how_it_works: Gtk.Label = self.builder.get_object(
-            "info_how_it_works")
+            "info_how_it_works"
+        )
         self.info_how_it_works.set_label(
             self.info_how_it_works.get_label().format(
                 MAYBE=f'<span foreground="{label_color_theme("orange")}">'
-                      '<b>MAYBE</b></span>',
+                "<b>MAYBE</b></span>",
                 OBSOLETE=f'<span foreground="{label_color_theme("red")}">'
-                      '<b>OBSOLETE</b></span>'
-            ))
+                "<b>OBSOLETE</b></span>",
+            )
+        )
 
     def populate_vm_list(self, qapp, settings):
         """Adds to list any updatable vms with update info."""
         self.log.debug("Populate update list")
         self.list_store = ListWrapper(
-            UpdateRowWrapper, self.vm_list.get_model())
+            UpdateRowWrapper, self.vm_list.get_model()
+        )
 
         for vm in qapp.domains:
-            if vm.klass == 'AdminVM':
+            if vm.klass == "AdminVM":
                 try:
-                    if settings.hide_skipped and bool(vm.features.get( \
-                            'skip-update', False)):
+                    if settings.hide_skipped and bool(
+                        vm.features.get("skip-update", False)
+                    ):
                         continue
-                    state = bool(vm.features.get('updates-available', False))
+                    state = bool(vm.features.get("updates-available", False))
                 except exc.QubesDaemonCommunicationError:
                     state = False
                 self.list_store.append_vm(vm, state)
 
-        to_update=set()
+        to_update = set()
         if settings.hide_updated:
-            cmd = ['qubes-vm-update', '--quiet', '--dry-run',
-                   '--update-if-stale', str(settings.update_if_stale)]
+            cmd = [
+                "qubes-vm-update",
+                "--quiet",
+                "--dry-run",
+                "--update-if-stale",
+                str(settings.update_if_stale),
+            ]
             to_update = self._get_stale_qubes(cmd)
 
         for vm in qapp.domains:
             try:
-                if settings.hide_skipped and bool(vm.features.get( \
-                        'skip-update', False)):
+                if settings.hide_skipped and bool(
+                    vm.features.get("skip-update", False)
+                ):
                     continue
                 if settings.hide_updated and not vm.name in to_update:
                     # TODO: Make re-filtering possible without App restart
                     continue
             except exc.QubesDaemonCommunicationError:
                 continue
-            if getattr(vm, 'updateable', False) and vm.klass != 'AdminVM':
+            if getattr(vm, "updateable", False) and vm.klass != "AdminVM":
                 self.list_store.append_vm(vm)
 
         self.refresh_update_list(settings.update_if_stale)
@@ -131,13 +150,18 @@ class IntroPage:
         if not self.active:
             return
 
-        cmd = ['qubes-vm-update', '--quiet', '--dry-run',
-               '--update-if-stale', str(update_if_stale)]
+        cmd = [
+            "qubes-vm-update",
+            "--quiet",
+            "--dry-run",
+            "--update-if-stale",
+            str(update_if_stale),
+        ]
 
         to_update = self._get_stale_qubes(cmd)
 
         for row in self.list_store:
-            if row.vm.name == 'dom0':
+            if row.vm.name == "dom0":
                 continue
             row.updates_available = bool(row.vm.name in to_update)
             row.selected = bool(row.vm.name in to_update)
@@ -186,22 +210,29 @@ class IntroPage:
         the cycle will start from (1).
         """
         on_head_checkbox_toggled(
-            self.list_store, self.head_checkbox, self.select_rows)
+            self.list_store, self.head_checkbox, self.select_rows
+        )
 
     def select_rows(self):
         for row in self.list_store:
-            row.selected = row.updates_available \
-                           in self.head_checkbox.allowed
+            row.selected = row.updates_available in self.head_checkbox.allowed
 
     def select_rows_ignoring_conditions(self, cliargs, dom0):
-        cmd = ['qubes-vm-update', '--dry-run', '--quiet']
+        cmd = ["qubes-vm-update", "--dry-run", "--quiet"]
 
         args = [a for a in dir(cliargs) if not a.startswith("_")]
         for arg in args:
-            if arg in ("non_interactive", "non_default_select",
-                       "dom0",
-                       "restart", "apply_to_sys", "apply_to_all", "no_apply",
-                       "max_concurrency", "log"):
+            if arg in (
+                "non_interactive",
+                "non_default_select",
+                "dom0",
+                "restart",
+                "apply_to_sys",
+                "apply_to_all",
+                "no_apply",
+                "max_concurrency",
+                "log",
+            ):
                 continue
             value = getattr(cliargs, arg)
             if value:
@@ -217,7 +248,8 @@ class IntroPage:
 
         to_update = set()
         non_default_select = [
-            '--' + arg for arg in cliargs.non_default_select if arg != 'dom0']
+            "--" + arg for arg in cliargs.non_default_select if arg != "dom0"
+        ]
         non_default = [a for a in cmd if a in non_default_select]
         if non_default or cliargs.non_interactive:
             to_update = self._get_stale_qubes(cmd)
@@ -238,8 +270,10 @@ class IntroPage:
                 return set()
 
             return {
-                vm_name.strip() for vm_name
-                in output_lines[0].split(":", maxsplit=1)[1].split(",")
+                vm_name.strip()
+                for vm_name in output_lines[0]
+                .split(":", maxsplit=1)[1]
+                .split(",")
             }
         except subprocess.CalledProcessError as err:
             if err.returncode != 100:
@@ -249,18 +283,23 @@ class IntroPage:
     @staticmethod
     def _handle_cli_dom0(dom0, to_update, cliargs):
         default_select = not any(
-            (getattr(cliargs, arg)
-             for arg in cliargs.non_default_select if arg != 'all'))
-        if ((
-            default_select and cliargs.non_interactive
+            (
+                getattr(cliargs, arg)
+                for arg in cliargs.non_default_select
+                if arg != "all"
+            )
+        )
+        if (
+            default_select
+            and cliargs.non_interactive
             or cliargs.all
             or cliargs.dom0
         ) and (
             cliargs.force_update
-            or bool(dom0.features.get('updates-available', False))
+            or bool(dom0.features.get("updates-available", False))
             or is_stale(dom0, cliargs.update_if_stale)
-        )):
-            to_update.add('dom0')
+        ):
+            to_update.add("dom0")
 
         if cliargs.targets and "dom0" in cliargs.targets.split(","):
             to_update.add("dom0")
@@ -274,8 +313,8 @@ def is_stale(vm, expiration_period):
         return False
     today = datetime.today()
     last_update_str = vm.features.get(
-        'last-updates-check',
-        datetime.fromtimestamp(0).strftime('%Y-%m-%d %H:%M:%S')
+        "last-updates-check",
+        datetime.fromtimestamp(0).strftime("%Y-%m-%d %H:%M:%S"),
     )
     last_update = datetime.fromisoformat(last_update_str)
     if (today - last_update).days > expiration_period:
@@ -295,14 +334,14 @@ class UpdateRowWrapper(RowWrapper):
     _STATUS = 8
 
     def __init__(self, list_store, vm, to_update: bool):
-        updates_available = bool(vm.features.get('updates-available', False))
+        updates_available = bool(vm.features.get("updates-available", False))
         if to_update and not updates_available:
             updates_available = None
         selected = updates_available is True
         supported = check_support(vm)
 
-        last_updates_check = vm.features.get('last-updates-check', None)
-        last_update = vm.features.get('last-update', None)
+        last_updates_check = vm.features.get("last-updates-check", None)
+        last_update = vm.features.get("last-update", None)
 
         icon = load_icon(vm.icon)
         name = QubeName(vm.name, str(vm.label))
@@ -352,13 +391,15 @@ class UpdateRowWrapper(RowWrapper):
     @updates_available.setter
     def updates_available(self, value):
         updates_available = bool(
-            self.vm.features.get('updates-available', False))
+            self.vm.features.get("updates-available", False)
+        )
         supported = check_support(self.vm)
 
         if value and not updates_available:
             updates_available = None
-        self.raw_row[self._UPDATES_AVAILABLE] = \
-            UpdatesAvailable.from_features(updates_available, supported)
+        self.raw_row[self._UPDATES_AVAILABLE] = UpdatesAvailable.from_features(
+            updates_available, supported
+        )
 
     @property
     def last_updates_check(self):
@@ -384,10 +425,10 @@ class UpdateRowWrapper(RowWrapper):
 
 class UpdateHeaderCheckbox(HeaderCheckbox):
     def __init__(self, checkbox_column_button, next_button):
-        super().__init__(checkbox_column_button,
-                         [UpdatesAvailable.YES,
-                          UpdatesAvailable.MAYBE,
-                          UpdatesAvailable.NO])
+        super().__init__(
+            checkbox_column_button,
+            [UpdatesAvailable.YES, UpdatesAvailable.MAYBE, UpdatesAvailable.NO],
+        )
         self.next_button = next_button
 
     def all_action(self, *args, **kwargs):
@@ -458,8 +499,9 @@ class UpdatesAvailable(Enum):
     EOL = 3
 
     @staticmethod
-    def from_features(updates_available: Optional[bool],
-                      supported: Optional[str]=None) -> "UpdatesAvailable":
+    def from_features(
+        updates_available: Optional[bool], supported: Optional[str] = None
+    ) -> "UpdatesAvailable":
         if not supported:
             return UpdatesAvailable.EOL
         if updates_available:
@@ -477,7 +519,7 @@ class UpdatesAvailable(Enum):
         if self is UpdatesAvailable.NO:
             return label_color_theme("black")
         if self is UpdatesAvailable.EOL:
-            return label_color_theme('red')
+            return label_color_theme("red")
 
     def __str__(self):
         if self is UpdatesAvailable.YES:
@@ -490,8 +532,7 @@ class UpdatesAvailable(Enum):
             name = "OBSOLETE"
         else:
             name = "ERROR"
-        return f'<span foreground="{self.color}"><b>' \
-               + name + '</b></span>'
+        return f'<span foreground="{self.color}"><b>' + name + "</b></span>"
 
     def __eq__(self, other: "UpdatesAvailable"):
         return self.value == other.value

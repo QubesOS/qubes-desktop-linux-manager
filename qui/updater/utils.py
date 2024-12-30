@@ -25,7 +25,7 @@ import gi
 from enum import Enum
 from typing import List
 
-gi.require_version('Gtk', '3.0')  # isort:skip
+gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk
 
 
@@ -40,8 +40,10 @@ def disable_checkboxes(func):
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
         if not hasattr(self, "disable_checkboxes"):
-            raise TypeError("To use this decorator inside the class yu need to"
-                            " add attribute `disable_checkboxes`.")
+            raise TypeError(
+                "To use this decorator inside the class yu need to"
+                " add attribute `disable_checkboxes`."
+            )
         if self.disable_checkboxes:
             return
         self.disable_checkboxes = True
@@ -116,12 +118,12 @@ def on_head_checkbox_toggled(list_store, head_checkbox, select_rows):
         selected_num = 0
     else:
         selected_num = selected_num_old = sum(
-            row.selected for row in list_store)
+            row.selected for row in list_store
+        )
         while selected_num == selected_num_old:
             head_checkbox.next_state()
             select_rows()
-            selected_num = sum(
-                row.selected for row in list_store)
+            selected_num = sum(row.selected for row in list_store)
     head_checkbox.set_buttons(selected_num)
 
 
@@ -129,32 +131,36 @@ class QubeClass(Enum):
     """
     Sorting order by vm type.
     """
+
     AdminVM = 0
     TemplateVM = 1
     StandaloneVM = 2
     AppVM = 3
     DispVM = 4
 
+
 # pylint: disable=global-statement
 # TODO: Encapsulate the below variable within a class
 __effective_css_provider__: Gtk.CssProvider = None
+
 
 def SetEffectiveCssProvider(CssProvider: Gtk.CssProvider) -> None:
     global __effective_css_provider__
     __effective_css_provider__ = CssProvider
 
+
 def label_color_theme(color: str) -> str:
     widget = Gtk.Label()
     if not __effective_css_provider__:
         # Replicating the old behaviour. Both forward and backward compatible
-        widget.get_style_context().add_class(f'qube-box-{color}')
-    elif f'.qube-box-{color}' in __effective_css_provider__.to_string():
-        widget.get_style_context().add_class(f'qube-box-{color}')
+        widget.get_style_context().add_class(f"qube-box-{color}")
+    elif f".qube-box-{color}" in __effective_css_provider__.to_string():
+        widget.get_style_context().add_class(f"qube-box-{color}")
     else:
-        widget.get_style_context().add_class('qube-box-custom-label')
+        widget.get_style_context().add_class("qube-box-custom-label")
     gtk_color = widget.get_style_context().get_color(Gtk.StateFlags.NORMAL)
     color_rgb = ast.literal_eval(gtk_color.to_string()[3:])
-    color_hex = '#{:02x}{:02x}{:02x}'.format(*color_rgb)
+    color_hex = "#{:02x}{:02x}{:02x}".format(*color_rgb)
     return color_hex
 
 
@@ -164,8 +170,10 @@ class QubeName:
         self.color = color
 
     def __str__(self):
-        return f'<span foreground="{label_color_theme(self.color)}' \
-               '"><b>' + self.name + '</b></span>'
+        return (
+            f'<span foreground="{label_color_theme(self.color)}'
+            '"><b>' + self.name + "</b></span>"
+        )
 
     def __eq__(self, other):
         return self.name == other.name
@@ -197,7 +205,7 @@ class UpdateStatus(Enum):
         elif self in (UpdateStatus.InProgress, UpdateStatus.ProgressUnknown):
             text = "In progress"
 
-        return f'<span foreground="{color}">' + text + '</span>'
+        return f'<span foreground="{color}">' + text + "</span>"
 
     def __eq__(self, other):
         return self.value == other.value
@@ -210,10 +218,12 @@ class UpdateStatus(Enum):
 
     @staticmethod
     def from_name(name):
-        names = {"success": UpdateStatus.Success,
-                 "error": UpdateStatus.Error,
-                 "no_updates": UpdateStatus.NoUpdatesFound,
-                 "cancelled": UpdateStatus.Cancelled}
+        names = {
+            "success": UpdateStatus.Success,
+            "error": UpdateStatus.Error,
+            "no_updates": UpdateStatus.NoUpdatesFound,
+            "cancelled": UpdateStatus.Cancelled,
+        }
         return names[name]
 
 
@@ -294,14 +304,17 @@ class ListWrapper:
 
     def invert_selection(self, path):
         it = self.list_store_raw.get_iter(path)
-        self.list_store_raw[it][0].selected = \
-            not self.list_store_raw[it][0].selected
+        self.list_store_raw[it][0].selected = not self.list_store_raw[it][
+            0
+        ].selected
 
     def get_selected(self) -> "ListWrapper":
-        empty_copy = Gtk.ListStore(*(
-            self.list_store_raw.get_column_type(i)
-            for i in range(self.list_store_raw.get_n_columns())
-        ))
+        empty_copy = Gtk.ListStore(
+            *(
+                self.list_store_raw.get_column_type(i)
+                for i in range(self.list_store_raw.get_n_columns())
+            )
+        )
         result = ListWrapper(self.row_type, empty_copy)
         selected_rows = [row for row in self if row.selected]
         for row in selected_rows:

@@ -30,7 +30,8 @@ import qubesadmin.devices
 import qubesadmin.vm
 
 import gi
-gi.require_version('Gtk', '3.0')  # isort:skip
+
+gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk, GdkPixbuf, GLib  # isort:skip
 
 from . import backend
@@ -49,24 +50,32 @@ def load_icon(icon_name: str, backup_name: str, size: int = 24):
     """
     try:
         image: GdkPixbuf.Pixbuf = Gtk.IconTheme.get_default().load_icon(
-            icon_name, size, 0)
+            icon_name, size, 0
+        )
         return image
     except (TypeError, GLib.Error):
         try:
             image: GdkPixbuf.Pixbuf = Gtk.IconTheme.get_default().load_icon(
-                backup_name, size, 0)
+                backup_name, size, 0
+            )
             return image
         except (TypeError, GLib.Error):
             try:
                 # this is a workaround in case we are running this locally
-                icon_path = str(pathlib.Path().resolve()) + \
-                            '/icons/scalable/' + icon_name + '.svg'
+                icon_path = (
+                    str(pathlib.Path().resolve())
+                    + "/icons/scalable/"
+                    + icon_name
+                    + ".svg"
+                )
                 return GdkPixbuf.Pixbuf.new_from_file_at_size(
-                    icon_path,  size, size)
+                    icon_path, size, size
+                )
             except (GLib.Error, TypeError):
                 # we are giving up and just using a blank icon
                 pixbuf: GdkPixbuf.Pixbuf = GdkPixbuf.Pixbuf.new(
-                    GdkPixbuf.Colorspace.RGB, True, 8, size, size)
+                    GdkPixbuf.Colorspace.RGB, True, 8, size, size
+                )
                 pixbuf.fill(0x000)
                 return pixbuf
 
@@ -74,6 +83,7 @@ def load_icon(icon_name: str, backup_name: str, size: int = 24):
 class ActionableWidget:
     """abstract class to be used in various clickable items in menus and
     list items"""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # should this widget be sensitive?
@@ -94,10 +104,10 @@ class VariantIcon(Gtk.Image):
         """
         super().__init__()
 
-        self.light_icon = load_icon(icon_name + '-light', icon_name, size)
-        self.dark_icon = load_icon(icon_name + '-dark', icon_name, size)
+        self.light_icon = load_icon(icon_name + "-light", icon_name, size)
+        self.dark_icon = load_icon(icon_name + "-dark", icon_name, size)
 
-        if initial_variant == 'light':
+        if initial_variant == "light":
             self.set_from_pixbuf(self.light_icon)
             self.is_light = True
         else:
@@ -114,8 +124,13 @@ class VariantIcon(Gtk.Image):
 
 
 class VMWithIcon(Gtk.Box):
-    def __init__(self, vm: backend.VM, size: int = 18, variant: str = 'dark',
-                 name_extension: Optional[str] = None):
+    def __init__(
+        self,
+        vm: backend.VM,
+        size: int = 18,
+        variant: str = "dark",
+        name_extension: Optional[str] = None,
+    ):
         """
         Icon with VM name and optional text name extension in parentheses.
         :param vm: VM object
@@ -136,7 +151,7 @@ class VMWithIcon(Gtk.Box):
         self.pack_start(self.backend_icon, False, False, 4)
         self.pack_start(self.backend_label, False, False, 0)
 
-        self.get_style_context().add_class('vm_item')
+        self.get_style_context().add_class("vm_item")
 
 
 class VMAttachmentDiagram(Gtk.Box):
@@ -144,60 +159,64 @@ class VMAttachmentDiagram(Gtk.Box):
     Device attachment scheme, in the following form:
     backend_vm (device name) [-> frontend_vm[, other_frontend+]]
     """
-    def __init__(self, device: backend.Device,
-                 variant: str = 'dark'):
+
+    def __init__(self, device: backend.Device, variant: str = "dark"):
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL)
 
         backend_vm = device.backend_domain
         frontend_vms = list(device.attachments)
         # backend is always there
-        backend_vm_icon = VMWithIcon(backend_vm,
-                                     name_extension=device.id_string)
-        backend_vm_icon.get_style_context().add_class('main_device_vm')
+        backend_vm_icon = VMWithIcon(
+            backend_vm, name_extension=device.id_string
+        )
+        backend_vm_icon.get_style_context().add_class("main_device_vm")
         self.pack_start(backend_vm_icon, False, False, 4)
 
         if frontend_vms:
             # arrow
-            self.arrow = VariantIcon('arrow', variant, 15)
+            self.arrow = VariantIcon("arrow", variant, 15)
             self.pack_start(self.arrow, False, False, 4)
 
             for vm in frontend_vms:
                 # vm
                 # potential topic to explore: commas
                 vm_name = VMWithIcon(vm)
-                vm_name.get_style_context().add_class('main_device_vm')
+                vm_name.get_style_context().add_class("main_device_vm")
 
                 self.pack_start(vm_name, False, False, 4)
 
 
 #### Non-interactive items
 
+
 class InfoHeader(Gtk.Label, ActionableWidget):
     """
     Simple header with a bolded name, left-aligned.
     """
+
     def __init__(self, text):
         super().__init__()
         self.set_text(text)
-        self.get_style_context().add_class('device_header')
-        self.get_style_context().add_class('main_device_item')
+        self.get_style_context().add_class("device_header")
+        self.get_style_context().add_class("main_device_item")
         self.set_halign(Gtk.Align.START)
         self.actionable = False
 
 
 class SeparatorItem(Gtk.Separator, ActionableWidget):
     """Separator item"""
+
     def __init__(self):
         super().__init__()
         self.actionable = False
-        self.get_style_context().add_class('separator_item')
+        self.get_style_context().add_class("separator_item")
 
 
 #### Attach/detach action items
 
 
 class SimpleActionWidget(Gtk.Box):
-    def __init__(self, icon_name, text, variant: str = 'dark'):
+    def __init__(self, icon_name, text, variant: str = "dark"):
         """Widget with an action and an icon."""
         super().__init__()
         self.set_orientation(Gtk.Orientation.HORIZONTAL)
@@ -206,7 +225,7 @@ class SimpleActionWidget(Gtk.Box):
         self.text_label.set_line_wrap_mode(Gtk.WrapMode.WORD)
         self.text_label.set_markup(text)
         self.text_label.set_xalign(0)
-        self.get_style_context().add_class('vm_item')
+        self.get_style_context().add_class("vm_item")
 
         self.pack_start(self.icon, False, False, 5)
         self.pack_start(self.text_label, True, True, 0)
@@ -214,6 +233,7 @@ class SimpleActionWidget(Gtk.Box):
 
 class AttachWidget(ActionableWidget, VMWithIcon):
     """Attach device to qube action"""
+
     def __init__(self, vm: backend.VM, device: backend.Device):
         super().__init__(vm)
         self.vm = vm
@@ -225,10 +245,13 @@ class AttachWidget(ActionableWidget, VMWithIcon):
 
 class DetachWidget(ActionableWidget, SimpleActionWidget):
     """Detach device from a VM"""
-    def __init__(self, vm: backend.VM, device: backend.Device,
-                 variant: str = 'dark'):
-        super().__init__('detach', '<b>Detach from ' + vm.name + '</b>',
-                         variant)
+
+    def __init__(
+        self, vm: backend.VM, device: backend.Device, variant: str = "dark"
+    ):
+        super().__init__(
+            "detach", "<b>Detach from " + vm.name + "</b>", variant
+        )
         self.vm = vm
         self.device = device
 
@@ -238,10 +261,13 @@ class DetachWidget(ActionableWidget, SimpleActionWidget):
 
 class DetachAndShutdownWidget(ActionableWidget, SimpleActionWidget):
     """Detach device from a disposable VM and shut it down."""
-    def __init__(self, vm: backend.VM, device: backend.Device,
-                 variant: str = 'dark'):
-        super().__init__('detach', '<b>Detach and shut down ' +
-                         vm.name +  '</b>', variant)
+
+    def __init__(
+        self, vm: backend.VM, device: backend.Device, variant: str = "dark"
+    ):
+        super().__init__(
+            "detach", "<b>Detach and shut down " + vm.name + "</b>", variant
+        )
         self.vm = vm
         self.device = device
 
@@ -252,8 +278,10 @@ class DetachAndShutdownWidget(ActionableWidget, SimpleActionWidget):
 
 class DetachAndAttachWidget(ActionableWidget, VMWithIcon):
     """Detach device from current attachment(s) and attach to another"""
-    def __init__(self, vm: backend.VM, device: backend.Device,
-                 variant: str = 'dark'):
+
+    def __init__(
+        self, vm: backend.VM, device: backend.Device, variant: str = "dark"
+    ):
         super().__init__(vm, variant=variant)
         self.vm = vm
         self.device = device
@@ -266,15 +294,18 @@ class DetachAndAttachWidget(ActionableWidget, VMWithIcon):
 
 class AttachDisposableWidget(ActionableWidget, VMWithIcon):
     """Attach to a new disposable qube"""
-    def __init__(self, vm: backend.VM, device: backend.Device,
-                 variant: str = 'dark'):
+
+    def __init__(
+        self, vm: backend.VM, device: backend.Device, variant: str = "dark"
+    ):
         super().__init__(vm, variant=variant)
         self.vm = vm
         self.device = device
 
     def widget_action(self, *_args):
-        new_dispvm = qubesadmin.vm.DispVM.from_appvm(self.vm.vm_object.app,
-                                                     self.vm)
+        new_dispvm = qubesadmin.vm.DispVM.from_appvm(
+            self.vm.vm_object.app, self.vm
+        )
         new_dispvm.start()
 
         self.device.attach_to_vm(backend.VM(new_dispvm))
@@ -282,16 +313,19 @@ class AttachDisposableWidget(ActionableWidget, VMWithIcon):
 
 class DetachAndAttachDisposableWidget(ActionableWidget, VMWithIcon):
     """Detach from all current attachments and attach to new disposable"""
-    def __init__(self, vm: backend.VM, device: backend.Device,
-                 variant: str = 'dark'):
+
+    def __init__(
+        self, vm: backend.VM, device: backend.Device, variant: str = "dark"
+    ):
         super().__init__(vm, variant=variant)
         self.vm = vm
         self.device = device
 
     def widget_action(self, *_args):
         self.device.detach_from_vm(self.vm)
-        new_dispvm = qubesadmin.vm.DispVM.from_appvm(self.vm.vm_object.app,
-                                                     self.vm)
+        new_dispvm = qubesadmin.vm.DispVM.from_appvm(
+            self.vm.vm_object.app, self.vm
+        )
         new_dispvm.start()
 
         self.device.attach_to_vm(backend.VM(new_dispvm))
@@ -299,13 +333,14 @@ class DetachAndAttachDisposableWidget(ActionableWidget, VMWithIcon):
 
 #### Other actions
 
+
 class DeviceSettingsWidget(ActionableWidget, SimpleActionWidget):
     """
     Not yet implemented.
     """
-    def __init__(self, device: backend.Device, variant: str = 'dark'):
-        super().__init__('settings', '<b>Device settings</b>',
-                         variant)
+
+    def __init__(self, device: backend.Device, variant: str = "dark"):
+        super().__init__("settings", "<b>Device settings</b>", variant)
         self.device = device
 
     def widget_action(self, *_args):
@@ -316,8 +351,9 @@ class GlobalSettingsWidget(ActionableWidget, SimpleActionWidget):
     """
     Not yet implemented.
     """
-    def __init__(self, device: backend.Device, variant: str = 'dark'):
-        super().__init__('settings', '<b>Global device settings</b>', variant)
+
+    def __init__(self, device: backend.Device, variant: str = "dark"):
+        super().__init__("settings", "<b>Global device settings</b>", variant)
         self.device = device
 
     def widget_action(self, *_args):
@@ -328,18 +364,20 @@ class HelpWidget(ActionableWidget, SimpleActionWidget):
     """
     Not yet implemented.
     """
-    def __init__(self, device: backend.Device, variant: str = 'dark'):
-        super().__init__('question-icon', '<b>Help</b>', variant)
+
+    def __init__(self, device: backend.Device, variant: str = "dark"):
+        super().__init__("question-icon", "<b>Help</b>", variant)
         self.device = device
 
     def widget_action(self, *_args):
         pass
 
+
 #### Device info widget
 
 
 class DeviceHeaderWidget(Gtk.Box, ActionableWidget):
-    def __init__(self, device: backend.Device, variant: str = 'dark'):
+    def __init__(self, device: backend.Device, variant: str = "dark"):
         """General information about the device - name, in the future also
         a button to rename the device."""
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
@@ -368,7 +406,7 @@ class DeviceHeaderWidget(Gtk.Box, ActionableWidget):
 
         self.device_label = Gtk.Label()
         self.device_label.set_markup(device.name)
-        self.device_label.get_style_context().add_class('device_name')
+        self.device_label.get_style_context().add_class("device_name")
         self.device_label.set_xalign(Gtk.Align.CENTER)
         self.device_label.set_halign(Gtk.Align.CENTER)
 
@@ -389,7 +427,8 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
     | dev_icon |                device_name            |
     |          | backend_vm | (arrow) | frontend_vm[s] |
     """
-    def __init__(self, device: backend.Device, variant: str = 'dark'):
+
+    def __init__(self, device: backend.Device, variant: str = "dark"):
         super().__init__()
         self.device = device
         self.variant = variant
@@ -399,7 +438,7 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
         # reduce NEW! label timeout to 2 minutes after 1st view
         self._new_device_label_afterview = 2 * 60
 
-        self.get_style_context().add_class('main_device_item')
+        self.get_style_context().add_class("main_device_item")
 
         # the part that is common to all devices
 
@@ -409,8 +448,10 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
         self.device_label = Gtk.Label(xalign=0)
 
         label_markup = device.name
-        if (device.connection_timestamp and
-                int(time.monotonic() - device.connection_timestamp) < 120):
+        if (
+            device.connection_timestamp
+            and int(time.monotonic() - device.connection_timestamp) < 120
+        ):
             label_markup += ' <span foreground="#63a0ff"><b>NEW</b></span>'
         self.device_label.set_markup(label_markup)
 
@@ -425,8 +466,9 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
         self.vm_diagram = VMAttachmentDiagram(device, self.variant)
         self.attach(self.vm_diagram, 1, 1, 3, 1)
 
-    def get_child_widgets(self, vms, disp_vm_templates) -> \
-            Iterable[ActionableWidget]:
+    def get_child_widgets(
+        self, vms, disp_vm_templates
+    ) -> Iterable[ActionableWidget]:
         """
         Get type-appropriate list of child widgets.
         :return: iterable of ActionableWidgets, ready to be packed in somewhere
@@ -454,8 +496,9 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
             yield InfoHeader("Detach and attach to new disposable qube:")
 
             for vm in disp_vm_templates:
-                yield DetachAndAttachDisposableWidget(vm, self.device,
-                                                      self.variant)
+                yield DetachAndAttachDisposableWidget(
+                    vm, self.device, self.variant
+                )
 
         else:
             yield InfoHeader("Attach to qube:")
@@ -470,8 +513,9 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
                 yield AttachDisposableWidget(vm, self.device, self.variant)
 
 
-def generate_wrapper_widget(widget_class: Callable,
-                            signal: str, inside_widget: ActionableWidget):
+def generate_wrapper_widget(
+    widget_class: Callable, signal: str, inside_widget: ActionableWidget
+):
     """
     Wraps a provided
     :param widget_class: "outside" widget class, e.g. Gtk.MenuItem

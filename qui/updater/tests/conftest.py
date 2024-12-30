@@ -22,9 +22,14 @@
 import pytest
 import importlib.resources
 
-from qubes_config.tests.conftest import add_dom0_vm_property, \
-    add_dom0_text_property, add_dom0_feature, add_expected_vm, \
-    add_feature_with_template_to_all, add_feature_to_all
+from qubes_config.tests.conftest import (
+    add_dom0_vm_property,
+    add_dom0_text_property,
+    add_dom0_feature,
+    add_expected_vm,
+    add_feature_with_template_to_all,
+    add_feature_to_all,
+)
 from qubesadmin.tests import QubesTest
 
 import gi
@@ -33,8 +38,8 @@ from qui.updater.intro_page import UpdateRowWrapper
 from qui.updater.summary_page import RestartRowWrapper
 from qui.updater.utils import ListWrapper
 
-gi.require_version('Gtk', '3.0')
-gi.require_version('GdkPixbuf', '2.0')
+gi.require_version("Gtk", "3.0")
+gi.require_version("GdkPixbuf", "2.0")
 from gi.repository import Gtk
 
 
@@ -46,104 +51,163 @@ def test_qapp():
 def test_qapp_impl():
     """Test QubesApp"""
     qapp = QubesTest()
-    qapp._local_name = 'dom0'  # pylint: disable=protected-access
+    qapp._local_name = "dom0"  # pylint: disable=protected-access
 
-    add_dom0_vm_property(qapp, 'clockvm', 'sys-net')
-    add_dom0_vm_property(qapp, 'updatevm', 'sys-net')
-    add_dom0_vm_property(qapp, 'default_netvm', 'sys-net')
-    add_dom0_vm_property(qapp, 'default_template', 'fedora-36')
-    add_dom0_vm_property(qapp, 'default_dispvm', 'fedora-36')
+    add_dom0_vm_property(qapp, "clockvm", "sys-net")
+    add_dom0_vm_property(qapp, "updatevm", "sys-net")
+    add_dom0_vm_property(qapp, "default_netvm", "sys-net")
+    add_dom0_vm_property(qapp, "default_template", "fedora-36")
+    add_dom0_vm_property(qapp, "default_dispvm", "fedora-36")
 
-    add_dom0_text_property(qapp, 'default_kernel', '1.1')
-    add_dom0_text_property(qapp, 'default_pool', 'file')
+    add_dom0_text_property(qapp, "default_kernel", "1.1")
+    add_dom0_text_property(qapp, "default_pool", "file")
 
-    add_dom0_feature(qapp, 'gui-default-allow-fullscreen', '')
-    add_dom0_feature(qapp, 'gui-default-allow-utf8-titles', '')
-    add_dom0_feature(qapp, 'gui-default-trayicon-mode', '')
-    add_dom0_feature(qapp, 'qubes-vm-update-update-if-stale', None)
-    add_dom0_feature(qapp, 'skip-update', None)
-    add_dom0_feature(qapp, 'qubes-vm-update-hide-skipped', None)
-    add_dom0_feature(qapp, 'qubes-vm-update-hide-updated', None)
+    add_dom0_feature(qapp, "gui-default-allow-fullscreen", "")
+    add_dom0_feature(qapp, "gui-default-allow-utf8-titles", "")
+    add_dom0_feature(qapp, "gui-default-trayicon-mode", "")
+    add_dom0_feature(qapp, "qubes-vm-update-update-if-stale", None)
+    add_dom0_feature(qapp, "skip-update", None)
+    add_dom0_feature(qapp, "qubes-vm-update-hide-skipped", None)
+    add_dom0_feature(qapp, "qubes-vm-update-hide-updated", None)
 
     # setup labels
-    qapp.expected_calls[('dom0', 'admin.label.List', None, None)] = \
-        b'0\x00red\nblue\ngreen\n'
+    qapp.expected_calls[("dom0", "admin.label.List", None, None)] = (
+        b"0\x00red\nblue\ngreen\n"
+    )
 
     # setup pools:
-    qapp.expected_calls[('dom0', 'admin.pool.List', None, None)] = \
-        b'0\x00linux-kernel\nlvm\nfile\n'
-    qapp.expected_calls[('dom0', 'admin.pool.volume.List',
-                         'linux-kernel', None)] = \
-        b'0\x001.1\nmisc\n4.2\n'
+    qapp.expected_calls[("dom0", "admin.pool.List", None, None)] = (
+        b"0\x00linux-kernel\nlvm\nfile\n"
+    )
+    qapp.expected_calls[
+        ("dom0", "admin.pool.volume.List", "linux-kernel", None)
+    ] = b"0\x001.1\nmisc\n4.2\n"
 
-    add_expected_vm(qapp, 'dom0', 'AdminVM',
-                    {}, {'service.qubes-update-check': 1,
-                         'config.default.qubes-update-check': None,
-                         'config-usbvm-name': None,
-                         'gui-default-secure-copy-sequence': None,
-                         'gui-default-secure-paste-sequence': None
-                         }, [])
-    add_expected_vm(qapp, 'sys-net', 'AppVM',
-                    {'provides_network': ('bool', False, 'True')},
-                    {'service.qubes-update-check': None,
-                     'service.qubes-updates-proxy': 1}, [])
+    add_expected_vm(
+        qapp,
+        "dom0",
+        "AdminVM",
+        {},
+        {
+            "service.qubes-update-check": 1,
+            "config.default.qubes-update-check": None,
+            "config-usbvm-name": None,
+            "gui-default-secure-copy-sequence": None,
+            "gui-default-secure-paste-sequence": None,
+        },
+        [],
+    )
+    add_expected_vm(
+        qapp,
+        "sys-net",
+        "AppVM",
+        {"provides_network": ("bool", False, "True")},
+        {"service.qubes-update-check": None, "service.qubes-updates-proxy": 1},
+        [],
+    )
 
-    add_expected_vm(qapp, 'sys-firewall', 'AppVM',
-                    {'provides_network': ('bool', False, 'True')},
-                    {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp,
+        "sys-firewall",
+        "AppVM",
+        {"provides_network": ("bool", False, "True")},
+        {"service.qubes-update-check": None},
+        [],
+    )
 
-    add_expected_vm(qapp, 'sys-usb', 'AppVM',
-                    {},
-                    {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp, "sys-usb", "AppVM", {}, {"service.qubes-update-check": None}, []
+    )
 
-    add_expected_vm(qapp, 'fedora-36', 'TemplateVM',
-                    {"netvm": ("vm", False, ''),
-                     'updateable': ('bool', True, "True")},
-                    {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp,
+        "fedora-36",
+        "TemplateVM",
+        {"netvm": ("vm", False, ""), "updateable": ("bool", True, "True")},
+        {"service.qubes-update-check": None},
+        [],
+    )
 
-    add_expected_vm(qapp, 'fedora-35', 'TemplateVM',
-                    {"netvm": ("vm", False, ''),
-                     'updateable': ('bool', True, "True")},
-                    {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp,
+        "fedora-35",
+        "TemplateVM",
+        {"netvm": ("vm", False, ""), "updateable": ("bool", True, "True")},
+        {"service.qubes-update-check": None},
+        [],
+    )
 
-    add_expected_vm(qapp, 'default-dvm', 'DispVM',
-                    {'template_for_dispvms': ('bool', False, 'True'),
-                     'auto_cleanup': ('bool', False, 'False')},
-                    {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp,
+        "default-dvm",
+        "DispVM",
+        {
+            "template_for_dispvms": ("bool", False, "True"),
+            "auto_cleanup": ("bool", False, "False"),
+        },
+        {"service.qubes-update-check": None},
+        [],
+    )
 
-    add_expected_vm(qapp, 'test-vm', 'AppVM',
-                    {}, {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp, "test-vm", "AppVM", {}, {"service.qubes-update-check": None}, []
+    )
 
-    add_expected_vm(qapp, 'test-blue', 'AppVM',
-                    {'label': ('str', False, 'blue')},
-                    {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp,
+        "test-blue",
+        "AppVM",
+        {"label": ("str", False, "blue")},
+        {"service.qubes-update-check": None},
+        [],
+    )
 
-    add_expected_vm(qapp, 'test-red', 'AppVM',
-                    {'label': ('str', False, 'red')},
-                    {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp,
+        "test-red",
+        "AppVM",
+        {"label": ("str", False, "red")},
+        {"service.qubes-update-check": None},
+        [],
+    )
 
-    add_expected_vm(qapp, 'test-standalone', 'StandaloneVM',
-                    {'label': ('str', False, 'green'),
-                     'updateable': ('bool', True, "True")},
-                    {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp,
+        "test-standalone",
+        "StandaloneVM",
+        {
+            "label": ("str", False, "green"),
+            "updateable": ("bool", True, "True"),
+        },
+        {"service.qubes-update-check": None},
+        [],
+    )
 
-    add_expected_vm(qapp, 'vault', 'AppVM',
-                    {"netvm": ("vm", False, '')},
-                    {'service.qubes-update-check': None}, [])
+    add_expected_vm(
+        qapp,
+        "vault",
+        "AppVM",
+        {"netvm": ("vm", False, "")},
+        {"service.qubes-update-check": None},
+        [],
+    )
 
-    add_feature_with_template_to_all(qapp, 'supported-service.qubes-u2f-proxy',
-                                     ['test-vm', 'fedora-35', 'sys-usb'])
-    add_feature_to_all(qapp, 'service.qubes-u2f-proxy',
-                                     ['test-vm'])
-    add_feature_to_all(qapp, 'restart-after-update', [])
-    add_feature_to_all(qapp, 'updates-available', [])
-    add_feature_to_all(qapp, 'last-update', [])
-    add_feature_to_all(qapp, 'last-updates-check', [])
-    add_feature_to_all(qapp, 'template-name', [])
-    add_feature_to_all(qapp, 'servicevm',
-                       ['sys-usb', 'sys-firewall', 'sys-net'])
-    add_feature_to_all(qapp, 'os-eol', [])
-    add_feature_to_all(qapp, 'skip-update', [])
+    add_feature_with_template_to_all(
+        qapp,
+        "supported-service.qubes-u2f-proxy",
+        ["test-vm", "fedora-35", "sys-usb"],
+    )
+    add_feature_to_all(qapp, "service.qubes-u2f-proxy", ["test-vm"])
+    add_feature_to_all(qapp, "restart-after-update", [])
+    add_feature_to_all(qapp, "updates-available", [])
+    add_feature_to_all(qapp, "last-update", [])
+    add_feature_to_all(qapp, "last-updates-check", [])
+    add_feature_to_all(qapp, "template-name", [])
+    add_feature_to_all(
+        qapp, "servicevm", ["sys-usb", "sys-firewall", "sys-net"]
+    )
+    add_feature_to_all(qapp, "os-eol", [])
+    add_feature_to_all(qapp, "skip-update", [])
 
     return qapp
 
@@ -153,8 +217,7 @@ def real_builder():
     """Gtk builder with actual config glade file registered"""
     builder = Gtk.Builder()
     builder.set_translation_domain("desktop-linux-manager")
-    glade_ref = (importlib.resources.files('qui') /
-                 'updater.glade')
+    glade_ref = importlib.resources.files("qui") / "updater.glade"
     with importlib.resources.as_file(glade_ref) as path:
         builder.add_from_file(str(path))
     return builder
