@@ -507,6 +507,12 @@ class GlobalConfig(Gtk.Application):
             ],
         )
 
+        # workaround the uncomfortable behavior with comboboxes: combobox
+        # should not change item ID on random scrolling around
+        for obj in self.builder.get_objects():
+            if isinstance(obj, (Gtk.ComboBox, Gtk.ComboBoxText)):
+                obj.connect("scroll-event", lambda *args: True)
+
         self.progress_bar_dialog.update_progress(1)
         self.progress_bar_dialog.hide()
         self.progress_bar_dialog.destroy()
