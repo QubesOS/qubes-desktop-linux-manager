@@ -274,6 +274,9 @@ class UpdateListIter:
         self.list_store_wrapped = list_store_wrapped
         self._id = -1
 
+    def __iter__(self) -> "UpdateListIter":
+        return self
+
     def __next__(self) -> RowWrapper:
         self._id += 1
         if 0 <= self._id < len(self.list_store_wrapped):
