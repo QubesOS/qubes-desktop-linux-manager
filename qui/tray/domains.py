@@ -80,7 +80,7 @@ def show_error(title, text):
         None, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.OK
     )
     dialog.set_title(title)
-    dialog.set_markup(text)
+    dialog.set_markup(GLib.markup_escape_text(text))
     dialog.connect("response", lambda *x: dialog.destroy())
     GLib.idle_add(dialog.show)
 
@@ -232,7 +232,7 @@ class PreferencesItem(VMActionMenuItem):
     def __init__(self, vm, icon_cache):
         super().__init__(vm, icon_cache, "preferences", _("Settings"))
 
-    def perform_action(self):
+    def perform_action(self) -> None:
         # pylint: disable=consider-using-with
         subprocess.Popen(["qubes-vm-settings", self.vm.name])
 
@@ -251,7 +251,7 @@ class LogItem(Gtk.ImageMenuItem):
 
         self.connect("activate", self.launch_log_viewer)
 
-    def launch_log_viewer(self, *_args, **_kwargs):
+    def launch_log_viewer(self, *_args, **_kwargs) -> None:
         # pylint: disable=consider-using-with
         subprocess.Popen(["qubes-log-viewer", self.path])
 
@@ -270,7 +270,7 @@ class RunTerminalItem(Gtk.ImageMenuItem):
 
         self.connect("activate", self.run_terminal)
 
-    def run_terminal(self, _item):
+    def run_terminal(self, _item) -> None:
         try:
             self.vm.run_service("qubes.StartApp+qubes-run-terminal")
         except exc.QubesException as ex:
@@ -318,11 +318,15 @@ class InternalInfoItem(Gtk.MenuItem):
     def __init__(self):
         super().__init__()
         self.label = Gtk.Label(xalign=0)
-        self.label.set_markup(_("<b>Internal qube</b>"))
+        self.label.set_markup(
+            "<b>" + GLib.markup_escape_text(_("Internal qube")) + "</b>"
+        )
         self.set_tooltip_text(
-            "Internal qubes are used by the operating system. Do not modify"
-            " them or run programs in them unless you really "
-            "know what you are doing."
+            _(
+                "Internal qubes are used by the operating system. Do not modify"
+                " them or run programs in them unless you really "
+                "know what you are doing."
+            )
         )
         self.add(self.label)
         self.set_sensitive(False)
@@ -555,7 +559,9 @@ class DomainMenuItem(Gtk.ImageMenuItem):
         colormap = {"Paused": "grey", "Crashed": "red", "Transient": "red"}
         if state in colormap:
             self.name.label.set_markup(
-                f"<span color='{colormap[state]}'>{self.vm.name}</span>"
+                f"<span color='{colormap[state]}'>"
+                + GLib.markup_escape_text(self.vm.name)
+                + "</span>"
             )
         else:
             self.name.label.set_label(self.vm.name)

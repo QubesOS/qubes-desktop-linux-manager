@@ -88,6 +88,22 @@ def load_icon(icon_name: str, width: int = 24, height: int = 24):
             return pixbuf
 
 
+def _escape_str(s: Union[str, float, int]) -> Union[str, float, int]:
+    # pylint: disable=unidiomatic-typecheck
+    if type(s) is str:
+        return GLib.markup_escape_text(s)
+    # pylint: disable=unidiomatic-typecheck
+    if type(s) in (float, int, bool):
+        return s
+    raise TypeError(f"Unsupported input type {type(s)}")
+
+
+def markup_format(s, *args, **kwargs) -> str:
+    escaped_args = [_escape_str(i) for i in args]
+    escaped_kwargs = {k: _escape_str(v) for k, v in kwargs.items()}
+    return s.format(*escaped_args, **escaped_kwargs)
+
+
 def show_error(parent, title, text):
     """
     Helper function to display error messages.
@@ -184,7 +200,7 @@ def show_dialog(
 
     if isinstance(text, str):
         label: Gtk.Label = Gtk.Label()
-        label.set_markup(text)
+        label.set_text(text)
         label.set_line_wrap_mode(Gtk.WrapMode.WORD)
         label.set_max_width_chars(200)
         label.set_xalign(0)
