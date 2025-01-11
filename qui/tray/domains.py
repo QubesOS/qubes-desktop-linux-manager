@@ -2,6 +2,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position,import-error,superfluous-parens
 """ A menu listing domains """
+
+# Must be imported before creating threads
+from .gtk3_xwayland_menu_dismisser import (
+    get_fullscreen_window_hack,
+)  # isort:skip
+
 import abc
 import asyncio
 import subprocess
@@ -584,6 +590,8 @@ class DomainTray(Gtk.Application):
         )
 
         self.tray_menu = Gtk.Menu()
+        self.fullscreen_window_hack = get_fullscreen_window_hack()
+        self.fullscreen_window_hack.show_for_widget(self.tray_menu)
 
         self.icon_cache = IconCache()
 
