@@ -93,9 +93,9 @@ MSG_COPY_SUCCESS = _(
     "<small>Press {shortcut} in qube to paste to local clipboard.</small>"
 )
 MSG_WIPED = _("\n<small>Global clipboard has been wiped</small>")
+MSG_NOT_WIPED = _("\n<small>Global clipboard is <b>NOT</b> wiped</small>")
 MSG_PASTE_SUCCESS_METADATA = _(
     "Global clipboard copied <b>{size}</b> to <b>{vmname}</b>.\n"
-    "Global clipboard has been wiped.\n"
     "<small>Paste normally in qube (e.g. Ctrl+V).</small>"
 )
 MSG_PASTE_SUCCESS_LEGACY = _(
@@ -184,6 +184,10 @@ class EventHandler(pyinotify.ProcessEvent):
                 size=clipboard_formatted_size(metadata["sent_size"]),
                 vmname=metadata["vmname"],
             )
+            if metadata["cleared"]:
+                body += MSG_WIPED
+            else:
+                body += MSG_NOT_WIPED
             icon = "dialog-information"
         else:
             body = MSG_PASTE_SUCCESS_LEGACY
@@ -234,6 +238,10 @@ class EventHandler(pyinotify.ProcessEvent):
             self._copy(metadata=metadata)
         elif metadata["paste_action"]:
             self._paste(metadata=metadata)
+
+    def process_IN_CLOSE_NOWRITE(self, _unused=None):
+        """ Reacts to change of FROM file modification time """
+        self.process_IN_CLOSE_WRITE()
 
     def process_IN_MOVE_SELF(self, _unused):
         """Stop loop if file is moved"""
