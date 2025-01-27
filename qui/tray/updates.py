@@ -69,7 +69,7 @@ class UpdatesTray(Gtk.Application):
         self.register()  # register Gtk Application
 
         self.widget_icon = Gtk.StatusIcon()
-        self.widget_icon.set_from_icon_name("software-update-available")
+        self.widget_icon.set_from_icon_name("qui-updates")
         self.widget_icon.set_visible(False)
         self.widget_icon.connect("button-press-event", self.show_menu)
         self.widget_icon.set_tooltip_markup(

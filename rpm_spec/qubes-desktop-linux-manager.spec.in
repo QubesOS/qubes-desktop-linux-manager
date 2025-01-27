@@ -276,6 +276,13 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 /usr/share/icons/hicolor/scalable/apps/qubes-expander-shown-black.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-expander-shown-white.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-global-config.svg
+/usr/share/icons/hicolor/scalable/apps/qubes-files.svg
+/usr/share/icons/hicolor/scalable/apps/qubes-terminal.svg
+/usr/share/icons/hicolor/scalable/apps/qubes-vm-pause.svg
+/usr/share/icons/hicolor/scalable/apps/qubes-vm-shutdown.svg
+/usr/share/icons/hicolor/scalable/apps/qubes-vm-restart.svg
+/usr/share/icons/hicolor/scalable/apps/qubes-vm-unpause.svg
+/usr/share/icons/hicolor/scalable/apps/qubes-vm-kill.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-info.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-key.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-logo.svg
@@ -283,14 +290,18 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 /usr/share/icons/hicolor/scalable/apps/qubes-ok.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-padlock.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-policy-editor.svg
-/usr/share/icons/hicolor/scalable/apps/qubes-question-light.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-question.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-this-device.svg
+/usr/share/icons/hicolor/scalable/apps/qui-clipboard.svg
 /usr/share/icons/hicolor/scalable/apps/qui-domains-scalable.svg
+/usr/share/icons/hicolor/scalable/apps/qui-disk-space.svg
+/usr/share/icons/hicolor/scalable/apps/qui-disk-space-warn.svg
+/usr/share/icons/hicolor/scalable/apps/qui-updates.svg
 /usr/share/icons/hicolor/scalable/apps/settings-dark.svg
 /usr/share/icons/hicolor/scalable/apps/settings-light.svg
 /usr/share/icons/hicolor/scalable/apps/smartphone-dark.svg
 /usr/share/icons/hicolor/scalable/apps/smartphone-light.svg
+/usr/share/icons/hicolor/scalable/apps/qubes-add.svg
 
 /usr/share/gtksourceview-4/language-specs/qubes-rpc.lang
 

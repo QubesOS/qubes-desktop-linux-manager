@@ -1,9 +1,19 @@
 separator {
     background: @separator-color;
+    border-top: 1px solid @dark-gray-2;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .combo {
-    padding: 2px;
+    padding: 2px 2px 2px 10px;
+    background: @top-background;
+    border-width: 1px;
+    border-color: @background-frame
+}
+
+.flat_combo button.combo {
+    border-left: 0px;
 }
 
 .qubes_version_label {
@@ -64,6 +74,15 @@ separator {
 .section_title {
     margin-top: 10px;
     margin-bottom: 2px;
+    font-weight: 600;
+    font-size: 150%;
+}
+
+.page_title {
+    font-weight: 400;
+    font-size: 180%;
+    margin-top: 20px;
+    margin-bottom: 2px;
 }
 
 .flowbox_container {
@@ -100,17 +119,25 @@ separator {
 }
 
 .add_label {
-    color: @qubes-blue;
-    font-weight: bold;
+    color: @text-color;
+    font-weight: 600;
+    font-size: 100%;
 }
 
 .add_label:disabled {
-    color: @misc-text-color;
-    font-weight: bold;
+    color: @soft-text-color;
+    font-size: 100%;
+    font-weight: 600;
 }
 
 .add_button {
-    border: 0;
+    border-image: none;
+    background-image: none;
+    border: 2px;
+    border-style: solid;
+    border-color: @medium-gray-2;
+    background: @add-button;
+    box-shadow: none;
 }
 
 .permission_list {
@@ -130,10 +157,8 @@ separator {
 
 .edited_row {
     padding: 5px 5px 5px 5px;
-    background: @top-background;
-    border-color: @background-frame;
-    border-style: solid;
-    border-width: 1px;
+    background: none;
+    border-style: none;
     margin: 5px;
 }
 
@@ -142,11 +167,12 @@ separator {
 }
 
 .problem_box {
-    margin: 5px 80px 5px 40px;
+    margin: 5px 0px 5px 0px;
     padding: 10px;
-    border: 1px;
+    border-width: 2px;
     border-style: solid;
-    border-color: @background-frame;
+    border-radius: 4px;
+    border-color: @problem-frame;
     background: @problem-background;
 }
 
@@ -197,12 +223,17 @@ separator {
 }
 
 .info_box {
-    padding: 10px 20px 10px 20px;
-    margin: 5px 50px 5px 30px;
+    padding: 10px 10px 10px 10px;
+    margin: 5px 0px 5px 0px;
     background: @info-background;
-    border-width: 1px;
+    border-width: 2px;
     border-style: solid;
-    border-color: @background-frame;
+    border-radius: 4px;
+    border-color: @info-frame;
+}
+
+.info_box link {
+    color: @link-color;
 }
 
 .action_text {

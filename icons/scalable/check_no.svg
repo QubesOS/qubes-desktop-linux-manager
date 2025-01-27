@@ -1,16 +1,1 @@
-<svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g filter="url(#filter0_i_705_5449)">
-<path fill-rule="evenodd" clip-rule="evenodd" d="M7.89133 0L4.99626 2.8937L2.10792 0.00859331L0 2.11582L2.8861 5.00019L0 7.88492L2.10792 9.99178L4.99626 7.10779L7.89133 10L10 7.89314L7.10493 5.00019L10 2.10723L7.89133 0Z" fill="#9C2E4B"/>
-</g>
-<defs>
-<filter id="filter0_i_705_5449" x="0" y="0" width="10" height="10" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-<feOffset dy="1"/>
-<feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
-<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0"/>
-<feBlend mode="normal" in2="shape" result="effect1_innerShadow_705_5449"/>
-</filter>
-</defs>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-slash"><circle cx="12" cy="12" r="10"/><line x1="9" x2="15" y1="15" y2="9"/></svg>

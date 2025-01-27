@@ -305,19 +305,9 @@ class UpdateCheckerHandler:
 
     def _set_label(self):
         if self.enable_radio.get_active():
-            self.exception_label.set_markup(
-                _(
-                    "Except the following qubes, for which checking for updates"
-                    " will be <b>disabled</b>"
-                )
-            )
+            self.exception_label.set_markup(_("<b>disabled</b>"))
         else:
-            self.exception_label.set_markup(
-                _(
-                    "Except the following qubes, for which checking for updates"
-                    " will be <b>enabled</b>"
-                )
-            )
+            self.exception_label.set_markup(_("<b>enabled</b>"))
 
     def _enable_disable_toggled(self, *_args):
         self._set_label()

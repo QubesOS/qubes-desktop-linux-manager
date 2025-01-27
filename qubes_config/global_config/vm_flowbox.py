@@ -70,7 +70,7 @@ class VMFlowBoxButton(Gtk.FlowBoxChild):
         box.pack_start(token_widget, False, False, 0)
         remove_icon = Gtk.Image()
         remove_icon.set_from_pixbuf(load_icon("qubes-delete", 14, 14))
-        box.pack_start(remove_icon, False, False, 10)
+        box.pack_start(remove_icon, False, False, 0)
 
         button.add(box)
         button.connect("clicked", self._remove_self)
