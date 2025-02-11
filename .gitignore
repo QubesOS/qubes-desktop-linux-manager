@@ -93,3 +93,7 @@ ENV/
 *.swp
 
 *.~undo-tree~
+
+# GTK glade temporary files
+*.glade~
+*.glade#

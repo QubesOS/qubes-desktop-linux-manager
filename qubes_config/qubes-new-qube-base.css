@@ -53,6 +53,18 @@ radiobutton:checked radio {
     color: @text-color;
 }
 
+.flat_button:disabled {
+    background: @dark-gray;
+}
+
+.invalid_entry {
+    border-color: red;
+}
+
+.invalid_entry:focus {
+    box-shadow: none;
+}
+
 #applications {
     background: @top-background;
     margin-top: 10px;
