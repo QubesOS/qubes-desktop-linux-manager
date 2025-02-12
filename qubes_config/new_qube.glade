@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.2 -->
+<!-- Generated with glade 3.40.0 -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
   <!-- interface-css-provider-path qubes-new-qube-light.css -->
@@ -424,10 +424,10 @@
                           <object class="GtkEntry" id="qube_name">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
-                            <property name="tooltip-text" translatable="yes">The name of the qube can contain letters from a to z and underscore.</property>
+                            <property name="tooltip-text" translatable="yes">Qube name can have up to 63 characters: A-Z, a-z, numbers and underscores</property>
                             <property name="max-length">64</property>
                             <property name="width-chars">32</property>
-                            <property name="placeholder-text" translatable="yes">enter qube name</property>
+                            <property name="placeholder-text" translatable="yes">enter qube name (required)</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>

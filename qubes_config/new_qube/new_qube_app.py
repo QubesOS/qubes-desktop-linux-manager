@@ -182,6 +182,7 @@ class CreateNewQube(Gtk.Application):
         )
 
         self.qube_name.connect("changed", self._name_changed)
+        self.qube_name.connect("focus-out-event", self._name_changed)
 
         self.progress_bar_dialog.update_progress(0.1)
 
@@ -218,6 +219,8 @@ class CreateNewQube(Gtk.Application):
         self.progress_bar_dialog.update_progress(1)
         self.progress_bar_dialog.hide()
 
+        self.main_window.set_focus(self.qube_name)
+
     def _quit(self, *_args):
         self.quit()
 
@@ -232,11 +235,14 @@ class CreateNewQube(Gtk.Application):
             (str,),
         )
 
-    def _name_changed(self, entry: Gtk.Entry):
+    def _name_changed(self, entry: Gtk.Entry, event=None):
+        # pylint: disable=unused-argument
         if not entry.get_text():
             self.create_button.set_sensitive(False)
+            self.qube_name.get_style_context().add_class("invalid_entry")
         else:
             self.create_button.set_sensitive(True)
+            self.qube_name.get_style_context().remove_class("invalid_entry")
 
     def _type_selected(self, button: Gtk.RadioButton):
         button_name = button.get_name()
