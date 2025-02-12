@@ -142,7 +142,7 @@ radiobutton radio {
 }
 
 .background {
-    background: @bottom-background;
+    background: @top-background-2;
 }
 
 .invisible_button {

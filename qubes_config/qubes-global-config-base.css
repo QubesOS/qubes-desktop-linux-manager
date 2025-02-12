@@ -16,26 +16,25 @@ separator {
     border-left: 0px;
 }
 
-.qubes_version_label {
-    margin: 10px 0 10px 0;
-    color: @soft-text-color;
-    font-size: 120%;
-    font-weight: 700;
+.global_config_label {
+    font-weight: 600;
+    font-size: 110%;
 }
 
 .content_box {
     background: @top-background-2;
-    border-width: 2px;
+    border-width: 0px 0px 0px 1px;
     border-color: @background-frame;
-    padding-left: 50px;
-    padding-right: 50px;
-    box-shadow: @background-frame 2px -2px 2px -2px inset;
-    padding-top: 50px;
+    border-style: solid;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-top: 30px;
+    box-shadow: none;
     padding-bottom: 50px;
 }
 
 #main_notebook {
-    border-width: 1px;
+    border-width: 1px 1px 0px 1px;
     border-color: @bottom-background;
     border-style: solid;
 }
@@ -46,21 +45,21 @@ separator {
 }
 
 #main_notebook header tabs tab {
-    border-width: 0;
-    box-shadow: @background-frame 0px 2px 2px -2px inset;
     margin: 0px;
-    font-weight: bold;
+    font-weight: 500;
 }
 
 #main_notebook header tabs tab:checked {
-    background: @qubes-blue;
-    color: white;
+    background: @blue-bg;
 }
 
 #main_notebook header tabs tab:hover {
-    box-shadow: @background-frame 0px 2px 2px -2px inset;
-    border-width: 0px;
-    border-color: @background-frame;
+    background: @blue-bg;
+}
+
+.frame {
+    box-shadow: none;
+    border-width: 0 0 1px 0;
 }
 
 .category {

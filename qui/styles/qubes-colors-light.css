@@ -8,7 +8,7 @@
 @define-color medium-gray-2 #e5e7eb;
 @define-color light-gray #f3f4f6;
 
-@define-color top-background #ffffff;
+@define-color top-background #f3f4f6;
 @define-color top-background-2 #f9fafb;
 @define-color bottom-background #858585;
 @define-color background-frame #979797;
@@ -48,3 +48,5 @@
 @define-color purple-label #3F0C46;
 @define-color black-label #000000;
 @define-color custom-label #000000;
+
+@define-color blue-bg #bfdbfe;

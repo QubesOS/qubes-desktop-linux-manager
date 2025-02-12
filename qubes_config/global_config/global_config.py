@@ -30,7 +30,8 @@ import qubesadmin
 import qubesadmin.events
 import qubesadmin.exc
 import qubesadmin.vm
-from ..widgets.gtk_utils import show_error, show_dialog_with_icon, load_theme
+from ..widgets.gtk_utils import (show_error, show_dialog_with_icon,
+                                 load_theme, is_theme_light)
 from ..widgets.gtk_widgets import ProgressBarDialog, ViewportHandler
 from ..widgets.utils import open_url_in_disposable
 from .page_handler import PageHandler
@@ -398,6 +399,8 @@ class GlobalConfig(Gtk.Application):
             dark_file_name="qubes-global-config-dark.css",
         )
 
+        self.load_icons()
+
         self.progress_bar_dialog.show_all()
         self.progress_bar_dialog.update_progress(0)
 
@@ -535,6 +538,26 @@ class GlobalConfig(Gtk.Application):
     def _activate_link(self, _widget, url):
         open_url_in_disposable(url, self.qapp)
         return True
+
+    def load_icons(self):
+        """Load icons that have different light/dark modes"""
+        icon_dict = {
+            'settings_tab_icon': 'settings-',
+            'usb_tab_icon': 'usb-',
+            'updates_tab_icon': 'qui-updates-',
+            'splitgpg_tab_icon': 'key-',
+            'clipboard_tab_icon': 'qui-clipboard-',
+            'file_tab_icon': 'harddrive-',
+            'url_tab_icon': 'url-',
+            'thisdevice_tab_icon': 'laptop-'
+        }
+
+        current_theme = 'light' if is_theme_light(self.main_window) else 'dark'
+
+        for icon_id, icon_name in icon_dict.items():
+            self.builder.get_object(icon_id).set_from_icon_name(
+                icon_name + current_theme, Gtk.IconSize.LARGE_TOOLBAR)
+
 
     def get_current_page(self) -> Optional[PageHandler]:
         """Get currently visible page."""

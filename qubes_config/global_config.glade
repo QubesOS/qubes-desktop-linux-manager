@@ -839,14 +839,36 @@
               </object>
             </child>
             <child type="tab">
-              <object class="GtkLabel">
+              <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">General Settings</property>
-                <property name="xalign">0</property>
-                <style>
-                  <class name="category"/>
-                </style>
+                <child>
+                  <object class="GtkImage" id="settings_tab_icon">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">settings-dark</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">General</property>
+                    <style>
+                      <class name="category"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="tab-fill">False</property>
@@ -2223,14 +2245,36 @@
               </packing>
             </child>
             <child type="tab">
-              <object class="GtkLabel">
+              <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">USB Devices</property>
-                <property name="xalign">0</property>
-                <style>
-                  <class name="category"/>
-                </style>
+                <child>
+                  <object class="GtkImage" id="usb_tab_icon">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">usb-dark</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">USB Devices</property>
+                    <style>
+                      <class name="category"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="position">1</property>
@@ -3662,14 +3706,36 @@
               </packing>
             </child>
             <child type="tab">
-              <object class="GtkLabel">
+              <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Updates</property>
-                <property name="xalign">0</property>
-                <style>
-                  <class name="category"/>
-                </style>
+                <child>
+                  <object class="GtkImage" id="updates_tab_icon">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">usb-dark</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Updates</property>
+                    <style>
+                      <class name="category"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="position">2</property>
@@ -4468,14 +4534,36 @@
               </packing>
             </child>
             <child type="tab">
-              <object class="GtkLabel">
+              <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Split GPG</property>
-                <property name="xalign">0</property>
-                <style>
-                  <class name="category"/>
-                </style>
+                <child>
+                  <object class="GtkImage" id="splitgpg_tab_icon">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">usb-dark</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Split GPG</property>
+                    <style>
+                      <class name="category"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="position">3</property>
@@ -5227,14 +5315,36 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
               </packing>
             </child>
             <child type="tab">
-              <object class="GtkLabel">
+              <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Clipboard</property>
-                <property name="xalign">0</property>
-                <style>
-                  <class name="category"/>
-                </style>
+                <child>
+                  <object class="GtkImage" id="clipboard_tab_icon">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">usb-dark</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Clipboard</property>
+                    <style>
+                      <class name="category"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="position">4</property>
@@ -6381,14 +6491,36 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
               </packing>
             </child>
             <child type="tab">
-              <object class="GtkLabel">
+              <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">File Access</property>
-                <property name="xalign">0</property>
-                <style>
-                  <class name="category"/>
-                </style>
+                <child>
+                  <object class="GtkImage" id="file_tab_icon">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">usb-dark</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">File Access</property>
+                    <style>
+                      <class name="category"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="position">5</property>
@@ -6936,14 +7068,36 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
               </packing>
             </child>
             <child type="tab">
-              <object class="GtkLabel">
+              <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">URL Handling</property>
-                <property name="xalign">0</property>
-                <style>
-                  <class name="category"/>
-                </style>
+                <child>
+                  <object class="GtkImage" id="url_tab_icon">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">usb-dark</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">URL Handling</property>
+                    <style>
+                      <class name="category"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="position">6</property>
@@ -7418,14 +7572,36 @@ to global clipboard</property>
               </packing>
             </child>
             <child type="tab">
-              <object class="GtkLabel">
+              <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">This Device</property>
-                <property name="xalign">0</property>
-                <style>
-                  <class name="category"/>
-                </style>
+                <child>
+                  <object class="GtkImage" id="thisdevice_tab_icon">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">usb-dark</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">This Device</property>
+                    <style>
+                      <class name="category"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="position">7</property>
@@ -7433,14 +7609,13 @@ to global clipboard</property>
               </packing>
             </child>
             <child type="action-start">
-              <!-- n-columns=2 n-rows=3 -->
+              <!-- n-columns=2 n-rows=1 -->
               <object class="GtkGrid" id="logo_grid">
                 <property name="name">logo_grid</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="halign">center</property>
+                <property name="halign">start</property>
                 <property name="valign">center</property>
-                <property name="margin-start">10</property>
                 <property name="margin-end">10</property>
                 <property name="margin-top">30</property>
                 <property name="margin-bottom">10</property>
@@ -7448,14 +7623,14 @@ to global clipboard</property>
                   <object class="GtkImage" id="qubes_os_logo">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="pixel-size">128</property>
+                    <property name="margin-start">5</property>
+                    <property name="pixel-size">36</property>
                     <property name="icon-name">qubes-global-config</property>
-                    <property name="icon_size">6</property>
+                    <property name="icon_size">3</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
                     <property name="top-attach">0</property>
-                    <property name="width">2</property>
                   </packing>
                 </child>
                 <child>
@@ -7463,36 +7638,16 @@ to global clipboard</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">center</property>
-                    <property name="label" translatable="yes">Qubes OS</property>
+                    <property name="margin-start">10</property>
+                    <property name="label" translatable="yes">Global Config</property>
                     <property name="justify">center</property>
                     <style>
-                      <class name="qubes_version_label"/>
+                      <class name="global_config_label"/>
                     </style>
                   </object>
                   <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">1</property>
-                    <property name="width">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="release_notes_label">
-                    <property name="can-focus">False</property>
-                    <property name="label" translatable="yes">Release notes</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="version_information_label">
-                    <property name="can-focus">False</property>
-                    <property name="label" translatable="yes">Version information</property>
-                  </object>
-                  <packing>
                     <property name="left-attach">1</property>
-                    <property name="top-attach">2</property>
+                    <property name="top-attach">0</property>
                   </packing>
                 </child>
               </object>
@@ -7511,7 +7666,7 @@ to global clipboard</property>
           <object class="GtkBox" id="bottom_buttons">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="halign">center</property>
+            <property name="halign">end</property>
             <property name="margin-start">20</property>
             <property name="margin-end">20</property>
             <property name="margin-top">20</property>
@@ -7520,7 +7675,7 @@ to global clipboard</property>
             <property name="homogeneous">True</property>
             <child>
               <object class="GtkButton" id="ok_button">
-                <property name="label" translatable="yes">_OK</property>
+                <property name="label" translatable="yes">_Apply Changes and Close</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
@@ -7535,6 +7690,25 @@ to global clipboard</property>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="apply_button">
+                <property name="label" translatable="yes">_Apply Changes</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-underline">True</property>
+                <style>
+                  <class name="flat"/>
+                  <class name="button_cancel"/>
+                  <class name="flat_button"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child>
@@ -7554,25 +7728,6 @@ to global clipboard</property>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="apply_button">
-                <property name="label" translatable="yes">_Apply</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="use-underline">True</property>
-                <style>
-                  <class name="flat"/>
-                  <class name="button_cancel"/>
-                  <class name="flat_button"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">3</property>
               </packing>
             </child>
           </object>
