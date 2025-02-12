@@ -7,9 +7,9 @@
     <property name="visible">True</property>
     <property name="can-focus">True</property>
     <property name="receives-default">False</property>
+    <property name="tooltip-text" translatable="yes">Click here or press Ctrl+A to toggle selection</property>
     <property name="use-underline">True</property>
     <property name="draw-indicator">True</property>
-    <property name="tooltip-text" translatable="yes">Click here or press Ctrl+A to toggle selection</property>
     <accelerator key="a" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
   </object>
   <object class="GtkListStore" id="list_store">
@@ -66,8 +66,8 @@
     <property name="hexpand">True</property>
     <property name="vexpand">False</property>
     <property name="title" translatable="yes">Qubes OS Update</property>
-    <property name="icon-name">qubes-manager</property>
     <property name="window-position">center</property>
+    <property name="icon-name">qubes-manager</property>
     <child>
       <!-- n-columns=1 n-rows=3 -->
       <object class="GtkGrid">
@@ -684,26 +684,6 @@ Selected qubes will be automatically started if necessary and shutdown after suc
             <property name="spacing">30</property>
             <property name="baseline-position">bottom</property>
             <child>
-              <object class="GtkButton" id="button_cancel">
-                <property name="label" translatable="yes">_Cancel</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">False</property>
-                <property name="valign">end</property>
-                <property name="use-underline">True</property>
-                <style>
-                  <class name="button_text"/>
-                  <class name="button_common"/>
-                  <class name="bottom_button"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkButton" id="button_next">
                 <property name="label" translatable="yes">_Update</property>
                 <property name="visible">True</property>
@@ -716,6 +696,26 @@ Selected qubes will be automatically started if necessary and shutdown after suc
                   <class name="button_highlighted"/>
                   <class name="bottom_button"/>
                   <class name="flat"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_cancel">
+                <property name="label" translatable="yes">_Cancel</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">False</property>
+                <property name="valign">end</property>
+                <property name="use-underline">True</property>
+                <style>
+                  <class name="button_text"/>
+                  <class name="button_common"/>
+                  <class name="bottom_button"/>
                 </style>
               </object>
               <packing>

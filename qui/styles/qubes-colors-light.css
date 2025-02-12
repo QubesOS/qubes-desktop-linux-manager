@@ -1,14 +1,15 @@
 @define-color qubes-blue #4180c9;
 @define-color dark-blue #4488df;
+@define-color blue-100 #dbeafe;
 
 @define-color dark-gray-2 #858585;
 @define-color dark-gray #cdcdcd;
 @define-color medium-gray #979797;
-@define-color medium-gray-2 #e7e7e7;
-@define-color light-gray #f2f2f2;
+@define-color medium-gray-2 #e5e7eb;
+@define-color light-gray #f3f4f6;
 
-@define-color top-background #ffffff;
-@define-color top-background-2 #f2f2f2;
+@define-color top-background #f3f4f6;
+@define-color top-background-2 #f9fafb;
 @define-color bottom-background #858585;
 @define-color background-frame #979797;
 @define-color button-color #f2f2f2;
@@ -16,9 +17,14 @@
 @define-color soft-text-color #858585;
 @define-color misc-text-color #979797;
 
-@define-color problem-background #fce9e3;
+@define-color problem-background #fecaca;
+@define-color problem-frame #b91c1c;
 
-@define-color info-background #f0e9e3;
+@define-color info-background #fef3c7;
+@define-color info-frame #a16207;
+@define-color link-color #2563eb;
+
+@define-color add-button #f3f4f6;
 
 @define-color text-color #000000;
 @define-color dark-text-color #000000;
@@ -42,3 +48,5 @@
 @define-color purple-label #3F0C46;
 @define-color black-label #000000;
 @define-color custom-label #000000;
+
+@define-color blue-bg #bfdbfe;

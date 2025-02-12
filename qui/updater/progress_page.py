@@ -631,7 +631,7 @@ class CellRendererProgressWithResult(Gtk.CellRendererProgress):
         elif status == UpdateStatus.NoUpdatesFound:
             self.draw_icon("qubes-check-maybe", context, cell_area)
         elif status in (UpdateStatus.Error, UpdateStatus.Cancelled):
-            self.draw_icon("qubes-delete-x", context, cell_area)
+            self.draw_icon("check_no", context, cell_area)
         elif status == UpdateStatus.ProgressUnknown:
             Gtk.CellRendererProgress.do_render(
                 self, context, widget, background_area, cell_area, flags

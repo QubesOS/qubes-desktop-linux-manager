@@ -44,14 +44,14 @@ STATE_DICTIONARY = {
 class IconCache:
     def __init__(self):
         self.icon_files = {
-            "pause": "media-playback-pause",
-            "terminal": "utilities-terminal",
-            "preferences": "preferences-system",
-            "kill": "media-record",
-            "shutdown": "media-playback-stop",
-            "unpause": "media-playback-start",
-            "files": "system-file-manager",
-            "restart": "edit-redo",
+            "pause": "qubes-vm-pause",
+            "terminal": "qubes-terminal",
+            "preferences": "qubes-vm-settings",
+            "kill": "qubes-vm-kill",
+            "shutdown": "qubes-vm-shutdown",
+            "unpause": "qubes-vm-unpause",
+            "files": "qubes-files",
+            "restart": "qubes-vm-restart",
         }
         self.icons = {}
 

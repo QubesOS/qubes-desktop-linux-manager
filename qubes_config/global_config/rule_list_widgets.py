@@ -112,6 +112,7 @@ class VMWidget(Gtk.Box):
         )
 
         self.combobox: Gtk.ComboBox = Gtk.ComboBox.new_with_entry()
+        self.combobox.get_style_context().add_class("flat_combo")
         self.combobox.get_child().set_width_chars(24)
         self.model = VMListModeler(
             combobox=self.combobox,
@@ -140,10 +141,10 @@ class VMWidget(Gtk.Box):
             additional_text_widget = Gtk.Label()
             additional_text_widget.set_text(additional_text)
             additional_text_widget.get_style_context().add_class("didascalia")
-            additional_text_widget.set_halign(Gtk.Align.END)
+            additional_text_widget.set_halign(Gtk.Align.CENTER)
             self.pack_end(additional_text_widget, False, False, 0)
         if additional_widget:
-            additional_widget.set_halign(Gtk.Align.END)
+            additional_widget.set_halign(Gtk.Align.CENTER)
             self.pack_end(additional_widget, False, False, 0)
 
         self.set_editable(False)
@@ -385,8 +386,8 @@ class RuleListBoxRow(Gtk.ListBoxRow):
             click_function=self.revert,
             style_classes=["button_cancel", "flat_button"],
         )
-        self.additional_widget_box.pack_end(save_button, False, False, 10)
-        self.additional_widget_box.pack_end(cancel_button, False, False, 10)
+        self.additional_widget_box.pack_start(save_button, False, False, 10)
+        self.additional_widget_box.pack_start(cancel_button, False, False, 10)
 
         self.additional_widget_box.set_no_show_all(True)
         self.outer_box.pack_start(self.additional_widget_box, False, False, 10)

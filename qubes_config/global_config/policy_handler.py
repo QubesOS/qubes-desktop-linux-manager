@@ -98,6 +98,10 @@ class PolicyHandler(PageHandler):
         self.include_adminvm = include_admin_vm
 
         # main widgets
+        self.custom_settings_box: Gtk.Box = gtk_builder.get_object(
+            f"{prefix}_custom_box"
+        )
+
         self.main_list_box: Gtk.ListBox = gtk_builder.get_object(
             f"{prefix}_main_list"
         )
@@ -281,7 +285,8 @@ class PolicyHandler(PageHandler):
         self.check_custom_rules(rules)
 
     def set_custom_editable(self, state: bool):
-        """If true, set widgets to accept editing custom rules."""
+        """If true, set widgets to accept editing custom rules and show them."""
+        self.custom_settings_box.set_visible(state)
         self.add_button.set_sensitive(state)
         self.main_list_box.set_sensitive(state)
         self.exception_list_box.set_sensitive(state)

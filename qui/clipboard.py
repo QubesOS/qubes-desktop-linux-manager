@@ -290,7 +290,7 @@ class NotificationApp(Gtk.Application):
         self.dispatcher = dispatcher
 
         self.icon = Gtk.StatusIcon()
-        self.icon.set_from_icon_name("edit-copy")
+        self.icon.set_from_icon_name("qui-clipboard")
         self.icon.set_tooltip_markup(
             _(
                 "<b>Global Clipboard</b>\nInformation about the current"
@@ -350,7 +350,7 @@ class NotificationApp(Gtk.Application):
             self.clipboard_label.set_markup(
                 _("<i>Global clipboard is empty</i>")
             )
-            self.icon.set_from_icon_name("edit-copy")
+            self.icon.set_from_icon_name("qui-clipboard")
             # todo the icon should be empty and full depending on state
 
         else:
@@ -359,7 +359,7 @@ class NotificationApp(Gtk.Application):
                     "<i>Global clipboard contents: {0} from <b>{1}</b></i>"
                 ).format(size, vm)
             )
-            self.icon.set_from_icon_name("edit-copy")
+            self.icon.set_from_icon_name("qui-clipboard")
 
         if message:
             self.send_notify(message, icon=icon)

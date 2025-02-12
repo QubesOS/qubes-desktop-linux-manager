@@ -18,21 +18,14 @@
 
 .type_toggle {
     font-weight: 600;
-    font-size: 120%;
-    border-radius: 0px;
-    border-width: 1px 0px 0px 0px;
-    border-color: @background-frame;
+    font-size: 110%;
+    border-width: 0px;
     background: @top-background;
     padding: 10px 15px 10px 20px;
 }
 
-.type_toggle_bottom {
-    border-width: 1px 0px 1px 0px;
-}
-
 .type_toggle:checked {
-    background: @qubes-blue;
-    color: white;
+    background: @blue-bg;
 }
 
 
@@ -66,14 +59,20 @@ radiobutton:checked radio {
 
 .content_box {
     background: @top-background-2;
-    border-width: 2px;
+    border-width: 0px 0px 0px 1px;
     border-color: @background-frame;
-    padding-left: 100px;
-    padding-right: 100px;
-    box-shadow: @background-frame 2px -2px 2px -2px inset;
-    padding-top: 50px;
+    border-style: solid;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-top: 30px;
+    box-shadow: none;
+    padding-bottom: 50px;
 }
 
 #main_window {
     background: @bottom-background;
+}
+
+.explanation {
+    font-size: 90%;
 }

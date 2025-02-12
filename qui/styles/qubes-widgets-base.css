@@ -50,7 +50,7 @@ label {
 }
 
 .group_title {
-    font-weight: 400;
+    font-weight: 600;
     font-size: 150%;
     margin-top: 20px;
 }
@@ -58,8 +58,14 @@ label {
 .explanation {
     margin-bottom: 10px;
     margin-left: 5px;
-    font-size: 90%;
+    font-size: 100%;
 }
+
+.main_text {
+    font-weight: 500;
+    font-size: 110%;
+}
+
 checkbutton check {
     min-width: 20px;
     min-height: 20px;
@@ -136,7 +142,7 @@ radiobutton radio {
 }
 
 .background {
-    background: @bottom-background;
+    background: @top-background-2;
 }
 
 .invisible_button {

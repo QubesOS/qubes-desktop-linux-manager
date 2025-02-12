@@ -1,31 +1,40 @@
 separator {
     background: @separator-color;
+    border-top: 1px solid @dark-gray-2;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .combo {
-    padding: 2px;
+    padding: 2px 2px 2px 10px;
+    background: @top-background;
+    border-width: 1px;
+    border-color: @background-frame
 }
 
-.qubes_version_label {
-    margin: 10px 0 10px 0;
-    color: @soft-text-color;
-    font-size: 120%;
-    font-weight: 700;
+.flat_combo button.combo {
+    border-left: 0px;
+}
+
+.global_config_label {
+    font-weight: 600;
+    font-size: 110%;
 }
 
 .content_box {
     background: @top-background-2;
-    border-width: 2px;
+    border-width: 0px 0px 0px 1px;
     border-color: @background-frame;
-    padding-left: 50px;
-    padding-right: 50px;
-    box-shadow: @background-frame 2px -2px 2px -2px inset;
-    padding-top: 50px;
+    border-style: solid;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-top: 30px;
+    box-shadow: none;
     padding-bottom: 50px;
 }
 
 #main_notebook {
-    border-width: 1px;
+    border-width: 1px 1px 0px 1px;
     border-color: @bottom-background;
     border-style: solid;
 }
@@ -36,21 +45,21 @@ separator {
 }
 
 #main_notebook header tabs tab {
-    border-width: 0;
-    box-shadow: @background-frame 0px 2px 2px -2px inset;
     margin: 0px;
-    font-weight: bold;
+    font-weight: 500;
 }
 
 #main_notebook header tabs tab:checked {
-    background: @qubes-blue;
-    color: white;
+    background: @blue-bg;
 }
 
 #main_notebook header tabs tab:hover {
-    box-shadow: @background-frame 0px 2px 2px -2px inset;
-    border-width: 0px;
-    border-color: @background-frame;
+    background: @blue-bg;
+}
+
+.frame {
+    box-shadow: none;
+    border-width: 0 0 1px 0;
 }
 
 .category {
@@ -63,6 +72,15 @@ separator {
 
 .section_title {
     margin-top: 10px;
+    margin-bottom: 2px;
+    font-weight: 600;
+    font-size: 150%;
+}
+
+.page_title {
+    font-weight: 400;
+    font-size: 180%;
+    margin-top: 20px;
     margin-bottom: 2px;
 }
 
@@ -100,17 +118,25 @@ separator {
 }
 
 .add_label {
-    color: @qubes-blue;
-    font-weight: bold;
+    color: @text-color;
+    font-weight: 600;
+    font-size: 100%;
 }
 
 .add_label:disabled {
-    color: @misc-text-color;
-    font-weight: bold;
+    color: @soft-text-color;
+    font-size: 100%;
+    font-weight: 600;
 }
 
 .add_button {
-    border: 0;
+    border-image: none;
+    background-image: none;
+    border: 2px;
+    border-style: solid;
+    border-color: @medium-gray-2;
+    background: @add-button;
+    box-shadow: none;
 }
 
 .permission_list {
@@ -130,10 +156,8 @@ separator {
 
 .edited_row {
     padding: 5px 5px 5px 5px;
-    background: @top-background;
-    border-color: @background-frame;
-    border-style: solid;
-    border-width: 1px;
+    background: none;
+    border-style: none;
     margin: 5px;
 }
 
@@ -142,11 +166,12 @@ separator {
 }
 
 .problem_box {
-    margin: 5px 80px 5px 40px;
+    margin: 5px 0px 5px 0px;
     padding: 10px;
-    border: 1px;
+    border-width: 2px;
     border-style: solid;
-    border-color: @background-frame;
+    border-radius: 4px;
+    border-color: @problem-frame;
     background: @problem-background;
 }
 
@@ -197,12 +222,17 @@ separator {
 }
 
 .info_box {
-    padding: 10px 20px 10px 20px;
-    margin: 5px 50px 5px 30px;
+    padding: 10px 10px 10px 10px;
+    margin: 5px 0px 5px 0px;
     background: @info-background;
-    border-width: 1px;
+    border-width: 2px;
     border-style: solid;
-    border-color: @background-frame;
+    border-radius: 4px;
+    border-color: @info-frame;
+}
+
+.info_box link {
+    color: @link-color;
 }
 
 .action_text {

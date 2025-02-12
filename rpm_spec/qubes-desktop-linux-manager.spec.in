@@ -260,6 +260,8 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 /usr/share/icons/hicolor/scalable/apps/help-light.svg
 /usr/share/icons/hicolor/scalable/apps/key-dark.svg
 /usr/share/icons/hicolor/scalable/apps/key-light.svg
+/usr/share/icons/hicolor/scalable/apps/laptop-dark.svg
+/usr/share/icons/hicolor/scalable/apps/laptop-light.svg
 /usr/share/icons/hicolor/scalable/apps/mic-dark.svg
 /usr/share/icons/hicolor/scalable/apps/mic-light.svg
 /usr/share/icons/hicolor/scalable/apps/mouse-dark.svg
@@ -276,6 +278,13 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 /usr/share/icons/hicolor/scalable/apps/qubes-expander-shown-black.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-expander-shown-white.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-global-config.svg
+/usr/share/icons/hicolor/scalable/apps/qubes-files.svg
+/usr/share/icons/hicolor/scalable/apps/qubes-terminal.svg
+/usr/share/icons/hicolor/scalable/apps/qubes-vm-pause.svg
+/usr/share/icons/hicolor/scalable/apps/qubes-vm-shutdown.svg
+/usr/share/icons/hicolor/scalable/apps/qubes-vm-restart.svg
+/usr/share/icons/hicolor/scalable/apps/qubes-vm-unpause.svg
+/usr/share/icons/hicolor/scalable/apps/qubes-vm-kill.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-info.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-key.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-logo.svg
@@ -283,14 +292,26 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 /usr/share/icons/hicolor/scalable/apps/qubes-ok.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-padlock.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-policy-editor.svg
-/usr/share/icons/hicolor/scalable/apps/qubes-question-light.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-question.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-this-device.svg
+/usr/share/icons/hicolor/scalable/apps/qui-clipboard.svg
+/usr/share/icons/hicolor/scalable/apps/qui-clipboard-light.svg
+/usr/share/icons/hicolor/scalable/apps/qui-clipboard-dark.svg
 /usr/share/icons/hicolor/scalable/apps/qui-domains-scalable.svg
+/usr/share/icons/hicolor/scalable/apps/qui-disk-space.svg
+/usr/share/icons/hicolor/scalable/apps/qui-disk-space-warn.svg
+/usr/share/icons/hicolor/scalable/apps/qui-updates.svg
+/usr/share/icons/hicolor/scalable/apps/qui-updates-dark.svg
+/usr/share/icons/hicolor/scalable/apps/qui-updates-light.svg
 /usr/share/icons/hicolor/scalable/apps/settings-dark.svg
 /usr/share/icons/hicolor/scalable/apps/settings-light.svg
 /usr/share/icons/hicolor/scalable/apps/smartphone-dark.svg
 /usr/share/icons/hicolor/scalable/apps/smartphone-light.svg
+/usr/share/icons/hicolor/scalable/apps/qubes-add.svg
+/usr/share/icons/hicolor/scalable/apps/url-dark.svg
+/usr/share/icons/hicolor/scalable/apps/url-light.svg
+/usr/share/icons/hicolor/scalable/apps/usb-dark.svg
+/usr/share/icons/hicolor/scalable/apps/usb-light.svg
 
 /usr/share/gtksourceview-4/language-specs/qubes-rpc.lang
 

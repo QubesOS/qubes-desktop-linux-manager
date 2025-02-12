@@ -253,7 +253,7 @@ class CreateNewQube(Gtk.Application):
             self.network_selector.network_default.set_active(True)
 
         self.tooltips[button_name].set_from_pixbuf(
-            load_icon("qubes-question-light", 20, 20)
+            load_icon("qubes-question", 20, 20)
         )
 
     def _do_create_qube(self, *_args):

@@ -420,7 +420,7 @@ class DiskSpace(Gtk.Application):
 
     def set_icon_state(self, pool_warning=None, vm_warning=None):
         if pool_warning or vm_warning:
-            self.icon.set_from_icon_name("dialog-warning")
+            self.icon.set_from_icon_name("qui-disk-space-warn")
             text = _("<b>Qubes Disk Space Monitor</b>\n\nWARNING!")
             if pool_warning:
                 text += _("\nYou are running out of disk space.\n") + "".join(
@@ -432,7 +432,7 @@ class DiskSpace(Gtk.Application):
                 ) + ", ".join([x.vm.name for x in vm_warning])
             self.icon.set_tooltip_markup(text)
         else:
-            self.icon.set_from_icon_name("drive-harddisk")
+            self.icon.set_from_icon_name("qui-disk-space")
             self.icon.set_tooltip_markup(
                 _("<b>Qubes Disk Space Monitor</b>\nView free disk space.")
             )
