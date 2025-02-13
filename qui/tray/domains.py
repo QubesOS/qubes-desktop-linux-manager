@@ -502,19 +502,14 @@ class DomainMenuItem(Gtk.MenuItem):
         self.decorator = qui.decorators.DomainDecorator(vm)
 
         # Main horizontal box
-        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        self.hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
 
         # Icon box with fixed width
-        iconbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        iconbox.set_size_request(16, 0)
-        icon = self.decorator.icon()
-        if icon:
-            iconbox.pack_start(icon, False, True, 0)
-        else:
-            placeholder = Gtk.Label()
-            iconbox.pack_start(placeholder, False, True, 0)
+        self.iconbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        self.iconbox.set_size_request(16, 0)
+        self.set_label_icon()
 
-        hbox.pack_start(iconbox, False, True, 6)
+        self.hbox.pack_start(self.iconbox, False, True, 6)
 
         # Name box
         namebox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
@@ -523,7 +518,7 @@ class DomainMenuItem(Gtk.MenuItem):
         self.spinner = Gtk.Spinner()
         namebox.pack_start(self.spinner, False, True, 0)
 
-        hbox.pack_start(namebox, True, True, 0)
+        self.hbox.pack_start(namebox, True, True, 0)
 
         # Memory and CPU box
         mem_cpu_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
@@ -532,10 +527,10 @@ class DomainMenuItem(Gtk.MenuItem):
         self.cpu = self.decorator.cpu()
         mem_cpu_box.pack_start(self.cpu, False, True, 0)
 
-        hbox.pack_start(mem_cpu_box, False, True, 0)
+        self.hbox.pack_start(mem_cpu_box, False, True, 0)
 
         # Add hbox to the menu item
-        self.add(hbox)
+        self.add(self.hbox)
 
         if self.vm is None:  # if header
             self.set_reserve_indicator(True)  # align with submenu triangles
@@ -617,6 +612,17 @@ class DomainMenuItem(Gtk.MenuItem):
     def update_stats(self, memory_kb, cpu_usage):
         self.memory.update_state(int(memory_kb))
         self.cpu.update_state(int(cpu_usage))
+
+    def set_label_icon(self):
+        for child in self.iconbox.get_children():
+            self.iconbox.remove(child)
+        icon = self.decorator.icon()
+        if icon:
+            self.iconbox.pack_start(icon, False, True, 0)
+            icon.show()
+        else:
+            placeholder = Gtk.Label()
+            self.iconbox.pack_start(placeholder, False, True, 0)
 
 
 class DomainTray(Gtk.Application):
