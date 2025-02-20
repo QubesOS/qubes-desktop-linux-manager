@@ -18,7 +18,7 @@ import qui.decorators
 import qui.utils
 
 gi.require_version("Gtk", "3.0")  # isort:skip
-from gi.repository import Gio, Gtk, GLib, GdkPixbuf  # isort:skip
+from gi.repository import Gdk, Gio, Gtk, GLib, GdkPixbuf, GObject  # isort:skip
 
 import gbulb
 
@@ -108,7 +108,11 @@ class ActionMenuItem(Gtk.MenuItem, metaclass=ABCGtkMenuItemMeta):
             box.pack_start(placeholder, False, False, 0)
 
         # Add a label to the menu item
-        label_widget = Gtk.Label(label=label, xalign=0)
+        label_widget = label
+        if isinstance(label_widget, Gtk.Label):
+            label_widget.set_xalign(0)
+        else:
+            label_widget = Gtk.Label(label=label, xalign=0)
         box.pack_start(label_widget, True, True, 0)
 
         # Add the box to the menu item
@@ -289,17 +293,45 @@ class LogItem(ActionMenuItem):
 class RunTerminalItem(VMActionMenuItem):
     """Run Terminal menu Item. When activated runs a terminal emulator."""
 
-    def __init__(self, vm, icon_cache):
+    __gsignals__ = {
+        "set-terminal-user-root": (
+            GObject.SignalFlags.RUN_FIRST,
+            GObject.TYPE_NONE,
+            (bool,),
+        ),
+    }
+
+    def __init__(self, vm, icon_cache, as_root=False):
+        label = Gtk.Label(label=RunTerminalItem.dynamic_label(as_root))
         super().__init__(
             vm,
-            label=_("Run Terminal"),
+            label=label,
             icon_cache=icon_cache,
             icon_name="terminal",
         )
+        self.as_root = as_root
+        self.label = label
+        self.connect("set-terminal-user-root", self.set_as_root)
+
+    @staticmethod
+    def dynamic_label(as_root):
+        if as_root:
+            return _("Run Root Terminal")
+        return _("Run Terminal")
+
+    def set_as_root(self, _item, as_root):
+        self.as_root = as_root
+        self.label.set_text(RunTerminalItem.dynamic_label(as_root))
 
     async def perform_action(self):
+        service_args = {}
+        if self.as_root:
+            service_args["user"] = "root"
         try:
-            self.vm.run_service("qubes.StartApp+qubes-run-terminal")
+            self.vm.run_service(
+                "qubes.StartApp+qubes-run-terminal",
+                **service_args
+            )
         except exc.QubesException as ex:
             show_error(
                 _("Error starting terminal"),
@@ -361,7 +393,11 @@ class StartedMenu(Gtk.Menu):
         self.app = app
 
         self.add(OpenFileManagerItem(self.vm, icon_cache))
-        self.add(RunTerminalItem(self.vm, icon_cache))
+        self.add(RunTerminalItem(
+            self.vm,
+            icon_cache,
+            as_root=app.terminal_as_root
+        ))
         self.add(PreferencesItem(self.vm, icon_cache))
         self.add(PauseItem(self.vm, icon_cache))
         self.add(ShutdownItem(self.vm, icon_cache))
@@ -557,6 +593,8 @@ class DomainMenuItem(Gtk.MenuItem):
             submenu = PausedMenu(self.vm, self.icon_cache)
         else:
             submenu = DebugMenu(self.vm, self.icon_cache)
+        submenu.connect("key-press-event", self.app.key_event)
+        submenu.connect("key-release-event", self.app.key_event)
         # This is a workaround for a bug in Gtk which occurs when a
         # submenu is replaced while it is open.
         # see https://gitlab.gnome.org/GNOME/gtk/issues/885
@@ -643,6 +681,8 @@ class DomainTray(Gtk.Application):
 
         self.tray_menu = Gtk.Menu()
         self.tray_menu.set_reserve_toggle_size(False)
+        self.tray_menu.connect("key-press-event", self.key_event)
+        self.tray_menu.connect("key-release-event", self.key_event)
 
         self.icon_cache = IconCache()
 
@@ -710,6 +750,7 @@ class DomainTray(Gtk.Application):
         self.stats_dispatcher.add_handler("vm-stats", self.update_stats)
 
     def show_menu(self, _unused, event):
+        self.terminal_as_root = False
         self.tray_menu.popup_at_pointer(event)  # None means current event
 
     def emit_notification(self, vm, event, **kwargs):
@@ -1060,6 +1101,41 @@ class DomainTray(Gtk.Application):
         )
 
         self.stats_dispatcher.remove_handler("vm-stats", self.update_stats)
+
+    @property
+    def terminal_as_root(self):
+        try:
+            return self._terminal_as_root
+        except AttributeError:
+            self._terminal_as_root = False
+            return self.terminal_as_root
+
+    @terminal_as_root.setter
+    def terminal_as_root(self, as_root):
+        if as_root == self.terminal_as_root:
+            return
+
+        self._terminal_as_root = as_root
+        for item in self.menu_items.values():
+            if item.vm:
+                submenu = item.get_submenu()
+                if submenu is None:
+                    continue
+
+                def do_emit(child):
+                    try:
+                        child.emit("set-terminal-user-root", as_root)
+                    except Exception:  # pylint: disable=broad-except
+                        pass
+
+                submenu.foreach(do_emit)
+
+    def key_event(self, _unused, event):
+        if event.keyval in [Gdk.KEY_Shift_L, Gdk.KEY_Shift_R]:
+            if event.type == Gdk.EventType.KEY_PRESS:
+                self.terminal_as_root = True
+            elif event.type == Gdk.EventType.KEY_RELEASE:
+                self.terminal_as_root = False
 
 
 def main():
