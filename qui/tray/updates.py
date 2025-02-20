@@ -3,6 +3,12 @@
 # pylint: disable=wrong-import-position,import-error
 """ A widget that monitors update availability and notifies the user
  about new updates to templates and standalone VMs"""
+
+# Must be imported before creating threads
+from .gtk3_xwayland_menu_dismisser import (
+    get_fullscreen_window_hack,
+)  # isort:skip
+
 import asyncio
 import sys
 import subprocess
@@ -62,6 +68,7 @@ class UpdatesTray(Gtk.Application):
         super().__init__()
         self.name = app_name
 
+        self.fullscreen_window_hack = get_fullscreen_window_hack()
         self.dispatcher = dispatcher
         self.qapp = qapp
 
@@ -80,6 +87,7 @@ class UpdatesTray(Gtk.Application):
         self.obsolete_vms = set()
 
         self.tray_menu = Gtk.Menu()
+        self.fullscreen_window_hack.show_for_widget(self.tray_menu)
 
     def run(self):  # pylint: disable=arguments-differ
         self.check_vms_needing_update()
@@ -122,6 +130,7 @@ class UpdatesTray(Gtk.Application):
 
     def show_menu(self, _unused, _event):
         self.tray_menu = Gtk.Menu()
+        self.fullscreen_window_hack.show_for_widget(self.tray_menu)
 
         self.setup_menu()
 

@@ -26,6 +26,11 @@
 via Qubes RPC """
 # pylint: disable=invalid-name,wrong-import-position
 
+# Must be imported before creating threads
+from .tray.gtk3_xwayland_menu_dismisser import (
+    get_fullscreen_window_hack,
+)  # isort:skip
+
 import asyncio
 import contextlib
 import json
@@ -285,6 +290,7 @@ class NotificationApp(Gtk.Application):
         self.set_application_id("org.qubes.qui.clipboard")
         self.register()  # register Gtk Application
 
+        self.fullscreen_window_hack = get_fullscreen_window_hack()
         self.qapp = qapp
         self.vm = self.qapp.domains[self.qapp.local_name]
         self.dispatcher = dispatcher
@@ -373,6 +379,7 @@ class NotificationApp(Gtk.Application):
         )
 
         self.menu = Gtk.Menu()
+        self.fullscreen_window_hack.show_for_widget(self.menu)
 
         title_label = Gtk.Label(xalign=0)
         title_label.set_markup(_("<b>Current clipboard</b>"))
