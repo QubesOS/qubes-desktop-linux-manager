@@ -128,6 +128,8 @@ class IntroPage:
 
         for vm in qapp.domains:
             try:
+                if bool(vm.features.get("prohibit-start", False)):
+                    continue
                 if settings.hide_skipped and bool(
                     vm.features.get("skip-update", False)
                 ):

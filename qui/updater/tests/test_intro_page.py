@@ -63,6 +63,17 @@ def test_populate_vm_list(
     assert len(sut.list_store) == 4
     assert len(sut.get_vms_to_update()) == 2
 
+    test_qapp.expected_calls[
+        ("test-standalone", "admin.vm.feature.Get", "prohibit-start", None)
+    ] = b"0\x00Compromissed by Gremlins!"
+    mock_subprocess.return_value = (
+        b"Following templates will be updated:test-standalone,fedora-36"
+    )
+
+    sut.populate_vm_list(test_qapp, mock_settings)
+    assert len(sut.list_store) == 3
+    assert len(sut.get_vms_to_update()) == 1
+
 
 @pytest.mark.parametrize(
     "updates_available, expectations",
