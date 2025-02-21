@@ -63,6 +63,8 @@ class IntroPage:
         self.page: Gtk.Box = self.builder.get_object("list_page")
         self.stack: Gtk.Stack = self.builder.get_object("main_stack")
         self.vm_list: Gtk.TreeView = self.builder.get_object("vm_list")
+        self.vm_list.set_has_tooltip(True)
+        self.vm_list.connect("query-tooltip", self.on_query_tooltip)
         self.list_store: Optional[ListWrapper] = None
 
         checkbox_column: Gtk.TreeViewColumn = self.builder.get_object(
@@ -93,6 +95,8 @@ class IntroPage:
                 "<b>MAYBE</b></span>",
                 OBSOLETE=f'<span foreground="{label_color_theme("red")}">'
                 "<b>OBSOLETE</b></span>",
+                PROHIBITED=f'<span foreground="{label_color_theme("red")}">'
+                "<b>START PROHIBITED</b></span>",
             )
         )
 
@@ -307,6 +311,25 @@ class IntroPage:
             to_update = to_update.difference({"dom0"})
         return to_update
 
+    def on_query_tooltip(self, widget, x, y, keyboard_tip, tooltip):
+        """Show appropriate qube tooltip. Currently only for prohibit-start."""
+        if not widget.get_tooltip_context(x, y, keyboard_tip):
+            return False
+        _, x, y, model, path, iterator = widget.get_tooltip_context(
+            x, y, keyboard_tip
+        )
+        if path:
+            status = model[iterator][4]
+            if status == type(status).PROHIBITED:
+                tooltip.set_text(
+                    "Start prohibition rationale:\n{}".format(
+                        str(model[iterator][9])
+                    )
+                )
+                widget.set_tooltip_cell(tooltip, path, None, None)
+                return True
+        return False
+
 
 def is_stale(vm, expiration_period):
     if expiration_period is None:
@@ -345,16 +368,20 @@ class UpdateRowWrapper(RowWrapper):
 
         icon = load_icon(vm.icon)
         name = QubeName(vm.name, str(vm.label))
+        prohibit_rationale = vm.features.get("prohibit-start", False)
 
         raw_row = [
             selected,
             icon,
             name,
-            UpdatesAvailable.from_features(updates_available, supported),
+            UpdatesAvailable.from_features(
+                updates_available, supported, bool(prohibit_rationale)
+            ),
             Date(last_updates_check),
             Date(last_update),
             0,
             UpdateStatus.Undefined,
+            prohibit_rationale,
         ]
 
         super().__init__(list_store, vm, raw_row)
@@ -390,6 +417,7 @@ class UpdateRowWrapper(RowWrapper):
 
     @updates_available.setter
     def updates_available(self, value):
+        prohibited = bool(self.vm.features.get("prohibit-start", False))
         updates_available = bool(
             self.vm.features.get("updates-available", False)
         )
@@ -398,7 +426,7 @@ class UpdateRowWrapper(RowWrapper):
         if value and not updates_available:
             updates_available = None
         self.raw_row[self._UPDATES_AVAILABLE] = UpdatesAvailable.from_features(
-            updates_available, supported
+            updates_available, supported, prohibited
         )
 
     @property
@@ -497,11 +525,16 @@ class UpdatesAvailable(Enum):
     MAYBE = 1
     NO = 2
     EOL = 3
+    PROHIBITED = 4
 
     @staticmethod
     def from_features(
-        updates_available: Optional[bool], supported: Optional[str] = None
+        updates_available: Optional[bool],
+        supported: Optional[str] = None,
+        prohibited: Optional[str] = None,
     ) -> "UpdatesAvailable":
+        if prohibited:
+            return UpdatesAvailable.PROHIBITED
         if not supported:
             return UpdatesAvailable.EOL
         if updates_available:
@@ -512,6 +545,8 @@ class UpdatesAvailable(Enum):
 
     @property
     def color(self):
+        if self is UpdatesAvailable.PROHIBITED:
+            return label_color_theme("red")
         if self is UpdatesAvailable.YES:
             return label_color_theme("green")
         if self is UpdatesAvailable.MAYBE:
@@ -522,7 +557,9 @@ class UpdatesAvailable(Enum):
             return label_color_theme("red")
 
     def __str__(self):
-        if self is UpdatesAvailable.YES:
+        if self is UpdatesAvailable.PROHIBITED:
+            name = "START PROHIBITED"
+        elif self is UpdatesAvailable.YES:
             name = "YES"
         elif self is UpdatesAvailable.MAYBE:
             name = "MAYBE"

@@ -32,6 +32,8 @@
       <column type="gint"/>
       <!-- column-name gchararray1 -->
       <column type="PyObject"/>
+      <!-- column-name rationale -->
+      <column type="PyObject"/>
     </columns>
   </object>
   <object class="GtkListStore" id="progress_store">
@@ -173,6 +175,7 @@
                         <child>
                           <object class="GtkTreeViewColumn" id="intro_name_column">
                             <property name="title">Qube name</property>
+                            <property name="expand">True</property>
                             <property name="sort-column-id">3</property>
                             <child>
                               <object class="GtkCellRendererText" id="intro_name_renderer"/>
@@ -182,6 +185,7 @@
                         <child>
                           <object class="GtkTreeViewColumn" id="available_column">
                             <property name="title">Updates available</property>
+                            <property name="expand">True</property>
                             <property name="alignment">0.5</property>
                             <property name="sort-column-id">4</property>
                             <child>
@@ -192,6 +196,7 @@
                         <child>
                           <object class="GtkTreeViewColumn" id="check_column">
                             <property name="title">Last checked</property>
+                            <property name="min-width">150</property>
                             <property name="alignment">0.5</property>
                             <property name="sort-column-id">5</property>
                             <child>
@@ -202,6 +207,7 @@
                         <child>
                           <object class="GtkTreeViewColumn" id="update_column">
                             <property name="title">Last updated</property>
+                            <property name="min-width">150</property>
                             <property name="alignment">0.5</property>
                             <property name="sort-column-id">6</property>
                             <child>
@@ -230,7 +236,7 @@
                     <property name="margin-bottom">20</property>
                     <property name="label" translatable="yes">Qubes OS checks for updates for running and networked qubes and their templates. Updates may also be available in other qubes, marked as {MAYBE} above.
 
-{OBSOLETE} qubes are based on templates that are no longer supported and no longer receive updates. Please install new templates using the Qubes Template Manager.
+{OBSOLETE} qubes are based on templates that are no longer supported and no longer receive updates. Please install new templates using the Qubes Template Manager. {PROHIBITED} qubes have the `prohibit-start` feature set.
 
 Selected qubes will be automatically started if necessary and shutdown after successful update.</property>
                     <property name="use-markup">True</property>

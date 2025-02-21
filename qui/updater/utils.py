@@ -307,9 +307,11 @@ class ListWrapper:
 
     def invert_selection(self, path):
         it = self.list_store_raw.get_iter(path)
-        self.list_store_raw[it][0].selected = not self.list_store_raw[it][
-            0
-        ].selected
+        UpdatesAvailable = self.list_store_raw[it][4]
+        if "PROHIBITED" not in str(UpdatesAvailable):
+            self.list_store_raw[it][0].selected = not self.list_store_raw[it][
+                0
+            ].selected
 
     def get_selected(self) -> "ListWrapper":
         empty_copy = Gtk.ListStore(

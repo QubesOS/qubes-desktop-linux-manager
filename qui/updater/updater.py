@@ -232,6 +232,7 @@ class QubesUpdater(Gtk.Application):
             int(width * 1.2), self.main_window.get_screen().get_height() - 48
         )
         self.main_window.resize(width + 50, height)
+        self.main_window.set_size_request(800, 600)  # Smaller is meaningless
         self.main_window.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
 
     def open_settings_window(self, _emitter):
