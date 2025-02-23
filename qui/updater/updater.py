@@ -227,7 +227,7 @@ class QubesUpdater(Gtk.Application):
         width = self.intro_page.vm_list.get_preferred_width().natural_width
         # Wide enough for details section to show update progress.
         # But still less than 1024 pixels to do not break OpenQA tests.
-        width = max(width, 1000)
+        width = min(max(width, 1000), self.main_window.get_screen().get_width())
         height = min(
             int(width * 1.2), self.main_window.get_screen().get_height() - 48
         )
