@@ -208,6 +208,7 @@ def test_qapp_impl():
     )
     add_feature_to_all(qapp, "os-eol", [])
     add_feature_to_all(qapp, "skip-update", [])
+    add_feature_to_all(qapp, "prohibit-start", [])
 
     return qapp
 
