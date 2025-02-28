@@ -58,6 +58,8 @@ class IconCache:
             "unpause": "qubes-vm-unpause",
             "files": "qubes-files",
             "restart": "qubes-vm-restart",
+            "debug": "bug-play",
+            "logs": "scroll-text",
         }
         self.icons = {}
 
@@ -283,11 +285,12 @@ class PreferencesItem(VMActionMenuItem):
 
 
 class LogItem(ActionMenuItem):
-    def __init__(self, name, path):
-        img = Gtk.Image.new_from_file(
-            "/usr/share/icons/HighContrast/16x16/apps/logviewer.png"
+    def __init__(self, name, path, icon_cache):
+        super().__init__(
+            label=name,
+            icon_cache=icon_cache,
+            icon_name="logs",
         )
-        super().__init__(label=name, img=img)
         self.path = path
 
     async def perform_action(self):
@@ -336,6 +339,32 @@ class RunTerminalItem(VMActionMenuItem):
                     "run terminal {0}:\n{1}"
                 ).format(self.vm.name, str(ex)),
             )
+
+
+class RunDebugConsoleItem(VMActionMenuItem):
+    """Run Debug Console menu Item. When activated runs a qvm-console-dispvm."""
+
+    def __init__(self, vm, icon_cache):
+        super().__init__(
+            vm,
+            label=_("Debug Console"),
+            icon_cache=icon_cache,
+            icon_name="debug",
+        )
+        self.visible = False
+        self.connect("show", self.on_show_event)
+
+    def on_show_event(self, widget):
+        if self.visible:
+            widget.show()
+        else:
+            widget.hide()
+
+    async def perform_action(self):
+        # pylint: disable=consider-using-with
+        await asyncio.create_subprocess_exec(
+            "qvm-console-dispvm", self.vm.name, stderr=subprocess.PIPE
+        )
 
 
 class OpenFileManagerItem(VMActionMenuItem):
@@ -392,6 +421,11 @@ class StartedMenu(Gtk.Menu):
         self.add(
             RunTerminalItem(self.vm, icon_cache, as_root=app.terminal_as_root)
         )
+
+        # Debug console for developers, troubleshooting, headless qubes
+        self.debug_console = RunDebugConsoleItem(self.vm, icon_cache)
+        self.add(self.debug_console)
+
         self.add(PreferencesItem(self.vm, icon_cache))
         self.add(PauseItem(self.vm, icon_cache))
         self.add(ShutdownItem(self.vm, icon_cache))
@@ -399,7 +433,24 @@ class StartedMenu(Gtk.Menu):
             self.add(RestartItem(self.vm, icon_cache))
 
         self.set_reserve_toggle_size(False)
+        self.debug_console_update()
         self.show_all()
+
+    def debug_console_update(self, *_args, **_kwargs):
+        # Debug console is shown only if debug property is set, no GUIVM is set
+        # ... or with `expert-mode` feature per qube or per entire GUIVM.
+        if (
+            self.app.expert_mode
+            or getattr(self.vm, "debug")
+            or not getattr(self.vm, "guivm")
+            or not self.vm.features.check_with_template("gui", False)
+            or self.vm.features.get("expert-mode", False)
+        ):
+            self.debug_console.visible = True
+            self.debug_console.show()
+        else:
+            self.debug_console.visible = False
+            self.debug_console.hide()
 
 
 class PausedMenu(Gtk.Menu):
@@ -439,7 +490,7 @@ class DebugMenu(Gtk.Menu):
 
         for name, path in logs:
             if os.path.isfile(path):
-                self.add(LogItem(name, path))
+                self.add(LogItem(name, path, icon_cache=icon_cache))
 
         self.add(KillItem(self.vm, icon_cache))
 
@@ -475,7 +526,7 @@ class InternalMenu(Gtk.Menu):
 
         for name, path in logs:
             if os.path.isfile(path):
-                self.add(LogItem(name, path))
+                self.add(LogItem(name, path, icon_cache=icon_cache))
 
         if working_correctly:
             self.add(ShutdownItem(self.vm, icon_cache))
@@ -696,6 +747,11 @@ class DomainTray(Gtk.Application):
         self.set_application_id(app_name)
         self.register()  # register Gtk Application
 
+        # to display debug console for all qubes
+        self.expert_mode = self.qapp.domains[self.qapp.local_name].features.get(
+            "expert-mode", False
+        )
+
     def register_events(self):
         self.dispatcher.add_handler("connection-established", self.refresh_all)
         self.dispatcher.add_handler("domain-pre-start", self.update_domain_item)
@@ -743,7 +799,33 @@ class DomainTray(Gtk.Application):
         self.dispatcher.add_handler("property-set:netvm", self.property_change)
         self.dispatcher.add_handler("property-set:label", self.property_change)
 
+        self.dispatcher.add_handler("property-set:debug", self.debug_change)
+        self.dispatcher.add_handler("property-set:guivm", self.debug_change)
+        self.dispatcher.add_handler("domain-feature-set:gui", self.debug_change)
+        self.dispatcher.add_handler(
+            "domain-feature-delete:gui", self.debug_change
+        )
+        self.dispatcher.add_handler(
+            "domain-feature-set:expert-mode", self.debug_change
+        )
+        self.dispatcher.add_handler(
+            "domain-feature-delete:expert-mode", self.debug_change
+        )
+
         self.stats_dispatcher.add_handler("vm-stats", self.update_stats)
+
+    def debug_change(self, vm, *_args, **_kwargs):
+        if vm == self.qapp.local_name:
+            self.expert_mode = self.qapp.domains[
+                self.qapp.local_name
+            ].features.get("expert-mode", False)
+            vms = self.menu_items
+        else:
+            vms = {vm}
+        for menu in vms:
+            submenu = self.menu_items[menu].get_submenu()
+            if isinstance(submenu, StartedMenu):
+                submenu.debug_console_update()
 
     def show_menu(self, _unused, event):
         self.terminal_as_root = False
@@ -1094,6 +1176,21 @@ class DomainTray(Gtk.Application):
         )
         self.dispatcher.remove_handler(
             "property-set:label", self.property_change
+        )
+
+        self.dispatcher.remove_handler("property-set:debug", self.debug_change)
+        self.dispatcher.remove_handler("property-set:guivm", self.debug_change)
+        self.dispatcher.remove_handler(
+            "domain-feature-set:gui", self.debug_change
+        )
+        self.dispatcher.remove_handler(
+            "domain-feature-delete:gui", self.debug_change
+        )
+        self.dispatcher.remove_handler(
+            "domain-feature-set:expert-mode", self.debug_change
+        )
+        self.dispatcher.remove_handler(
+            "domain-feature-delete:expert-mode", self.debug_change
         )
 
         self.stats_dispatcher.remove_handler("vm-stats", self.update_stats)

@@ -266,6 +266,8 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 /usr/share/icons/hicolor/scalable/apps/mic-light.svg
 /usr/share/icons/hicolor/scalable/apps/mouse-dark.svg
 /usr/share/icons/hicolor/scalable/apps/mouse-light.svg
+/usr/share/icons/hicolor/scalable/apps/bug-play.svg
+/usr/share/icons/hicolor/scalable/apps/scroll-text.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-ask.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-check-maybe.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-check-yes.svg
