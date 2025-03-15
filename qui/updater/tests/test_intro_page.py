@@ -172,6 +172,123 @@ def test_on_checkbox_toggled(
     assert not sut.checkbox_column_button.get_active()
 
 
+def test_prohibit_start(
+    real_builder, test_qapp, mock_next_button, mock_settings, mock_list_store
+):
+    mock_log = Mock()
+    test_qapp.expected_calls[
+        ("test-standalone", "admin.vm.feature.Get", "prohibit-start", None)
+    ] = b"0\x00Control qube which should be un-selectable/un-updatable"
+    sut = IntroPage(real_builder, mock_log, mock_next_button)
+
+    # populate_vm_list
+    sut.list_store = ListWrapper(UpdateRowWrapper, mock_list_store)
+    for vm in test_qapp.domains:
+        sut.list_store.append_vm(vm)
+
+    assert len(sut.list_store) == 12
+
+    sut.head_checkbox.state = HeaderCheckbox.NONE
+    sut.head_checkbox.set_buttons()
+
+    # If button is inconsistent we do not care if it is active or not
+    # (we do not use this value)
+
+    # no selected row
+    assert not sut.checkbox_column_button.get_inconsistent()
+    assert not sut.checkbox_column_button.get_active()
+
+    # only one row selected
+    sut.on_checkbox_toggled(_emitter=None, path=(3,))
+
+    assert sut.checkbox_column_button.get_inconsistent()
+
+    for i in range(len(sut.list_store)):
+        sut.on_checkbox_toggled(_emitter=None, path=(i,))
+
+    # almost all rows selected (except one)
+    assert sut.checkbox_column_button.get_inconsistent()
+
+    sut.on_checkbox_toggled(_emitter=None, path=(3,))
+
+    # almost all rows selected (except the start prohibited qube)
+    assert sut.checkbox_column_button.get_inconsistent()
+    assert not sut.checkbox_column_button.get_active()
+
+    sut.on_checkbox_toggled(_emitter=None, path=(3,))
+
+    # almost all rows selected (except one)
+    assert sut.checkbox_column_button.get_inconsistent()
+
+    for i in range(len(sut.list_store)):
+        if i == 3:
+            continue
+        sut.on_checkbox_toggled(_emitter=None, path=(i,))
+
+    # no selected row
+    assert not sut.checkbox_column_button.get_inconsistent()
+    assert not sut.checkbox_column_button.get_active()
+
+    # emulate mouse hover over vm_list header & area between rows
+    side_effects = [False, True, (None, 1, 1, sut.list_store, False, None)]
+    sut.vm_list.get_tooltip_context = Mock(side_effect=side_effects)
+    sut.on_query_tooltip(sut.vm_list, 0, 0, None, None)
+    sut.on_query_tooltip(sut.vm_list, 1, 1, None, None)
+
+
+def test_prohibit_start_rationale_tooltip(
+    real_builder, test_qapp, mock_next_button, mock_settings, mock_list_store
+):
+    mock_log = Mock()
+    sut = IntroPage(real_builder, mock_log, mock_next_button)
+
+    # emulate mouse hover over an ordinary updateable qube
+    side_effects = [
+        True,
+        [
+            None,
+            2,
+            2,
+            [[0, 1, 2, 3, UpdatesAvailable.YES, 5, 6, 7, 8, ""]],
+            True,
+            0,
+        ],
+    ]
+    sut.vm_list.get_tooltip_context = Mock(side_effect=side_effects)
+    sut.on_query_tooltip(sut.vm_list, 2, 2, None, None)
+
+    # emulate mouse hover over an start prohibited qube
+    side_effects = [
+        True,
+        [
+            None,
+            2,
+            2,
+            [
+                [
+                    0,
+                    1,
+                    2,
+                    3,
+                    UpdatesAvailable.PROHIBITED,
+                    5,
+                    6,
+                    7,
+                    8,
+                    "DO NOT UPDATE",
+                ],
+            ],
+            True,
+            0,
+        ],
+    ]
+    sut.vm_list.get_tooltip_context = Mock(side_effect=side_effects)
+    sut.vm_list.set_tooltip_cell = Mock()
+    mock_tooltip = Mock()
+    sut.on_query_tooltip(sut.vm_list, 3, 3, None, mock_tooltip)
+    assert sut.vm_list.set_tooltip_cell.called
+
+
 doms = test_qapp_impl().domains
 _domains = {vm.name for vm in doms}
 _templates = {vm.name for vm in doms if vm.klass == "TemplateVM"}
