@@ -1,3 +1,20 @@
+qubes-desktop-linux-manager (4.3.10-1) unstable; urgency=medium
+
+  [ Ali Mirjamali ]
+  * Make updater width enoguh for update details
+
+  [ Demi Marie Obenour ]
+  * Make the widgets work in KDE Wayland session
+
+  [ Marcus Ofenhed ]
+  * Added root terminal to Domains tray icon menu
+
+  [ Ali Mirjamali ]
+  * Mark VMs with `prohibit-start` feature in updater
+  * Assure Update window width does not break OpenQA
+
+ -- Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>  Sat, 15 Mar 2025 03:44:57 +0100
+
 qubes-desktop-linux-manager (4.3.9-1) unstable; urgency=medium
 
   [ Ali Mirjamali ]
