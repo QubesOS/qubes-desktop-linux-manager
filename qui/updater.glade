@@ -583,7 +583,7 @@ Selected qubes will be automatically started if necessary and shutdown after suc
                         <property name="valign">start</property>
                         <property name="margin-top">30</property>
                         <property name="margin-bottom">5</property>
-                        <property name="label" translatable="yes">The following qubes need to be restarted to use an updated template:</property>
+                        <property name="label" translatable="yes">The following qubes need to be restarted to use an updated template (to enable or disable restartarting service or other qubes by default, go to 'Updater Settings' in the top right corner of the updater landing dialog box):</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
