@@ -364,9 +364,11 @@ def parse_args(args, app):
         action='store_true',
         help='Restart not updated ServiceVMs whose template has been updated.')
     restart.add_argument(
-        '--apply-to-all', '-R', action='store_true',
-        help='Restart not updated ServiceVMs and shutdown not updated AppVMs '
-             'whose template has been updated.')
+        "--apply-to-all",
+        "-R",
+        action="store_true",
+        help="Restart service qubes and AppVMs with updated templates.",
+    )
     restart.add_argument(
         '--no-apply', action='store_true',
         help='DEFAULT. Do not restart/shutdown any AppVMs.')
