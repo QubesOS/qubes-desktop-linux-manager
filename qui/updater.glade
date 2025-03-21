@@ -578,6 +578,8 @@ Selected qubes will be automatically started if necessary and shutdown after suc
                         <property name="margin-top">30</property>
                         <property name="margin-bottom">5</property>
                         <property name="label" translatable="yes">The following qubes need to be restarted to use an updated template (to configure restarting qubes by default, go to 'Updater Settings' in the top right corner of this window):</property>
+                        <property name="use-markup">True</property>
+                        <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
