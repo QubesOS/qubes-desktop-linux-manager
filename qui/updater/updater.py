@@ -227,12 +227,13 @@ class QubesUpdater(Gtk.Application):
         width = self.intro_page.vm_list.get_preferred_width().natural_width
         # Wide enough for details section to show update progress.
         # But still less than 1024 pixels to do not break OpenQA tests.
+        screen = self.main_window.get_screen()
         width = max(width, 1000)
-        width = min(width, self.main_window.get_screen().get_width() - 12)
-        height = min(
-            int(width * 1.2), self.main_window.get_screen().get_height() - 48
-        )
+        width = min(width, screen.get_width() - 12)
+        height = min(int(width * 1.2), screen.get_height() - 100)
         self.main_window.resize(width + 50, height)
+        if screen.get_width() <= 1024 or screen.get_height() < 768:
+            self.main_window.maximize()
         self.main_window.set_size_request(800, 600)  # Smaller is meaningless
         self.main_window.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
 
