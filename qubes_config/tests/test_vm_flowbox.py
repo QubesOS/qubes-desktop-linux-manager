@@ -57,7 +57,6 @@ def test_simple_flowbox_init_empty(test_qapp, test_builder):
         flowbox_handler.flowbox.get_children()[0], PlaceholderText
     )
     assert flowbox_handler.flowbox.get_children()[0].get_visible()
-    assert not flowbox_handler.add_box.get_visible()
 
 
 def test_simple_flowbox_init_not_empty(test_qapp, test_builder):
@@ -137,24 +136,10 @@ def test_flowbox_add_vm(test_qapp, test_builder):
         test_builder, test_qapp, "flowtest", initial_vms=initial_vms
     )
 
-    # try to add a VM and abort
-    assert not flowbox_handler.add_box.get_visible()
-    flowbox_handler.add_button.clicked()
-    assert flowbox_handler.add_box.get_visible()
-    flowbox_handler.add_qube_model.select_value("test-blue")
-    flowbox_handler.add_cancel.clicked()
-
-    assert not flowbox_handler.add_box.get_visible()
-    assert sorted(flowbox_handler.selected_vms) == sorted(initial_vms)
-    assert sorted(get_visible_vms(flowbox_handler)) == sorted(initial_vms)
-
     # now try to add and do not abort
-    flowbox_handler.add_button.clicked()
-    assert flowbox_handler.add_box.get_visible()
     flowbox_handler.add_qube_model.select_value("test-blue")
-    flowbox_handler.add_confirm.clicked()
+    flowbox_handler.add_button.clicked()
 
-    assert not flowbox_handler.add_box.get_visible()
     expected_vms = sorted(
         [test_qapp.domains["test-vm"], test_qapp.domains["test-blue"]]
     )
@@ -162,17 +147,14 @@ def test_flowbox_add_vm(test_qapp, test_builder):
     assert sorted(get_visible_vms(flowbox_handler)) == expected_vms
 
     # now try to add something that's already selected
-    flowbox_handler.add_button.clicked()
-    assert flowbox_handler.add_box.get_visible()
     flowbox_handler.add_qube_model.select_value("test-blue")
     with patch(
         "qubes_config.global_config.vm_flowbox.show_error"
     ) as mock_error:
         assert not mock_error.mock_calls
-        flowbox_handler.add_confirm.clicked()
+        flowbox_handler.add_button.clicked()
         assert mock_error.mock_calls
-    # the box should not have hidden, maybe user wants to change selection
-    assert flowbox_handler.add_box.get_visible()
+
     expected_vms = sorted(
         [test_qapp.domains["test-vm"], test_qapp.domains["test-blue"]]
     )
@@ -281,21 +263,17 @@ def test_flowbox_verify(test_qapp, test_builder):
     )
 
     # attempt to add and see an erorr
-    flowbox_handler.add_button.clicked()
-    assert flowbox_handler.add_box.get_visible()
     flowbox_handler.add_qube_model.select_value("test-blue")
     # vm will not be added, but the verification callback is responsible
     # for messaging (it can propose additional actions)
-    flowbox_handler.add_confirm.clicked()
+    flowbox_handler.add_button.clicked()
     assert flowbox_handler.selected_vms == [test_vm]
     assert get_visible_vms(flowbox_handler) == [test_vm]
     assert not flowbox_handler.is_changed()
 
     # but adding correct stuff still works
-    flowbox_handler.add_button.clicked()
-    assert flowbox_handler.add_box.get_visible()
     flowbox_handler.add_qube_model.select_value("test-red")
-    flowbox_handler.add_confirm.clicked()
+    flowbox_handler.add_button.clicked()
     assert flowbox_handler.selected_vms == [red_vm, test_vm]
     assert get_visible_vms(flowbox_handler) == [red_vm, test_vm]
     assert flowbox_handler.is_changed()

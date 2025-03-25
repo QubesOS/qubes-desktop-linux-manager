@@ -1023,14 +1023,13 @@ def test_u2f_handler_add_without_service(
     assert not handler.register_some_handler.selected_vms
     assert handler.enable_some_handler.selected_vms == [testvm]
 
-    handler.register_some_handler.add_button.clicked()
     handler.register_some_handler.add_qube_model.select_value("fedora-35")
     # refuse
     with patch(
         "qubes_config.global_config.usb_devices.ask_question"
     ) as mock_question:
         mock_question.return_value = Gtk.ResponseType.NO
-        handler.register_some_handler.add_confirm.clicked()
+        handler.register_some_handler.add_button.clicked()
         assert mock_question.mock_calls
     assert not handler.register_some_handler.selected_vms
     assert handler.enable_some_handler.selected_vms == [testvm]
@@ -1040,7 +1039,7 @@ def test_u2f_handler_add_without_service(
         "qubes_config.global_config.usb_devices.ask_question"
     ) as mock_question:
         mock_question.return_value = Gtk.ResponseType.YES
-        handler.register_some_handler.add_confirm.clicked()
+        handler.register_some_handler.add_button.clicked()
         assert mock_question.mock_calls
     assert handler.register_some_handler.selected_vms == [fedora35]
 

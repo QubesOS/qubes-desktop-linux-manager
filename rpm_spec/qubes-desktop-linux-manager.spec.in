@@ -279,6 +279,9 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 /usr/share/icons/hicolor/scalable/apps/qubes-expander-hidden-white.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-expander-shown-black.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-expander-shown-white.svg
+/usr/share/icons/hicolor/scalable/apps/qubes-icon-add.svg
+/usr/share/icons/hicolor/scalable/apps/qubes-icon-edit.svg
+/usr/share/icons/hicolor/scalable/apps/qubes-icon-remove.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-global-config.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-files.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-terminal.svg

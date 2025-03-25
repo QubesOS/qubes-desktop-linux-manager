@@ -57,7 +57,7 @@ from .thisdevice_handler import ThisDeviceHandler
 import gi
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, GLib, GObject, Gio, Gdk
+from gi.repository import Gtk, GLib, GObject, Gio
 
 logger = logging.getLogger("qubes-global-config")
 
@@ -314,10 +314,6 @@ class GlobalConfig(Gtk.Application):
         else:
             height = self.main_window.get_allocated_height()
         self.main_window.resize(width, height)
-        self.main_window.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
-        self.main_window.set_gravity(Gdk.Gravity.CENTER)
-        self.main_window.move(0, 0)
-        self.main_window.set_position(Gtk.WindowPosition.CENTER)
 
         # open at specified location
         if self.open_at:
@@ -552,6 +548,7 @@ class GlobalConfig(Gtk.Application):
         icon_dict = {
             "settings_tab_icon": "settings-",
             "usb_tab_icon": "usb-",
+            # "devices_tab_icon": "devices-",
             "updates_tab_icon": "qui-updates-",
             "splitgpg_tab_icon": "key-",
             "clipboard_tab_icon": "qui-clipboard-",
