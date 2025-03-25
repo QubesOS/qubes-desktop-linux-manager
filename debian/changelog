@@ -1,3 +1,20 @@
+qubes-desktop-linux-manager (4.3.11-1) unstable; urgency=medium
+
+  [ Ali Mirjamali ]
+  * Center Global Config after window resize
+
+  [ ooops ]
+  * Clarify updater settings
+
+  [ kennethrrosen ]
+  * Update qui/updater.glade
+
+  [ Ali Mirjamali ]
+  * Maximize Updater GUI on openQA display
+  * Fix `prohibit-start` selection & tooltip
+
+ -- Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>  Tue, 25 Mar 2025 04:14:24 +0100
+
 qubes-desktop-linux-manager (4.3.10-1) unstable; urgency=medium
 
   [ Ali Mirjamali ]
