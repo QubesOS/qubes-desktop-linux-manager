@@ -1425,7 +1425,6 @@
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="halign">start</property>
-                                    <property name="margin-start">30</property>
                                     <property name="label" translatable="yes">&lt;b&gt;List of qubes that can use the U2F Proxy:&lt;/b&gt;</property>
                                     <property name="use-markup">True</property>
                                   </object>
@@ -1439,6 +1438,7 @@
                                   <object class="GtkFlowBox" id="usb_u2f_enable_some_flowbox">
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
+                                    <property name="margin-start">10</property>
                                     <property name="margin-end">40</property>
                                     <style>
                                       <class name="flowbox_container"/>
@@ -1452,39 +1452,63 @@
                                 </child>
                                 <child>
                                   <object class="GtkBox" id="usb_u2f_enable_some_add_box">
+                                    <property name="visible">True</property>
                                     <property name="can-focus">False</property>
+                                    <property name="margin-start">10</property>
                                     <property name="margin-end">40</property>
+                                    <property name="margin-top">5</property>
+                                    <property name="margin-bottom">5</property>
                                     <property name="spacing">10</property>
                                     <child>
-                                      <object class="GtkLabel">
+                                      <object class="GtkButton" id="usb_u2f_enable_some_add_button">
                                         <property name="visible">True</property>
-                                        <property name="can-focus">False</property>
-                                        <property name="label" translatable="yes">Add qube:</property>
-                                        <attributes>
-                                          <attribute name="weight" value="bold"/>
-                                        </attributes>
+                                        <property name="can-focus">True</property>
+                                        <property name="receives-default">True</property>
+                                        <property name="halign">start</property>
+                                        <property name="relief">none</property>
+                                        <child>
+                                          <object class="GtkBox">
+                                            <property name="visible">True</property>
+                                            <property name="can-focus">False</property>
+                                            <property name="spacing">10</property>
+                                            <child>
+                                              <object class="GtkImage">
+                                                <property name="visible">True</property>
+                                                <property name="can-focus">False</property>
+                                                <property name="icon-name">qubes-icon-add</property>
+                                              </object>
+                                              <packing>
+                                                <property name="expand">False</property>
+                                                <property name="fill">True</property>
+                                                <property name="position">0</property>
+                                              </packing>
+                                            </child>
+                                            <child>
+                                              <object class="GtkLabel">
+                                                <property name="visible">True</property>
+                                                <property name="can-focus">False</property>
+                                                <property name="label" translatable="yes">Add qube</property>
+                                                <style>
+                                                  <class name="add_label"/>
+                                                </style>
+                                              </object>
+                                              <packing>
+                                                <property name="expand">False</property>
+                                                <property name="fill">True</property>
+                                                <property name="position">1</property>
+                                              </packing>
+                                            </child>
+                                          </object>
+                                        </child>
+                                        <style>
+                                          <class name="add_button"/>
+                                          <class name="flat"/>
+                                        </style>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
                                         <property name="fill">True</property>
-                                        <property name="position">0</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkImage">
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">False</property>
-                                        <property name="tooltip-text" translatable="yes">If you don't see the desired qube here, install the &lt;tt&gt;qubes-u2f&lt;/tt&gt; package in the template on which it is based (or, if it's a standalone, in the qube itself).</property>
-                                        <property name="xalign">0.5</property>
-                                        <property name="yalign">0.6000000238418579</property>
-                                        <property name="pixel-size">20</property>
-                                        <property name="icon-name">qubes-question</property>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="padding">3</property>
-                                        <property name="position">1</property>
+                                        <property name="position">2</property>
                                       </packing>
                                     </child>
                                     <child>
@@ -1494,7 +1518,7 @@
                                         <property name="has-entry">True</property>
                                         <child internal-child="entry">
                                           <object class="GtkEntry">
-                                            <property name="can-focus">True</property>
+                                            <property name="can-focus">False</property>
                                           </object>
                                         </child>
                                       </object>
@@ -1504,47 +1528,6 @@
                                         <property name="position">2</property>
                                       </packing>
                                     </child>
-                                    <child>
-                                      <object class="GtkButton" id="usb_u2f_enable_some_add_cancel">
-                                        <property name="label" translatable="yes">CANCEL</property>
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">True</property>
-                                        <property name="receives-default">True</property>
-                                        <property name="relief">none</property>
-                                        <style>
-                                          <class name="button_cancel"/>
-                                          <class name="flat_button"/>
-                                          <class name="flat"/>
-                                        </style>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">3</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkButton" id="usb_u2f_enable_some_add_confirm">
-                                        <property name="label" translatable="yes">  ADD  </property>
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">True</property>
-                                        <property name="receives-default">True</property>
-                                        <property name="relief">none</property>
-                                        <style>
-                                          <class name="button_save"/>
-                                          <class name="flat_button"/>
-                                          <class name="flat"/>
-                                        </style>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">4</property>
-                                      </packing>
-                                    </child>
-                                    <style>
-                                      <class name="edited_row"/>
-                                    </style>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -1553,49 +1536,16 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkButton" id="usb_u2f_enable_some_add_button">
+                                  <object class="GtkLabel">
                                     <property name="visible">True</property>
-                                    <property name="can-focus">True</property>
-                                    <property name="receives-default">True</property>
-                                    <property name="halign">start</property>
-                                    <property name="relief">none</property>
-                                    <child>
-                                      <object class="GtkBox">
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">False</property>
-                                        <property name="spacing">10</property>
-                                        <child>
-                                          <object class="GtkImage">
-                                            <property name="visible">True</property>
-                                            <property name="can-focus">False</property>
-                                            <property name="icon-name">qubes-add</property>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">True</property>
-                                            <property name="position">0</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <object class="GtkLabel">
-                                            <property name="visible">True</property>
-                                            <property name="can-focus">False</property>
-                                            <property name="label" translatable="yes">Add Qube</property>
-                                            <style>
-                                              <class name="add_label"/>
-                                            </style>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">True</property>
-                                            <property name="position">1</property>
-                                          </packing>
-                                        </child>
-                                      </object>
-                                    </child>
+                                    <property name="can-focus">False</property>
+                                    <property name="margin-start">10</property>
+                                    <property name="label" translatable="yes">If you don't see the desired qube here, install the &lt;tt&gt;qubes-u2f&lt;/tt&gt; package in the template on which it is based (or, if it's a standalone, in the qube itself).</property>
+                                    <property name="use-markup">True</property>
+                                    <property name="wrap">True</property>
+                                    <property name="xalign">0</property>
                                     <style>
-                                      <class name="add_button"/>
-                                      <class name="flat"/>
+                                      <class name="explanation"/>
                                     </style>
                                   </object>
                                   <packing>
@@ -1769,6 +1719,7 @@
                                       <object class="GtkFlowBox" id="usb_u2f_register_some_flowbox">
                                         <property name="visible">True</property>
                                         <property name="can-focus">False</property>
+                                        <property name="margin-start">10</property>
                                         <property name="margin-end">40</property>
                                         <style>
                                           <class name="flowbox_container"/>
@@ -1782,41 +1733,13 @@
                                     </child>
                                     <child>
                                       <object class="GtkBox" id="usb_u2f_register_some_add_box">
+                                        <property name="visible">True</property>
                                         <property name="can-focus">False</property>
+                                        <property name="margin-start">10</property>
                                         <property name="margin-end">40</property>
+                                        <property name="margin-top">5</property>
+                                        <property name="margin-bottom">5</property>
                                         <property name="spacing">10</property>
-                                        <child>
-                                          <object class="GtkLabel">
-                                            <property name="visible">True</property>
-                                            <property name="can-focus">False</property>
-                                            <property name="label" translatable="yes">Add qube:</property>
-                                            <attributes>
-                                              <attribute name="weight" value="bold"/>
-                                            </attributes>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">True</property>
-                                            <property name="position">0</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <object class="GtkImage">
-                                            <property name="visible">True</property>
-                                            <property name="can-focus">False</property>
-                                            <property name="tooltip-text" translatable="yes">If you don't see the desired qube here, install the &lt;tt&gt;qubes-u2f&lt;/tt&gt; package in the template on which it is based (or, if it's a standalone, in the qube itself).</property>
-                                            <property name="xalign">0.5</property>
-                                            <property name="yalign">0.6000000238418579</property>
-                                            <property name="pixel-size">20</property>
-                                            <property name="icon-name">qubes-question</property>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">True</property>
-                                            <property name="padding">3</property>
-                                            <property name="position">1</property>
-                                          </packing>
-                                        </child>
                                         <child>
                                           <object class="GtkComboBox" id="usb_u2f_register_some_qube_combo">
                                             <property name="visible">True</property>
@@ -1835,15 +1758,48 @@
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkButton" id="usb_u2f_register_some_add_cancel">
-                                            <property name="label" translatable="yes">CANCEL</property>
+                                          <object class="GtkButton" id="usb_u2f_register_some_add_button">
                                             <property name="visible">True</property>
                                             <property name="can-focus">True</property>
                                             <property name="receives-default">True</property>
+                                            <property name="halign">start</property>
                                             <property name="relief">none</property>
+                                            <child>
+                                              <object class="GtkBox">
+                                                <property name="visible">True</property>
+                                                <property name="can-focus">False</property>
+                                                <property name="spacing">10</property>
+                                                <child>
+                                                  <object class="GtkImage">
+                                                    <property name="visible">True</property>
+                                                    <property name="can-focus">False</property>
+                                                    <property name="icon-name">qubes-icon-add</property>
+                                                  </object>
+                                                  <packing>
+                                                    <property name="expand">False</property>
+                                                    <property name="fill">True</property>
+                                                    <property name="position">0</property>
+                                                  </packing>
+                                                </child>
+                                                <child>
+                                                  <object class="GtkLabel">
+                                                    <property name="visible">True</property>
+                                                    <property name="can-focus">False</property>
+                                                    <property name="label" translatable="yes">Add qube</property>
+                                                    <style>
+                                                      <class name="add_label"/>
+                                                    </style>
+                                                  </object>
+                                                  <packing>
+                                                    <property name="expand">False</property>
+                                                    <property name="fill">True</property>
+                                                    <property name="position">1</property>
+                                                  </packing>
+                                                </child>
+                                              </object>
+                                            </child>
                                             <style>
-                                              <class name="button_cancel"/>
-                                              <class name="flat_button"/>
+                                              <class name="add_button"/>
                                               <class name="flat"/>
                                             </style>
                                           </object>
@@ -1853,28 +1809,6 @@
                                             <property name="position">3</property>
                                           </packing>
                                         </child>
-                                        <child>
-                                          <object class="GtkButton" id="usb_u2f_register_some_add_confirm">
-                                            <property name="label" translatable="yes">  ADD  </property>
-                                            <property name="visible">True</property>
-                                            <property name="can-focus">True</property>
-                                            <property name="receives-default">True</property>
-                                            <property name="relief">none</property>
-                                            <style>
-                                              <class name="button_save"/>
-                                              <class name="flat_button"/>
-                                              <class name="flat"/>
-                                            </style>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">True</property>
-                                            <property name="position">4</property>
-                                          </packing>
-                                        </child>
-                                        <style>
-                                          <class name="edited_row"/>
-                                        </style>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -1883,49 +1817,16 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkButton" id="usb_u2f_register_some_add_button">
+                                      <object class="GtkLabel">
                                         <property name="visible">True</property>
-                                        <property name="can-focus">True</property>
-                                        <property name="receives-default">True</property>
-                                        <property name="halign">start</property>
-                                        <property name="relief">none</property>
-                                        <child>
-                                          <object class="GtkBox">
-                                            <property name="visible">True</property>
-                                            <property name="can-focus">False</property>
-                                            <property name="spacing">10</property>
-                                            <child>
-                                              <object class="GtkImage">
-                                                <property name="visible">True</property>
-                                                <property name="can-focus">False</property>
-                                                <property name="icon-name">qubes-add</property>
-                                              </object>
-                                              <packing>
-                                                <property name="expand">False</property>
-                                                <property name="fill">True</property>
-                                                <property name="position">0</property>
-                                              </packing>
-                                            </child>
-                                            <child>
-                                              <object class="GtkLabel">
-                                                <property name="visible">True</property>
-                                                <property name="can-focus">False</property>
-                                                <property name="label" translatable="yes">Add Qube</property>
-                                                <style>
-                                                  <class name="add_label"/>
-                                                </style>
-                                              </object>
-                                              <packing>
-                                                <property name="expand">False</property>
-                                                <property name="fill">True</property>
-                                                <property name="position">1</property>
-                                              </packing>
-                                            </child>
-                                          </object>
-                                        </child>
+                                        <property name="can-focus">False</property>
+                                        <property name="margin-start">10</property>
+                                        <property name="label" translatable="yes">If you don't see the desired qube here, install the &lt;tt&gt;qubes-u2f&lt;/tt&gt; package in the template on which it is based (or, if it's a standalone, in the qube itself).</property>
+                                        <property name="use-markup">True</property>
+                                        <property name="wrap">True</property>
+                                        <property name="xalign">0</property>
                                         <style>
-                                          <class name="add_button"/>
-                                          <class name="flat"/>
+                                          <class name="explanation"/>
                                         </style>
                                       </object>
                                       <packing>
@@ -2053,6 +1954,7 @@
                                   <object class="GtkFlowBox" id="usb_u2f_blanket_flowbox">
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
+                                    <property name="margin-start">10</property>
                                     <property name="margin-end">40</property>
                                     <style>
                                       <class name="flowbox_container"/>
@@ -2066,41 +1968,13 @@
                                 </child>
                                 <child>
                                   <object class="GtkBox" id="usb_u2f_blanket_add_box">
+                                    <property name="visible">True</property>
                                     <property name="can-focus">False</property>
+                                    <property name="margin-start">10</property>
                                     <property name="margin-end">30</property>
+                                    <property name="margin-top">5</property>
+                                    <property name="margin-bottom">5</property>
                                     <property name="spacing">10</property>
-                                    <child>
-                                      <object class="GtkLabel">
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">False</property>
-                                        <property name="label" translatable="yes">Add qube:</property>
-                                        <attributes>
-                                          <attribute name="weight" value="bold"/>
-                                        </attributes>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">0</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkImage">
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">False</property>
-                                        <property name="tooltip-text" translatable="yes">If you don't see the desired qube here, install the &lt;tt&gt;qubes-u2f&lt;/tt&gt; package in the template on which it is based (or, if it's a standalone, in the qube itself).</property>
-                                        <property name="xalign">0.5</property>
-                                        <property name="yalign">0.6000000238418579</property>
-                                        <property name="pixel-size">20</property>
-                                        <property name="icon-name">qubes-question</property>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="padding">3</property>
-                                        <property name="position">1</property>
-                                      </packing>
-                                    </child>
                                     <child>
                                       <object class="GtkComboBox" id="usb_u2f_blanket_qube_combo">
                                         <property name="visible">True</property>
@@ -2119,15 +1993,48 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkButton" id="usb_u2f_blanket_add_cancel">
-                                        <property name="label" translatable="yes">CANCEL</property>
+                                      <object class="GtkButton" id="usb_u2f_blanket_add_button">
                                         <property name="visible">True</property>
                                         <property name="can-focus">True</property>
                                         <property name="receives-default">True</property>
+                                        <property name="halign">start</property>
                                         <property name="relief">none</property>
+                                        <child>
+                                          <object class="GtkBox">
+                                            <property name="visible">True</property>
+                                            <property name="can-focus">False</property>
+                                            <property name="spacing">10</property>
+                                            <child>
+                                              <object class="GtkImage">
+                                                <property name="visible">True</property>
+                                                <property name="can-focus">False</property>
+                                                <property name="icon-name">qubes-icon-add</property>
+                                              </object>
+                                              <packing>
+                                                <property name="expand">False</property>
+                                                <property name="fill">True</property>
+                                                <property name="position">0</property>
+                                              </packing>
+                                            </child>
+                                            <child>
+                                              <object class="GtkLabel">
+                                                <property name="visible">True</property>
+                                                <property name="can-focus">False</property>
+                                                <property name="label" translatable="yes">Add qube</property>
+                                                <style>
+                                                  <class name="add_label"/>
+                                                </style>
+                                              </object>
+                                              <packing>
+                                                <property name="expand">False</property>
+                                                <property name="fill">True</property>
+                                                <property name="position">1</property>
+                                              </packing>
+                                            </child>
+                                          </object>
+                                        </child>
                                         <style>
-                                          <class name="button_cancel"/>
-                                          <class name="flat_button"/>
+                                          <class name="add_button"/>
                                           <class name="flat"/>
                                         </style>
                                       </object>
@@ -2137,28 +2044,6 @@
                                         <property name="position">3</property>
                                       </packing>
                                     </child>
-                                    <child>
-                                      <object class="GtkButton" id="usb_u2f_blanket_add_confirm">
-                                        <property name="label" translatable="yes">  ADD  </property>
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">True</property>
-                                        <property name="receives-default">True</property>
-                                        <property name="relief">none</property>
-                                        <style>
-                                          <class name="button_save"/>
-                                          <class name="flat_button"/>
-                                          <class name="flat"/>
-                                        </style>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">4</property>
-                                      </packing>
-                                    </child>
-                                    <style>
-                                      <class name="edited_row"/>
-                                    </style>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -2167,49 +2052,15 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkButton" id="usb_u2f_blanket_add_button">
+                                  <object class="GtkLabel">
                                     <property name="visible">True</property>
-                                    <property name="can-focus">True</property>
-                                    <property name="receives-default">True</property>
-                                    <property name="halign">start</property>
-                                    <property name="relief">none</property>
-                                    <child>
-                                      <object class="GtkBox">
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">False</property>
-                                        <property name="spacing">10</property>
-                                        <child>
-                                          <object class="GtkImage">
-                                            <property name="visible">True</property>
-                                            <property name="can-focus">False</property>
-                                            <property name="icon-name">qubes-add</property>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">True</property>
-                                            <property name="position">0</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <object class="GtkLabel">
-                                            <property name="visible">True</property>
-                                            <property name="can-focus">False</property>
-                                            <property name="label" translatable="yes">Add Qube</property>
-                                            <style>
-                                              <class name="add_label"/>
-                                            </style>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">True</property>
-                                            <property name="position">1</property>
-                                          </packing>
-                                        </child>
-                                      </object>
-                                    </child>
+                                    <property name="can-focus">False</property>
+                                    <property name="margin-start">10</property>
+                                    <property name="label" translatable="yes">If you don't see the desired qube here, install the &lt;tt&gt;qubes-u2f&lt;/tt&gt; package in the template on which it is based (or, if it's a standalone, in the qube itself).</property>
+                                    <property name="wrap">True</property>
+                                    <property name="xalign">0</property>
                                     <style>
-                                      <class name="add_button"/>
-                                      <class name="flat"/>
+                                      <class name="explanation"/>
                                     </style>
                                   </object>
                                   <packing>
@@ -2818,9 +2669,6 @@
                           </packing>
                         </child>
                         <child>
-                          <placeholder/>
-                        </child>
-                        <child>
                           <object class="GtkCheckButton" id="updates_exceptions_check">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
@@ -2868,7 +2716,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">17</property>
+                            <property name="position">16</property>
                           </packing>
                         </child>
                         <child>
@@ -2894,24 +2742,10 @@
                             </child>
                             <child>
                               <object class="GtkBox" id="updates_exception_add_box">
+                                <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="margin-start">25</property>
+                                <property name="margin-start">20</property>
                                 <property name="spacing">10</property>
-                                <child>
-                                  <object class="GtkLabel">
-                                    <property name="visible">True</property>
-                                    <property name="can-focus">False</property>
-                                    <property name="label" translatable="yes">Add exception:</property>
-                                    <attributes>
-                                      <attribute name="weight" value="bold"/>
-                                    </attributes>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">0</property>
-                                  </packing>
-                                </child>
                                 <child>
                                   <object class="GtkComboBox" id="updates_exception_qube_combo">
                                     <property name="visible">True</property>
@@ -2933,15 +2767,50 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkButton" id="updates_exception_add_cancel">
-                                    <property name="label" translatable="yes">CANCEL</property>
+                                  <object class="GtkButton" id="updates_exception_add_button">
                                     <property name="visible">True</property>
                                     <property name="can-focus">True</property>
                                     <property name="receives-default">True</property>
+                                    <property name="halign">start</property>
+                                    <property name="margin-start">35</property>
                                     <property name="relief">none</property>
+                                    <child>
+                                      <object class="GtkBox">
+                                        <property name="visible">True</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="spacing">10</property>
+                                        <child>
+                                          <object class="GtkImage">
+                                            <property name="visible">True</property>
+                                            <property name="can-focus">False</property>
+                                            <property name="icon-name">qubes-icon-add</property>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can-focus">False</property>
+                                            <property name="xpad">5</property>
+                                            <property name="label" translatable="yes">Add exception</property>
+                                            <style>
+                                              <class name="add_label"/>
+                                            </style>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">1</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                    </child>
                                     <style>
-                                      <class name="button_cancel"/>
-                                      <class name="flat_button"/>
+                                      <class name="add_button"/>
                                       <class name="flat"/>
                                     </style>
                                   </object>
@@ -2951,87 +2820,11 @@
                                     <property name="position">2</property>
                                   </packing>
                                 </child>
-                                <child>
-                                  <object class="GtkButton" id="updates_exception_add_confirm">
-                                    <property name="label" translatable="yes">  ADD  </property>
-                                    <property name="visible">True</property>
-                                    <property name="can-focus">True</property>
-                                    <property name="receives-default">True</property>
-                                    <property name="relief">none</property>
-                                    <style>
-                                      <class name="button_save"/>
-                                      <class name="flat_button"/>
-                                      <class name="flat"/>
-                                    </style>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">3</property>
-                                  </packing>
-                                </child>
-                                <style>
-                                  <class name="edited_row"/>
-                                </style>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
                                 <property name="position">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkButton" id="updates_exception_add_button">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="receives-default">True</property>
-                                <property name="halign">start</property>
-                                <property name="margin-start">35</property>
-                                <property name="relief">none</property>
-                                <child>
-                                  <object class="GtkBox">
-                                    <property name="visible">True</property>
-                                    <property name="can-focus">False</property>
-                                    <property name="spacing">10</property>
-                                    <child>
-                                      <object class="GtkImage">
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">False</property>
-                                        <property name="icon-name">qubes-add</property>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">0</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel">
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">False</property>
-                                        <property name="xpad">5</property>
-                                        <property name="label" translatable="yes">Add Exception</property>
-                                        <style>
-                                          <class name="add_label"/>
-                                        </style>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">1</property>
-                                      </packing>
-                                    </child>
-                                  </object>
-                                </child>
-                                <style>
-                                  <class name="add_button"/>
-                                  <class name="flat"/>
-                                </style>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">2</property>
                               </packing>
                             </child>
                           </object>
@@ -3405,6 +3198,19 @@
                           </packing>
                         </child>
                         <child>
+                          <object class="GtkButton" id="template_repositories">
+                            <property name="label" translatable="yes">anchor</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">29</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkButton" id="updates_updatevm_add_rule_button">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
@@ -3420,7 +3226,7 @@
                                   <object class="GtkImage">
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
-                                    <property name="icon-name">qubes-add</property>
+                                    <property name="icon-name">qubes-icon-add</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -3457,19 +3263,6 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkButton" id="template_repositories">
-                            <property name="label" translatable="yes">anchor</property>
-                            <property name="visible">True</property>
-                            <property name="can-focus">True</property>
-                            <property name="receives-default">True</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">30</property>
-                          </packing>
-                        </child>
-                        <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
@@ -3483,7 +3276,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">31</property>
+                            <property name="position">30</property>
                           </packing>
                         </child>
                         <child>
@@ -3500,7 +3293,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">32</property>
+                            <property name="position">31</property>
                           </packing>
                         </child>
                         <child>
@@ -3690,7 +3483,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">33</property>
+                            <property name="position">32</property>
                           </packing>
                         </child>
                         <style>
@@ -4211,7 +4004,7 @@
                                       <object class="GtkImage">
                                         <property name="visible">True</property>
                                         <property name="can-focus">False</property>
-                                        <property name="icon-name">qubes-add</property>
+                                        <property name="icon-name">qubes-icon-add</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -4330,7 +4123,7 @@
                                       <object class="GtkImage">
                                         <property name="visible">True</property>
                                         <property name="can-focus">False</property>
-                                        <property name="icon-name">qubes-add</property>
+                                        <property name="icon-name">qubes-icon-add</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -5000,7 +4793,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="halign">start</property>
-                                    <property name="label" translatable="yes">&lt;b&gt;DESTI NATION QUBE&lt;/b&gt;</property>
+                                    <property name="label" translatable="yes">&lt;b&gt;DESTINATION QUBE&lt;/b&gt;</property>
                                     <property name="use-markup">True</property>
                                   </object>
                                   <packing>
@@ -5116,7 +4909,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                                       <object class="GtkImage">
                                         <property name="visible">True</property>
                                         <property name="can-focus">False</property>
-                                        <property name="icon-name">qubes-add</property>
+                                        <property name="icon-name">qubes-icon-add</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -5774,7 +5567,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                                       <object class="GtkImage">
                                         <property name="visible">True</property>
                                         <property name="can-focus">False</property>
-                                        <property name="icon-name">qubes-add</property>
+                                        <property name="icon-name">qubes-icon-add</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -6297,7 +6090,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                                   <object class="GtkImage">
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
-                                    <property name="icon-name">qubes-add</property>
+                                    <property name="icon-name">qubes-icon-add</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -6874,7 +6667,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                                   <object class="GtkImage">
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
-                                    <property name="icon-name">qubes-add</property>
+                                    <property name="icon-name">qubes-icon-add</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
