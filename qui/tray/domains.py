@@ -812,6 +812,13 @@ class DomainTray(Gtk.Application):
             "domain-feature-delete:expert-mode", self.debug_change
         )
 
+        self.dispatcher.add_handler(
+            "domain-feature-set:internal", self.update_domain_item
+        )
+        self.dispatcher.add_handler(
+            "domain-feature-delete:internal", self.update_domain_item
+        )
+
         self.stats_dispatcher.add_handler("vm-stats", self.update_stats)
 
     def debug_change(self, vm, *_args, **_kwargs):
@@ -1191,6 +1198,13 @@ class DomainTray(Gtk.Application):
         )
         self.dispatcher.remove_handler(
             "domain-feature-delete:expert-mode", self.debug_change
+        )
+
+        self.dispatcher.remove_handler(
+            "domain-feature-set:internal", self.update_domain_item
+        )
+        self.dispatcher.remove_handler(
+            "domain-feature-delete:internal", self.update_domain_item
         )
 
         self.stats_dispatcher.remove_handler("vm-stats", self.update_stats)
