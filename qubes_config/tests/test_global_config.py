@@ -29,8 +29,11 @@ from ..global_config.global_config import (
     GlobalConfig,
     ClipboardHandler,
     FileAccessHandler,
+    VMCollection,
+    Qubes,
 )
 from ..global_config.basics_handler import BasicSettingsHandler
+from qubesadmin.tests import TestVMCollection, QubesTest
 
 import gi
 
@@ -47,6 +50,24 @@ from gi.repository import Gtk
 show_dialog_with_icon_path = (
     "qubes_config.global_config.global_config.show_dialog_with_icon"
 )
+
+
+@patch("qubesadmin.app.VMCollection", TestVMCollection)
+def test_vmcollection_global_config(test_qapp):
+    collection = VMCollection(test_qapp)
+    test_qapp.expected_calls[
+        ("disp666", "admin.vm.property.Get", "auto_cleanup", None)
+    ] = b"2\x00QubesNoSuchPropertyError\x00\x00DispVM suddenly died!\x00"
+    for vm in collection:
+        assert vm.name != "disp123"
+        assert vm.name != "disp666"
+
+
+@patch("qubesadmin.Qubes", QubesTest)
+def test_qubes_global_config():
+    app = Qubes()
+    app.domains = {}
+    assert app.domains == {}
 
 
 @patch("subprocess.check_output")

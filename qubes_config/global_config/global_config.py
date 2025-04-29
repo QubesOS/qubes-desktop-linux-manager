@@ -690,11 +690,47 @@ class GlobalConfig(Gtk.Application):
         return False
 
 
+class VMCollection(qubesadmin.app.VMCollection):
+    """
+    Overloaded class to get rid of volatile disposables
+    """
+
+    def __iter__(self):
+        for vm in super().__iter__():
+            try:
+                if vm.klass == "DispVM" and vm.auto_cleanup:
+                    continue
+            except:  # pylint: disable=bare-except
+                continue
+            yield vm
+
+
+class Qubes(qubesadmin.Qubes):
+    """
+    Overloaded class to get rid of volatile disposables
+    """
+
+    # Auxiliary domains collection which excludes true disposables (not named)
+    _domains = None
+
+    def __init__(self):
+        super().__init__()
+        self._domains = VMCollection(self)
+
+    @property
+    def domains(self):
+        return self._domains
+
+    @domains.setter
+    def domains(self, d):
+        self._domains = d
+
+
 def main():
     """
     Start the app
     """
-    qapp = qubesadmin.Qubes()
+    qapp = Qubes()
     qapp.cache_enabled = True
     policy_manager = PolicyManager()
     app = GlobalConfig(qapp, policy_manager)

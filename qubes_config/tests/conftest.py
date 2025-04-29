@@ -81,6 +81,7 @@ default_vm_properties = {
     "management_dispvm": ("vm", True, "default-mgmt-dvm"),
     "netvm": ("vm", False, "sys-firewall"),
     "template": ("vm", False, "fedora-36"),
+    "auto_cleanup": ("bool", True, "False"),
 }
 
 possible_tags = ["whonix-updatevm", "anon-gateway"]
@@ -341,6 +342,25 @@ def test_qapp_impl():
         "default-dvm",
         "DispVM",
         {"template_for_dispvms": ("bool", False, "True")},
+        {"service.qubes-update-check": None},
+        [],
+    )
+
+    add_expected_vm(
+        qapp,
+        "disp123",
+        "DispVM",
+        {"auto_cleanup": ("bool", False, "True")},
+        {"service.qubes-update-check": None},
+        [],
+    )
+
+    # This DispVM will die suddently in the middle of Global Config running
+    add_expected_vm(
+        qapp,
+        "disp666",
+        "DispVM",
+        {},
         {"service.qubes-update-check": None},
         [],
     )
