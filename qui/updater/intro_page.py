@@ -99,20 +99,9 @@ class IntroPage:
     def populate_vm_list(self, qapp, settings):
         """Adds to list any updatable vms with update info."""
         self.log.debug("Populate update list")
-        self.list_store = ListWrapper(UpdateRowWrapper, self.vm_list.get_model())
-
-        for vm in qapp.domains:
-            if vm.klass == "AdminVM":
-                try:
-                    if settings.hide_skipped and bool(
-                        vm.features.get("skip-update", False)
-                    ):
-                        continue
-                    state = bool(vm.features.get("updates-available", False))
-                except exc.QubesDaemonCommunicationError:
-                    state = False
-                self.list_store.append_vm(vm, state)
-
+        self.list_store = ListWrapper(
+            UpdateRowWrapper, self.vm_list.get_model()
+        )
         to_update = set()
         if settings.hide_updated:
             cmd = [
@@ -124,6 +113,7 @@ class IntroPage:
             ]
             to_update = self._get_stale_qubes(cmd)
 
+        to_display = []
         for vm in qapp.domains:
             try:
                 if settings.hide_skipped and bool(
@@ -135,8 +125,10 @@ class IntroPage:
                     continue
             except exc.QubesDaemonCommunicationError:
                 continue
-            if getattr(vm, "updateable", False) and vm.klass != "AdminVM":
-                self.list_store.append_vm(vm)
+            if getattr(vm, "updateable", False):
+                to_display.append(vm)
+        for vm in sorted(to_display, key=lambda vm: vm.klass):
+            self.list_store.append_vm(vm)
 
         self.refresh_update_list(settings.update_if_stale)
 
@@ -159,8 +151,6 @@ class IntroPage:
         to_update = self._get_stale_qubes(cmd)
 
         for row in self.list_store:
-            if row.vm.name == "dom0":
-                continue
             row.updates_available = bool(row.vm.name in to_update)
             row.selected = bool(row.vm.name in to_update) and not row.vm.features.get(
                 "prohibit-start", False
@@ -223,7 +213,6 @@ class IntroPage:
             if arg in (
                 "non_interactive",
                 "non_default_select",
-                "dom0",
                 "restart",
                 "apply_to_sys",
                 "apply_to_all",
@@ -236,23 +225,18 @@ class IntroPage:
             if value:
                 if arg in ("skip", "targets"):
                     vms = set(value.split(","))
-                    vms_without_dom0 = vms.difference({"dom0"})
-                    if not vms_without_dom0:
-                        continue
-                    value = ",".join(sorted(vms_without_dom0))
+                    value = ",".join(sorted(vms))
                 cmd.append(f"--{arg.replace('_', '-')}")
                 if not isinstance(value, bool):
                     cmd.append(str(value))
 
         to_update = set()
         non_default_select = [
-            "--" + arg for arg in cliargs.non_default_select if arg != "dom0"
+            "--" + arg for arg in cliargs.non_default_select if arg != "dom0"  # TODO remove dom0 flag
         ]
         non_default = [a for a in cmd if a in non_default_select]
         if non_default or cliargs.non_interactive:
             to_update = self._get_stale_qubes(cmd)
-
-        to_update = self._handle_cli_dom0(dom0, to_update, cliargs)
 
         for row in self.list_store:
             row.selected = row.name in to_update
@@ -264,13 +248,16 @@ class IntroPage:
             self.log.debug("Command returns: %s", output.decode())
 
             output_lines = output.decode().split("\n")
-            if ":" not in output_lines[0]:
-                return set()
+            result = set()
+            if "dom0" in output_lines[0]:
+                result.add("dom0")
+            if ":" not in output_lines[1]:
+                return result
 
-            return {
+            return result.union({
                 vm_name.strip()
-                for vm_name in output_lines[0].split(":", maxsplit=1)[1].split(",")
-            }
+                for vm_name in output_lines[1].split(":", maxsplit=1)[1].split(",")
+            })
         except subprocess.CalledProcessError as err:
             if err.returncode != 100:
                 raise err
