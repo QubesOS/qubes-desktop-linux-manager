@@ -53,6 +53,7 @@ from .usb_devices import DevicesHandler
 from .basics_handler import BasicSettingsHandler, FeatureHandler
 from .policy_exceptions_handler import DispvmExceptionHandler
 from .thisdevice_handler import ThisDeviceHandler
+from .device_attachments import DevAttachmentHandler
 
 import gi
 
@@ -83,6 +84,9 @@ LOCATIONS = [
     "clipboard_policy",
     "filecopy_policy",
     "open_in_vm",
+    "attachment_policy",
+    "auto_attachment",
+    "required_devices",
 ]
 
 
@@ -438,6 +442,11 @@ class GlobalConfig(Gtk.Application):
         )
         self.progress_bar_dialog.update_progress(page_progress)
 
+        self.handlers["attachments"] = DevAttachmentHandler(
+            self.qapp, self.builder
+        )
+        self.progress_bar_dialog.update_progress(page_progress)
+
         self.handlers["splitgpg"] = VMSubsetPolicyHandler(
             qapp=self.qapp,
             gtk_builder=self.builder,
@@ -548,7 +557,7 @@ class GlobalConfig(Gtk.Application):
         icon_dict = {
             "settings_tab_icon": "settings-",
             "usb_tab_icon": "usb-",
-            # "devices_tab_icon": "devices-",
+            "devices_tab_icon": "devices-",
             "updates_tab_icon": "qui-updates-",
             "splitgpg_tab_icon": "key-",
             "clipboard_tab_icon": "qui-clipboard-",

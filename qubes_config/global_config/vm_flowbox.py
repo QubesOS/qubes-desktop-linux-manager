@@ -79,7 +79,9 @@ class VMFlowBoxButton(Gtk.FlowBoxChild):
 
     def _remove_self(self, *_args):
         response = ask_question(
-            self, _("Delete"), _("Are you sure you want to remove this qube?")
+            self,
+            _("Delete"),
+            _("Are you sure you want to remove this qube from the list?"),
         )
         if response == Gtk.ResponseType.NO:
             return
@@ -123,6 +125,7 @@ class VMFlowboxHandler:
         """
         self.qapp = qapp
         self.verification_callback = verification_callback
+        self._change_callback: Callable | None = None
 
         self.flowbox: Gtk.FlowBox = gtk_builder.get_object(f"{prefix}_flowbox")
         self.box: Gtk.Box = gtk_builder.get_object(f"{prefix}_box")
@@ -176,9 +179,13 @@ class VMFlowboxHandler:
             return
         self.flowbox.add(VMFlowBoxButton(select_vm))
         self.placeholder.set_visible(False)
+        if self._change_callback:
+            self._change_callback()
 
     def _vm_removed(self, *_args):
         self.placeholder.set_visible(not bool(self.selected_vms))
+        if self._change_callback:
+            self._change_callback()
 
     def set_visible(self, state: bool):
         """Set flowbox to visible/usable."""
@@ -189,6 +196,9 @@ class VMFlowboxHandler:
         Add a vm to selected vms.
         """
         self.flowbox.add(VMFlowBoxButton(vm))
+        self.placeholder.set_visible(False)
+        if self._change_callback:
+            self._change_callback()
 
     @property
     def selected_vms(self) -> List[qubesadmin.vm.QubesVM]:
@@ -229,7 +239,17 @@ class VMFlowboxHandler:
         self.placeholder.set_visible(not bool(self.selected_vms))
 
     def clear(self):
-        """Remove all selected qubes"""
+        """Remove all selected qubes and clear selected VM"""
         for child in self.flowbox.get_children():
             if isinstance(child, VMFlowBoxButton):
                 self.flowbox.remove(child)
+            self._vm_removed()
+        self.add_qube_model.clear_selection()
+
+    def set_sensitive(self, state: bool):
+        self.flowbox.set_sensitive(state)
+        self.add_button.set_sensitive(state)
+        self.qube_combo.set_sensitive(state)
+
+    def connect_change_callback(self, func: Callable):
+        self._change_callback = func

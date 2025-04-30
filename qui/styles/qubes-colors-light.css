@@ -16,6 +16,7 @@
 @define-color separator-color #cdcdcd;
 @define-color soft-text-color #858585;
 @define-color misc-text-color #979797;
+@define-color alt-row #e5e7eb;
 
 @define-color problem-background #fecaca;
 @define-color problem-frame #b91c1c;

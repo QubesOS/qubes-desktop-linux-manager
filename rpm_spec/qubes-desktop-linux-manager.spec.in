@@ -164,6 +164,9 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 %{python3_sitelib}/qubes_config/global_config/__pycache__/*
 %{python3_sitelib}/qubes_config/global_config/basics_handler.py
 %{python3_sitelib}/qubes_config/global_config/conflict_handler.py
+%{python3_sitelib}/qubes_config/global_config/device_attachments.py
+%{python3_sitelib}/qubes_config/global_config/device_blocks.py
+%{python3_sitelib}/qubes_config/global_config/device_widgets.py
 %{python3_sitelib}/qubes_config/global_config/global_config.py
 %{python3_sitelib}/qubes_config/global_config/page_handler.py
 %{python3_sitelib}/qubes_config/global_config/policy_handler.py
@@ -252,6 +255,8 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 /usr/share/icons/hicolor/scalable/apps/check_yes.svg
 /usr/share/icons/hicolor/scalable/apps/detach-dark.svg
 /usr/share/icons/hicolor/scalable/apps/detach-light.svg
+/usr/share/icons/hicolor/scalable/apps/devices-dark.svg
+/usr/share/icons/hicolor/scalable/apps/devices-light.svg
 /usr/share/icons/hicolor/scalable/apps/edit-dark.svg
 /usr/share/icons/hicolor/scalable/apps/edit-light.svg
 /usr/share/icons/hicolor/scalable/apps/harddrive-dark.svg
@@ -299,6 +304,7 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 /usr/share/icons/hicolor/scalable/apps/qubes-policy-editor.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-question.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-this-device.svg
+/usr/share/icons/hicolor/scalable/apps/qubes-unplug.svg
 /usr/share/icons/hicolor/scalable/apps/qui-clipboard.svg
 /usr/share/icons/hicolor/scalable/apps/qui-clipboard-light.svg
 /usr/share/icons/hicolor/scalable/apps/qui-clipboard-dark.svg

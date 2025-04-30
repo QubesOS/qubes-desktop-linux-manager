@@ -19,6 +19,9 @@
 # with this program; if not, see <http://www.gnu.org/licenses/>.
 """Conftest helper pytest file: fixtures container here are
  reachable by all tests"""
+# pylint: disable=protected-access
+# pylint: disable=redefined-outer-name
+
 import pytest
 import importlib.resources
 import subprocess
@@ -33,18 +36,26 @@ from ..global_config.global_config import GlobalConfig
 from ..global_config.policy_manager import PolicyManager
 from ..new_qube.new_qube_app import CreateNewQube
 
-from qubesadmin.tests.mock_app import MockQubesComplete, MockQubes, \
-    MockQubesWhonix, QubesTestWrapper, GLOBAL_PROPERTIES
-
+from qubesadmin.tests.mock_app import (
+    MockQubesComplete,
+    MockQube,
+    MockQubes,
+    MockQubesWhonix,
+    QubesTestWrapper,
+    GLOBAL_PROPERTIES,
+    MockDevice,
+)
 
 @pytest.fixture
 def test_qapp():
     test_qapp = MockQubesComplete()
-    test_qapp._qubes['dom0'].features['gui-default-secure-copy-sequence'] = None
-    test_qapp._qubes['sys-usb'].features[
-        'supported-feature.keyboard-layout'] = '1'
+    test_qapp._qubes["dom0"].features["gui-default-secure-copy-sequence"] = None
+    test_qapp._qubes["sys-usb"].features[
+        "supported-feature.keyboard-layout"
+    ] = "1"
     test_qapp.update_vm_calls()
     return test_qapp
+
 
 @pytest.fixture
 def test_qapp_simple():
@@ -66,16 +77,146 @@ def test_qapp_broken():  # pylint: disable=redefined-outer-name
 
     qapp._global_properties = GLOBAL_PROPERTIES.copy()
 
-    qapp.set_global_property('clockvm', "")
-    qapp.set_global_property('default_dispvm', "")
-    qapp.set_global_property('default_netvm', "")
-    qapp.set_global_property('default_template', "")
-    qapp.set_global_property('updatevm', "")
+    qapp.set_global_property("clockvm", "")
+    qapp.set_global_property("default_dispvm", "")
+    qapp.set_global_property("default_netvm", "")
+    qapp.set_global_property("default_template", "")
+    qapp.set_global_property("updatevm", "")
 
     qapp.update_global_properties()
     qapp.update_vm_calls()
 
     return qapp
+
+
+@pytest.fixture
+def test_qapp_devices():
+    test_qapp_devices = MockQubesComplete()
+
+    test_qapp_devices._qubes["test-dev"] = MockQube(
+        name="test-dev",
+        qapp=test_qapp_devices,
+        label="purple",
+        devices_denied="m******",
+    )
+    test_qapp_devices._qubes["test-dev2"] = MockQube(
+        name="test-dev2",
+        qapp=test_qapp_devices,
+        label="green",
+        devices_denied="p02****u02****p07****p123***",
+    )
+
+    test_qapp_devices.update_vm_calls()
+
+    # add some PCI devices
+    test_qapp_devices._devices.append(
+        MockDevice(
+            test_qapp_devices,
+            dev_class="pci",
+            device_id="0x8086:0x51f0::p028000",
+            product="Network Card",
+            vendor="unknown",
+            backend_vm="dom0",
+            assigned=[("sys-net", "required", None)],
+            port="0c.0",
+        )
+    )
+    test_qapp_devices._devices.append(
+        MockDevice(
+            test_qapp_devices,
+            dev_class="pci",
+            product="USB Controller",
+            backend_vm="dom0",
+            assigned=[("sys-net", "required", None)],
+            device_id="0x8086:0x461e::p0c0330",
+            port="0d.0",
+            vendor="ACME",
+        )
+    )
+    test_qapp_devices._devices.append(
+        MockDevice(
+            test_qapp_devices,
+            dev_class="pci",
+            device_id="0x8086:0x51f0::p300000",
+            product="Piano Dropper",
+            vendor="ACME",
+            backend_vm="dom0",
+            port="0f.0",
+        )
+    )
+    # and one assigned with no-strict-reset
+    test_qapp_devices._devices.append(
+        MockDevice(
+            test_qapp_devices,
+            dev_class="pci",
+            device_id="0x8086:0x51c8::p040300",
+            product="Whole Symphonic Orchestra",
+            vendor="Berlin Philharmonie",
+            backend_vm="dom0",
+            assigned=[("test-red", "required", ["no-strict-reset"])],
+            port="0h.0",
+        )
+    )
+
+    # add two pre-assigned devices
+    test_qapp_devices._devices.append(
+        MockDevice(
+            test_qapp_devices,
+            dev_class="usb",
+            product="Anvil",
+            vendor="ACME",
+            backend_vm="sys-usb",
+            assigned=[
+                ("test-vm", "ask-to-attach", None),
+                ("test-red", "ask-to-attach", None),
+            ],
+            device_id="3:4:b011010",
+            port="2-22",
+        )
+    )
+    test_qapp_devices._devices.append(
+        MockDevice(
+            test_qapp_devices,
+            dev_class="usb",
+            product="Hammer",
+            vendor="ACME",
+            backend_vm="sys-usb",
+            assigned=[("test-vm", "auto-attach", None)],
+            device_id="1:2:u011010",
+            port="2-23",
+        )
+    )
+
+    # add an unassigned block device
+    test_qapp_devices._devices.append(
+        MockDevice(
+            test_qapp_devices,
+            dev_class="block",
+            product="Ouroboros",
+            vendor="ACME",
+            backend_vm="sys-usb",
+            device_id="444:888:b123422",
+            port="sda",
+        )
+    )
+
+    test_qapp_devices.update_vm_calls()
+
+    # an assignment for a currently not-connected device
+
+    call = ("test-vm", "admin.vm.device.usb.Assigned", None, None)
+    assignment_string = (
+        "sys-usb+2-30 device_id='0:0007:u01101' "
+        "port_id='2-30' devclass='usb' "
+        "backend_domain='sys-usb' mode='ask-to-attach' "
+        "frontend_domain='test-vm'\n"
+    ).encode()
+    current_response = test_qapp_devices.expected_calls[call]
+    test_qapp_devices.expected_calls[call] = (
+        current_response + assignment_string
+    )
+
+    return test_qapp_devices
 
 
 @pytest.fixture
