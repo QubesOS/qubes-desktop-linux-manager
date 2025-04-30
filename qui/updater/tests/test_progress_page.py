@@ -103,13 +103,11 @@ def test_perform_update(
         def __call__(self, vm_rows, *args, **kwargs):
             self.vm_rows = vm_rows
 
-    sut.update_admin_vm = VMConsumer()
-    sut.update_templates = VMConsumer()
+    sut.update_selected = VMConsumer()
 
     sut.perform_update(mock_settings)
 
-    assert len(sut.update_admin_vm.vm_rows) == 1
-    assert len(sut.update_templates.vm_rows) == 3
+    assert len(sut.update_selected.vm_rows) == 4
 
     calls = [
         call(mock_next_button.set_sensitive, True),
@@ -118,59 +116,6 @@ def test_perform_update(
     ]
     idle_add.assert_has_calls(calls, any_order=True)
     mock_callback.assert_called_once()
-
-
-@patch("gi.repository.GLib.idle_add")
-@patch("subprocess.check_output", return_value=b"")
-@pytest.mark.parametrize(
-    "interrupted",
-    (
-        pytest.param(True, id="interrupted"),
-        pytest.param(False, id="not interrupted"),
-    ),
-)
-def test_update_admin_vm(
-    mock_subprocess,
-    idle_add,
-    interrupted,
-    real_builder,
-    test_qapp,
-    mock_next_button,
-    mock_cancel_button,
-    mock_label,
-    mock_text_view,
-    mock_list_store,
-):
-    mock_log = Mock()
-    mock_callback = Mock()
-    sut = ProgressPage(
-        real_builder,
-        mock_log,
-        mock_label,
-        mock_next_button,
-        mock_cancel_button,
-        mock_callback,
-    )
-
-    admins = ListWrapper(UpdateRowWrapper, mock_list_store)
-    for vm in test_qapp.domains:
-        if vm.klass in ("AdminVM",):
-            admins.append_vm(vm)
-
-    sut.update_details.progress_textview = mock_text_view
-    # chose vm to show details
-    sut.update_details.active_row = admins[0]
-    admins[0].buffer = "Update details"
-
-    if interrupted:
-        sut.interrupt_update()
-    sut.update_admin_vm(admins=admins)
-
-    calls = [call(mock_text_view.buffer.set_text, "Update details")]
-    idle_add.assert_has_calls(calls)
-    if not interrupted:
-        mock_subprocess.assert_called()
-    mock_callback.assert_not_called()
 
 
 @patch("gi.repository.GLib.idle_add")
@@ -190,6 +135,7 @@ def test_update_templates(
     mock_cancel_button,
     mock_label,
     mock_text_view,
+    mock_settings,
 ):
     mock_log = Mock()
     mock_callback = Mock()
@@ -202,7 +148,7 @@ def test_update_templates(
         mock_callback,
     )
 
-    sut.do_update_templates = Mock()
+    sut.do_update_selected = Mock()
     total_progress = []
     sut.set_total_progress = lambda prog: total_progress.append(prog)
 
@@ -214,7 +160,7 @@ def test_update_templates(
 
     if interrupted:
         sut.interrupt_update()
-    sut.update_templates(updatable_vms_list, mock_settings)
+    sut.update_selected(updatable_vms_list, mock_settings)
 
     sut.update_details.set_active_row(updatable_vms_list[2])
 
@@ -225,12 +171,12 @@ def test_update_templates(
     ]
     idle_add.assert_has_calls(calls, any_order=True)
     if not interrupted:
-        sut.do_update_templates.assert_called()
+        sut.do_update_selected.assert_called()
     mock_callback.assert_not_called()
 
 
 @patch("subprocess.Popen")
-def test_do_update_templates(
+def test_do_update_selected(
     mock_subprocess,
     real_builder,
     test_qapp,
@@ -274,22 +220,23 @@ def test_do_update_templates(
 
     to_update = ListWrapper(UpdateRowWrapper, mock_list_store)
     for vm in test_qapp.domains:
-        if vm.klass in ("TemplateVM", "StandaloneVM"):
+        if vm.klass in ("AdminVM", "TemplateVM", "StandaloneVM"):
             to_update.append_vm(vm)
 
     rows = {row.name: row for row in to_update}
 
-    sut.do_update_templates(rows, mock_settings)
+    sut.do_update_selected(rows, mock_settings)
 
     calls = [
         call(
             [
+                "sudo",
                 "qubes-vm-update",
                 "--show-output",
                 "--just-print-progress",
                 "--force-update",
                 "--targets",
-                "fedora-35,fedora-36,test-standalone",
+                "dom0,fedora-35,fedora-36,test-standalone",
             ],
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE,
