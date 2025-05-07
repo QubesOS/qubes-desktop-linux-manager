@@ -997,7 +997,9 @@ class DomainTray(Gtk.Application):
 
     def handle_domain_shutdown(self, vm):
         try:
-            if getattr(vm, "klass", None) == "TemplateVM":
+            if getattr(vm, "klass", None) == "TemplateVM" or getattr(
+                vm, "template_for_dispvms", False
+            ):
                 for menu_item in self.menu_items.values():
                     try:
                         if not menu_item.vm.is_running():
@@ -1006,7 +1008,9 @@ class DomainTray(Gtk.Application):
                             continue
                     except exc.QubesPropertyAccessError:
                         continue
-                    if getattr(menu_item.vm, "template", None) == vm and any(
+                    template1 = getattr(menu_item.vm, "template", None)
+                    template2 = getattr(template1, "template", None)
+                    if vm in (template1, template2) and any(
                         vol.is_outdated()
                         for vol in menu_item.vm.volumes.values()
                     ):
