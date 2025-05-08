@@ -304,6 +304,13 @@ class VMListModeler(TraitSelector):
         if self.style_changes:
             self.entry_box.get_style_context().remove_class("combo-changed")
 
+    def clear_selection(self):
+        """
+        Clear currently selected item.
+        """
+        self.entry_box.set_text("")
+        self.combo.set_active_id(None)
+
     def reset(self):
         """Reset changes."""
         self.combo.set_active_id(self._initial_id)
