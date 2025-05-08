@@ -385,6 +385,7 @@ class PolicyEditor(Gtk.Application):
         )
         self.source_view.set_monospace(True)
         self.source_buffer.connect("changed", self._text_changed)
+        self.source_buffer.connect("modified-changed", self._text_changed)
         self.source_buffer.get_undo_manager().connect(
             "can-redo-changed", self._redo_changed
         )
