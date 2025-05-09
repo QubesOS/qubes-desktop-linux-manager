@@ -1,3 +1,16 @@
+qubes-desktop-linux-manager (4.3.12-1) unstable; urgency=medium
+
+  [ Ali Mirjamali ]
+  * Add Debug Console to Qui Domains systray widget
+
+  [ Ben Grande ]
+  * Handle internal feature in Qui Domains
+
+  [ Rusty Bird ]
+  * Fix outdated status of disposables
+
+ -- Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>  Fri, 09 May 2025 04:14:15 +0200
+
 qubes-desktop-linux-manager (4.3.11-1) unstable; urgency=medium
 
   [ Ali Mirjamali ]
