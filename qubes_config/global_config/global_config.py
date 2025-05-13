@@ -53,11 +53,12 @@ from .usb_devices import DevicesHandler
 from .basics_handler import BasicSettingsHandler, FeatureHandler
 from .policy_exceptions_handler import DispvmExceptionHandler
 from .thisdevice_handler import ThisDeviceHandler
+from .device_attachments import DevAttachmentHandler
 
 import gi
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, GLib, GObject, Gio, Gdk
+from gi.repository import Gtk, GLib, GObject, Gio
 
 logger = logging.getLogger("qubes-global-config")
 
@@ -83,6 +84,9 @@ LOCATIONS = [
     "clipboard_policy",
     "filecopy_policy",
     "open_in_vm",
+    "attachment_policy",
+    "auto_attachment",
+    "required_devices",
 ]
 
 
@@ -314,10 +318,6 @@ class GlobalConfig(Gtk.Application):
         else:
             height = self.main_window.get_allocated_height()
         self.main_window.resize(width, height)
-        self.main_window.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
-        self.main_window.set_gravity(Gdk.Gravity.CENTER)
-        self.main_window.move(0, 0)
-        self.main_window.set_position(Gtk.WindowPosition.CENTER)
 
         # open at specified location
         if self.open_at:
@@ -442,6 +442,11 @@ class GlobalConfig(Gtk.Application):
         )
         self.progress_bar_dialog.update_progress(page_progress)
 
+        self.handlers["attachments"] = DevAttachmentHandler(
+            self.qapp, self.builder
+        )
+        self.progress_bar_dialog.update_progress(page_progress)
+
         self.handlers["splitgpg"] = VMSubsetPolicyHandler(
             qapp=self.qapp,
             gtk_builder=self.builder,
@@ -552,6 +557,7 @@ class GlobalConfig(Gtk.Application):
         icon_dict = {
             "settings_tab_icon": "settings-",
             "usb_tab_icon": "usb-",
+            "devices_tab_icon": "devices-",
             "updates_tab_icon": "qui-updates-",
             "splitgpg_tab_icon": "key-",
             "clipboard_tab_icon": "qui-clipboard-",
