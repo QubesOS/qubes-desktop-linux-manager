@@ -11,10 +11,11 @@ import qubesadmin
 import qubesadmin.events
 import qui.utils
 from qubesadmin import exc
+from qubes_config.widgets.utils import open_url_in_disposable
 
 import gi  # isort:skip
 gi.require_version('Gtk', '3.0')  # isort:skip
-from gi.repository import Gtk, Gio  # isort:skip
+from gi.repository import Gtk, Gio, GLib  # isort:skip
 
 try:
     from gi.events import GLibEventLoopPolicy
@@ -83,14 +84,37 @@ class UpdatesTray(Gtk.Application):
 
         self.tray_menu = Gtk.Menu()
 
+        # For those who never restart their PC, update EOL notifs every 6 hours
+        GLib.timeout_add_seconds(3600 * 6, self.check_vms_needing_update)
+
     def run(self):  # pylint: disable=arguments-differ
         self.check_vms_needing_update()
         self.connect_events()
 
         self.update_indicator_state()
 
+    def obsolete_dom0(self, _event):
+        open_url_in_disposable(
+            "https://www.qubes-os.org/doc/supported-releases/",
+            self.qapp,
+        )
+
     def setup_menu(self):
         self.tray_menu.set_reserve_toggle_size(False)
+
+        if "dom0" in self.obsolete_vms:
+            self.tray_menu.append(
+                RunItem(
+                    _(
+                        '<span foreground="red"><b>'
+                        "Warning! "
+                        "This release of Qubes OS is no longer supported!"
+                        "</b></span>\n"
+                        "<b>See officially supported releases</b>"
+                    ),
+                    self.obsolete_dom0,
+                )
+            )
 
         if self.vms_needing_update:
             self.tray_menu.append(TextItem(_("<b>Qube updates available!</b>")))
@@ -99,7 +123,7 @@ class UpdatesTray(Gtk.Application):
                   "<b>Launch updater</b>").format(
                     len(self.vms_needing_update)), self.launch_updater))
 
-        if self.obsolete_vms:
+        if self.obsolete_vms and self.obsolete_vms != {"dom0"}:
             self.tray_menu.append(TextItem(
                 _("<b>Some qubes are no longer supported!</b>")))
             obsolete_text = _("The following qubes are based on distributions "
@@ -145,6 +169,7 @@ class UpdatesTray(Gtk.Application):
                 supported = True
             if not supported:
                 self.obsolete_vms.add(vm.name)
+        return True
 
     def connect_events(self):
         self.dispatcher.add_handler('domain-feature-set:updates-available',
@@ -212,6 +237,8 @@ class UpdatesTray(Gtk.Application):
         self.update_indicator_state()
 
     def update_indicator_state(self):
+        if "dom0" in self.obsolete_vms:
+            self.widget_icon.set_from_icon_name("qui-red-warn")
         if self.vms_needing_update or self.obsolete_vms:
             self.widget_icon.set_visible(True)
         else:

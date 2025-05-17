@@ -96,5 +96,5 @@ def check_support(vm):
         eol_string = EOL_DATES.get(template_name, None)
         if not eol_string:
             return True
-    eol = datetime.strptime(eol_string, '%Y-%m-%d')
+    eol = datetime.strptime(eol_string + " UTC", "%Y-%m-%d %Z")
     return eol > datetime.now()

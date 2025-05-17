@@ -280,6 +280,7 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 /usr/share/icons/hicolor/scalable/apps/qubes-question.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-this-device.svg
 /usr/share/icons/hicolor/scalable/apps/qui-domains-scalable.svg
+/usr/share/icons/hicolor/scalable/apps/qui-red-warn.svg
 /usr/share/icons/hicolor/scalable/apps/settings-dark.svg
 /usr/share/icons/hicolor/scalable/apps/settings-light.svg
 /usr/share/icons/hicolor/scalable/apps/smartphone-dark.svg
