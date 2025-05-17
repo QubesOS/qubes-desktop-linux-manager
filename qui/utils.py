@@ -127,5 +127,5 @@ def check_support(vm) -> bool:
                 return True
     except exc.QubesException:
         return True
-    eol = datetime.strptime(eol_string, "%Y-%m-%d")
+    eol = datetime.strptime(eol_string + " UTC", "%Y-%m-%d %Z")
     return eol > datetime.now()
