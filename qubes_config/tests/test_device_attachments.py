@@ -30,6 +30,7 @@ from ..global_config.device_attachments import AutoDeviceDialog, DeviceManager
 from ..global_config.device_attachments import (
     AttachmentHandler,
     RequiredDeviceDialog,
+    DevAttachmentHandler,
 )
 
 import gi
@@ -55,6 +56,7 @@ def auto_attach_handler(real_builder, test_qapp_devices):
         builder=real_builder,
         device_policy_manager=dev_policy_manager,
         classes=AUTO_CLASSES,
+        assignment_filter=DevAttachmentHandler._filter_auto,
         edit_dialog_class=AutoDeviceDialog,
         prefix="devices_auto",
     )
@@ -71,6 +73,7 @@ def required_handler(real_builder, test_qapp_devices):
         builder=real_builder,
         device_policy_manager=dev_policy_manager,
         classes=PCI_CLASSES,
+        assignment_filter=DevAttachmentHandler._filter_required,
         edit_dialog_class=RequiredDeviceDialog,
         prefix="devices_required",
     )
@@ -105,6 +108,7 @@ def test_auto_attach_edit_dialog(auto_attach_handler):
         in auto_attach_handler.edit_dialog.devident_label.get_text()
     )
     assert "dom0:mic" in auto_attach_handler.edit_dialog.port_check.get_label()
+    assert auto_attach_handler.edit_dialog.port_check.get_active()
 
     auto_attach_handler.edit_dialog.dev_combo.set_active_id("1:2:u011010")
     assert (
@@ -119,6 +123,8 @@ def test_auto_attach_edit_dialog(auto_attach_handler):
     auto_attach_handler.edit_dialog.qube_handler.add_selected_vm(
         qapp.domains["test-vm"]
     )
+    assert auto_attach_handler.edit_dialog.port_check.get_active()
+    auto_attach_handler.edit_dialog.port_check.set_active(False)
 
     auto_attach_handler.edit_dialog.ok_button.clicked()
 
@@ -153,7 +159,6 @@ def test_auto_attach_dialog_port_two_vms(auto_attach_handler):
     auto_attach_handler.add_button.clicked()
     auto_attach_handler.edit_dialog.dev_combo.set_active_id("1:2:u011010")
     auto_attach_handler.edit_dialog.devident_check.set_active(False)
-    auto_attach_handler.edit_dialog.port_check.set_active(True)
     auto_attach_handler.edit_dialog.ask_radio.set_active(True)
     auto_attach_handler.edit_dialog.qube_handler.add_selected_vm(
         qapp.domains["test-vm"]
@@ -373,6 +378,7 @@ def test_edit_rule_unknown_opt(real_builder, test_qapp_devices):
         builder=real_builder,
         device_policy_manager=dev_policy_manager,
         classes=AUTO_CLASSES,
+        assignment_filter=DevAttachmentHandler._filter_auto,
         edit_dialog_class=AutoDeviceDialog,
         prefix="devices_auto",
     )
@@ -416,6 +422,40 @@ def test_edit_rule_unknown_opt(real_builder, test_qapp_devices):
 
     for call in expected_calls:
         assert call in test_qapp_devices.actual_calls
+
+
+def test_auto_not_list_required(real_builder, test_qapp_devices):
+    # do not show a rule for block devices that are Required in the auto-attach list
+    test_qapp_devices._devices.append(
+        MockDevice(
+            test_qapp_devices,
+            dev_class="block",
+            product="RequiredB",
+            vendor="ACME",
+            backend_vm="sys-usb",
+            assigned=[("test-vm", "required", None)],
+            device_id="1d6b:0104:DEADBEEF:b123456",
+            port="sda",
+        )
+    )
+    test_qapp_devices.update_vm_calls()
+
+    dev_policy_manager = DeviceManager(test_qapp_devices)
+    dev_policy_manager.load_data()
+
+    handler = AttachmentHandler(
+        qapp=test_qapp_devices,
+        builder=real_builder,
+        device_policy_manager=dev_policy_manager,
+        classes=AUTO_CLASSES,
+        assignment_filter=DevAttachmentHandler._filter_auto,
+        edit_dialog_class=AutoDeviceDialog,
+        prefix="devices_auto",
+    )
+    assert isinstance(handler.edit_dialog, AutoDeviceDialog)
+    for row in handler.rule_list.get_children():
+        if "RequiredB" in row.dev_label.get_text():
+            assert False, "Required incorrectly listed in AutoAttach"
 
 
 def test_remove_rule(auto_attach_handler):
@@ -1291,6 +1331,7 @@ def test_req_grouping(real_builder, test_qapp_devices):
         builder=real_builder,
         device_policy_manager=dev_policy_manager,
         classes=PCI_CLASSES,
+        assignment_filter=DevAttachmentHandler._filter_required,
         edit_dialog_class=RequiredDeviceDialog,
         prefix="devices_required",
     )
@@ -1303,24 +1344,37 @@ def test_req_grouping(real_builder, test_qapp_devices):
     assert len(rows) == 3
 
 
-# def test_auto_attach_double_star(real_builder, test_qapp_devices):
-#     # attachment with both port and device as *
-#     call = ('test-blue', f"admin.vm.device.usb.Assigned", None, None)
-#     assignment_string = (f"sys-usb+*:* device_id='*' "
-#               f"port_id='*' devclass='usb' "
-#               f"backend_domain='sys-usb' mode='ask-to-attach' "
-#               f"frontend_domain='test-blue'\n").encode()
-#     current_response = test_qapp_devices.expected_calls[call]
-#     test_qapp_devices.expected_calls[call] = current_response + \
-#                         assignment_string
-#
-#     dev_policy_manager = DeviceManager(test_qapp_devices)
-#     dev_policy_manager.load_data()
-#
-#     handler = AttachmentHandler(qapp=test_qapp_devices, builder=real_builder,
-#                                 device_policy_manager=dev_policy_manager,
-#                                 classes=AUTO_CLASSES,
-#                                 edit_dialog_class=AutoDeviceDialog,
-#                                 prefix="devices_auto")
-#
-#     assert list(handler.rule_list.get_children()) == 4
+def test_req_port_not_required(required_handler):
+    qapp = required_handler.qapp
+
+    required_handler.add_button.clicked()
+
+    assert required_handler.edit_dialog.dev_modeler.get_selected() is None
+    assert "Ouroboros" not in required_handler.edit_dialog.devident_label.get_text()
+
+    required_handler.edit_dialog.dev_combo.set_active_id("444:888:b123422")
+
+    required_handler.edit_dialog.qube_handler.add_selected_vm(qapp.domains["test-vm"])
+
+    assert required_handler.edit_dialog.port_check.get_active()
+    required_handler.edit_dialog.port_check.set_active(False)
+    required_handler.edit_dialog.ok_button.clicked()
+
+    expected_calls = [
+        (
+            "test-vm",
+            "admin.vm.device.block.Assign",
+            "sys-usb+*:444:888:b123422",
+            b"device_id='444:888:b123422' port_id='*' "
+            b"devclass='block' backend_domain='sys-usb' mode='required'"
+            b" frontend_domain='test-vm'",
+        ),
+    ]
+    for call in expected_calls:
+        assert call not in qapp.actual_calls
+        qapp.expected_calls[call] = b"0\x00"
+
+    required_handler.save()
+
+    for call in expected_calls:
+        assert call in qapp.actual_calls

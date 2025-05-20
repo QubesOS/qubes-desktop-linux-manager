@@ -76,7 +76,8 @@ def test_policy_block_remove(block_handler):
     expected_calls = [
         ("test-dev2", "admin.vm.device.denied.Remove", None, b"p02****"),
         ("test-dev2", "admin.vm.device.denied.Remove", None, b"u02****"),
-        ("test-dev2", "admin.vm.device.denied.Remove", None, b"p07****"),
+        ("test-dev2", "admin.vm.device.denied.Remove", None, b"p0703**"),
+        ("test-dev2", "admin.vm.device.denied.Remove", None, b"ue0****"),
         ("test-dev2", "admin.vm.device.denied.Remove", None, b"p123***"),
     ]
     for call in expected_calls:
@@ -129,6 +130,42 @@ def test_policy_block_add(block_handler):
         assert call in qapp.actual_calls
 
 
+def test_policy_block_all(block_handler):
+    qapp = block_handler.qapp
+    assert block_handler.add_button.is_sensitive()
+
+    block_handler.add_button.clicked()
+
+    block_handler.edit_dialog.qube_model.select_value("test-blue")
+
+    for row in block_handler.edit_dialog.listbox.get_children():
+        if row.category_wrapper.name == "All devices":
+            row.activate()
+            break
+    else:
+        assert False, "Category not found"
+
+    for row in block_handler.edit_dialog.listbox.get_children():
+        assert row.check_box.get_active()
+
+    assert block_handler.edit_dialog.ok_button.get_sensitive()
+    block_handler.edit_dialog.ok_button.clicked()
+    assert len(block_handler.rule_list.get_children()) == 3
+
+    # only top level categories should block
+    expected_calls = [
+        ("test-blue", "admin.vm.device.denied.Add", None, b"*******"),
+    ]
+    for call in expected_calls:
+        assert call not in qapp.actual_calls
+        qapp.expected_calls[call] = b"0\x00"
+
+    block_handler.save()
+
+    for call in expected_calls:
+        assert call in qapp.actual_calls
+
+
 def test_policy_block_edit_vm(block_handler):
     qapp = block_handler.qapp
     assert not block_handler.edit_button.is_sensitive()
@@ -167,10 +204,12 @@ def test_policy_block_edit_vm(block_handler):
     expected_calls = [
         ("test-dev2", "admin.vm.device.denied.Remove", None, b"p02****"),
         ("test-dev2", "admin.vm.device.denied.Remove", None, b"u02****"),
-        ("test-dev2", "admin.vm.device.denied.Remove", None, b"p07****"),
+        ("test-dev2", "admin.vm.device.denied.Remove", None, b"p0703**"),
+        ("test-dev2", "admin.vm.device.denied.Remove", None, b"ue0****"),
         ("test-dev2", "admin.vm.device.denied.Remove", None, b"p123***"),
         ("test-blue", "admin.vm.device.denied.Add", None, b"p02****"),
-        ("test-blue", "admin.vm.device.denied.Add", None, b"p07****"),
+        ("test-blue", "admin.vm.device.denied.Add", None, b"p0703**"),
+        ("test-blue", "admin.vm.device.denied.Add", None, b"ue0****"),
         ("test-blue", "admin.vm.device.denied.Add", None, b"u02****"),
         ("test-blue", "admin.vm.device.denied.Add", None, b"p123***"),
     ]
@@ -394,7 +433,8 @@ def test_multiple_save(block_handler):
         ("test-red", "admin.vm.device.denied.Add", None, b"u07****"),
         ("test-dev2", "admin.vm.device.denied.Remove", None, b"p123***"),
         ("test-dev2", "admin.vm.device.denied.Remove", None, b"p02****"),
-        ("test-dev2", "admin.vm.device.denied.Remove", None, b"p07****"),
+        ("test-dev2", "admin.vm.device.denied.Remove", None, b"p0703**"),
+        ("test-dev2", "admin.vm.device.denied.Remove", None, b"ue0****"),
         ("test-dev2", "admin.vm.device.denied.Remove", None, b"u02****"),
         ("test-blue", "admin.vm.device.denied.Add", None, b"m******"),
         ("test-dev", "admin.vm.device.denied.Remove", None, b"m******"),
