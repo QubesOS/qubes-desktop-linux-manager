@@ -103,7 +103,7 @@ def test_qapp_devices():
         name="test-dev2",
         qapp=test_qapp_devices,
         label="green",
-        devices_denied="p02****u02****p07****p123***",
+        devices_denied="u02****p0703**p02****ue0****p123***",
     )
 
     test_qapp_devices.update_vm_calls()

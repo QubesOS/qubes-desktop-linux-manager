@@ -1303,24 +1303,37 @@ def test_req_grouping(real_builder, test_qapp_devices):
     assert len(rows) == 3
 
 
-# def test_auto_attach_double_star(real_builder, test_qapp_devices):
-#     # attachment with both port and device as *
-#     call = ('test-blue', f"admin.vm.device.usb.Assigned", None, None)
-#     assignment_string = (f"sys-usb+*:* device_id='*' "
-#               f"port_id='*' devclass='usb' "
-#               f"backend_domain='sys-usb' mode='ask-to-attach' "
-#               f"frontend_domain='test-blue'\n").encode()
-#     current_response = test_qapp_devices.expected_calls[call]
-#     test_qapp_devices.expected_calls[call] = current_response + \
-#                         assignment_string
-#
-#     dev_policy_manager = DeviceManager(test_qapp_devices)
-#     dev_policy_manager.load_data()
-#
-#     handler = AttachmentHandler(qapp=test_qapp_devices, builder=real_builder,
-#                                 device_policy_manager=dev_policy_manager,
-#                                 classes=AUTO_CLASSES,
-#                                 edit_dialog_class=AutoDeviceDialog,
-#                                 prefix="devices_auto")
-#
-#     assert list(handler.rule_list.get_children()) == 4
+def test_req_port_not_required(required_handler):
+    qapp = required_handler.qapp
+
+    required_handler.add_button.clicked()
+
+    assert required_handler.edit_dialog.dev_modeler.get_selected() is None
+    assert "Ouroboros" not in required_handler.edit_dialog.devident_label.get_text()
+
+    required_handler.edit_dialog.dev_combo.set_active_id("444:888:b123422")
+
+    required_handler.edit_dialog.qube_handler.add_selected_vm(qapp.domains["test-vm"])
+
+    assert required_handler.edit_dialog.port_check.get_active()
+    required_handler.edit_dialog.port_check.set_active(False)
+    required_handler.edit_dialog.ok_button.clicked()
+
+    expected_calls = [
+        (
+            "test-vm",
+            "admin.vm.device.block.Assign",
+            "sys-usb+*:444:888:b123422",
+            b"device_id='444:888:b123422' port_id='*' "
+            b"devclass='block' backend_domain='sys-usb' mode='required'"
+            b" frontend_domain='test-vm'",
+        ),
+    ]
+    for call in expected_calls:
+        assert call not in qapp.actual_calls
+        qapp.expected_calls[call] = b"0\x00"
+
+    required_handler.save()
+
+    for call in expected_calls:
+        assert call in qapp.actual_calls

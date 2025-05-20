@@ -28,9 +28,9 @@ separator {
     border-style: solid;
     padding-left: 30px;
     padding-right: 30px;
-    padding-top: 30px;
+    padding-top: 10px;
     box-shadow: none;
-    padding-bottom: 50px;
+    padding-bottom: 10px;
 }
 
 #main_notebook {

@@ -2,7 +2,7 @@
 #
 # The Qubes OS Project, http://www.qubes-os.org
 #
-# Copyright (C) 2022 Marta Marczykowska-Górecka
+# Copyright (C) 2025 Marta Marczykowska-Górecka
 #                               <marmarta@invisiblethingslab.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -47,14 +47,10 @@ class DevicePolicyDialog(DevPolicyDialogHandler):
     def __init__(self, builder: Gtk.Builder, qapp, parent_window: Gtk.Window):
         super().__init__(builder, qapp, "device_policy", parent_window)
 
-        self.new_label: Gtk.Label = builder.get_object(
-            "device_policy_new_label"
-        )
+        self.new_label: Gtk.Label = builder.get_object("device_policy_new_label")
 
         self.block_box: Gtk.Box = builder.get_object("device_policy_block_box")
-        self.qube_combo: Gtk.ComboBox = builder.get_object(
-            "device_policy_vm_combo"
-        )
+        self.qube_combo: Gtk.ComboBox = builder.get_object("device_policy_vm_combo")
         self.listbox: Gtk.ListBox = builder.get_object("device_policy_listbox")
 
         # setup qube modeler
@@ -127,13 +123,13 @@ class DevicePolicyDialog(DevPolicyDialogHandler):
 
     def select_rows(self, categories: list["DeviceCategoryWrapper"]):
         """Select rows matching provided categories"""
-        last_parent = None
+        last_active_parent = None
         for row in self.listbox.get_children():
-            if last_parent == row.parent:
+            if last_active_parent == row.parent:
                 continue
             if row.category_wrapper in categories:
                 row.check_box.set_active(True)
-                last_parent = row
+                last_active_parent = row
 
     def _row_activated(self, _box, row, *_args):
         row.row_activated()
@@ -175,9 +171,7 @@ class DeviceCategoryWrapper:
         self.children: List[DeviceCategoryWrapper] = []
         self.device_category = device_category
         self.description = description
-        self.interfaces = [
-            DeviceInterface(s) for s in self.device_category.value
-        ]
+        self.interfaces = [DeviceInterface(s) for s in self.device_category.value]
 
     def readable_description(self):
         """Nicely formatted category description, perfect to be placed in a
@@ -230,9 +224,7 @@ class DeviceCategoryRow(Gtk.ListBoxRow):
         self.check_box: Gtk.CheckButton = Gtk.CheckButton()
         self.main_box.add(self.check_box)
         self.description_label = Gtk.Label()
-        self.description_label.set_markup(
-            self.category_wrapper.readable_description()
-        )
+        self.description_label.set_markup(self.category_wrapper.readable_description())
         self.main_box.add(self.description_label)
         self.show_all()
 
@@ -270,9 +262,7 @@ class OtherCategoryRow(Gtk.ListBoxRow):
 
         self.text_box = Gtk.Entry()
         self.main_box.add(self.text_box)
-        self.text_box.set_text(
-            ", ".join([repr(i) for i in self.other_interfaces])
-        )
+        self.text_box.set_text(", ".join([repr(i) for i in self.other_interfaces]))
         self.set_tooltip_text(_("Block set in command line."))
         self.set_sensitive(False)
         self.show_all()
@@ -282,9 +272,7 @@ class DeviceCategoryModeler:
     """Helper class to manage our DeviceCategoryWrapper model"""
 
     def __init__(self):
-        self.root_device = DeviceCategoryWrapper(
-            "All devices", DeviceCategory.Other
-        )
+        self.root_device = DeviceCategoryWrapper("All devices", DeviceCategory.Other)
         self.root_device.children.append(
             DeviceCategoryWrapper(
                 _("Network devices"),
@@ -321,22 +309,15 @@ class DeviceCategoryModeler:
         self.root_device.children.append(
             DeviceCategoryWrapper(
                 _("Multimedia output devices"),
-                DeviceCategory.Multimedia_Output,
+                DeviceCategory.Multimedia,
                 _("Displays and audio output devices"),
             )
         )
 
-        audio_devices = DeviceCategoryWrapper(
-            _("Audio devices"), DeviceCategory.Audio
-        )
+        audio_devices = DeviceCategoryWrapper(_("Audio devices"), DeviceCategory.Audio)
         self.root_device.children.append(audio_devices)
         audio_devices.children.append(
-            DeviceCategoryWrapper(("Microphones"), DeviceCategory.Microphone)
-        )
-        audio_devices.children.append(
-            DeviceCategoryWrapper(
-                _("Audio output devices"), DeviceCategory.Audio_Output
-            )
+            DeviceCategoryWrapper(_("Microphones"), DeviceCategory.Microphone)
         )
 
         storage_devices = DeviceCategoryWrapper(
@@ -344,9 +325,7 @@ class DeviceCategoryModeler:
         )
         self.root_device.children.append(storage_devices)
         storage_devices.children.append(
-            DeviceCategoryWrapper(
-                _("Block devices"), DeviceCategory.Block_Storage
-            )
+            DeviceCategoryWrapper(_("Block devices"), DeviceCategory.Block_Storage)
         )
         storage_devices.children.append(
             DeviceCategoryWrapper(
@@ -445,8 +424,8 @@ class BlockPolicyWrapper:
         """Update matching categories."""
         self.categories.clear()
         self.other_interfaces.clear()
-        self.categories, self.other_interfaces = (
-            self.dev_cat_modeler.parse_interfaces(self.interfaces.copy())
+        self.categories, self.other_interfaces = self.dev_cat_modeler.parse_interfaces(
+            self.interfaces.copy()
         )
 
     def save(self):
@@ -566,7 +545,7 @@ class DeviceBlockHandler(DevicePolicyHandler):
     def load_current_state(self):
         """Load state from system"""
         rules = []
-        for vm, interfaces in self.device_policy_manager.get_blocks():
+        for vm, interfaces in self.device_policy_manager.get_denied():
             rules.append(
                 BlockPolicyWrapper(vm, interfaces, self.device_category_modeler)
             )

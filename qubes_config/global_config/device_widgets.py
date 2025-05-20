@@ -2,7 +2,7 @@
 #
 # The Qubes OS Project, http://www.qubes-os.org
 #
-# Copyright (C) 2022 Marta Marczykowska-Górecka
+# Copyright (C) 2025 Marta Marczykowska-Górecka
 #                               <marmarta@invisiblethingslab.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -137,9 +137,7 @@ class DevPolicyDialogHandler:
 
         # ok and cancel buttons
         self.ok_button: Gtk.Button = builder.get_object(f"{prefix}_ok_button")
-        self.cancel_button: Gtk.Button = builder.get_object(
-            f"{prefix}_cancel_button"
-        )
+        self.cancel_button: Gtk.Button = builder.get_object(f"{prefix}_cancel_button")
 
         self.current_row: Gtk.ListBoxRow | None = None
         self.remove_on_cancel = False
@@ -198,6 +196,25 @@ class DevPolicyDialogHandler:
         False otherwise."""
         return True
 
+    def fill_combo_with_devices(self,
+                                dev_classes: dict,
+                                combo: Gtk.ComboBox,
+                                device_manager,
+                                dev_row_class) -> HeaderComboModeler:
+        """Fill provided combobox with current devices"""
+        dev_list = {}
+        for class_id, class_name in dev_classes.items():
+            devices = list(device_manager.get_available_devices([class_id]))
+            if devices:
+                dev_list[class_name] = (class_name, None)
+                for dev in devices:
+                    dw = dev_row_class.new_from_device_info(dev)
+                    dev_list[dw.device_id] = (dw.long_name, dw)
+
+        combo.connect("changed", self.validate)
+
+        return HeaderComboModeler(combo, dev_list)
+
 
 class DevicePolicyHandler:
     """Generic handler for DeviceAssignments"""
@@ -218,15 +235,9 @@ class DevicePolicyHandler:
 
         self.rule_list: Gtk.ListBox = builder.get_object(f"{prefix}_list")
 
-        self.add_button: Gtk.Button = builder.get_object(
-            f"{prefix}_add_rule_button"
-        )
-        self.edit_button: Gtk.Button = builder.get_object(
-            f"{prefix}_edit_rule_button"
-        )
-        self.remove_button: Gtk.Button = builder.get_object(
-            f"{prefix}_del_rule_button"
-        )
+        self.add_button: Gtk.Button = builder.get_object(f"{prefix}_add_rule_button")
+        self.edit_button: Gtk.Button = builder.get_object(f"{prefix}_edit_rule_button")
+        self.remove_button: Gtk.Button = builder.get_object(f"{prefix}_del_rule_button")
 
         self.add_button.connect("clicked", self.add_new_rule)
         self.edit_button.connect("clicked", self.edit_rule)

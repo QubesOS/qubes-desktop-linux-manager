@@ -168,7 +168,7 @@
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
-                    <property name="label" translatable="yes">Block devices</property>
+                    <property name="label" translatable="yes">Deny device attachment</property>
                     <style>
                       <class name="section_title"/>
                     </style>
@@ -200,16 +200,31 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkListBox" id="device_policy_listbox">
+                  <object class="GtkScrolledWindow">
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="selection-mode">none</property>
-                    <style>
-                      <class name="permission_list"/>
-                    </style>
+                    <property name="can-focus">True</property>
+                    <property name="vexpand">True</property>
+                    <property name="shadow-type">in</property>
+                    <property name="min-content-height">300</property>
+                    <child>
+                      <object class="GtkViewport">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <child>
+                          <object class="GtkListBox" id="device_policy_listbox">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="selection-mode">none</property>
+                            <style>
+                              <class name="permission_list"/>
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
+                    <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">2</property>
                   </packing>
@@ -226,7 +241,7 @@
             </style>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
@@ -604,7 +619,8 @@
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">If you select matching only the port and not device identity, the rule will be applied to any device of this class connected to that port.</property>
+                <property name="label" translatable="yes">&lt;b&gt;Port&lt;/b&gt; refers to the port this device is currently plugged in. If you select matching the port, the device &lt;b&gt;must&lt;/b&gt; be plugged into this port to be automatically attached. If you select port and not device identity, all devices plugged into this port will be automatically attached.</property>
+                <property name="use-markup">True</property>
                 <property name="wrap">True</property>
                 <property name="xalign">0</property>
                 <style>
@@ -9549,6 +9565,23 @@ Other description:</property>
               </packing>
             </child>
             <child>
+              <object class="GtkCheckButton" id="required_device_port_check">
+                <property name="label" translatable="yes">Require port (device will match only when plugged into the currently used port)</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">False</property>
+                <property name="draw-indicator">True</property>
+                <style>
+                  <class name="main_text"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">10</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
@@ -9561,7 +9594,7 @@ Other description:</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">10</property>
+                <property name="position">11</property>
               </packing>
             </child>
             <child>
@@ -9677,7 +9710,7 @@ Other description:</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">11</property>
+                <property name="position">13</property>
               </packing>
             </child>
             <child>
@@ -9695,7 +9728,7 @@ Other description:</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">12</property>
+                <property name="position">14</property>
               </packing>
             </child>
             <style>
