@@ -2,7 +2,7 @@
 #
 # The Qubes OS Project, http://www.qubes-os.org
 #
-# Copyright (C) 2022 Marta Marczykowska-Górecka
+# Copyright (C) 2025 Marta Marczykowska-Górecka
 #                               <marmarta@invisiblethingslab.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -88,9 +88,7 @@ class AutoDeviceDialog(DevPolicyDialogHandler):
         super().__init__(builder, qapp, "edit_device", parent_window)
         self.device_manager = device_manager
 
-        self.dev_combo: Gtk.ComboBox = builder.get_object(
-            "edit_device_device_combo"
-        )
+        self.dev_combo: Gtk.ComboBox = builder.get_object("edit_device_device_combo")
 
         self.backend_check: Gtk.CheckButton = builder.get_object(
             "edit_device_backend_check"
@@ -101,29 +99,19 @@ class AutoDeviceDialog(DevPolicyDialogHandler):
         self.devident_check: Gtk.CheckButton = builder.get_object(
             "edit_device_devident_check"
         )
-        self.port_check: Gtk.CheckButton = builder.get_object(
-            "edit_device_port_check"
-        )
+        self.port_check: Gtk.CheckButton = builder.get_object("edit_device_port_check")
 
         self.devident_label: Gtk.Label = builder.get_object(
             "edit_device_devident_label"
         )
 
-        self.backend_box: Gtk.Box = builder.get_object(
-            "edit_device_backend_box"
-        )
+        self.backend_box: Gtk.Box = builder.get_object("edit_device_backend_box")
         self.backend_child: Optional[Gtk.Widget] = None  # formatted qube name
 
-        self.auto_radio: Gtk.RadioButton = builder.get_object(
-            "edit_device_auto_radio"
-        )
-        self.ask_radio: Gtk.RadioButton = builder.get_object(
-            "edit_device_ask_radio"
-        )
+        self.auto_radio: Gtk.RadioButton = builder.get_object("edit_device_auto_radio")
+        self.ask_radio: Gtk.RadioButton = builder.get_object("edit_device_ask_radio")
 
-        self.unknown_box: Gtk.Box = builder.get_object(
-            "edit_device_unknown_box"
-        )
+        self.unknown_box: Gtk.Box = builder.get_object("edit_device_unknown_box")
         self.err_label: Gtk.Label = builder.get_object("edit_device_err_label")
         self.read_only_check: Gtk.CheckButton = builder.get_object(
             "edit_device_read_only"
@@ -140,9 +128,7 @@ class AutoDeviceDialog(DevPolicyDialogHandler):
         self.backend_vm: Optional[qubesadmin.vm.QubesVM] = None
         dev_list = {}
         for class_id, class_name in self.DEV_CLASSES.items():
-            devices = list(
-                self.device_manager.get_available_devices([class_id])
-            )
+            devices = list(self.device_manager.get_available_devices([class_id]))
             if devices:
                 dev_list[class_name] = (class_name, None)
                 for dev in devices:
@@ -207,8 +193,6 @@ class AutoDeviceDialog(DevPolicyDialogHandler):
             ident_checked=True,
             port_checked=False,
         )
-        self.devident_check.set_sensitive(True)
-        self.port_check.set_sensitive(True)
 
     def fill_checkboxes_from_assignment_wrapper(
         self, assignment_wrapper: "AssignmentWrapper"
@@ -226,8 +210,6 @@ class AutoDeviceDialog(DevPolicyDialogHandler):
             port_checked=assignment_wrapper.port_required,
             read_only=assignment_wrapper.read_only,
         )
-        self.devident_check.set_sensitive(True)
-        self.port_check.set_sensitive(True)
 
     def fill_checkboxes_from_none(self):
         """Fill checkboxes for an empty device"""
@@ -245,7 +227,7 @@ class AutoDeviceDialog(DevPolicyDialogHandler):
 
         # port
         self.port_check.set_label("Port: ")
-        self.port_check.set_active(False)
+        self.port_check.set_active(True)
         self.port_check.set_sensitive(False)
 
         self.read_only_check.set_sensitive(False)
@@ -253,18 +235,15 @@ class AutoDeviceDialog(DevPolicyDialogHandler):
 
     def check_validity(self):
         """Check if dialog can be saved/ok-ed"""
+        self.err_label.set_visible(False)
         if not self.qube_handler.selected_vms:
             return False
-        if (
-            not self.port_check.get_active()
-            and not self.devident_check.get_active()
-        ):
+        if not self.port_check.get_active() and not self.devident_check.get_active():
             return False
         for vm in self.qube_handler.selected_vms:
             if vm == self.backend_vm:
                 self.err_label.set_visible(True)
                 return False
-        self.err_label.set_visible(False)
         return True
 
     def _combo_changed(self, *_args):
@@ -405,9 +384,7 @@ class RequiredDeviceDialog(DevPolicyDialogHandler):
         self.dev_combo: Gtk.ComboBox = builder.get_object(
             "required_device_device_combo"
         )
-        self.devident_label: Gtk.Label = builder.get_object(
-            "required_device_devident"
-        )
+        self.devident_label: Gtk.Label = builder.get_object("required_device_devident")
 
         self.no_strict_check: Gtk.CheckButton = builder.get_object(
             "required_device_nostrict_check"
@@ -419,12 +396,8 @@ class RequiredDeviceDialog(DevPolicyDialogHandler):
             "required_device_readonly_check"
         )
 
-        self.unknown_box: Gtk.Box = builder.get_object(
-            "required_device_unknown_box"
-        )
-        self.err_label: Gtk.Label = builder.get_object(
-            "required_device_err_label"
-        )
+        self.unknown_box: Gtk.Box = builder.get_object("required_device_unknown_box")
+        self.err_label: Gtk.Label = builder.get_object("required_device_err_label")
 
         self.qube_handler = VMFlowboxHandler(
             builder,
@@ -436,9 +409,7 @@ class RequiredDeviceDialog(DevPolicyDialogHandler):
 
         dev_list = {}
         for class_id, class_name in self.DEV_CLASSES.items():
-            devices = list(
-                self.device_manager.get_available_devices([class_id])
-            )
+            devices = list(self.device_manager.get_available_devices([class_id]))
             if devices:
                 dev_list[class_name] = (class_name, None)
                 for dev in devices:
@@ -502,14 +473,9 @@ class RequiredDeviceDialog(DevPolicyDialogHandler):
             return
         assignment_wrapper = self.current_row.assignment_wrapper
 
-        if (
-            assignment_wrapper.no_strict_reset
-            != self.no_strict_check.get_active()
-        ):
+        if assignment_wrapper.no_strict_reset != self.no_strict_check.get_active():
             assignment_wrapper.changed = True
-            assignment_wrapper.no_strict_reset = (
-                self.no_strict_check.get_active()
-            )
+            assignment_wrapper.no_strict_reset = self.no_strict_check.get_active()
 
         if assignment_wrapper.permissive != self.permissive_check.get_active():
             assignment_wrapper.changed = True
@@ -579,9 +545,7 @@ class DeviceManager:
         self.qapp = qapp
 
         self.all_devices: List[DeviceInfo] = []
-        self.assignments: List[
-            Tuple[DeviceAssignment, qubesadmin.vm.QubesVM]
-        ] = []
+        self.assignments: List[Tuple[DeviceAssignment, qubesadmin.vm.QubesVM]] = []
 
     def load_data(self):
         """Load system state"""
@@ -595,9 +559,7 @@ class DeviceManager:
                 for ass in vm.devices[devclass].get_assigned_devices():
                     self.assignments.append((ass, vm))
 
-    def get_available_devices(
-        self, dev_classes: List[str]
-    ) -> Iterator[DeviceInfo]:
+    def get_available_devices(self, dev_classes: List[str]) -> Iterator[DeviceInfo]:
         """Get all available devices of listed classes"""
         for dev in self.all_devices:
             if dev.devclass in dev_classes:
@@ -625,9 +587,7 @@ class DeviceWrapper:
     being connected to VMs. Can be an existing device, a virtual device or a
     port."""
 
-    def __init__(
-        self, devclass: str, backend_domain: Optional[qubesadmin.vm.QubesVM]
-    ):
+    def __init__(self, devclass: str, backend_domain: Optional[qubesadmin.vm.QubesVM]):
         # a bare-bones device object, ready to be filled with data
         self.device: Optional[DeviceInfo] = None
         self.devclass: str = devclass
@@ -651,9 +611,7 @@ class DeviceWrapper:
         result = _("Device name: ") + self.device.description + "\n"
         result += (
             _("Type: ")
-            + ", ".join(
-                interface.category.name for interface in self.device.interfaces
-            )
+            + ", ".join(interface.category.name for interface in self.device.interfaces)
             + "\n"
         )
         result += _("Vendor: ") + self.device.vendor + "\n"
@@ -727,9 +685,7 @@ class AssignmentWrapper:
         aw.no_strict_reset = (
             aw.assignments[0].options.get("no-strict-reset", "") == "True"
         )
-        aw.permissive = (
-            aw.assignments[0].options.get("permissive", "") == "True"
-        )
+        aw.permissive = aw.assignments[0].options.get("permissive", "") == "True"
         aw.read_only = aw.assignments[0].options.get("read-only", "") == "True"
 
         for opt in aw.assignments[0].options:
@@ -784,9 +740,7 @@ class AssignmentWrapper:
         Remove the current assignment from the system.
         ."""
         for assignment in self.assignments:
-            assignment.frontend_domain.devices[assignment.devclass].unassign(
-                assignment
-            )
+            assignment.frontend_domain.devices[assignment.devclass].unassign(assignment)
 
     def save(self):
         """
@@ -836,9 +790,7 @@ class AssignmentWrapper:
             options["read-only"] = "True"
 
         for vm in self.frontends:
-            new_assignment = DeviceAssignment(
-                device=device, mode=mode, options=options
-            )
+            new_assignment = DeviceAssignment(device=device, mode=mode, options=options)
             vm.devices[device.devclass].assign(new_assignment)
             self.assignments.append(new_assignment)
 
@@ -848,9 +800,7 @@ class AssignmentWrapper:
 class AttachmentDescriptionRow(DevPolicyRow):
     """A ListBoxRow describing an existing assignment rule"""
 
-    def __init__(
-        self, assignment_wrapper: AssignmentWrapper, qapp: qubesadmin.Qubes
-    ):
+    def __init__(self, assignment_wrapper: AssignmentWrapper, qapp: qubesadmin.Qubes):
         super().__init__()
         self.assignment_wrapper = assignment_wrapper
         self.valid = assignment_wrapper.valid
@@ -900,9 +850,7 @@ class AttachmentDescriptionRow(DevPolicyRow):
     def update(self):
         """Update row display."""
         self.dev_label.set_markup(self.assignment_wrapper.device_description())
-        self.action_label.set_markup(
-            self.assignment_wrapper.action_description()
-        )
+        self.action_label.set_markup(self.assignment_wrapper.action_description())
 
         for child in self.vm_box.get_children():
             self.vm_box.remove(child)
@@ -913,9 +861,7 @@ class AttachmentDescriptionRow(DevPolicyRow):
             self.vm_box.add(TokenName(vm.name, self.qapp))
             if vm.klass == "AdminVM":
                 self.valid = False
-                self.set_tooltip_text(
-                    _("This rule cannot be edited with GUI tools.")
-                )
+                self.set_tooltip_text(_("This rule cannot be edited with GUI tools."))
 
         self.show_all()
 
@@ -988,17 +934,12 @@ class AttachmentHandler(DevicePolicyHandler):
         """Load system state"""
         assignments: dict[tuple[str, str, str], list[DeviceAssignment]] = {}
         # we identify an attachment as device identity + port identity
-        for assignment, vm in self.device_policy_manager.get_assignments(
-            self.classes
-        ):
+        for assignment, vm in self.device_policy_manager.get_assignments(self.classes):
             if assignment.frontend_domain is None:
                 assignment.frontend_domain = vm  # WORKAROUND for qubesd not
                 # storing frontend domain correctly
             assignment_id = self.assignment_id(assignment)
-            if assignment_id in assignments:
-                assignments[assignment_id].append(assignment)
-            else:
-                assignments[assignment_id] = [assignment]
+            assignments.setdefault(assignment_id, []).append(assignment)
 
         for assignment_id, assignment_list in assignments.items():
             aw = AssignmentWrapper.new_from_existing(assignment_list)

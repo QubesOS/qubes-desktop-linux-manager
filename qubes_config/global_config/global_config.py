@@ -58,7 +58,7 @@ from .device_attachments import DevAttachmentHandler
 import gi
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, GLib, GObject, Gio
+from gi.repository import Gtk, GLib, GObject, Gio, Gdk
 
 logger = logging.getLogger("qubes-global-config")
 
@@ -318,6 +318,10 @@ class GlobalConfig(Gtk.Application):
         else:
             height = self.main_window.get_allocated_height()
         self.main_window.resize(width, height)
+        self.main_window.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
+        self.main_window.set_gravity(Gdk.Gravity.CENTER)
+        self.main_window.move(0, 0)
+        self.main_window.set_position(Gtk.WindowPosition.CENTER)
 
         # open at specified location
         if self.open_at:
