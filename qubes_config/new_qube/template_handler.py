@@ -117,9 +117,7 @@ class TemplateSelectorCombo(TemplateSelector):
         """
         super().__init__(gtk_builder, qapp)
 
-        self.label: Gtk.Label = gtk_builder.get_object(
-            f"label_template_{name_suffix}"
-        )
+        self.label: Gtk.Label = gtk_builder.get_object(f"label_template_{name_suffix}")
         self.explain_label: Gtk.Label = gtk_builder.get_object(
             f"label_template_explanation_{name_suffix}"
         )
@@ -182,18 +180,14 @@ class TemplateSelectorNoneCombo(TemplateSelector):
         """
         super().__init__(gtk_builder, qapp)
 
-        self.label: Gtk.Label = gtk_builder.get_object(
-            f"label_template_{name_suffix}"
-        )
+        self.label: Gtk.Label = gtk_builder.get_object(f"label_template_{name_suffix}")
         self.explain_label: Gtk.Label = gtk_builder.get_object(
             f"label_template_explanation_{name_suffix}"
         )
         self.radio_none: Gtk.RadioButton = gtk_builder.get_object(
             f"radio_{name_suffix}_none"
         )
-        self.box_template: Gtk.Box = gtk_builder.get_object(
-            f"box_radio_{name_suffix}"
-        )
+        self.box_template: Gtk.Box = gtk_builder.get_object(f"box_radio_{name_suffix}")
         self.radio_template: Gtk.RadioButton = gtk_builder.get_object(
             f"radio_template_{name_suffix}"
         )
@@ -281,17 +275,14 @@ class TemplateHandler:
                 gtk_builder=gtk_builder,
                 qapp=self.qapp,
                 name_suffix="standalone",
-                filter_function=lambda x: x.klass
-                in ("TemplateVM", "StandaloneVM"),
+                filter_function=lambda x: x.klass in ("TemplateVM", "StandaloneVM"),
                 default_value=None,
             ),
             "qube_type_disposable": TemplateSelectorCombo(
                 gtk_builder=gtk_builder,
                 qapp=self.qapp,
                 name_suffix="dispvm",
-                filter_function=lambda x: getattr(
-                    x, "template_for_dispvms", False
-                ),
+                filter_function=lambda x: getattr(x, "template_for_dispvms", False),
                 default_value=self.qapp.default_dispvm,
             ),
         }
@@ -299,9 +290,7 @@ class TemplateHandler:
         self.selected_type: Optional[str] = None
         self.change_vm_type("qube_type_app")
 
-        self._application_data: Dict[
-            qubesadmin.vm.QubesVM, List[ApplicationData]
-        ] = {}
+        self._application_data: Dict[qubesadmin.vm.QubesVM, List[ApplicationData]] = {}
         self._default_applications: Dict[qubesadmin.vm.QubesVM, List[str]] = {}
 
     def change_vm_type(self, vm_type: str):
@@ -318,14 +307,10 @@ class TemplateHandler:
             return self.template_selectors[self.selected_type].get_selected_vm()
         return None
 
-    def is_given_template_available(
-        self, template: qubesadmin.vm.QubesVM
-    ) -> bool:
+    def is_given_template_available(self, template: qubesadmin.vm.QubesVM) -> bool:
         """Check if given qubesVM is among available templates."""
         if self.selected_type:
-            return self.template_selectors[self.selected_type].is_vm_available(
-                template
-            )
+            return self.template_selectors[self.selected_type].is_vm_available(template)
         return False
 
     def load_all_available_apps(self):
@@ -348,9 +333,7 @@ class TemplateHandler:
             try:
                 available_apps = [
                     ApplicationData.from_line(line, template=vm)
-                    for line in subprocess.check_output(command)
-                    .decode()
-                    .splitlines()
+                    for line in subprocess.check_output(command).decode().splitlines()
                 ]
                 self._application_data[vm] = available_apps
             except subprocess.CalledProcessError:

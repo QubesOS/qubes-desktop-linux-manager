@@ -67,9 +67,7 @@ class IntroPage:
         self.vm_list.connect("query-tooltip", self.on_query_tooltip)
         self.list_store: Optional[ListWrapper] = None
 
-        checkbox_column: Gtk.TreeViewColumn = self.builder.get_object(
-            "checkbox_column"
-        )
+        checkbox_column: Gtk.TreeViewColumn = self.builder.get_object("checkbox_column")
         checkbox_column.connect("clicked", self.on_header_toggled)
         header_button = checkbox_column.get_button()
 
@@ -86,9 +84,7 @@ class IntroPage:
 
         self.vm_list.connect("row-activated", self.on_checkbox_toggled)
 
-        self.info_how_it_works: Gtk.Label = self.builder.get_object(
-            "info_how_it_works"
-        )
+        self.info_how_it_works: Gtk.Label = self.builder.get_object("info_how_it_works")
         self.info_how_it_works.set_label(
             self.info_how_it_works.get_label().format(
                 MAYBE=f'<span foreground="{label_color_theme("orange")}">'
@@ -103,9 +99,7 @@ class IntroPage:
     def populate_vm_list(self, qapp, settings):
         """Adds to list any updatable vms with update info."""
         self.log.debug("Populate update list")
-        self.list_store = ListWrapper(
-            UpdateRowWrapper, self.vm_list.get_model()
-        )
+        self.list_store = ListWrapper(UpdateRowWrapper, self.vm_list.get_model())
 
         for vm in qapp.domains:
             if vm.klass == "AdminVM":
@@ -168,9 +162,9 @@ class IntroPage:
             if row.vm.name == "dom0":
                 continue
             row.updates_available = bool(row.vm.name in to_update)
-            row.selected = bool(
-                row.vm.name in to_update
-            ) and not row.vm.features.get("prohibit-start", False)
+            row.selected = bool(row.vm.name in to_update) and not row.vm.features.get(
+                "prohibit-start", False
+            )
 
     def get_vms_to_update(self) -> ListWrapper:
         """Returns list of vms selected to be updated"""
@@ -215,9 +209,7 @@ class IntroPage:
         If the user has selected any vms that do not match the defined states,
         the cycle will start from (1).
         """
-        on_head_checkbox_toggled(
-            self.list_store, self.head_checkbox, self.select_rows
-        )
+        on_head_checkbox_toggled(self.list_store, self.head_checkbox, self.select_rows)
 
     def select_rows(self):
         for row in self.list_store:
@@ -277,9 +269,7 @@ class IntroPage:
 
             return {
                 vm_name.strip()
-                for vm_name in output_lines[0]
-                .split(":", maxsplit=1)[1]
-                .split(",")
+                for vm_name in output_lines[0].split(":", maxsplit=1)[1].split(",")
             }
         except subprocess.CalledProcessError as err:
             if err.returncode != 100:
@@ -296,10 +286,7 @@ class IntroPage:
             )
         )
         if (
-            default_select
-            and cliargs.non_interactive
-            or cliargs.all
-            or cliargs.dom0
+            default_select and cliargs.non_interactive or cliargs.all or cliargs.dom0
         ) and (
             cliargs.force_update
             or bool(dom0.features.get("updates-available", False))
@@ -317,16 +304,12 @@ class IntroPage:
         """Show appropriate qube tooltip. Currently only for prohibit-start."""
         if not widget.get_tooltip_context(x, y, keyboard_tip):
             return False
-        _, x, y, model, path, iterator = widget.get_tooltip_context(
-            x, y, keyboard_tip
-        )
+        _, x, y, model, path, iterator = widget.get_tooltip_context(x, y, keyboard_tip)
         if path:
             status = model[iterator][4]
             if status == type(status).PROHIBITED:
                 tooltip.set_text(
-                    "Start prohibition rationale:\n{}".format(
-                        str(model[iterator][9])
-                    )
+                    "Start prohibition rationale:\n{}".format(str(model[iterator][9]))
                 )
                 widget.set_tooltip_cell(tooltip, path, None, None)
                 return True
@@ -420,9 +403,7 @@ class UpdateRowWrapper(RowWrapper):
     @updates_available.setter
     def updates_available(self, value):
         prohibited = bool(self.vm.features.get("prohibit-start", False))
-        updates_available = bool(
-            self.vm.features.get("updates-available", False)
-        )
+        updates_available = bool(self.vm.features.get("updates-available", False))
         supported = check_support(self.vm)
 
         if value and not updates_available:

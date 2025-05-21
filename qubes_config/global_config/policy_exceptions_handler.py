@@ -78,9 +78,7 @@ class PolicyExceptionsHandler:
         self.policy_manager = policy_manager
 
         self.initial_rules: List[Rule] = []
-        self.rule_list: Gtk.ListBox = gtk_builder.get_object(
-            f"{prefix}_exception_list"
-        )
+        self.rule_list: Gtk.ListBox = gtk_builder.get_object(f"{prefix}_exception_list")
 
         self.add_button: Gtk.Button = gtk_builder.get_object(
             f"{prefix}_add_rule_button"
@@ -89,15 +87,13 @@ class PolicyExceptionsHandler:
         self.error_handler = ErrorHandler(gtk_builder, prefix)
 
         if enable_raw:
-            self.raw_handler: Optional[RawPolicyTextHandler] = (
-                RawPolicyTextHandler(
-                    gtk_builder=gtk_builder,
-                    prefix=prefix,
-                    policy_manager=self.policy_manager,
-                    error_handler=self.error_handler,
-                    callback_on_open_raw=self.close_all_edits,
-                    callback_on_save_raw=self.populate_rule_lists,
-                )
+            self.raw_handler: Optional[RawPolicyTextHandler] = RawPolicyTextHandler(
+                gtk_builder=gtk_builder,
+                prefix=prefix,
+                policy_manager=self.policy_manager,
+                error_handler=self.error_handler,
+                callback_on_open_raw=self.close_all_edits,
+                callback_on_save_raw=self.populate_rule_lists,
             )
         else:
             self.raw_handler = None
@@ -169,9 +165,7 @@ class PolicyExceptionsHandler:
 
     @property
     def current_rules(self) -> List[Rule]:
-        rules = [
-            row.rule.raw_rule for row in self.current_rows if not row.is_new_row
-        ]
+        rules = [row.rule.raw_rule for row in self.current_rows if not row.is_new_row]
         return rules
 
     def close_all_edits(self, *_args):
@@ -194,9 +188,7 @@ class PolicyExceptionsHandler:
         for other_row in other_rows:
             if other_row == row:
                 continue
-            if other_row.rule.is_rule_conflicting(
-                new_source, new_target, new_action
-            ):
+            if other_row.rule.is_rule_conflicting(new_source, new_target, new_action):
                 return str(other_row)
         return None
 
@@ -262,9 +254,7 @@ class DispvmExceptionHandler(PageHandler):
         self.current_state_widget: Optional[Gtk.Box] = None
 
         self.initial_rules, self.current_token = (
-            self.policy_manager.get_rules_from_filename(
-                self.policy_file_name, ""
-            )
+            self.policy_manager.get_rules_from_filename(self.policy_file_name, "")
         )
 
         self.initialize()
@@ -317,10 +307,8 @@ class DispvmExceptionHandler(PageHandler):
             self.current_token,
         )
 
-        _rules, self.current_token = (
-            self.policy_manager.get_rules_from_filename(
-                self.policy_file_name, ""
-            )
+        _rules, self.current_token = self.policy_manager.get_rules_from_filename(
+            self.policy_file_name, ""
         )
 
         self.initial_rules = deepcopy(self.list_handler.current_rules)

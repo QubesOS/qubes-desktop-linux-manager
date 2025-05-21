@@ -196,11 +196,9 @@ class DevPolicyDialogHandler:
         False otherwise."""
         return True
 
-    def fill_combo_with_devices(self,
-                                dev_classes: dict,
-                                combo: Gtk.ComboBox,
-                                device_manager,
-                                dev_row_class) -> HeaderComboModeler:
+    def fill_combo_with_devices(
+        self, dev_classes: dict, combo: Gtk.ComboBox, device_manager, dev_row_class
+    ) -> HeaderComboModeler:
         """Fill provided combobox with current devices"""
         dev_list = {}
         for class_id, class_name in dev_classes.items():

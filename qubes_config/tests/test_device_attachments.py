@@ -95,29 +95,19 @@ def test_auto_attach_edit_dialog(auto_attach_handler):
 
     assert auto_attach_handler.edit_dialog.dev_modeler.get_selected() is None
     assert (
-        "Internal Mic"
-        not in auto_attach_handler.edit_dialog.devident_label.get_text()
+        "Internal Mic" not in auto_attach_handler.edit_dialog.devident_label.get_text()
     )
 
     auto_attach_handler.edit_dialog.dev_combo.set_active_id("dom0:mic::m000000")
-    assert (
-        auto_attach_handler.edit_dialog.dev_modeler.get_selected() is not None
-    )
-    assert (
-        "Internal Mic"
-        in auto_attach_handler.edit_dialog.devident_label.get_text()
-    )
+    assert auto_attach_handler.edit_dialog.dev_modeler.get_selected() is not None
+    assert "Internal Mic" in auto_attach_handler.edit_dialog.devident_label.get_text()
     assert "dom0:mic" in auto_attach_handler.edit_dialog.port_check.get_label()
     assert auto_attach_handler.edit_dialog.port_check.get_active()
 
     auto_attach_handler.edit_dialog.dev_combo.set_active_id("1:2:u011010")
-    assert (
-        auto_attach_handler.edit_dialog.dev_modeler.get_selected() is not None
-    )
+    assert auto_attach_handler.edit_dialog.dev_modeler.get_selected() is not None
     assert "Hammer" in auto_attach_handler.edit_dialog.devident_label.get_text()
-    assert (
-        "sys-usb:2-23" in auto_attach_handler.edit_dialog.port_check.get_label()
-    )
+    assert "sys-usb:2-23" in auto_attach_handler.edit_dialog.port_check.get_label()
 
     auto_attach_handler.edit_dialog.auto_radio.set_active(True)
     auto_attach_handler.edit_dialog.qube_handler.add_selected_vm(
@@ -721,21 +711,15 @@ def test_req_edit_dialog(required_handler):
     assert required_handler.edit_dialog.dev_modeler.get_selected() is None
     assert "Piano" not in required_handler.edit_dialog.devident_label.get_text()
 
-    required_handler.edit_dialog.dev_combo.set_active_id(
-        "0x8086:0x51f0::p028000"
-    )
+    required_handler.edit_dialog.dev_combo.set_active_id("0x8086:0x51f0::p028000")
     assert required_handler.edit_dialog.dev_modeler.get_selected() is not None
     assert "Network" in required_handler.edit_dialog.devident_label.get_text()
 
-    required_handler.edit_dialog.dev_combo.set_active_id(
-        "0x8086:0x51f0::p300000"
-    )
+    required_handler.edit_dialog.dev_combo.set_active_id("0x8086:0x51f0::p300000")
     assert required_handler.edit_dialog.dev_modeler.get_selected() is not None
     assert "Piano" in required_handler.edit_dialog.devident_label.get_text()
 
-    required_handler.edit_dialog.qube_handler.add_selected_vm(
-        qapp.domains["test-vm"]
-    )
+    required_handler.edit_dialog.qube_handler.add_selected_vm(qapp.domains["test-vm"])
 
     required_handler.edit_dialog.ok_button.clicked()
 
@@ -778,9 +762,7 @@ def test_req_dialog_change_vm(required_handler):
     required_handler.edit_button.clicked()
 
     required_handler.edit_dialog.qube_handler.clear()
-    required_handler.edit_dialog.qube_handler.add_selected_vm(
-        qapp.domains["test-red"]
-    )
+    required_handler.edit_dialog.qube_handler.add_selected_vm(qapp.domains["test-red"])
     required_handler.edit_dialog.ok_button.clicked()
 
     expected_calls = [
@@ -815,14 +797,10 @@ def test_req_add_no_strict(required_handler):
 
     required_handler.add_button.clicked()
 
-    required_handler.edit_dialog.dev_combo.set_active_id(
-        "0x8086:0x51f0::p300000"
-    )
+    required_handler.edit_dialog.dev_combo.set_active_id("0x8086:0x51f0::p300000")
 
     assert not required_handler.edit_dialog.ok_button.get_sensitive()
-    required_handler.edit_dialog.qube_handler.add_selected_vm(
-        qapp.domains["test-vm"]
-    )
+    required_handler.edit_dialog.qube_handler.add_selected_vm(qapp.domains["test-vm"])
 
     assert not required_handler.edit_dialog.no_strict_check.get_active()
     required_handler.edit_dialog.no_strict_check.set_active(True)
@@ -851,14 +829,10 @@ def test_req_add_both_opts(required_handler):
 
     required_handler.add_button.clicked()
 
-    required_handler.edit_dialog.dev_combo.set_active_id(
-        "0x8086:0x51f0::p300000"
-    )
+    required_handler.edit_dialog.dev_combo.set_active_id("0x8086:0x51f0::p300000")
 
     assert not required_handler.edit_dialog.ok_button.get_sensitive()
-    required_handler.edit_dialog.qube_handler.add_selected_vm(
-        qapp.domains["test-vm"]
-    )
+    required_handler.edit_dialog.qube_handler.add_selected_vm(qapp.domains["test-vm"])
     assert required_handler.edit_dialog.ok_button.get_sensitive()
 
     assert not required_handler.edit_dialog.permissive_check.get_active()
@@ -1043,9 +1017,7 @@ def test_req_get_unsaved(required_handler):
     required_handler.edit_dialog.ok_button.clicked()
 
     required_handler.add_button.clicked()
-    required_handler.edit_dialog.dev_combo.set_active_id(
-        "0x8086:0x461e::p0c0330"
-    )
+    required_handler.edit_dialog.dev_combo.set_active_id("0x8086:0x461e::p0c0330")
     required_handler.edit_dialog.qube_handler.add_selected_vm(
         required_handler.qapp.domains["test-vm"]
     )
@@ -1085,12 +1057,8 @@ def test_req_reset(required_handler):
     required_handler.edit_dialog.ok_button.clicked()
 
     required_handler.add_button.clicked()
-    required_handler.edit_dialog.dev_combo.set_active_id(
-        "0x8086:0x461e::p0c0330"
-    )
-    required_handler.edit_dialog.qube_handler.add_selected_vm(
-        qapp.domains["test-vm"]
-    )
+    required_handler.edit_dialog.dev_combo.set_active_id("0x8086:0x461e::p0c0330")
+    required_handler.edit_dialog.qube_handler.add_selected_vm(qapp.domains["test-vm"])
     required_handler.edit_dialog.ok_button.clicked()
 
     assert required_handler.get_unsaved() != ""
@@ -1116,12 +1084,8 @@ def test_req_multiple_save(required_handler):
     qapp = required_handler.qapp
     required_handler.add_button.clicked()
 
-    required_handler.edit_dialog.dev_combo.set_active_id(
-        "0x8086:0x51f0::p300000"
-    )
-    required_handler.edit_dialog.qube_handler.add_selected_vm(
-        qapp.domains["test-vm"]
-    )
+    required_handler.edit_dialog.dev_combo.set_active_id("0x8086:0x51f0::p300000")
+    required_handler.edit_dialog.qube_handler.add_selected_vm(qapp.domains["test-vm"])
     required_handler.edit_dialog.ok_button.clicked()
 
     for row in required_handler.rule_list.get_children():
@@ -1239,9 +1203,7 @@ def test_req_options_after_save(required_handler):
 
     # because the main program does a reset after save to ensure correctness,
     # we need to check that the data loads correctly
-    qapp.expected_calls[
-        ("sys-net", "admin.vm.device.pci.Assigned", None, None)
-    ] = (
+    qapp.expected_calls[("sys-net", "admin.vm.device.pci.Assigned", None, None)] = (
         "0\x00dom0+0d.0:0x8086:0x461e::p0c0330 "
         "device_id='0x8086:0x461e::p0c0330' port_id='0d.0' devclass='pci' "
         "backend_domain='dom0' mode='required' frontend_domain='sys-net' "
@@ -1271,14 +1233,10 @@ def test_req_readonly(required_handler):
 
     required_handler.add_button.clicked()
 
-    required_handler.edit_dialog.dev_combo.set_active_id(
-        "0x8086:0x51f0::p300000"
-    )
+    required_handler.edit_dialog.dev_combo.set_active_id("0x8086:0x51f0::p300000")
 
     assert not required_handler.edit_dialog.ok_button.get_sensitive()
-    required_handler.edit_dialog.qube_handler.add_selected_vm(
-        qapp.domains["test-vm"]
-    )
+    required_handler.edit_dialog.qube_handler.add_selected_vm(qapp.domains["test-vm"])
 
     assert not required_handler.edit_dialog.no_strict_check.get_active()
     required_handler.edit_dialog.no_strict_check.set_active(True)

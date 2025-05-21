@@ -92,9 +92,7 @@ class VMAndPortListModeler(VMListModeler):
                     f"The following source qube does not exist: {qube_name}"
                 )
         else:
-            raise TypeError(
-                "Only expecting Gtk.Entry objects to want our icon."
-            )
+            raise TypeError("Only expecting Gtk.Entry objects to want our icon.")
 
 
 class AttachmentConfirmationWindow(RPCConfirmationWindow):
@@ -137,27 +135,17 @@ class AttachmentConfirmationWindow(RPCConfirmationWindow):
         self._gtk_builder = Gtk.Builder()
         with importlib.resources.as_file(self._source_file_ref) as path:
             self._gtk_builder.add_from_file(str(path))
-        self._rpc_window = self._gtk_builder.get_object(
-            self._source_id["window"]
-        )
-        self._rpc_ok_button = self._gtk_builder.get_object(
-            self._source_id["ok"]
-        )
+        self._rpc_window = self._gtk_builder.get_object(self._source_id["window"])
+        self._rpc_ok_button = self._gtk_builder.get_object(self._source_id["ok"])
         self._rpc_cancel_button = self._gtk_builder.get_object(
             self._source_id["cancel"]
         )
         self._device_label = self._gtk_builder.get_object(
             self._source_id["device_label"]
         )
-        self._source_entry = self._gtk_builder.get_object(
-            self._source_id["source"]
-        )
-        self._rpc_combo_box = self._gtk_builder.get_object(
-            self._source_id["target"]
-        )
-        self._error_bar = self._gtk_builder.get_object(
-            self._source_id["error_bar"]
-        )
+        self._source_entry = self._gtk_builder.get_object(self._source_id["source"])
+        self._rpc_combo_box = self._gtk_builder.get_object(self._source_id["target"])
+        self._error_bar = self._gtk_builder.get_object(self._source_id["error_bar"])
         self._error_message = self._gtk_builder.get_object(
             self._source_id["error_message"]
         )

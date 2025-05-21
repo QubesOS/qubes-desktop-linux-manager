@@ -307,9 +307,7 @@ class GlobalConfig(Gtk.Application):
             width = int(self.main_window.get_screen().get_width() * 0.9)
         else:
             # try to have at least 1100 pixels
-            width = min(
-                int(self.main_window.get_screen().get_width() * 0.9), 1100
-            )
+            width = min(int(self.main_window.get_screen().get_width() * 0.9), 1100)
         if (
             self.main_window.get_allocated_height()
             > self.main_window.get_screen().get_height() * 0.9
@@ -393,16 +391,12 @@ class GlobalConfig(Gtk.Application):
         The function that performs actual widget realization and setup.
         """
         self.builder = Gtk.Builder()
-        glade_ref = (
-            importlib.resources.files("qubes_config") / "global_config.glade"
-        )
+        glade_ref = importlib.resources.files("qubes_config") / "global_config.glade"
         with importlib.resources.as_file(glade_ref) as path:
             self.builder.add_from_file(str(path))
 
         self.main_window: Gtk.Window = self.builder.get_object("main_window")
-        self.main_notebook: Gtk.Notebook = self.builder.get_object(
-            "main_notebook"
-        )
+        self.main_notebook: Gtk.Notebook = self.builder.get_object("main_notebook")
 
         load_theme(
             widget=self.main_window,
@@ -417,9 +411,7 @@ class GlobalConfig(Gtk.Application):
         self.progress_bar_dialog.update_progress(0)
 
         self.apply_button: Gtk.Button = self.builder.get_object("apply_button")
-        self.cancel_button: Gtk.Button = self.builder.get_object(
-            "cancel_button"
-        )
+        self.cancel_button: Gtk.Button = self.builder.get_object("cancel_button")
         self.ok_button: Gtk.Button = self.builder.get_object("ok_button")
 
         self.apply_button.connect("clicked", self._apply)
@@ -446,9 +438,7 @@ class GlobalConfig(Gtk.Application):
         )
         self.progress_bar_dialog.update_progress(page_progress)
 
-        self.handlers["attachments"] = DevAttachmentHandler(
-            self.qapp, self.builder
-        )
+        self.handlers["attachments"] = DevAttachmentHandler(self.qapp, self.builder)
         self.progress_bar_dialog.update_progress(page_progress)
 
         self.handlers["splitgpg"] = VMSubsetPolicyHandler(
@@ -636,14 +626,10 @@ class GlobalConfig(Gtk.Application):
     def _ask_unsaved(self, description: str) -> Gtk.ResponseType:
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         label_1 = Gtk.Label()
-        label_1.set_markup(
-            _("The following <b>unsaved changes</b> were found:")
-        )
+        label_1.set_markup(_("The following <b>unsaved changes</b> were found:"))
         label_1.set_xalign(0)
         label_2 = Gtk.Label()
-        label_2.set_text(
-            "\n".join([f"- {row}" for row in description.split("\n")])
-        )
+        label_2.set_text("\n".join([f"- {row}" for row in description.split("\n")]))
         label_2.set_margin_start(20)
         label_2.set_xalign(0)
         label_3 = Gtk.Label()

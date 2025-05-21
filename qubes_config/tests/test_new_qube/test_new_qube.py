@@ -50,9 +50,7 @@ def mock_output(command, *_args, **_kwargs):
 
 @patch("subprocess.check_output", side_effect=mock_output)
 @patch("qubes_config.new_qube.new_qube_app.show_error")
-def test_simple_new_qube(
-    mock_error, mock_subprocess, test_qapp, new_qube_builder
-):
+def test_simple_new_qube(mock_error, mock_subprocess, test_qapp, new_qube_builder):
     # the builder fixture must be called to register needed signals and
     # only do it once
     assert new_qube_builder
@@ -77,9 +75,9 @@ def test_simple_new_qube(
     ] = b"0\x00"
 
     # netvm is default
-    test_qapp.expected_calls[
-        ("test", "admin.vm.property.Reset", "netvm", None)
-    ] = b"0\x00"
+    test_qapp.expected_calls[("test", "admin.vm.property.Reset", "netvm", None)] = (
+        b"0\x00"
+    )
 
     # not provide network
     test_qapp.expected_calls[
@@ -107,8 +105,7 @@ def test_simple_new_qube(
             in mock_popen.mock_calls
         )
         assert (
-            call().__enter__().communicate(b"firefox.desktop")
-            in mock_popen.mock_calls
+            call().__enter__().communicate(b"firefox.desktop") in mock_popen.mock_calls
         )
 
     mock_error.assert_not_called()
@@ -118,9 +115,7 @@ def test_simple_new_qube(
 
 @patch("subprocess.check_output", side_effect=mock_output)
 @patch("qubes_config.new_qube.new_qube_app.show_error")
-def test_complex_new_qube(
-    mock_error, mock_subprocess, test_qapp, new_qube_builder
-):
+def test_complex_new_qube(mock_error, mock_subprocess, test_qapp, new_qube_builder):
     # the builder fixture must be called to register needed signals and
     # only do it once
     assert new_qube_builder
@@ -147,9 +142,7 @@ def test_complex_new_qube(
     else:
         assert False  # button not found
     for row in new_qube_app.app_box_handler.apps_list.get_children():
-        if hasattr(row, "appdata") and (
-            row.appdata.name in ["Green App", "Eggs App"]
-        ):
+        if hasattr(row, "appdata") and (row.appdata.name in ["Green App", "Eggs App"]):
             row.activate()
 
     new_qube_app.app_box_handler.apps_close.clicked()
@@ -163,9 +156,7 @@ def test_complex_new_qube(
     ] = b"0\x00"
 
     # netvm is None
-    test_qapp.expected_calls[
-        ("test", "admin.vm.property.Set", "netvm", b"")
-    ] = b"0\x00"
+    test_qapp.expected_calls[("test", "admin.vm.property.Set", "netvm", b"")] = b"0\x00"
 
     # not provide network
     test_qapp.expected_calls[
@@ -204,9 +195,7 @@ def test_complex_new_qube(
 
 @patch("subprocess.check_output", side_effect=mock_output)
 @patch("qubes_config.new_qube.new_qube_app.show_error")
-def test_new_template_cloned(
-    mock_error, mock_subprocess, test_qapp, new_qube_builder
-):
+def test_new_template_cloned(mock_error, mock_subprocess, test_qapp, new_qube_builder):
     # the builder fixture must be called to register needed signals and
     # only do it once
     assert new_qube_builder
@@ -233,14 +222,14 @@ def test_new_template_cloned(
         ("dom0", "admin.vm.Create.TemplateVM", None, b"name=test label=green")
     ] = b"0\x00"
     # but as user requested red label, we replace it
-    test_qapp.expected_calls[
-        ("test", "admin.vm.property.Set", "label", b"red")
-    ] = b"0\x00"
+    test_qapp.expected_calls[("test", "admin.vm.property.Set", "label", b"red")] = (
+        b"0\x00"
+    )
 
     # netvm is default
-    test_qapp.expected_calls[
-        ("test", "admin.vm.property.Reset", "netvm", None)
-    ] = b"0\x00"
+    test_qapp.expected_calls[("test", "admin.vm.property.Reset", "netvm", None)] = (
+        b"0\x00"
+    )
 
     # not provide network
     test_qapp.expected_calls[
@@ -302,17 +291,17 @@ def test_new_standalone(
     ] = b"0\x00"
 
     # it's a standalone so it should be a hvm with no kernel
-    test_qapp.expected_calls[
-        ("test", "admin.vm.property.Set", "virt_mode", b"hvm")
-    ] = b"0\x00"
-    test_qapp.expected_calls[
-        ("test", "admin.vm.property.Set", "kernel", b"")
-    ] = b"0\x00"
+    test_qapp.expected_calls[("test", "admin.vm.property.Set", "virt_mode", b"hvm")] = (
+        b"0\x00"
+    )
+    test_qapp.expected_calls[("test", "admin.vm.property.Set", "kernel", b"")] = (
+        b"0\x00"
+    )
 
     # netvm is default
-    test_qapp.expected_calls[
-        ("test", "admin.vm.property.Reset", "netvm", None)
-    ] = b"0\x00"
+    test_qapp.expected_calls[("test", "admin.vm.property.Reset", "netvm", None)] = (
+        b"0\x00"
+    )
 
     # not provide network
     test_qapp.expected_calls[
@@ -332,8 +321,7 @@ def test_new_standalone(
         assert mock_dialog.mock_calls  # called to tell us about the success
 
         assert (
-            call(["qubes-vm-boot-from-device", "test"])
-            in mock_check_call.mock_calls
+            call(["qubes-vm-boot-from-device", "test"]) in mock_check_call.mock_calls
         )  # called install system to qube
 
         # but no apps were added
@@ -352,9 +340,7 @@ def test_new_standalone(
 
 @patch("subprocess.check_output", side_effect=mock_output)
 @patch("qubes_config.new_qube.new_qube_app.show_error")
-def test_new_disposable(
-    mock_error, mock_subprocess, test_qapp, new_qube_builder
-):
+def test_new_disposable(mock_error, mock_subprocess, test_qapp, new_qube_builder):
     # the builder fixture must be called to register needed signals and
     # only do it once
     assert new_qube_builder
@@ -389,17 +375,17 @@ def test_new_disposable(
     ] = b"0\x00"
 
     # it's a standalone so it should be a hvm with no kernel
-    test_qapp.expected_calls[
-        ("test", "admin.vm.property.Set", "virt_mode", b"hvm")
-    ] = b"0\x00"
-    test_qapp.expected_calls[
-        ("test", "admin.vm.property.Set", "kernel", b"")
-    ] = b"0\x00"
+    test_qapp.expected_calls[("test", "admin.vm.property.Set", "virt_mode", b"hvm")] = (
+        b"0\x00"
+    )
+    test_qapp.expected_calls[("test", "admin.vm.property.Set", "kernel", b"")] = (
+        b"0\x00"
+    )
 
     # netvm is default
-    test_qapp.expected_calls[
-        ("test", "admin.vm.property.Reset", "netvm", None)
-    ] = b"0\x00"
+    test_qapp.expected_calls[("test", "admin.vm.property.Reset", "netvm", None)] = (
+        b"0\x00"
+    )
 
     # not provide network
     test_qapp.expected_calls[
@@ -467,18 +453,18 @@ def test_advanced_new_qube(
     ] = b"0\x00"
 
     # netvm is default
-    test_qapp.expected_calls[
-        ("test", "admin.vm.property.Reset", "netvm", None)
-    ] = b"0\x00"
+    test_qapp.expected_calls[("test", "admin.vm.property.Reset", "netvm", None)] = (
+        b"0\x00"
+    )
 
     # not provide network
     test_qapp.expected_calls[
         ("test", "admin.vm.property.Set", "provides_network", b"False")
     ] = b"0\x00"
     # memory
-    test_qapp.expected_calls[
-        ("test", "admin.vm.property.Set", "memory", b"400")
-    ] = b"0\x00"
+    test_qapp.expected_calls[("test", "admin.vm.property.Set", "memory", b"400")] = (
+        b"0\x00"
+    )
 
     # also add a call we do after adding the vm:
     test_qapp.expected_calls[("dom0", "admin.vm.List", None, None)] = (
@@ -501,8 +487,7 @@ def test_advanced_new_qube(
             in mock_popen.mock_calls
         )
         assert (
-            call().__enter__().communicate(b"firefox.desktop")
-            in mock_popen.mock_calls
+            call().__enter__().communicate(b"firefox.desktop") in mock_popen.mock_calls
         )
 
     mock_error.assert_not_called()

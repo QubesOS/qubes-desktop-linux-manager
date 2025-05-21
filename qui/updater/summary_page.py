@@ -62,9 +62,7 @@ class SummaryPage:
     Show the summary of vm updates and appms that should be restarted.
     """
 
-    def __init__(
-        self, builder, log, next_button, cancel_button, back_by_row_selection
-    ):
+    def __init__(self, builder, log, next_button, cancel_button, back_by_row_selection):
         self.builder = builder
         self.log = log
         self.next_button = next_button
@@ -76,9 +74,7 @@ class SummaryPage:
 
         self.updated_tmpls: Optional[list] = None
 
-        self.restart_list: Gtk.TreeView = self.builder.get_object(
-            "restart_list"
-        )
+        self.restart_list: Gtk.TreeView = self.builder.get_object("restart_list")
         self.list_store: Optional[ListWrapper] = None
 
         self.stack: Gtk.Stack = self.builder.get_object("main_stack")
@@ -86,20 +82,16 @@ class SummaryPage:
         self.label_summary: Gtk.Label = self.builder.get_object("label_summary")
 
         self.restart_list.connect("row-activated", self.on_checkbox_toggled)
-        self.app_vm_list: Gtk.ListStore = self.builder.get_object(
-            "restart_list_store"
-        )
+        self.app_vm_list: Gtk.ListStore = self.builder.get_object("restart_list_store")
         restart_checkbox_column: Gtk.TreeViewColumn = self.builder.get_object(
             "restart_checkbox_column"
         )
         restart_checkbox_column.connect("clicked", self.on_header_toggled)
         restart_header_button: Gtk.Button = restart_checkbox_column.get_button()
         restart_header_button.connect("realize", pass_through_event_window)
-        self.restart_header: Gtk.Label = self.builder.get_object(
-            "restart_header"
-        )
-        self.restart_scrolled_window: Gtk.ScrolledWindow = (
-            self.builder.get_object("restart_scrolled_window")
+        self.restart_header: Gtk.Label = self.builder.get_object("restart_header")
+        self.restart_scrolled_window: Gtk.ScrolledWindow = self.builder.get_object(
+            "restart_scrolled_window"
         )
 
         self.head_checkbox_button: Gtk.CheckButton = self.builder.get_object(
@@ -111,9 +103,7 @@ class SummaryPage:
             self.head_checkbox_button, self.next_button
         )
 
-        self.summary_list: Gtk.TreeView = self.builder.get_object(
-            "summary_list"
-        )
+        self.summary_list: Gtk.TreeView = self.builder.get_object("summary_list")
         self.summary_list.connect("row-activated", back_by_row_selection)
 
     @disable_checkboxes
@@ -151,9 +141,7 @@ class SummaryPage:
         If the user has selected any vms that do not match the defined states,
         the cycle will start from (1).
         """
-        on_head_checkbox_toggled(
-            self.list_store, self.head_checkbox, self.select_rows
-        )
+        on_head_checkbox_toggled(self.list_store, self.head_checkbox, self.select_rows)
 
     @property
     def is_populated(self) -> bool:
@@ -211,21 +199,16 @@ class SummaryPage:
         self.updated_tmpls = [
             row
             for row in vm_updated
-            if bool(row.status)
-            and QubeClass[row.vm.klass] == QubeClass.TemplateVM
+            if bool(row.status) and QubeClass[row.vm.klass] == QubeClass.TemplateVM
         ]
         possibly_changed_vms = set()
         for template in self.updated_tmpls:
             possibly_changed_vms.update(template.vm.derived_vms)
 
-        self.list_store = ListWrapper(
-            RestartRowWrapper, self.restart_list.get_model()
-        )
+        self.list_store = ListWrapper(RestartRowWrapper, self.restart_list.get_model())
 
         for vm in possibly_changed_vms:
-            if vm.is_running() and (
-                vm.klass != "DispVM" or not vm.auto_cleanup
-            ):
+            if vm.is_running() and (vm.klass != "DispVM" or not vm.auto_cleanup):
                 self.list_store.append_vm(vm)
 
         if settings.restart_service_vms:
@@ -333,9 +316,7 @@ class SummaryPage:
                 self.log.info("Shutdown %s", vm.name)
             except qubesadmin.exc.QubesVMError as err:
                 self.err += vm.name + " cannot shutdown: " + str(err) + "\n"
-                self.log.error(
-                    "Cannot shutdown %s because %s", vm.name, str(err)
-                )
+                self.log.error("Cannot shutdown %s because %s", vm.name, str(err))
                 self.status = RestartStatus.ERROR_TMPL_DOWN
 
         asyncio.run(wait_for_domain_shutdown(wait_for))
@@ -463,9 +444,7 @@ class RestartStatus(Enum):
 
 class RestartHeaderCheckbox(HeaderCheckbox):
     def __init__(self, checkbox_column_button, next_button):
-        super().__init__(
-            checkbox_column_button, [None, None, AppVMType.EXCLUDED]
-        )
+        super().__init__(checkbox_column_button, [None, None, AppVMType.EXCLUDED])
         self.next_button = next_button
 
     def allow_service_vms(self, value=True):

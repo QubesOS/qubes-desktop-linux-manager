@@ -44,9 +44,7 @@ def block_handler(real_builder, test_qapp_devices):
     dev_policy_manager = DeviceManager(test_qapp_devices)
     dev_policy_manager.load_data()
 
-    handler = DeviceBlockHandler(
-        test_qapp_devices, real_builder, dev_policy_manager
-    )
+    handler = DeviceBlockHandler(test_qapp_devices, real_builder, dev_policy_manager)
     return handler
 
 
@@ -181,9 +179,7 @@ def test_policy_block_edit_vm(block_handler):
 
     block_handler.edit_button.clicked()
 
-    assert (
-        block_handler.edit_dialog.qube_model.get_selected().name == "test-dev2"
-    )
+    assert block_handler.edit_dialog.qube_model.get_selected().name == "test-dev2"
 
     for row in block_handler.edit_dialog.listbox.get_children():
         if isinstance(row, OtherCategoryRow):

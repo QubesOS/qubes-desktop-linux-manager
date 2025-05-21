@@ -68,9 +68,7 @@ def test_template_handler_none(mock_subprocess, test_qapp, new_qube_builder):
     # templates are available
     assert handler.is_given_template_available(test_qapp.domains["fedora-36"])
     assert handler.is_given_template_available(test_qapp.domains["fedora-35"])
-    assert not handler.is_given_template_available(
-        test_qapp.domains["test-standalone"]
-    )
+    assert not handler.is_given_template_available(test_qapp.domains["test-standalone"])
     assert not handler.is_given_template_available(test_qapp.domains["dom0"])
     assert not handler.is_given_template_available(test_qapp.domains["test-vm"])
 
@@ -99,9 +97,7 @@ def test_template_handler_none(mock_subprocess, test_qapp, new_qube_builder):
 
 
 @patch("subprocess.check_output")
-def test_template_handler_select_vm(
-    mock_subprocess, test_qapp, new_qube_builder
-):
+def test_template_handler_select_vm(mock_subprocess, test_qapp, new_qube_builder):
     mock_subprocess.return_value = b""
     handler = TemplateHandler(new_qube_builder, test_qapp)
 

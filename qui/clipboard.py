@@ -67,13 +67,9 @@ COPY_FEATURE = "gui-default-secure-copy-sequence"
 PASTE_FEATURE = "gui-default-secure-paste-sequence"
 
 # Defining all messages in one place for easy modification
-ERROR_MALFORMED_DATA = _(
-    "Malformed clipboard data received from qube: <b>{vmname}</b>"
-)
+ERROR_MALFORMED_DATA = _("Malformed clipboard data received from qube: <b>{vmname}</b>")
 ERROR_ON_COPY = _("Failed to fetch clipboard data from qube: <b>{vmname}</b>")
-ERROR_ON_PASTE = _(
-    "Failed to paste global clipboard contents to qube: <b>{vmname}</b>"
-)
+ERROR_ON_PASTE = _("Failed to paste global clipboard contents to qube: <b>{vmname}</b>")
 ERROR_OVERSIZED_DATA = _(
     "Global clipboard size exceeded.\n"
     "qube: <b>{vmname}</b> attempted to send {size} bytes to global clipboard."
@@ -270,9 +266,7 @@ def clipboard_formatted_size(size: int = None) -> str:
         formatted_bytes = str(file_size) + _(" bytes")
 
     if file_size > 0:
-        magnitude = min(
-            int(math.log(file_size) / math.log(2) * 0.1), len(units) - 1
-        )
+        magnitude = min(int(math.log(file_size) / math.log(2) * 0.1), len(units) - 1)
         if magnitude > 0:
             # pylint: disable=consider-using-f-string
             return "%s (%.1f %s)" % (
@@ -324,9 +318,7 @@ class NotificationApp(Gtk.Application):
             self.setup_watcher()
 
         for feature in [COPY_FEATURE, PASTE_FEATURE]:
-            self.dispatcher.add_handler(
-                f"domain-feature-set:{feature}", self.setup_ui
-            )
+            self.dispatcher.add_handler(f"domain-feature-set:{feature}", self.setup_ui)
             self.dispatcher.add_handler(
                 f"domain-feature-delete:{feature}", self.setup_ui
             )
@@ -349,21 +341,17 @@ class NotificationApp(Gtk.Application):
             Gtk.get_current_event_time(),
         )  # activate_time
 
-    def update_clipboard_contents(
-        self, vm=None, size=0, message=None, icon=None
-    ):
+    def update_clipboard_contents(self, vm=None, size=0, message=None, icon=None):
         if not vm or not size:
-            self.clipboard_label.set_markup(
-                _("<i>Global clipboard is empty</i>")
-            )
+            self.clipboard_label.set_markup(_("<i>Global clipboard is empty</i>"))
             self.icon.set_from_icon_name("qui-clipboard")
             # todo the icon should be empty and full depending on state
 
         else:
             self.clipboard_label.set_markup(
-                _(
-                    "<i>Global clipboard contents: {0} from <b>{1}</b></i>"
-                ).format(size, vm)
+                _("<i>Global clipboard contents: {0} from <b>{1}</b></i>").format(
+                    size, vm
+                )
             )
             self.icon.set_from_icon_name("qui-clipboard")
 
@@ -398,10 +386,9 @@ class NotificationApp(Gtk.Application):
 
         help_label = Gtk.Label(xalign=0)
         help_label.set_markup(
-            _(
-                "<i>Use <b>{copy}</b> to copy and "
-                "<b>{paste}</b> to paste.</i>"
-            ).format(copy=self.copy_shortcut, paste=self.paste_shortcut)
+            _("<i>Use <b>{copy}</b> to copy and <b>{paste}</b> to paste.</i>").format(
+                copy=self.copy_shortcut, paste=self.paste_shortcut
+            )
         )
         help_item = Gtk.MenuItem()
         help_item.set_margin_left(10)
@@ -420,9 +407,7 @@ class NotificationApp(Gtk.Application):
         text = clipboard.wait_for_text()
 
         if not text:
-            self.send_notify(
-                _("Dom0 clipboard is empty!"), icon="dialog-information"
-            )
+            self.send_notify(_("Dom0 clipboard is empty!"), icon="dialog-information")
             return
 
         try:

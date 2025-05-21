@@ -109,9 +109,7 @@ class VMFlowboxHandler:
         prefix: str,
         initial_vms: List[qubesadmin.vm.QubesVM],
         filter_function: Optional[Callable] = None,
-        verification_callback: Optional[
-            Callable[[qubesadmin.vm.QubesVM], bool]
-        ] = None,
+        verification_callback: Optional[Callable[[qubesadmin.vm.QubesVM], bool]] = None,
     ):
         """
         :param gtk_builder: Gtk.Builder
@@ -130,13 +128,9 @@ class VMFlowboxHandler:
         self.flowbox: Gtk.FlowBox = gtk_builder.get_object(f"{prefix}_flowbox")
         self.box: Gtk.Box = gtk_builder.get_object(f"{prefix}_box")
 
-        self.qube_combo: Gtk.ComboBox = gtk_builder.get_object(
-            f"{prefix}_qube_combo"
-        )
+        self.qube_combo: Gtk.ComboBox = gtk_builder.get_object(f"{prefix}_qube_combo")
 
-        self.add_button: Gtk.Button = gtk_builder.get_object(
-            f"{prefix}_add_button"
-        )
+        self.add_button: Gtk.Button = gtk_builder.get_object(f"{prefix}_add_button")
 
         self.add_qube_model = VMListModeler(
             combobox=self.qube_combo,

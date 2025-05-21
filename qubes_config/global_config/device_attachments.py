@@ -35,7 +35,6 @@ from ..widgets.gtk_utils import show_error
 from .device_widgets import (
     DevPolicyRow,
     DevPolicyDialogHandler,
-    HeaderComboModeler,
     DevicePolicyHandler,
 )
 from .page_handler import PageHandler
