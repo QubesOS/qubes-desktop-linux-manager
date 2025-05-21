@@ -228,9 +228,7 @@ class VMListModeler(TraitSelector):
         self,
         combobox: Gtk.ComboBox,
         qapp: qubesadmin.Qubes,
-        filter_function: Optional[
-            Callable[[qubesadmin.vm.QubesVM], bool]
-        ] = None,
+        filter_function: Optional[Callable[[qubesadmin.vm.QubesVM], bool]] = None,
         event_callback: Optional[Callable[[], None]] = None,
         default_value: Optional[Union[qubesadmin.vm.QubesVM, str]] = None,
         current_value: Optional[Union[qubesadmin.vm.QubesVM, str]] = None,
@@ -404,9 +402,7 @@ class VMListModeler(TraitSelector):
         assert isinstance(self.combo, Gtk.ComboBox)
         list_store = Gtk.ListStore(int, str, GdkPixbuf.Pixbuf, str, str, str)
 
-        for entry_no, display_name in zip(
-            itertools.count(), sorted(self._entries)
-        ):
+        for entry_no, display_name in zip(itertools.count(), sorted(self._entries)):
             entry = self._entries[display_name]
             list_store.append(
                 [
@@ -473,10 +469,7 @@ class VMListModeler(TraitSelector):
             # special treatment for None:
             if self._entries[selected]["api_name"] == "None":
                 return None
-            return (
-                self._entries[selected]["vm"]
-                or self._entries[selected]["api_name"]
-            )
+            return self._entries[selected]["vm"] or self._entries[selected]["api_name"]
         return None
 
     def select_value(self, vm_name):

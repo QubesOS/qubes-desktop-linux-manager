@@ -79,9 +79,9 @@ def test_qapp_impl():
     qapp.expected_calls[("dom0", "admin.pool.List", None, None)] = (
         b"0\x00linux-kernel\nlvm\nfile\n"
     )
-    qapp.expected_calls[
-        ("dom0", "admin.pool.volume.List", "linux-kernel", None)
-    ] = b"0\x001.1\nmisc\n4.2\n"
+    qapp.expected_calls[("dom0", "admin.pool.volume.List", "linux-kernel", None)] = (
+        b"0\x001.1\nmisc\n4.2\n"
+    )
 
     add_expected_vm(
         qapp,
@@ -203,9 +203,7 @@ def test_qapp_impl():
     add_feature_to_all(qapp, "last-update", [])
     add_feature_to_all(qapp, "last-updates-check", [])
     add_feature_to_all(qapp, "template-name", [])
-    add_feature_to_all(
-        qapp, "servicevm", ["sys-usb", "sys-firewall", "sys-net"]
-    )
+    add_feature_to_all(qapp, "servicevm", ["sys-usb", "sys-firewall", "sys-net"])
     add_feature_to_all(qapp, "os-eol", [])
     add_feature_to_all(qapp, "skip-update", [])
     add_feature_to_all(qapp, "prohibit-start", [])

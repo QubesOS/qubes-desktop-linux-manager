@@ -35,7 +35,6 @@ from ..widgets.gtk_utils import show_error
 from .device_widgets import (
     DevPolicyRow,
     DevPolicyDialogHandler,
-    HeaderComboModeler,
     DevicePolicyHandler,
 )
 from .page_handler import PageHandler
@@ -933,7 +932,7 @@ class AttachmentHandler(DevicePolicyHandler):
     def load_current_state(self):
         """Load system state"""
         assignments: dict[tuple[str, str, str], list[DeviceAssignment]] = {}
-        for assignment, vm in self.device_policy_manager.get_assignments(self.classes):
+        for assignment, _ in self.device_policy_manager.get_assignments(self.classes):
             assignment_id = self.assignment_id(assignment)
             assignments.setdefault(assignment_id, []).append(assignment)
 

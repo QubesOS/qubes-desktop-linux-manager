@@ -53,9 +53,7 @@ def test_simple_flowbox_init_empty(test_qapp, test_builder):
     assert not flowbox_handler.is_changed()
 
     assert len(flowbox_handler.flowbox.get_children()) == 1  # only placeholder
-    assert isinstance(
-        flowbox_handler.flowbox.get_children()[0], PlaceholderText
-    )
+    assert isinstance(flowbox_handler.flowbox.get_children()[0], PlaceholderText)
     assert flowbox_handler.flowbox.get_children()[0].get_visible()
 
 
@@ -148,9 +146,7 @@ def test_flowbox_add_vm(test_qapp, test_builder):
 
     # now try to add something that's already selected
     flowbox_handler.add_qube_model.select_value("test-blue")
-    with patch(
-        "qubes_config.global_config.vm_flowbox.show_error"
-    ) as mock_error:
+    with patch("qubes_config.global_config.vm_flowbox.show_error") as mock_error:
         assert not mock_error.mock_calls
         flowbox_handler.add_button.clicked()
         assert mock_error.mock_calls

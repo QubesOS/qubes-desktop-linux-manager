@@ -103,8 +103,7 @@ class UpdatesTray(Gtk.Application):
             self.tray_menu.append(
                 RunItem(
                     _(
-                        "Updates for {} qubes are available!\n"
-                        "<b>Launch updater</b>"
+                        "Updates for {} qubes are available!\n<b>Launch updater</b>"
                     ).format(len(self.vms_needing_update)),
                     self.launch_updater,
                 )
@@ -122,9 +121,7 @@ class UpdatesTray(Gtk.Application):
                 + ", ".join([str(vm) for vm in self.obsolete_vms])
                 + _("\n<b>Install new templates with Template Manager</b>")
             )
-            self.tray_menu.append(
-                RunItem(obsolete_text, self.launch_template_manager)
-            )
+            self.tray_menu.append(RunItem(obsolete_text, self.launch_template_manager))
 
         self.tray_menu.show_all()
 
@@ -172,9 +169,7 @@ class UpdatesTray(Gtk.Application):
         )
         self.dispatcher.add_handler("domain-add", self.domain_added)
         self.dispatcher.add_handler("domain-delete", self.domain_removed)
-        self.dispatcher.add_handler(
-            "domain-feature-set:os-eol", self.feature_change
-        )
+        self.dispatcher.add_handler("domain-feature-set:os-eol", self.feature_change)
 
     def domain_added(self, _submitter, _event, vm, *_args, **_kwargs):
         try:

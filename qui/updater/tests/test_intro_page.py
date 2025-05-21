@@ -358,9 +358,7 @@ _derived_qubes = _domains.difference(_non_derived_qubes)
         ),
         # `qubes-update-gui --dom0`
         # Target dom0
-        pytest.param(
-            ("--dom0", "--force-update"), b"", b"", {"dom0"}, None, id="dom0"
-        ),
+        pytest.param(("--dom0", "--force-update"), b"", b"", {"dom0"}, None, id="dom0"),
         # `qubes-update-gui --dom0 --skip dom0`
         # Comma separated list of VMs to be skipped,
         # works with all other options.
@@ -398,9 +396,7 @@ _derived_qubes = _domains.difference(_non_derived_qubes)
             ("--skip", "fedora-36,garbage-name", "--templates"),
             id="templates with skip",
         ),
-        pytest.param(
-            ("--force-update",), b"", b"", set(), None, id="force-update"
-        ),
+        pytest.param(("--force-update",), b"", b"", set(), None, id="force-update"),
     ),
 )
 def test_select_rows_ignoring_conditions(
@@ -429,8 +425,7 @@ def test_select_rows_ignoring_conditions(
     result = b""
     if tmpls_and_stndas:
         result += (
-            b"Following templates and standalones will be updated: "
-            + tmpls_and_stndas
+            b"Following templates and standalones will be updated: " + tmpls_and_stndas
         )
     if derived_qubes:
         if result:

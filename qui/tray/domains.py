@@ -73,18 +73,14 @@ class IconCache:
                 )
                 self.icons[icon_name] = icon
             except (TypeError, GLib.Error):
-                icon = GdkPixbuf.Pixbuf.new(
-                    GdkPixbuf.Colorspace.RGB, True, 8, 16, 16
-                )
+                icon = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, True, 8, 16, 16)
                 icon.fill(0)
                 self.icons[icon_name] = icon
         return icon
 
 
 def show_error(title, text):
-    dialog = Gtk.MessageDialog(
-        None, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.OK
-    )
+    dialog = Gtk.MessageDialog(None, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.OK)
     dialog.set_title(title)
     dialog.set_markup(text)
     dialog.connect("response", lambda *x: dialog.destroy())
@@ -249,9 +245,7 @@ class KillItem(VMActionMenuItem):
     """Kill domain menu Item. When activated kills the domain."""
 
     def __init__(self, vm, icon_cache):
-        super().__init__(
-            vm, label=_("Kill"), icon_cache=icon_cache, icon_name="kill"
-        )
+        super().__init__(vm, label=_("Kill"), icon_cache=icon_cache, icon_name="kill")
 
     async def perform_action(self, *_args, **_kwargs):
         try:
@@ -328,9 +322,7 @@ class RunTerminalItem(VMActionMenuItem):
         if self.as_root:
             service_args["user"] = "root"
         try:
-            self.vm.run_service(
-                "qubes.StartApp+qubes-run-terminal", **service_args
-            )
+            self.vm.run_service("qubes.StartApp+qubes-run-terminal", **service_args)
         except exc.QubesException as ex:
             show_error(
                 _("Error starting terminal"),
@@ -418,9 +410,7 @@ class StartedMenu(Gtk.Menu):
         self.app = app
 
         self.add(OpenFileManagerItem(self.vm, icon_cache))
-        self.add(
-            RunTerminalItem(self.vm, icon_cache, as_root=app.terminal_as_root)
-        )
+        self.add(RunTerminalItem(self.vm, icon_cache, as_root=app.terminal_as_root))
 
         # Debug console for developers, troubleshooting, headless qubes
         self.debug_console = RunDebugConsoleItem(self.vm, icon_cache)
@@ -545,9 +535,7 @@ class QubesManagerItem(Gtk.MenuItem):
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
 
         # Icon box with fixed width
-        iconbox = Gtk.Image.new_from_icon_name(
-            "qubes-logo-icon", Gtk.IconSize.MENU
-        )
+        iconbox = Gtk.Image.new_from_icon_name("qubes-logo-icon", Gtk.IconSize.MENU)
         hbox.pack_start(iconbox, False, True, 6)
 
         # Name box
@@ -756,34 +744,22 @@ class DomainTray(Gtk.Application):
         self.dispatcher.add_handler("connection-established", self.refresh_all)
         self.dispatcher.add_handler("domain-pre-start", self.update_domain_item)
         self.dispatcher.add_handler("domain-start", self.update_domain_item)
-        self.dispatcher.add_handler(
-            "domain-start-failed", self.update_domain_item
-        )
+        self.dispatcher.add_handler("domain-start-failed", self.update_domain_item)
         self.dispatcher.add_handler("domain-paused", self.update_domain_item)
         self.dispatcher.add_handler("domain-unpaused", self.update_domain_item)
         self.dispatcher.add_handler("domain-shutdown", self.update_domain_item)
-        self.dispatcher.add_handler(
-            "domain-pre-shutdown", self.update_domain_item
-        )
-        self.dispatcher.add_handler(
-            "domain-shutdown-failed", self.update_domain_item
-        )
+        self.dispatcher.add_handler("domain-pre-shutdown", self.update_domain_item)
+        self.dispatcher.add_handler("domain-shutdown-failed", self.update_domain_item)
 
         self.dispatcher.add_handler("domain-add", self.add_domain_item)
         self.dispatcher.add_handler("domain-delete", self.remove_domain_item)
 
         self.dispatcher.add_handler("domain-pre-start", self.emit_notification)
         self.dispatcher.add_handler("domain-start", self.emit_notification)
-        self.dispatcher.add_handler(
-            "domain-start-failed", self.emit_notification
-        )
-        self.dispatcher.add_handler(
-            "domain-pre-shutdown", self.emit_notification
-        )
+        self.dispatcher.add_handler("domain-start-failed", self.emit_notification)
+        self.dispatcher.add_handler("domain-pre-shutdown", self.emit_notification)
         self.dispatcher.add_handler("domain-shutdown", self.emit_notification)
-        self.dispatcher.add_handler(
-            "domain-shutdown-failed", self.emit_notification
-        )
+        self.dispatcher.add_handler("domain-shutdown-failed", self.emit_notification)
 
         self.dispatcher.add_handler("domain-start", self.check_pause_notify)
         self.dispatcher.add_handler("domain-paused", self.check_pause_notify)
@@ -802,12 +778,8 @@ class DomainTray(Gtk.Application):
         self.dispatcher.add_handler("property-set:debug", self.debug_change)
         self.dispatcher.add_handler("property-set:guivm", self.debug_change)
         self.dispatcher.add_handler("domain-feature-set:gui", self.debug_change)
-        self.dispatcher.add_handler(
-            "domain-feature-delete:gui", self.debug_change
-        )
-        self.dispatcher.add_handler(
-            "domain-feature-set:expert-mode", self.debug_change
-        )
+        self.dispatcher.add_handler("domain-feature-delete:gui", self.debug_change)
+        self.dispatcher.add_handler("domain-feature-set:expert-mode", self.debug_change)
         self.dispatcher.add_handler(
             "domain-feature-delete:expert-mode", self.debug_change
         )
@@ -823,9 +795,9 @@ class DomainTray(Gtk.Application):
 
     def debug_change(self, vm, *_args, **_kwargs):
         if vm == self.qapp.local_name:
-            self.expert_mode = self.qapp.domains[
-                self.qapp.local_name
-            ].features.get("expert-mode", False)
+            self.expert_mode = self.qapp.domains[self.qapp.local_name].features.get(
+                "expert-mode", False
+            )
             vms = self.menu_items
         else:
             vms = {vm}
@@ -839,16 +811,12 @@ class DomainTray(Gtk.Application):
         self.tray_menu.popup_at_pointer(event)  # None means current event
 
     def emit_notification(self, vm, event, **kwargs):
-        notification = Gio.Notification.new(
-            _("Qube Status: {}").format(vm.name)
-        )
+        notification = Gio.Notification.new(_("Qube Status: {}").format(vm.name))
         notification.set_priority(Gio.NotificationPriority.NORMAL)
 
         if event == "domain-start-failed":
             notification.set_body(
-                _("Qube {} has failed to start: {}").format(
-                    vm.name, kwargs["reason"]
-                )
+                _("Qube {} has failed to start: {}").format(vm.name, kwargs["reason"])
             )
             notification.set_priority(Gio.NotificationPriority.HIGH)
             notification.set_icon(Gio.ThemedIcon.new("dialog-warning"))
@@ -864,9 +832,7 @@ class DomainTray(Gtk.Application):
             notification.set_body(_("Qube {} has shut down.").format(vm.name))
         elif event == "domain-shutdown-failed":
             notification.set_body(
-                _("Qube {} failed to shut down: {}").format(
-                    vm.name, kwargs["reason"]
-                )
+                _("Qube {} failed to shut down: {}").format(vm.name, kwargs["reason"])
             )
             notification.set_priority(Gio.NotificationPriority.HIGH)
             notification.set_icon(Gio.ThemedIcon.new("dialog-warning"))
@@ -876,9 +842,7 @@ class DomainTray(Gtk.Application):
 
     def emit_paused_notification(self):
         if not self.pause_notification_out:
-            notification = Gio.Notification.new(
-                _("Your qubes have been paused!")
-            )
+            notification = Gio.Notification.new(_("Your qubes have been paused!"))
             notification.set_body(
                 _(
                     "All your qubes are currently paused. If this was an "
@@ -1018,8 +982,7 @@ class DomainTray(Gtk.Application):
                     template1 = getattr(menu_item.vm, "template", None)
                     template2 = getattr(template1, "template", None)
                     if vm in (template1, template2) and any(
-                        vol.is_outdated()
-                        for vol in menu_item.vm.volumes.values()
+                        vol.is_outdated() for vol in menu_item.vm.volumes.values()
                     ):
                         menu_item.name.update_outdated(True)
         except exc.QubesVMNotFoundError:
@@ -1070,23 +1033,17 @@ class DomainTray(Gtk.Application):
     def update_stats(self, vm, _event, **kwargs):
         if vm not in self.menu_items:
             return
-        self.menu_items[vm].update_stats(
-            kwargs["memory_kb"], kwargs["cpu_usage"]
-        )
+        self.menu_items[vm].update_stats(kwargs["memory_kb"], kwargs["cpu_usage"])
 
     def initialize_menu(self):
         self.tray_menu.add(DomainMenuItem(None, self, self.icon_cache))
 
         # Add AdminVMS
-        for vm in sorted(
-            [vm for vm in self.qapp.domains if vm.klass == "AdminVM"]
-        ):
+        for vm in sorted([vm for vm in self.qapp.domains if vm.klass == "AdminVM"]):
             self.add_domain_item(None, None, vm)
 
         # and the rest of them
-        for vm in sorted(
-            [vm for vm in self.qapp.domains if vm.klass != "AdminVM"]
-        ):
+        for vm in sorted([vm for vm in self.qapp.domains if vm.klass != "AdminVM"]):
             self.add_domain_item(None, None, vm)
 
         for item in self.menu_items.values():
@@ -1123,26 +1080,14 @@ class DomainTray(Gtk.Application):
         self.initialize_menu()
 
     def _disconnect_signals(self, _event):
-        self.dispatcher.remove_handler(
-            "connection-established", self.refresh_all
-        )
-        self.dispatcher.remove_handler(
-            "domain-pre-start", self.update_domain_item
-        )
+        self.dispatcher.remove_handler("connection-established", self.refresh_all)
+        self.dispatcher.remove_handler("domain-pre-start", self.update_domain_item)
         self.dispatcher.remove_handler("domain-start", self.update_domain_item)
-        self.dispatcher.remove_handler(
-            "domain-start-failed", self.update_domain_item
-        )
+        self.dispatcher.remove_handler("domain-start-failed", self.update_domain_item)
         self.dispatcher.remove_handler("domain-paused", self.update_domain_item)
-        self.dispatcher.remove_handler(
-            "domain-unpaused", self.update_domain_item
-        )
-        self.dispatcher.remove_handler(
-            "domain-shutdown", self.update_domain_item
-        )
-        self.dispatcher.remove_handler(
-            "domain-pre-shutdown", self.update_domain_item
-        )
+        self.dispatcher.remove_handler("domain-unpaused", self.update_domain_item)
+        self.dispatcher.remove_handler("domain-shutdown", self.update_domain_item)
+        self.dispatcher.remove_handler("domain-pre-shutdown", self.update_domain_item)
         self.dispatcher.remove_handler(
             "domain-shutdown-failed", self.update_domain_item
         )
@@ -1150,31 +1095,17 @@ class DomainTray(Gtk.Application):
         self.dispatcher.remove_handler("domain-add", self.add_domain_item)
         self.dispatcher.remove_handler("domain-delete", self.remove_domain_item)
 
-        self.dispatcher.remove_handler(
-            "domain-pre-start", self.emit_notification
-        )
+        self.dispatcher.remove_handler("domain-pre-start", self.emit_notification)
         self.dispatcher.remove_handler("domain-start", self.emit_notification)
-        self.dispatcher.remove_handler(
-            "domain-start-failed", self.emit_notification
-        )
-        self.dispatcher.remove_handler(
-            "domain-pre-shutdown", self.emit_notification
-        )
-        self.dispatcher.remove_handler(
-            "domain-shutdown", self.emit_notification
-        )
-        self.dispatcher.remove_handler(
-            "domain-shutdown-failed", self.emit_notification
-        )
+        self.dispatcher.remove_handler("domain-start-failed", self.emit_notification)
+        self.dispatcher.remove_handler("domain-pre-shutdown", self.emit_notification)
+        self.dispatcher.remove_handler("domain-shutdown", self.emit_notification)
+        self.dispatcher.remove_handler("domain-shutdown-failed", self.emit_notification)
 
         self.dispatcher.remove_handler("domain-start", self.check_pause_notify)
         self.dispatcher.remove_handler("domain-paused", self.check_pause_notify)
-        self.dispatcher.remove_handler(
-            "domain-unpaused", self.check_pause_notify
-        )
-        self.dispatcher.remove_handler(
-            "domain-shutdown", self.check_pause_notify
-        )
+        self.dispatcher.remove_handler("domain-unpaused", self.check_pause_notify)
+        self.dispatcher.remove_handler("domain-shutdown", self.check_pause_notify)
 
         self.dispatcher.remove_handler(
             "domain-feature-set:updates-available", self.feature_change
@@ -1182,21 +1113,13 @@ class DomainTray(Gtk.Application):
         self.dispatcher.remove_handler(
             "domain-feature-delete:updates-available", self.feature_change
         )
-        self.dispatcher.remove_handler(
-            "property-set:netvm", self.property_change
-        )
-        self.dispatcher.remove_handler(
-            "property-set:label", self.property_change
-        )
+        self.dispatcher.remove_handler("property-set:netvm", self.property_change)
+        self.dispatcher.remove_handler("property-set:label", self.property_change)
 
         self.dispatcher.remove_handler("property-set:debug", self.debug_change)
         self.dispatcher.remove_handler("property-set:guivm", self.debug_change)
-        self.dispatcher.remove_handler(
-            "domain-feature-set:gui", self.debug_change
-        )
-        self.dispatcher.remove_handler(
-            "domain-feature-delete:gui", self.debug_change
-        )
+        self.dispatcher.remove_handler("domain-feature-set:gui", self.debug_change)
+        self.dispatcher.remove_handler("domain-feature-delete:gui", self.debug_change)
         self.dispatcher.remove_handler(
             "domain-feature-set:expert-mode", self.debug_change
         )
@@ -1254,9 +1177,7 @@ def main():
     stats_dispatcher = qubesadmin.events.EventsDispatcher(
         qapp, api_method="admin.vm.Stats"
     )
-    app = DomainTray(
-        "org.qubes.qui.tray.Domains", qapp, dispatcher, stats_dispatcher
-    )
+    app = DomainTray("org.qubes.qui.tray.Domains", qapp, dispatcher, stats_dispatcher)
     app.run()
 
     loop = asyncio.get_event_loop()
@@ -1265,9 +1186,7 @@ def main():
         asyncio.ensure_future(stats_dispatcher.listen_for_events()),
     ]
 
-    return qui.utils.run_asyncio_and_show_errors(
-        loop, tasks, "Qubes Domains Widget"
-    )
+    return qui.utils.run_asyncio_and_show_errors(loop, tasks, "Qubes Domains Widget")
 
 
 if __name__ == "__main__":

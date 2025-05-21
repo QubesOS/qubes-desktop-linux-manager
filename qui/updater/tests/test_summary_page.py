@@ -394,9 +394,7 @@ def test_perform_restart(
         "sys-net",
         "sys-usb",
     )
-    expected_start_calls = [
-        (tmpl, "admin.vm.Start", None, None) for tmpl in to_start
-    ]
+    expected_start_calls = [(tmpl, "admin.vm.Start", None, None) for tmpl in to_start]
     for call_ in expected_start_calls:
         test_qapp.expected_calls[call_] = b"0\x00"
 

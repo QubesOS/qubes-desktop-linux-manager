@@ -102,9 +102,7 @@ class PolicyHandler(PageHandler):
             f"{prefix}_custom_box"
         )
 
-        self.main_list_box: Gtk.ListBox = gtk_builder.get_object(
-            f"{prefix}_main_list"
-        )
+        self.main_list_box: Gtk.ListBox = gtk_builder.get_object(f"{prefix}_main_list")
         self.exception_list_box: Gtk.ListBox = gtk_builder.get_object(
             f"{prefix}_exception_list"
         )
@@ -127,9 +125,7 @@ class PolicyHandler(PageHandler):
 
         self.exception_list_box.connect("row-activated", self._rule_clicked)
         self.main_list_box.connect("row-activated", self._rule_clicked)
-        self.exception_list_box.connect(
-            "rules-changed", self._populate_raw_rules
-        )
+        self.exception_list_box.connect("rules-changed", self._populate_raw_rules)
         self.main_list_box.connect("rules-changed", self._populate_raw_rules)
 
         self.enable_radio.connect("toggled", self._custom_toggled)
@@ -194,9 +190,7 @@ class PolicyHandler(PageHandler):
         """
         if self.disable_radio.get_active():
             return self.policy_manager.text_to_rules(self.default_policy)
-        return [
-            row.rule.raw_rule for row in self.current_rows if not row.is_new_row
-        ]
+        return [row.rule.raw_rule for row in self.current_rows if not row.is_new_row]
 
     @property
     def current_rows(self) -> List[RuleListBoxRow]:
@@ -204,8 +198,7 @@ class PolicyHandler(PageHandler):
         Get the current list of all RuleListBoxRows
         """
         return (
-            self.exception_list_box.get_children()
-            + self.main_list_box.get_children()
+            self.exception_list_box.get_children() + self.main_list_box.get_children()
         )
 
     def initialize_data(self):
@@ -312,9 +305,7 @@ class PolicyHandler(PageHandler):
             return 1
         return -1
 
-    def rule_sorting_function(
-        self, row_1: RuleListBoxRow, row_2: RuleListBoxRow
-    ):
+    def rule_sorting_function(self, row_1: RuleListBoxRow, row_2: RuleListBoxRow):
         """Sorting function for exceptions."""
         source_cmp = self.cmp_token(row_1.rule.source, row_2.rule.source)
         if source_cmp != 0:
@@ -326,9 +317,7 @@ class PolicyHandler(PageHandler):
         Check if the provided set of rules is the same as the default set,
         set radio buttons accordingly.
         """
-        if self.policy_manager.compare_rules_to_text(
-            rules, self.default_policy
-        ):
+        if self.policy_manager.compare_rules_to_text(rules, self.default_policy):
             self.disable_radio.set_active(True)
         else:
             self.enable_radio.set_active(True)
@@ -362,9 +351,7 @@ class PolicyHandler(PageHandler):
         for other_row in other_rows:
             if other_row == row:
                 continue
-            if other_row.rule.is_rule_conflicting(
-                new_source, new_target, new_action
-            ):
+            if other_row.rule.is_rule_conflicting(new_source, new_target, new_action):
                 return str(other_row)
         return None
 
@@ -427,9 +414,7 @@ class PolicyHandler(PageHandler):
     def save(self):
         """Save current rules, whatever they are - custom or default."""
         rules = self.current_rules
-        self.policy_manager.save_rules(
-            self.policy_file_name, rules, self.current_token
-        )
+        self.policy_manager.save_rules(self.policy_file_name, rules, self.current_token)
         _r, self.current_token = self.policy_manager.get_rules_from_filename(
             self.policy_file_name, self.default_policy
         )
@@ -450,9 +435,7 @@ class PolicyHandler(PageHandler):
 
     def on_switch(self, *_args):
         if self.error_handler.get_errors():
-            rule_text = "\n".join(
-                str(rule) for rule in self.error_handler.get_errors()
-            )
+            rule_text = "\n".join(str(rule) for rule in self.error_handler.get_errors())
             show_error(
                 parent=self.main_list_box.get_toplevel(),
                 title=_("Unknown rule found in police file"),
@@ -498,13 +481,9 @@ class RawPolicyTextHandler:
         self.raw_expander_icon: Gtk.Image = gtk_builder.get_object(
             f"{prefix}_raw_expander"
         )
-        self.raw_text: Gtk.TextView = gtk_builder.get_object(
-            f"{prefix}_raw_text"
-        )
+        self.raw_text: Gtk.TextView = gtk_builder.get_object(f"{prefix}_raw_text")
         self.raw_save: Gtk.Button = gtk_builder.get_object(f"{prefix}_raw_save")
-        self.raw_cancel: Gtk.Button = gtk_builder.get_object(
-            f"{prefix}_raw_cancel"
-        )
+        self.raw_cancel: Gtk.Button = gtk_builder.get_object(f"{prefix}_raw_cancel")
         self.text_buffer: Gtk.TextBuffer = self.raw_text.get_buffer()
 
         self.raw_save.connect("clicked", self._save_raw)
@@ -700,16 +679,13 @@ class VMSubsetPolicyHandler(PolicyHandler):
                 and other_rule.target == "@default"
                 and (
                     getattr(other_rule.action, "target", None) == rule.target
-                    or getattr(other_rule.action, "default_target", None)
-                    == rule.target
+                    or getattr(other_rule.action, "default_target", None) == rule.target
                 )
             ):
                 return True
         return False
 
-    def populate_rule_lists(
-        self, rules: List[Rule], drop_obsolete: bool = False
-    ):
+    def populate_rule_lists(self, rules: List[Rule], drop_obsolete: bool = False):
         """
         Populate the rule lists.
         :param rules: List of Rule objects
@@ -718,8 +694,7 @@ class VMSubsetPolicyHandler(PolicyHandler):
         :return:
         """
         for child in (
-            self.main_list_box.get_children()
-            + self.exception_list_box.get_children()
+            self.main_list_box.get_children() + self.exception_list_box.get_children()
         ):
             child.get_parent().remove(child)
         # rules with source = '@anyvm' go to main list and their
@@ -864,9 +839,7 @@ class VMSubsetPolicyHandler(PolicyHandler):
                     # do not save duplicates
                     continue
                 rules.append(another_rule)
-        rules.extend(
-            [row.rule.raw_rule for row in self.main_list_box.get_children()]
-        )
+        rules.extend([row.rule.raw_rule for row in self.main_list_box.get_children()])
         return rules
 
 
@@ -881,9 +854,7 @@ class ErrorHandler:
         - prefix_error_list, a ListBox that contains erroneous rules
         """
         self.error_box: Gtk.Box = gtk_builder.get_object(f"{prefix}_error_box")
-        self.error_list: Gtk.ListBox = gtk_builder.get_object(
-            f"{prefix}_error_list"
-        )
+        self.error_list: Gtk.ListBox = gtk_builder.get_object(f"{prefix}_error_list")
 
         self._errors: List[Rule] = []
 
