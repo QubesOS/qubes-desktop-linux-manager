@@ -46,13 +46,12 @@ from qubesadmin.tests.mock_app import (
     MockDevice,
 )
 
+
 @pytest.fixture
 def test_qapp():
     test_qapp = MockQubesComplete()
     test_qapp._qubes["dom0"].features["gui-default-secure-copy-sequence"] = None
-    test_qapp._qubes["sys-usb"].features[
-        "supported-feature.keyboard-layout"
-    ] = "1"
+    test_qapp._qubes["sys-usb"].features["supported-feature.keyboard-layout"] = "1"
     test_qapp.update_vm_calls()
     return test_qapp
 
@@ -212,9 +211,7 @@ def test_qapp_devices():
         "frontend_domain='test-vm'\n"
     ).encode()
     current_response = test_qapp_devices.expected_calls[call]
-    test_qapp_devices.expected_calls[call] = (
-        current_response + assignment_string
-    )
+    test_qapp_devices.expected_calls[call] = current_response + assignment_string
 
     return test_qapp_devices
 
@@ -245,9 +242,7 @@ def real_builder():
         pass
     # test glade file contains very simple setup with correctly named widgets
     builder = Gtk.Builder()
-    glade_ref = (
-        importlib.resources.files("qubes_config") / "global_config.glade"
-    )
+    glade_ref = importlib.resources.files("qubes_config") / "global_config.glade"
     with importlib.resources.as_file(glade_ref) as path:
         builder.add_from_file(str(path))
     return builder
