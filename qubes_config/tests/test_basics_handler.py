@@ -339,6 +339,9 @@ def test_kernels(test_qapp):
 
 
 def test_basics_handler(real_builder, test_qapp):
+    test_qapp.expected_calls[
+        ("dom0", "admin.vm.feature.Get", "preload-dispvm-max", None)
+    ] = b"0\x00"
     basics_handler = BasicSettingsHandler(real_builder, test_qapp)
 
     assert basics_handler.get_unsaved() == ""

@@ -75,6 +75,9 @@ def test_qubes_global_config():
 def test_global_config_init(
     mock_error, mock_subprocess, test_qapp, test_policy_manager, test_builder
 ):
+    test_qapp.expected_calls[
+        ("dom0", "admin.vm.feature.Get", "preload-dispvm-max", None)
+    ] = b"0\x00"
     mock_subprocess.return_value = b""
     app = GlobalConfig(test_qapp, test_policy_manager)
     # do not call do_activate - it will make Gtk confused and, in case
@@ -140,6 +143,9 @@ def test_global_config_init(
 def test_global_config_page_change(
     mock_error, mock_subprocess, test_qapp, test_policy_manager, test_builder
 ):
+    test_qapp.expected_calls[
+        ("dom0", "admin.vm.feature.Get", "preload-dispvm-max", None)
+    ] = b"0\x00"
     mock_subprocess.return_value = b""
     app = GlobalConfig(test_qapp, test_policy_manager)
     # do not call do_activate - it will make Gtk confused and, in case
@@ -238,6 +244,9 @@ def test_global_config_page_change(
 def test_global_config_failure(
     mock_error, mock_subprocess, test_qapp, test_policy_manager, test_builder
 ):
+    test_qapp.expected_calls[
+        ("dom0", "admin.vm.feature.Get", "preload-dispvm-max", None)
+    ] = b"0\x00"
     mock_subprocess.return_value = b""
     app = GlobalConfig(test_qapp, test_policy_manager)
     # do not call do_activate - it will make Gtk confused and, in case
@@ -302,6 +311,9 @@ def test_global_config_broken_system(
 def test_global_config_open_at(
     mock_error, mock_subprocess, test_qapp, test_policy_manager, real_builder
 ):
+    test_qapp.expected_calls[
+        ("dom0", "admin.vm.feature.Get", "preload-dispvm-max", None)
+    ] = b"0\x00"
     mock_subprocess.return_value = b""
     app = GlobalConfig(test_qapp, test_policy_manager)
     # do not call do_activate - it will make Gtk confused and, in case
