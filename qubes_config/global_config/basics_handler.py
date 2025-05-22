@@ -208,6 +208,71 @@ class FeatureHandler(AbstractTraitHolder):
         return self.model
 
 
+class PreloadDispvmHandler(AbstractTraitHolder):
+    """Handler for preloaded disposables. Requires SpinButton widgets:
+    'basics_preload_dispvm'"""
+
+    def __init__(self, qapp: qubesadmin.Qubes, widget: Gtk.ComboBoxText):
+        self.qapp = qapp
+        self.widget = widget
+
+        # TODO: ben: only allow setting if default_dispvm is not empty.
+        # TODO: ben: if changing default_dispvm, set old value to 0 first.
+
+        self.preload_dispvm_spin: Gtk.SpinButton = self.widget.get_object(
+            "basics_preload_dispvm"
+        )
+
+        self.preload_dispvm_adjustment = Gtk.Adjustment()
+        self.preload_dispvm_adjustment.configure(0, 0, 50, 1, 10, 0)
+
+        self.preload_dispvm_spin.configure(
+            self.preload_dispvm_adjustment, 0.1, 0
+        )
+
+        self.preload_dispvm_spin.set_value(self.get_current_value())
+
+    @staticmethod
+    def get_readable_description() -> str:  # pylint: disable=arguments-differ
+        """Get human-readable description of the widget"""
+        # the pylint: disable above is because pylint does not understand
+        # static methods
+        return _("Maximum preload of default dispvm")
+
+    def save(self):
+        """Save changes: update system value and mark it as new initial value"""
+        if not self.is_changed():
+            return
+
+        self.qapp.default_dispvm.features["preload-dispvm-max"] = str(
+            self.preload_dispvm_spin.get_value()
+        )
+
+    def reset(self):
+        """Reset selection to the initial value."""
+        if not self.preload_dispvm_spin.is_sensitive():
+            return
+        self.preload_dispvm_spin.set_value(self.get_current_value())
+
+    def is_changed(self) -> bool:
+        """Has the user selected something different from the initial value?"""
+        if not self.preload_dispvm_spin.is_sensitive():
+            return False
+        if self.preload_dispvm_spin.get_value() != self.get_current_value():
+            return True
+        return False
+
+    def get_unsaved(self):
+        """Get human-readable description of unsaved changes, or
+        empty string if none were found."""
+        if self.is_changed():
+            return self.get_readable_description()
+        return ""
+
+    def get_current_value(self):
+        return self.qapp.default_dispvm.get_feat_preload_max()
+
+
 class QMemManHelper:
     """Helper class to handle the ugliness of managing qmemman config."""
 
@@ -513,6 +578,12 @@ class BasicSettingsHandler(PageHandler):
                 additional_options=NONE_CATEGORY,
             )
         )
+        self.handlers.append(
+            PreloadDispvmHandler(
+                qapp=self.qapp, widget=self.preload_dispvm_combo
+            )
+        )
+
         self.handlers.append(
             FeatureHandler(
                 trait_holder=self.vm,
