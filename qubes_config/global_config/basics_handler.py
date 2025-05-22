@@ -162,7 +162,7 @@ class PropertyHandler(AbstractTraitHolder):
             new_value = self.model.get_selected()
             setattr(self.trait_holder, self.trait_name, new_value)
 
-    def get_model(self) -> TraitSelector:
+    def get_model(self) -> VMListModeler:
         return self.model
 
 
@@ -206,6 +206,99 @@ class FeatureHandler(AbstractTraitHolder):
 
     def get_model(self) -> TraitSelector:
         return self.model
+
+
+class PreloadDispvmHandler(AbstractTraitHolder):
+    """Handler for preloaded disposables. Requires SpinButton widgets:
+    'basics_preload_dispvm'"""
+
+    def __init__(
+        self,
+        qapp: qubesadmin.Qubes,
+        widget: Gtk.SpinButton,
+        defdispvm_model: VMListModeler,
+        is_dvm_template: Optional[Callable] = None,
+    ):
+        self.qapp = qapp
+        self.widget = widget
+        self.defdispvm_model = defdispvm_model
+        self.defdispvm_model.connect_change_callback(self.on_defdispvm_changed)
+        self.is_dvm_template = is_dvm_template
+        self.preload_dispvm_adjustment = Gtk.Adjustment()
+        self.preload_dispvm_adjustment.configure(0, 0, 50, 1, 10, 0)
+        self.widget.configure(self.preload_dispvm_adjustment, 0.1, 0)
+        self.widget.set_value(self.get_current_value())
+        self.widget.set_sensitive(bool(self.get_defdispvm_value()))
+
+    def get_defdispvm_value(self):
+        return self.defdispvm_model.get_selected()
+
+    def on_defdispvm_changed(self):
+        value = self.get_defdispvm_value()
+        if value:
+            self.widget.set_sensitive(True)
+            self.widget.set_value(self.get_current_value())
+        else:
+            self.widget.set_value(0)
+            self.widget.set_sensitive(False)
+
+    @staticmethod
+    def get_readable_description() -> str:  # pylint: disable=arguments-differ
+        """Get human-readable description of the widget"""
+        # the pylint: disable above is because pylint does not understand
+        # static methods
+        return _("Number of preloaded disposables from default dispvm")
+
+    def save(self):
+        """Save changes: update system value and mark it as new initial value"""
+        if not self.is_changed():
+            return
+        if not self.get_defdispvm_value():
+            return
+        apply_feature_change(
+            self.qapp.domains["dom0"],
+            "preload-dispvm-max",
+            int(self.widget.get_value()),
+        )
+
+    def reset(self):
+        """Reset selection to the initial value."""
+        if not self.widget.is_sensitive():
+            return
+        self.widget.set_value(self.get_current_value())
+
+    def is_changed(self) -> bool:
+        """Has the user selected something different from the initial value?"""
+        if not self.widget.is_sensitive():
+            return False
+        if int(self.widget.get_value()) != self.get_current_value():
+            return True
+        return False
+
+    def get_unsaved(self):
+        """Get human-readable description of unsaved changes, or
+        empty string if none were found."""
+        if self.is_changed():
+            return self.get_readable_description()
+        return ""
+
+    def get_current_value(self):
+        """This should never be called."""
+        if not self.get_defdispvm_value():
+            return 0
+        if not self.is_dvm_template:
+            return 0
+        return int(
+            get_feature(self.qapp.domains["dom0"], "preload-dispvm-max") or 0
+        )
+
+    def update_current_value(self):
+        """This should never be called."""
+        raise NotImplementedError
+
+    def get_model(self) -> TraitSelector:
+        """This should never be called."""
+        raise NotImplementedError
 
 
 class QMemManHelper:
@@ -456,6 +549,9 @@ class BasicSettingsHandler(PageHandler):
         self.defdispvm_combo: Gtk.ComboBox = gtk_builder.get_object(
             "basics_defdispvm_combo"
         )
+        self.preload_dispvm_spin: Gtk.SpinButton = gtk_builder.get_object(
+            "basics_preload_dispvm"
+        )
         self.fullscreen_combo: Gtk.ComboBoxText = gtk_builder.get_object(
             "basics_fullscreen_combo"
         )
@@ -511,6 +607,17 @@ class BasicSettingsHandler(PageHandler):
                 vm_filter=self._default_dispvm_filter,
                 readable_name=_("Default disposable qube template"),
                 additional_options=NONE_CATEGORY,
+            )
+        )
+        defdispvm_model: VMListModeler = self.handlers[
+            -1
+        ].get_model()  # type: ignore
+        self.handlers.append(
+            PreloadDispvmHandler(
+                qapp=self.qapp,
+                widget=self.preload_dispvm_spin,
+                defdispvm_model=defdispvm_model,
+                is_dvm_template=self._default_dispvm_filter,
             )
         )
         self.handlers.append(

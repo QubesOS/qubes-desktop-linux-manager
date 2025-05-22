@@ -338,29 +338,86 @@ def test_kernels(test_qapp):
     assert handler.get_unsaved() == ""
 
 
-def test_basics_handler(real_builder, test_qapp):
+# when dealing with features, we need to be always using helper methods
+@patch("qubes_config.global_config.basics_handler.get_feature")
+def test_preload_handler(
+    mock_get, real_builder, test_qapp
+):  # pylint: disable=unused-argument
+    mock_get.return_value = "1"
+    test_qapp.expected_calls[
+        ("dom0", "admin.vm.feature.Get", "preload-dispvm-max", None)
+    ] = b"0\x00"
     basics_handler = BasicSettingsHandler(real_builder, test_qapp)
 
     assert basics_handler.get_unsaved() == ""
 
-    # all handlers are tested above, so now just use one as example
-    # change clockvm
+    defdispvm_combo: Gtk.ComboBox = real_builder.get_object(
+        "basics_defdispvm_combo"
+    )
+    preload_dispvm_spin: Gtk.SpinButton = real_builder.get_object(
+        "basics_preload_dispvm"
+    )
+
+    initial_preload_dispvm = preload_dispvm_spin.get_value()
+    initial_default_dispvm = defdispvm_combo.get_active_id()
+    preload_dispvm_spin.set_value(initial_preload_dispvm + 1)
+    defdispvm_combo.set_active_id("(none)")
+    assert not preload_dispvm_spin.is_sensitive()
+    assert preload_dispvm_spin.get_value() == 0
+    # Assert that preload feature hasn't changed.
+    test_qapp.expected_calls[
+        ("dom0", "admin.property.Set", "default_dispvm", b"")
+    ] = b"0\x00"
+    basics_handler.save()
+
+    initial_preload_dispvm = preload_dispvm_spin.get_value()
+    assert not preload_dispvm_spin.is_sensitive()
+    defdispvm_combo.set_active_id(initial_default_dispvm)
+    assert preload_dispvm_spin.is_sensitive()
+    new_preload_value = initial_preload_dispvm + 1
+    preload_dispvm_spin.set_value(new_preload_value)
+    test_qapp.expected_calls[
+        (
+            "dom0",
+            "admin.property.Set",
+            "default_dispvm",
+            initial_default_dispvm.encode(),
+        )
+    ] = b"0\x00"
+    test_qapp.expected_calls[
+        (
+            "dom0",
+            "admin.vm.features.Set",
+            "preload-dispvm-max",
+            str(new_preload_value).encode(),
+        ),
+    ] = b"0\x00"
+    basics_handler.save()
+
+
+def test_basics_handler(real_builder, test_qapp):
+    test_qapp.expected_calls[
+        ("dom0", "admin.vm.feature.Get", "preload-dispvm-max", None)
+    ] = b"0\x00"
+    basics_handler = BasicSettingsHandler(real_builder, test_qapp)
+
+    assert basics_handler.get_unsaved() == ""
+
+    # All handlers are tested above, so now just use one as example.
     clockvm_combo: Gtk.ComboBox = real_builder.get_object(
         "basics_clockvm_combo"
     )
     initial_clockvm = clockvm_combo.get_active_id()
     assert initial_clockvm != "test-blue"
-    clockvm_combo.set_active_id("test-blue")
 
+    clockvm_combo.set_active_id("test-blue")
     assert basics_handler.get_unsaved() == "Clock qube"
 
     basics_handler.reset()
-
     assert clockvm_combo.get_active_id() == initial_clockvm
     assert basics_handler.get_unsaved() == ""
 
     clockvm_combo.set_active_id("test-blue")
-
     test_qapp.expected_calls[
         ("dom0", "admin.property.Set", "clockvm", b"test-blue")
     ] = b"0\x00"
