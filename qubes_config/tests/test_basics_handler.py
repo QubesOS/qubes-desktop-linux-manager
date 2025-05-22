@@ -338,27 +338,161 @@ def test_kernels(test_qapp):
     assert handler.get_unsaved() == ""
 
 
+# when dealing with features, we need to be always using helper methods
+@patch("qubes_config.global_config.basics_handler.get_feature")
+@patch("qubes_config.global_config.basics_handler.apply_feature_change")
+def test_preload_handler(
+    mock_apply, mock_get, real_builder, test_qapp
+):  # pylint: disable=unused-argument
+    description = "Number of preloaded disposables from default dispvm"
+    mock_get.return_value = None
+    basics_handler = BasicSettingsHandler(real_builder, test_qapp)
+    # Actual calls includes extraneous calls for this test, focus on the
+    # calls made to each save.
+    test_qapp.actual_calls = []
+    assert basics_handler.get_unsaved() == ""
+
+    defdispvm_combo: Gtk.ComboBox = real_builder.get_object("basics_defdispvm_combo")
+    preload_dispvm_spin: Gtk.SpinButton = real_builder.get_object(
+        "basics_preload_dispvm"
+    )
+    preload_dispvm_spin_check: Gtk.CheckButton = real_builder.get_object(
+        "basics_preload_dispvm_check"
+    )
+    initial_default_dispvm = defdispvm_combo.get_active_id()
+    initial_preload_dispvm = preload_dispvm_spin.get_value_as_int()
+
+    # Start available but unchecked.
+    assert preload_dispvm_spin_check.is_sensitive()
+    assert not preload_dispvm_spin.is_sensitive()
+
+    # Check to allow spin.
+    preload_dispvm_spin_check.set_active(True)
+    assert preload_dispvm_spin.is_sensitive()
+
+    # Assert that with no default_dispvm, even if changing preload spin button,
+    # doesn't save the preload feature.
+    preload_dispvm_spin.set_value(initial_preload_dispvm + 1)
+    assert basics_handler.get_unsaved() == description
+    defdispvm_combo.set_active_id("(none)")
+    assert not preload_dispvm_spin_check.is_sensitive()
+    assert not preload_dispvm_spin.is_sensitive()
+    assert preload_dispvm_spin.get_value_as_int() == initial_preload_dispvm
+    expected_calls = [("dom0", "admin.property.Set", "default_dispvm", b"")]
+    for call in expected_calls:
+        test_qapp.expected_calls[call] = b"0\x00"
+        assert call not in test_qapp.actual_calls
+    basics_handler.save()
+    mock_apply.assert_not_called()
+    for call in expected_calls:
+        assert call in test_qapp.actual_calls
+    test_qapp.actual_calls = []
+
+    # Assert that reset ignores insensitive.
+    initial_preload_dispvm = preload_dispvm_spin.get_value_as_int()
+    assert not preload_dispvm_spin.is_sensitive()
+    mock_get_count = mock_get.call_count
+    basics_handler.reset()
+    assert mock_get_count == mock_get.call_count
+
+    # Assert when changing from no default_dispvm, requires checking the box.
+    defdispvm_combo.set_active_id(initial_default_dispvm)
+    assert not preload_dispvm_spin.is_sensitive()
+
+    # Assert save.
+    preload_dispvm_spin_check.set_active(True)
+    new_preload_value = initial_preload_dispvm + 2
+    preload_dispvm_spin.set_value(new_preload_value)
+    expected_calls = [
+        (
+            "dom0",
+            "admin.property.Set",
+            "default_dispvm",
+            initial_default_dispvm.encode(),
+        ),
+    ]
+    for call in expected_calls:
+        test_qapp.expected_calls[call] = b"0\x00"
+        assert call not in test_qapp.actual_calls
+    basics_handler.save()
+    mock_apply.assert_called_once_with(
+        test_qapp.domains["dom0"], "preload-dispvm-max", str(new_preload_value)
+    )
+    for call in expected_calls:
+        assert call in test_qapp.actual_calls
+    test_qapp.actual_calls = []
+
+    # Assert that saving '0' set the value '0' instead of feature deletion.
+    mock_get.return_value = new_preload_value
+    preload_dispvm_spin.set_value(0)
+    basics_handler.save()
+    assert mock_apply.call_args[0] == (
+        test_qapp.domains["dom0"],
+        "preload-dispvm-max",
+        str(0),
+    )
+
+    # Assert that deselecting the check box deletes the feature.
+    mock_get.return_value = 0
+    preload_dispvm_spin.set_value(1)
+    preload_dispvm_spin_check.set_active(False)
+    basics_handler.save()
+    assert mock_apply.call_args[0] == (
+        test_qapp.domains["dom0"],
+        "preload-dispvm-max",
+        None,
+    )
+    assert not preload_dispvm_spin.is_sensitive()
+
+    # Assert that reset sets the current value.
+    preload_dispvm_spin_check.set_active(True)
+    assert preload_dispvm_spin.is_sensitive()
+    mock_get_count = mock_get.call_count
+    mock_get.return_value = 1
+    basics_handler.reset()
+    assert mock_get.call_count == mock_get_count + 1
+    assert preload_dispvm_spin.get_value_as_int() == 1
+
+    # Assert that value is 1 when feature is None, get current value otherwise.
+    mock_get.return_value = None
+    preload_dispvm_spin_check.set_active(False)
+    preload_dispvm_spin_check.set_active(True)
+    assert preload_dispvm_spin.get_value_as_int() == 1
+
+    mock_get.return_value = 0
+    preload_dispvm_spin_check.set_active(False)
+    preload_dispvm_spin_check.set_active(True)
+    assert preload_dispvm_spin.get_value_as_int() == 0
+
+    mock_get.return_value = ""
+    preload_dispvm_spin_check.set_active(False)
+    preload_dispvm_spin_check.set_active(True)
+    assert preload_dispvm_spin.get_value_as_int() == 0
+
+    mock_get.return_value = 1
+    preload_dispvm_spin_check.set_active(False)
+    preload_dispvm_spin_check.set_active(True)
+    assert preload_dispvm_spin.get_value_as_int() == 1
+
+
 def test_basics_handler(real_builder, test_qapp):
     basics_handler = BasicSettingsHandler(real_builder, test_qapp)
 
     assert basics_handler.get_unsaved() == ""
 
-    # all handlers are tested above, so now just use one as example
-    # change clockvm
+    # All handlers are tested above, so now just use one as example.
     clockvm_combo: Gtk.ComboBox = real_builder.get_object("basics_clockvm_combo")
     initial_clockvm = clockvm_combo.get_active_id()
     assert initial_clockvm != "test-blue"
-    clockvm_combo.set_active_id("test-blue")
 
+    clockvm_combo.set_active_id("test-blue")
     assert basics_handler.get_unsaved() == "Clock qube"
 
     basics_handler.reset()
-
     assert clockvm_combo.get_active_id() == initial_clockvm
     assert basics_handler.get_unsaved() == ""
 
     clockvm_combo.set_active_id("test-blue")
-
     test_qapp.expected_calls[
         ("dom0", "admin.property.Set", "clockvm", b"test-blue")
     ] = b"0\x00"
