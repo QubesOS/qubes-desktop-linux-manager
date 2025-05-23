@@ -218,7 +218,7 @@ class PreloadDispvmHandler(AbstractTraitHolder):
         # TODO: ben: only allow setting if default_dispvm is not empty.
         # TODO: ben: if changing default_dispvm, set old value to 0 first.
         self.preload_dispvm_adjustment = Gtk.Adjustment()
-        self.preload_dispvm_adjustment.configure(0, 0, 9999, 1, 10, 0)
+        self.preload_dispvm_adjustment.configure(0, 0, 50, 1, 10, 0)
         self.widget.configure(self.preload_dispvm_adjustment, 0.1, 0)
         self.widget.set_value(self.get_current_value())
 
