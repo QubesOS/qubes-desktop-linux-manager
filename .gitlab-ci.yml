@@ -12,6 +12,7 @@ checks:tests:
   stage: checks
   variables:
     PYTEST_ADDOPTS: "--color=yes"
+    BLACK_ARGS: -l88 -v --diff --color --check
   before_script: &before-script
     - "PATH=$PATH:$HOME/.local/bin"
     - sudo dnf install -y python3-gobject gtk3 python3-pytest gtksourceview4

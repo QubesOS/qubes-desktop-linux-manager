@@ -208,6 +208,101 @@ class FeatureHandler(AbstractTraitHolder):
         return self.model
 
 
+class PreloadDispvmHandler(AbstractTraitHolder):
+    """Handler for preloaded disposables. Requires SpinButton widgets:
+    'basics_preload_dispvm'"""
+
+    def __init__(
+        self,
+        qapp: qubesadmin.Qubes,
+        widget: Gtk.SpinButton,
+        dependent_widget: Gtk.ComboBox,
+    ):
+        self.qapp = qapp
+        self.widget = widget
+        self.dependent_widget = dependent_widget
+        # TODO: ben: if changing default_dispvm, set old value to 0 first.
+        self.preload_dispvm_adjustment = Gtk.Adjustment()
+        self.preload_dispvm_adjustment.configure(0, 0, 50, 1, 10, 0)
+        self.widget.configure(self.preload_dispvm_adjustment, 0.1, 0)
+        self.widget.set_value(self.get_current_value())
+        self.dependent_widget.connect("changed", self.on_dependent_changed)
+        if not self.get_dependent_value():
+            self.widget.set_sensitive(False)
+
+    def get_dependent_value(self):
+        treeiter = self.dependent_widget.get_active_iter()
+        if treeiter is not None:
+            model = self.dependent_widget.get_model()
+            value = model[treeiter][3]
+            if value == "None":
+                value = None
+        else:
+            value = None
+        return value
+
+    def on_dependent_changed(self):
+        value = self.get_dependent_value()
+        if value:
+            self.widget.set_sensitive(True)
+            self.widget.set_value(self.get_current_value())
+        else:
+            self.widget.set_value(0)
+            self.widget.set_sensitive(False)
+
+    @staticmethod
+    def get_readable_description() -> str:  # pylint: disable=arguments-differ
+        """Get human-readable description of the widget"""
+        # the pylint: disable above is because pylint does not understand
+        # static methods
+        return _("Quantity of preloaded disposables from default dispvm")
+
+    def save(self):
+        """Save changes: update system value and mark it as new initial value"""
+        if not self.is_changed():
+            return
+        if not (qube := self.get_dependent_value()):
+            return
+        self.qapp.domains[qube].features["preload-dispvm-max"] = int(
+            self.widget.get_value()
+        )
+
+    def reset(self):
+        """Reset selection to the initial value."""
+        if not self.widget.is_sensitive():
+            return
+        self.widget.set_value(self.get_current_value())
+
+    def is_changed(self) -> bool:
+        """Has the user selected something different from the initial value?"""
+        if not self.widget.is_sensitive():
+            return False
+        if int(self.widget.get_value()) != self.get_current_value():
+            return True
+        return False
+
+    def get_unsaved(self):
+        """Get human-readable description of unsaved changes, or
+        empty string if none were found."""
+        if self.is_changed():
+            return self.get_readable_description()
+        return ""
+
+    def get_current_value(self):
+        """This should never be called."""
+        if not (qube := self.get_dependent_value()):
+            return 0
+        return int(self.qapp.domains[qube].features.get("preload-dispvm-max", 0) or 0)
+
+    def update_current_value(self):
+        """This should never be called."""
+        raise NotImplementedError
+
+    def get_model(self) -> TraitSelector:
+        """This should never be called."""
+        raise NotImplementedError
+
+
 class QMemManHelper:
     """Helper class to handle the ugliness of managing qmemman config."""
 
@@ -238,9 +333,7 @@ class QMemManHelper:
         """Wants a dict of 'vm-min-mem': value in MiB and
         'dom0-mem-boost': value in MiB"""
         # qmemman settings
-        text_dict = {
-            key: str(int(value)) + "MiB" for key, value in values_dict.items()
-        }
+        text_dict = {key: str(int(value)) + "MiB" for key, value in values_dict.items()}
 
         assert (
             len(text_dict) == 2
@@ -409,9 +502,7 @@ class KernelHolder(AbstractTraitHolder):
         )
 
     def _get_kernel_options(self) -> Dict[str, str]:
-        kernels = [
-            kernel.vid for kernel in self.qapp.pools["linux-kernel"].volumes
-        ]
+        kernels = [kernel.vid for kernel in self.qapp.pools["linux-kernel"].volumes]
         kernels = sorted(kernels, key=KernelVersion)
         kernels_dict = {kernel: kernel for kernel in kernels}
         kernels_dict["(none)"] = None
@@ -455,6 +546,9 @@ class BasicSettingsHandler(PageHandler):
         )
         self.defdispvm_combo: Gtk.ComboBox = gtk_builder.get_object(
             "basics_defdispvm_combo"
+        )
+        self.preload_dispvm_spin: Gtk.SpinButton = gtk_builder.get_object(
+            "basics_preload_dispvm"
         )
         self.fullscreen_combo: Gtk.ComboBoxText = gtk_builder.get_object(
             "basics_fullscreen_combo"
@@ -514,6 +608,14 @@ class BasicSettingsHandler(PageHandler):
             )
         )
         self.handlers.append(
+            PreloadDispvmHandler(
+                qapp=self.qapp,
+                widget=self.preload_dispvm_spin,
+                dependent_widget=self.defdispvm_combo,
+            )
+        )
+
+        self.handlers.append(
             FeatureHandler(
                 trait_holder=self.vm,
                 trait_name="gui-default-allow-fullscreen",
@@ -559,9 +661,7 @@ class BasicSettingsHandler(PageHandler):
                 is_bool=False,
             )
         )
-        self.handlers.append(
-            KernelHolder(qapp=self.qapp, widget=self.kernel_combo)
-        )
+        self.handlers.append(KernelHolder(qapp=self.qapp, widget=self.kernel_combo))
 
         self.handlers.append(MemoryHandler(gtk_builder))
 
