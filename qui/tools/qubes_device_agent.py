@@ -36,7 +36,14 @@ from gi.repository import Gtk
 # pylint: enable=import-error
 
 # pylint: disable=wrong-import-order
-import gbulb
+try:
+    from gi.events import GLibEventLoopPolicy
+
+    asyncio.set_event_loop_policy(GLibEventLoopPolicy())
+except ImportError:
+    import gbulb
+
+    gbulb.install()
 
 # pylint: enable=wrong-import-position
 
@@ -256,10 +263,10 @@ parser.add_argument(
 def main():
     args = parser.parse_args()
 
-    gbulb.install()
     agent = DeviceAgent(args.socket_path)
 
-    asyncio.run(agent.run())
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(agent.run())
 
 
 if __name__ == "__main__":
