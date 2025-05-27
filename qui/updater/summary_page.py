@@ -317,7 +317,8 @@ class SummaryPage:
                                vm.name, str(err))
                 self.status = RestartStatus.ERROR_TMPL_DOWN
 
-        asyncio.run(wait_for_domain_shutdown(wait_for))
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(wait_for_domain_shutdown(wait_for))
 
         return wait_for
 

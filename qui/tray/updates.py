@@ -16,8 +16,14 @@ import gi  # isort:skip
 gi.require_version('Gtk', '3.0')  # isort:skip
 from gi.repository import Gtk, Gio  # isort:skip
 
-import gbulb
-gbulb.install()
+try:
+    from gi.events import GLibEventLoopPolicy
+
+    asyncio.set_event_loop_policy(GLibEventLoopPolicy())
+except ImportError:
+    import gbulb
+
+    gbulb.install()
 
 import gettext
 t = gettext.translation("desktop-linux-manager", fallback=True)
