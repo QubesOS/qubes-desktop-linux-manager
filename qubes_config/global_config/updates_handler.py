@@ -70,22 +70,18 @@ class RepoHandler:
         self.template_official: Gtk.CheckButton = gtk_builder.get_object(
             "updates_template_official"
         )
-        self.template_official_testing: Gtk.CheckButton = (
-            gtk_builder.get_object("updates_template_official_testing")
+        self.template_official_testing: Gtk.CheckButton = gtk_builder.get_object(
+            "updates_template_official_testing"
         )
         self.template_community: Gtk.CheckButton = gtk_builder.get_object(
             "updates_template_community"
         )
-        self.template_community_testing: Gtk.CheckButton = (
-            gtk_builder.get_object("updates_template_community_testing")
+        self.template_community_testing: Gtk.CheckButton = gtk_builder.get_object(
+            "updates_template_community_testing"
         )
 
-        self.problems_repo_box: Gtk.Box = gtk_builder.get_object(
-            "updates_problem_repo"
-        )
-        self.problems_label: Gtk.Label = gtk_builder.get_object(
-            "updates_problem_label"
-        )
+        self.problems_repo_box: Gtk.Box = gtk_builder.get_object("updates_problem_repo")
+        self.problems_label: Gtk.Label = gtk_builder.get_object("updates_problem_label")
 
         # the code below relies on dicts in Python 3.6+ keeping the
         # order of items
@@ -140,9 +136,7 @@ class RepoHandler:
             self.repos = {}
             self.problems_repo_box.set_visible(True)
             self.problems_label.set_text(
-                self.problems_label.get_text()
-                + _(" Encountered error: ")
-                + str(ex)
+                self.problems_label.get_text() + _(" Encountered error: ") + str(ex)
             )
 
     def _load_state(self):
@@ -170,9 +164,7 @@ class RepoHandler:
         action = "Enable" if state else "Disable"
         result = self._run_qrexec_repo(f"qubes.repos.{action}", repository)
         if result != "ok\n":
-            raise RuntimeError(
-                "qrexec call stdout did not contain 'ok' as expected"
-            )
+            raise RuntimeError("qrexec call stdout did not contain 'ok' as expected")
 
     def get_unsaved(self) -> str:
         """Get human-readable description of unsaved changes, or
@@ -273,10 +265,7 @@ class UpdateCheckerHandler:
         for vm in self.qapp.domains:
             if vm.klass == "AdminVM":
                 continue
-            if (
-                get_boolean_feature(vm, self.FEATURE_NAME, True)
-                != self.initial_default
-            ):
+            if get_boolean_feature(vm, self.FEATURE_NAME, True) != self.initial_default:
                 self.initial_exceptions.append(vm)
 
         if self.initial_default:
@@ -299,9 +288,7 @@ class UpdateCheckerHandler:
 
         self.flowbox_handler.set_visible(self.exceptions_check.get_active())
 
-        self.exceptions_check.connect(
-            "toggled", self._enable_exceptions_clicked
-        )
+        self.exceptions_check.connect("toggled", self._enable_exceptions_clicked)
 
     def _set_label(self):
         if self.enable_radio.get_active():
@@ -491,10 +478,8 @@ class UpdateProxy:
 
     def load_rules(self):
         """Load rules into widgets."""
-        self.rules, self.current_token = (
-            self.policy_manager.get_rules_from_filename(
-                self.policy_file_name, ""
-            )
+        self.rules, self.current_token = self.policy_manager.get_rules_from_filename(
+            self.policy_file_name, ""
         )
         def_updatevm = self.default_updatevm
         def_whonix_updatevm = None
@@ -582,9 +567,7 @@ class UpdateProxy:
             return True
         if self.whonix_updatevm_model.is_changed():
             return True
-        if [
-            rule.raw_rule for rule in self.current_exception_rules
-        ] != self.rules[:-2]:
+        if [rule.raw_rule for rule in self.current_exception_rules] != self.rules[:-2]:
             return True
         return False
 
@@ -621,8 +604,7 @@ class UpdateProxy:
                     service=self.service_name,
                     source="@type:TemplateVM",
                     target="@default",
-                    action="allow "
-                    f"target={self.updatevm_model.get_selected()}",
+                    action="allow " f"target={self.updatevm_model.get_selected()}",
                 )
             )
             new_update_proxies.add(self.updatevm_model.get_selected())

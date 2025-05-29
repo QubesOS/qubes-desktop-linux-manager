@@ -243,14 +243,10 @@ class RuleTargetedAdminVM(AbstractRuleWrapper):
             raise ValueError(_("Target must be @adminvm"))
         if isinstance(rule.action, Ask):
             if rule.action.default_target != "@adminvm":
-                raise ValueError(
-                    _("If action is ask, default_target must be @adminvm")
-                )
+                raise ValueError(_("If action is ask, default_target must be @adminvm"))
         if isinstance(rule.action, Allow):
             if rule.action.target:
-                raise ValueError(
-                    _("If action is allow, no parameters are allowed")
-                )
+                raise ValueError(_("If action is allow, no parameters are allowed"))
 
     @property
     def target(self):
@@ -397,9 +393,7 @@ class RuleTargeted(AbstractRuleWrapper):
         Return True if rule with other_source and other_target would conflict
          with self.
         """
-        if super().is_rule_conflicting(
-            other_source, other_target, other_action
-        ):
+        if super().is_rule_conflicting(other_source, other_target, other_action):
             return True
         if self.action == "allow" and other_source == self.source:
             return True
@@ -574,9 +568,5 @@ class TargetedVerbDescription(AbstractVerbDescription):
 
     def get_verb_for_action_and_target(self, action: str, target: str) -> str:
         if target.startswith("@") and target != "@dispvm":
-            return self.multi_target_descr.get(action, "").rjust(
-                self.max_length, " "
-            )
-        return self.single_target_descr.get(action, "").rjust(
-            self.max_length, " "
-        )
+            return self.multi_target_descr.get(action, "").rjust(self.max_length, " ")
+        return self.single_target_descr.get(action, "").rjust(self.max_length, " ")

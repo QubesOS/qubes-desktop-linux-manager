@@ -53,12 +53,8 @@ class ThisDeviceHandler(PageHandler):
         self.qapp = qapp
         self.policy_manager = policy_manager
 
-        self.model_label: Gtk.Label = gtk_builder.get_object(
-            "thisdevice_model_label"
-        )
-        self.data_label: Gtk.Label = gtk_builder.get_object(
-            "thisdevice_data_label"
-        )
+        self.model_label: Gtk.Label = gtk_builder.get_object("thisdevice_model_label")
+        self.data_label: Gtk.Label = gtk_builder.get_object("thisdevice_data_label")
 
         self.certified_box_yes: Gtk.Box = gtk_builder.get_object(
             "thisdevice_certified_box_yes"
@@ -100,19 +96,13 @@ class ThisDeviceHandler(PageHandler):
         self.compat_usbk_label: Gtk.Label = gtk_builder.get_object(
             "thisdevice_usbk_label"
         )
-        self.compat_pv_image: Gtk.Image = gtk_builder.get_object(
-            "thisdevice_pv_image"
-        )
-        self.compat_pv_label: Gtk.Label = gtk_builder.get_object(
-            "thisdevice_pv_label"
-        )
+        self.compat_pv_image: Gtk.Image = gtk_builder.get_object("thisdevice_pv_image")
+        self.compat_pv_label: Gtk.Label = gtk_builder.get_object("thisdevice_pv_label")
         self.compat_pv_tooltip: Gtk.Image = gtk_builder.get_object(
             "thisdevice_pv_tooltip"
         )
 
-        self.copy_button: Gtk.Button = gtk_builder.get_object(
-            "thisdevice_copy_button"
-        )
+        self.copy_button: Gtk.Button = gtk_builder.get_object("thisdevice_copy_button")
         self.copy_hcl_button: Gtk.Button = gtk_builder.get_object(
             "thisdevice_copy_hcl_button"
         )
@@ -125,9 +115,7 @@ class ThisDeviceHandler(PageHandler):
                 ["qubes-hcl-report", "-y"]
             ).decode()
         except subprocess.CalledProcessError as ex:
-            label_text += _("Failed to load system data: {ex}\n").format(
-                ex=str(ex)
-            )
+            label_text += _("Failed to load system data: {ex}\n").format(ex=str(ex))
             self.hcl_check = ""
 
         try:
@@ -172,14 +160,10 @@ class ThisDeviceHandler(PageHandler):
         self.compat_hvm_label.set_markup(f"<b>HVM:</b> {self._get_data('hvm')}")
 
         self.set_state(self.compat_iommu_image, self._get_data("iommu"))
-        self.compat_iommu_label.set_markup(
-            f"<b>I/O MMU:</b> {self._get_data('iommu')}"
-        )
+        self.compat_iommu_label.set_markup(f"<b>I/O MMU:</b> {self._get_data('iommu')}")
 
         self.set_state(self.compat_hap_image, self._get_data("slat"))
-        self.compat_hap_label.set_markup(
-            f"<b>HAP/SLAT:</b> {self._get_data('slat')}"
-        )
+        self.compat_hap_label.set_markup(f"<b>HAP/SLAT:</b> {self._get_data('slat')}")
 
         self.set_state(
             self.compat_tpm_image,
@@ -195,9 +179,7 @@ class ThisDeviceHandler(PageHandler):
             self.compat_tpm_label.set_markup(_("<b>TPM version</b>: 1.2"))
         else:
             self.set_state(self.compat_tpm_image, "no")
-            self.compat_tpm_label.set_markup(
-                _("<b>TPM version</b>: device not found")
-            )
+            self.compat_tpm_label.set_markup(_("<b>TPM version</b>: device not found"))
 
         self.set_state(self.compat_remapping_image, self._get_data("remap"))
         self.compat_remapping_label.set_markup(
@@ -207,9 +189,7 @@ class ThisDeviceHandler(PageHandler):
         self.set_policy_state()
 
         pv_vms = [
-            vm
-            for vm in self.qapp.domains
-            if getattr(vm, "virt_mode", None) == "pv"
+            vm for vm in self.qapp.domains if getattr(vm, "virt_mode", None) == "pv"
         ]
 
         self.set_state(self.compat_pv_image, "no" if pv_vms else "yes")
@@ -255,10 +235,7 @@ class ThisDeviceHandler(PageHandler):
             show_error(
                 self.copy_button.get_toplevel(),
                 _("Failed to copy to Global Clipboard"),
-                _(
-                    "An error occurred while trying to access"
-                    " Global Clipboard"
-                ),
+                _("An error occurred while trying to access Global Clipboard"),
             )
 
     @staticmethod

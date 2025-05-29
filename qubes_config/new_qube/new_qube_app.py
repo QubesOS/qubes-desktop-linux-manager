@@ -94,9 +94,7 @@ class CreateNewQube(Gtk.Application):
             width = int(self.main_window.get_screen().get_width() * 0.9)
         else:
             # try to have at least 1100 pixels
-            width = min(
-                int(self.main_window.get_screen().get_width() * 0.9), 800
-            )
+            width = min(int(self.main_window.get_screen().get_width() * 0.9), 800)
         if (
             self.main_window.get_allocated_height()
             > self.main_window.get_screen().get_height() * 0.9
@@ -121,9 +119,7 @@ class CreateNewQube(Gtk.Application):
 
         self.main_window = self.builder.get_object("main_window")
         self.qube_name: Gtk.Entry = self.builder.get_object("qube_name")
-        self.qube_label_combo: Gtk.ComboBox = self.builder.get_object(
-            "qube_label"
-        )
+        self.qube_label_combo: Gtk.ComboBox = self.builder.get_object("qube_label")
 
         load_theme(
             widget=self.main_window,
@@ -139,9 +135,7 @@ class CreateNewQube(Gtk.Application):
 
         self.progress_bar_dialog.update_progress(0.1)
 
-        self.qube_type_app: Gtk.RadioButton = self.builder.get_object(
-            "qube_type_app"
-        )
+        self.qube_type_app: Gtk.RadioButton = self.builder.get_object("qube_type_app")
         self.qube_type_template: Gtk.RadioButton = self.builder.get_object(
             "qube_type_template"
         )
@@ -154,15 +148,9 @@ class CreateNewQube(Gtk.Application):
 
         self.tooltips = {
             "qube_type_app": self.builder.get_object("qube_type_app_q"),
-            "qube_type_template": self.builder.get_object(
-                "qube_type_template_q"
-            ),
-            "qube_type_standalone": self.builder.get_object(
-                "qube_type_standalone_q"
-            ),
-            "qube_type_disposable": self.builder.get_object(
-                "qube_type_disposable_q"
-            ),
+            "qube_type_template": self.builder.get_object("qube_type_template_q"),
+            "qube_type_standalone": self.builder.get_object("qube_type_standalone_q"),
+            "qube_type_disposable": self.builder.get_object("qube_type_disposable_q"),
         }
 
         self.qube_type_app.connect("toggled", self._type_selected)
@@ -200,14 +188,10 @@ class CreateNewQube(Gtk.Application):
 
         self.progress_bar_dialog.update_progress(0.1)
 
-        self.create_button: Gtk.Button = self.builder.get_object(
-            "create_button"
-        )
+        self.create_button: Gtk.Button = self.builder.get_object("create_button")
         self.create_button.connect("clicked", self._do_create_qube)
 
-        self.cancel_button: Gtk.Button = self.builder.get_object(
-            "cancel_button"
-        )
+        self.cancel_button: Gtk.Button = self.builder.get_object("cancel_button")
         self.cancel_button.connect("clicked", self._quit)
 
         self.viewport_handler = ViewportHandler(
@@ -258,9 +242,7 @@ class CreateNewQube(Gtk.Application):
         else:
             self.network_selector.network_default.set_active(True)
 
-        self.tooltips[button_name].set_from_pixbuf(
-            load_icon("qubes-question", 20, 20)
-        )
+        self.tooltips[button_name].set_from_pixbuf(load_icon("qubes-question", 20, 20))
 
     def _do_create_qube(self, *_args):
         label = self.qube_label_modeler.get_selected()

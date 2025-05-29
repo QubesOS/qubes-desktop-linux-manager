@@ -50,15 +50,11 @@ def make_rule(source, target, action):
     )
 
 
-VERB_DESCR = SimpleVerbDescription(
-    {"ask": "ASK", "allow": "ALLOW", "deny": "DENY"}
-)
+VERB_DESCR = SimpleVerbDescription({"ask": "ASK", "allow": "ALLOW", "deny": "DENY"})
 
 
 def test_vm_widget(test_qapp):
-    simple_widget = VMWidget(
-        qapp=test_qapp, categories=None, initial_value="test-vm"
-    )
+    simple_widget = VMWidget(qapp=test_qapp, categories=None, initial_value="test-vm")
 
     # test if parts of the widgets behave as expected
     # at the start, name should be visible and combo hidden
@@ -71,9 +67,7 @@ def test_vm_widget(test_qapp):
 
 
 def test_vm_widget_changes(test_qapp):
-    simple_widget = VMWidget(
-        qapp=test_qapp, categories=None, initial_value="test-vm"
-    )
+    simple_widget = VMWidget(qapp=test_qapp, categories=None, initial_value="test-vm")
     assert not simple_widget.is_changed()
     assert str(simple_widget.get_selected()) == "test-vm"
 
@@ -121,10 +115,7 @@ def test_action_widget_choices():
 
     assert not action_widget.is_changed()
     assert str(action_widget.get_selected()) == "allow"
-    assert (
-        action_widget.name_widget.get_text()
-        == RuleSimple.ACTION_CHOICES["allow"]
-    )
+    assert action_widget.name_widget.get_text() == RuleSimple.ACTION_CHOICES["allow"]
 
     action_widget.set_editable(True)
     action_widget.combobox.set_active_id(RuleSimple.ACTION_CHOICES["ask"])
@@ -133,14 +124,8 @@ def test_action_widget_choices():
     # get back to ineditable, change should be discarded
     action_widget.set_editable(False)
     assert str(action_widget.get_selected()) == "allow"
-    assert (
-        action_widget.name_widget.get_text()
-        == RuleSimple.ACTION_CHOICES["allow"]
-    )
-    assert (
-        action_widget.combobox.get_active_id()
-        == RuleSimple.ACTION_CHOICES["allow"]
-    )
+    assert action_widget.name_widget.get_text() == RuleSimple.ACTION_CHOICES["allow"]
+    assert action_widget.combobox.get_active_id() == RuleSimple.ACTION_CHOICES["allow"]
     assert not action_widget.is_changed()
 
     # let's change stuff for real
@@ -153,13 +138,8 @@ def test_action_widget_choices():
 
     assert not action_widget.is_changed()
     assert str(action_widget.get_selected()) == "ask"
-    assert (
-        action_widget.name_widget.get_text() == RuleSimple.ACTION_CHOICES["ask"]
-    )
-    assert (
-        action_widget.combobox.get_active_id()
-        == RuleSimple.ACTION_CHOICES["ask"]
-    )
+    assert action_widget.name_widget.get_text() == RuleSimple.ACTION_CHOICES["ask"]
+    assert action_widget.combobox.get_active_id() == RuleSimple.ACTION_CHOICES["ask"]
 
 
 def test_action_widget_verbdescr():
@@ -187,9 +167,7 @@ def test_rule_row(test_qapp):
     mock_handler.verify_new_rule.return_value = None
     rule = make_rule("test-blue", "test-red", "ask")
 
-    rule_row = RuleListBoxRow(
-        parent_handler=mock_handler, rule=rule, qapp=test_qapp
-    )
+    rule_row = RuleListBoxRow(parent_handler=mock_handler, rule=rule, qapp=test_qapp)
 
     # it should start in a non-editable mode
     assert not rule_row.action_widget.combobox.get_visible()
@@ -241,8 +219,7 @@ def test_rule_delete_new(test_qapp):
     rule_row.set_edit_mode(True)
 
     with patch(
-        "qubes_config.global_config.rule_list_widgets."
-        "RuleListBoxRow._do_delete_self"
+        "qubes_config.global_config.rule_list_widgets.RuleListBoxRow._do_delete_self"
     ) as mock_delete:
         # check that rule will try to delete itself if exiting edit mode
         # with no changes
@@ -256,8 +233,7 @@ def test_rule_delete_new(test_qapp):
     rule_row.set_edit_mode(True)
     rule_row.source_widget.model.select_value("test-vm")
     with patch(
-        "qubes_config.global_config.rule_list_widgets."
-        "RuleListBoxRow._do_delete_self"
+        "qubes_config.global_config.rule_list_widgets.RuleListBoxRow._do_delete_self"
     ) as mock_delete, patch.object(rule_row, "get_parent"):
         # check that rule will NOT try to delete itself if saving with changes
         assert rule_row.validate_and_save()

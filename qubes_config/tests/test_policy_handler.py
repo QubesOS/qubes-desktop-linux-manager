@@ -135,9 +135,7 @@ TestService * @anyvm @anyvm deny"""
 TestService * @anyvm @anyvm deny"""
     current_policy_rules = test_policy_manager.text_to_rules(current_policy)
 
-    test_policy_manager.policy_client.policy_replace(
-        "c-test", current_policy, "any"
-    )
+    test_policy_manager.policy_client.policy_replace("c-test", current_policy, "any")
 
     handler = PolicyHandler(
         qapp=test_qapp,
@@ -176,9 +174,7 @@ TestService * @anyvm @anyvm deny"""
         current_policy_with_deny
     )
 
-    test_policy_manager.policy_client.policy_replace(
-        "c-test", current_policy, "any"
-    )
+    test_policy_manager.policy_client.policy_replace("c-test", current_policy, "any")
 
     handler = PolicyHandler(
         qapp=test_qapp,
@@ -194,9 +190,7 @@ TestService * @anyvm @anyvm deny"""
 
     # this should have completely empty policy, enabled default policy
     assert handler.enable_radio.get_active()
-    assert compare_rule_lists(
-        handler.current_rules, current_policy_rules_with_deny
-    )
+    assert compare_rule_lists(handler.current_rules, current_policy_rules_with_deny)
 
 
 def test_policy_handler_add_rule(
@@ -606,9 +600,7 @@ def test_policy_handler_view_raw(
     TestService * @anyvm @anyvm deny"""
     current_policy_rules = test_policy_manager.text_to_rules(current_policy)
 
-    test_policy_manager.policy_client.policy_replace(
-        "c-test", current_policy, "any"
-    )
+    test_policy_manager.policy_client.policy_replace("c-test", current_policy, "any")
 
     handler = PolicyHandler(
         qapp=test_qapp,
@@ -647,9 +639,7 @@ def test_policy_handler_edit_raw(
     current_policy = """TestService * test-vm test-red allow
     TestService * @anyvm @anyvm deny"""
 
-    test_policy_manager.policy_client.policy_replace(
-        "c-test", current_policy, "any"
-    )
+    test_policy_manager.policy_client.policy_replace("c-test", current_policy, "any")
 
     handler = PolicyHandler(
         qapp=test_qapp,
@@ -683,9 +673,7 @@ def test_policy_handler_edit_raw_error(
     TestService * @anyvm @anyvm deny"""
     current_policy_rules = test_policy_manager.text_to_rules(current_policy)
 
-    test_policy_manager.policy_client.policy_replace(
-        "c-test", current_policy, "any"
-    )
+    test_policy_manager.policy_client.policy_replace("c-test", current_policy, "any")
 
     handler = PolicyHandler(
         qapp=test_qapp,
@@ -704,9 +692,7 @@ def test_policy_handler_edit_raw_error(
     TestService * @anyvm @anyvm deny"""
 
     handler.raw_handler.text_buffer.set_text(expected_policy)
-    with patch(
-        "qubes_config.global_config.policy_handler.show_error"
-    ) as mock_error:
+    with patch("qubes_config.global_config.policy_handler.show_error") as mock_error:
         assert not mock_error.mock_calls
         handler.raw_handler.raw_save.clicked()
         assert mock_error.mock_calls
@@ -731,9 +717,7 @@ def test_policy_handler_edit_raw_close(
     current_policy = """TestService * test-vm test-red allow
     TestService * @anyvm @anyvm deny"""
 
-    test_policy_manager.policy_client.policy_replace(
-        "c-test", current_policy, "any"
-    )
+    test_policy_manager.policy_client.policy_replace("c-test", current_policy, "any")
 
     handler = PolicyHandler(
         qapp=test_qapp,
@@ -869,9 +853,7 @@ def test_policy_handler_get_unsaved_unsupported(
     current_policy = """TestService * test-vm test-blue allow target=test-red
 TestService * @anyvm @anyvm deny"""
 
-    test_policy_manager.policy_client.policy_replace(
-        "c-test", current_policy, "any"
-    )
+    test_policy_manager.policy_client.policy_replace("c-test", current_policy, "any")
 
     handler = PolicyHandler(
         qapp=test_qapp,
@@ -900,9 +882,7 @@ TestService * @anyvm @anyvm deny"""
 ####### Subset handler
 
 
-def test_subset_handler(
-    test_builder, test_qapp, test_policy_manager: PolicyManager
-):
+def test_subset_handler(test_builder, test_qapp, test_policy_manager: PolicyManager):
     default_policy = """
 TestService * @anyvm test-blue allow"""
 
@@ -927,9 +907,7 @@ TestService * @anyvm test-blue allow"""
     handler.add_select_button.clicked()
     assert handler.add_select_box.get_visible()
     handler.select_qube_model.select_value("vault")
-    with patch(
-        "qubes_config.global_config.policy_handler.ask_question"
-    ) as mock_ask:
+    with patch("qubes_config.global_config.policy_handler.ask_question") as mock_ask:
         handler.add_select_confirm.clicked()
         # vault is not networked
         assert not mock_ask.mock_calls
@@ -944,9 +922,7 @@ TestService * @anyvm vault ask"""
     handler.add_select_button.clicked()
     assert handler.add_select_box.get_visible()
     handler.select_qube_model.select_value("test-red")
-    with patch(
-        "qubes_config.global_config.policy_handler.ask_question"
-    ) as mock_ask:
+    with patch("qubes_config.global_config.policy_handler.ask_question") as mock_ask:
         handler.add_select_confirm.clicked()
         # test-red is networked
         assert mock_ask.mock_calls
@@ -964,9 +940,7 @@ def test_subset_handler_get_unsaved_unsupported(
 ):
     current_policy = """TestService * @anyvm test-blue allow target=test=red"""
 
-    test_policy_manager.policy_client.policy_replace(
-        "c-test", current_policy, "any"
-    )
+    test_policy_manager.policy_client.policy_replace("c-test", current_policy, "any")
 
     handler = PolicyHandler(
         qapp=test_qapp,
@@ -1217,9 +1191,7 @@ TestService * test-blue vault allow
 TestService * @anyvm vault allow target=test-blue
 """
 
-    test_policy_manager.policy_client.policy_replace(
-        "c-test", current_policy, "any"
-    )
+    test_policy_manager.policy_client.policy_replace("c-test", current_policy, "any")
 
     handler = VMSubsetPolicyHandler(
         qapp=test_qapp,

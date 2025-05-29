@@ -238,9 +238,7 @@ class QMemManHelper:
         """Wants a dict of 'vm-min-mem': value in MiB and
         'dom0-mem-boost': value in MiB"""
         # qmemman settings
-        text_dict = {
-            key: str(int(value)) + "MiB" for key, value in values_dict.items()
-        }
+        text_dict = {key: str(int(value)) + "MiB" for key, value in values_dict.items()}
 
         assert (
             len(text_dict) == 2
@@ -409,9 +407,7 @@ class KernelHolder(AbstractTraitHolder):
         )
 
     def _get_kernel_options(self) -> Dict[str, str]:
-        kernels = [
-            kernel.vid for kernel in self.qapp.pools["linux-kernel"].volumes
-        ]
+        kernels = [kernel.vid for kernel in self.qapp.pools["linux-kernel"].volumes]
         kernels = sorted(kernels, key=KernelVersion)
         kernels_dict = {kernel: kernel for kernel in kernels}
         kernels_dict["(none)"] = None
@@ -559,9 +555,7 @@ class BasicSettingsHandler(PageHandler):
                 is_bool=False,
             )
         )
-        self.handlers.append(
-            KernelHolder(qapp=self.qapp, widget=self.kernel_combo)
-        )
+        self.handlers.append(KernelHolder(qapp=self.qapp, widget=self.kernel_combo))
 
         self.handlers.append(MemoryHandler(gtk_builder))
 

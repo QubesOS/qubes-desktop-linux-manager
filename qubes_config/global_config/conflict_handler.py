@@ -80,9 +80,7 @@ class ConflictFileHandler:
         self.own_file_name = own_file_name
         self.policy_manager = policy_manager
 
-        self.problem_box: Gtk.Box = gtk_builder.get_object(
-            f"{prefix}_problem_box"
-        )
+        self.problem_box: Gtk.Box = gtk_builder.get_object(f"{prefix}_problem_box")
         self.problem_list: Gtk.ListBox = gtk_builder.get_object(
             f"{prefix}_problem_files_list"
         )

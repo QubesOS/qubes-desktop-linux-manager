@@ -229,9 +229,7 @@ class ApplicationBoxHandler:
             "label_apps_explain"
         )
         self.apps_close: Gtk.Button = gtk_builder.get_object("apps_close")
-        self.apps_search: Gtk.SearchEntry = gtk_builder.get_object(
-            "apps_search"
-        )
+        self.apps_search: Gtk.SearchEntry = gtk_builder.get_object("apps_search")
         self.apps_list_placeholder: Gtk.Label = gtk_builder.get_object(
             "apps_list_placeholder"
         )
@@ -241,9 +239,7 @@ class ApplicationBoxHandler:
         self.label_other_templates: Gtk.Label = gtk_builder.get_object(
             "label_other_templates"
         )
-        self.load_all_button: Gtk.Button = gtk_builder.get_object(
-            "apps_list_load_all"
-        )
+        self.load_all_button: Gtk.Button = gtk_builder.get_object("apps_list_load_all")
 
         self.change_template_msg: Gtk.Dialog = gtk_builder.get_object(
             "msg_change_template"
@@ -259,9 +255,7 @@ class ApplicationBoxHandler:
         )
         self.target_template_name_widget: Optional[Gtk.Widget] = None
 
-        self.change_template_cancel.connect(
-            "clicked", self._hide_template_change
-        )
+        self.change_template_cancel.connect("clicked", self._hide_template_change)
         self.change_template_ok.connect("clicked", self._do_template_change)
         self.change_template_msg.connect(
             "key_press_event", self._keypress_change_template
@@ -302,9 +296,7 @@ class ApplicationBoxHandler:
     def _sort_func_app_list(self, x: ApplicationRow, y: ApplicationRow):
         # negation because True > False, and we want the selected rows to be
         # at the top
-        selection_comparison = self._cmp(
-            not x.is_selected(), not y.is_selected()
-        )
+        selection_comparison = self._cmp(not x.is_selected(), not y.is_selected())
         if selection_comparison == 0:
             return self._cmp(x.appdata.name, y.appdata.name)
         return selection_comparison
@@ -325,9 +317,7 @@ class ApplicationBoxHandler:
     def _filter_func_other_list(self, x: ApplicationRow):
         if not self.apps_list_placeholder.get_mapped():
             return False
-        if not self.template_selector.is_given_template_available(
-            x.appdata.template
-        ):
+        if not self.template_selector.is_given_template_available(x.appdata.template):
             return False
         return self._filter_func_app_list(x)
 
@@ -384,9 +374,7 @@ class ApplicationBoxHandler:
         if not template_vm:
             return
 
-        available_applications = self.template_selector.get_available_apps(
-            template_vm
-        )
+        available_applications = self.template_selector.get_available_apps(template_vm)
         selected = []
         if default:
             selected = self.template_selector.get_default_apps(template_vm)
@@ -417,9 +405,7 @@ class ApplicationBoxHandler:
 
     def _do_template_change(self, *_args):
         if self.target_template_name_widget:
-            self.template_selector.select_template(
-                self.target_template_name_widget.vm
-            )
+            self.template_selector.select_template(self.target_template_name_widget.vm)
         self._hide_template_change()
         self._hide_window()
 

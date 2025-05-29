@@ -83,9 +83,7 @@ class Settings:
         with importlib.resources.as_file(glade_ref) as path:
             self.builder.add_from_file(str(path))
 
-        self.settings_window: Gtk.Window = self.builder.get_object(
-            "main_window"
-        )
+        self.settings_window: Gtk.Window = self.builder.get_object("main_window")
 
         self.settings_window.set_transient_for(main_window)
         self.settings_window.connect("delete-event", self.close_without_saving)
@@ -93,17 +91,13 @@ class Settings:
         self.cancel_button: Gtk.Button = self.builder.get_object(
             "button_settings_cancel"
         )
-        self.cancel_button.connect(
-            "clicked", lambda _: self.settings_window.close()
-        )
+        self.cancel_button.connect("clicked", lambda _: self.settings_window.close())
 
-        self.save_button: Gtk.Button = self.builder.get_object(
-            "button_settings_save"
-        )
+        self.save_button: Gtk.Button = self.builder.get_object("button_settings_save")
         self.save_button.connect("clicked", self.save_and_close)
 
-        self.days_without_update_button: Gtk.SpinButton = (
-            self.builder.get_object("days_without_update")
+        self.days_without_update_button: Gtk.SpinButton = self.builder.get_object(
+            "days_without_update"
         )
         adj = Gtk.Adjustment(
             Settings.DEFAULT_UPDATE_IF_STALE,
@@ -115,8 +109,8 @@ class Settings:
         )
         self.days_without_update_button.configure(adj, 1, 0)
 
-        self.restart_servicevms_checkbox: Gtk.CheckButton = (
-            self.builder.get_object("restart_servicevms")
+        self.restart_servicevms_checkbox: Gtk.CheckButton = self.builder.get_object(
+            "restart_servicevms"
         )
         self.restart_servicevms_checkbox.connect(
             "toggled", self._show_restart_exceptions
@@ -125,9 +119,7 @@ class Settings:
         self.restart_other_checkbox: Gtk.CheckButton = self.builder.get_object(
             "restart_other"
         )
-        self.restart_other_checkbox.connect(
-            "toggled", self._show_restart_exceptions
-        )
+        self.restart_other_checkbox.connect("toggled", self._show_restart_exceptions)
 
         self.hide_skipped_checkbox: Gtk.CheckButton = self.builder.get_object(
             "hide_skipped"
@@ -140,9 +132,7 @@ class Settings:
         self.available_vms = [
             vm
             for vm in self.qapp.domains
-            if vm.klass == "DispVM"
-            and not vm.auto_cleanup
-            or vm.klass == "AppVM"
+            if vm.klass == "DispVM" and not vm.auto_cleanup or vm.klass == "AppVM"
         ]
         self.excluded_vms = [
             vm
@@ -160,8 +150,8 @@ class Settings:
             "restart_exceptions_page"
         )
 
-        self.limit_concurrency_checkbox: Gtk.CheckButton = (
-            self.builder.get_object("limit_concurrency")
+        self.limit_concurrency_checkbox: Gtk.CheckButton = self.builder.get_object(
+            "limit_concurrency"
         )
         self.limit_concurrency_checkbox.connect(
             "toggled", self._limit_concurrency_toggled
@@ -268,16 +258,10 @@ class Settings:
 
         self._init_restart_servicevms = self.restart_service_vms
         self._init_restart_other_vms = self.restart_other_vms
-        self.restart_servicevms_checkbox.set_sensitive(
-            not self.overrides.apply_to_sys
-        )
-        self.restart_servicevms_checkbox.set_active(
-            self._init_restart_servicevms
-        )
+        self.restart_servicevms_checkbox.set_sensitive(not self.overrides.apply_to_sys)
+        self.restart_servicevms_checkbox.set_active(self._init_restart_servicevms)
         self.restart_other_checkbox.set_active(self._init_restart_other_vms)
-        self.restart_other_checkbox.set_sensitive(
-            not self.overrides.apply_to_other
-        )
+        self.restart_other_checkbox.set_sensitive(not self.overrides.apply_to_other)
 
         self._init_max_concurrency = self.max_concurrency
         self._init_limit_concurrency = self._init_max_concurrency is not None

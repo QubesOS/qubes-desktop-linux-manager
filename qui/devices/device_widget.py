@@ -147,9 +147,7 @@ class DevicesTray(Gtk.Application):
         try:
             for devclass in DEV_TYPES:
                 for device in vm.devices[devclass]:
-                    changed_devices[str(device.port)] = backend.Device(
-                        device, self
-                    )
+                    changed_devices[str(device.port)] = backend.Device(device, self)
 
         except qubesadmin.exc.QubesException:
             changed_devices = {}  # VM was removed
@@ -199,9 +197,7 @@ class DevicesTray(Gtk.Application):
             for devclass in DEV_TYPES:
                 try:
                     for device in domain.devices[devclass]:
-                        self.devices[str(device.port)] = backend.Device(
-                            device, self
-                        )
+                        self.devices[str(device.port)] = backend.Device(device, self)
                 except qubesadmin.exc.QubesException:
                     # we have no permission to access VM's devices
                     continue
@@ -210,17 +206,13 @@ class DevicesTray(Gtk.Application):
         for domain in self.qapp.domains:
             for devclass in DEV_TYPES:
                 try:
-                    for device in domain.devices[
-                        devclass
-                    ].get_attached_devices():
+                    for device in domain.devices[devclass].get_attached_devices():
                         dev = str(device.port)
                         if dev in self.devices:
                             # occassionally ghost UnknownDevices appear when a
                             # device was removed but not detached from a VM
                             # FUTURE: is this still true after api changes?
-                            self.devices[dev].attachments.add(
-                                backend.VM(domain)
-                            )
+                            self.devices[dev].attachments.add(backend.VM(domain))
                 except qubesadmin.exc.QubesException:
                     # we have no permission to access VM's devices
                     continue
@@ -316,9 +308,7 @@ class DevicesTray(Gtk.Application):
         theme = "light" if is_theme_light(widget) else "dark"
         screen = Gdk.Screen.get_default()
         provider = Gtk.CssProvider()
-        css_file_ref = (
-            importlib.resources.files("qui") / f"qubes-devices-{theme}.css"
-        )
+        css_file_ref = importlib.resources.files("qui") / f"qubes-devices-{theme}.css"
         with importlib.resources.as_file(css_file_ref) as css_file:
             provider.load_from_path(str(css_file))
 
@@ -339,9 +329,7 @@ class DevicesTray(Gtk.Application):
         menu_items = []
         sorted_vms = sorted(self.vms)
         sorted_dispvms = sorted(self.dispvm_templates)
-        sorted_devices = sorted(
-            self.devices.values(), key=lambda x: x.sorting_key
-        )
+        sorted_devices = sorted(self.devices.values(), key=lambda x: x.sorting_key)
 
         for i, dev in enumerate(sorted_devices):
             if i == 0 or dev.device_group != sorted_devices[i - 1].device_group:
