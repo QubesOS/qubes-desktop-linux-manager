@@ -23,9 +23,14 @@ import gi  # isort:skip
 gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk, Gio  # isort:skip
 
-import gbulb
+try:
+    from gi.events import GLibEventLoopPolicy
 
-gbulb.install()
+    asyncio.set_event_loop_policy(GLibEventLoopPolicy())
+except ImportError:
+    import gbulb
+
+    gbulb.install()
 
 import gettext
 

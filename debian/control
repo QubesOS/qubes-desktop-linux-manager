@@ -6,7 +6,7 @@ Build-Depends:
  debhelper (>= 9),
  dh-python,
  python3-all,
- python3-gbulb,
+ python3-gi (>= 3.50.0) | python3-gbulb,
  python3-setuptools,
  python3-systemd,
 Standards-Version: 3.9.5

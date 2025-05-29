@@ -45,7 +45,15 @@ import gi
 gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk, Gio, Gdk  # isort:skip
 
-import gbulb
+try:
+    from gi.events import GLibEventLoopPolicy
+
+    asyncio.set_event_loop_policy(GLibEventLoopPolicy())
+except ImportError:
+    import gbulb
+
+    gbulb.install()
+
 import pyinotify
 
 import gettext
@@ -54,8 +62,6 @@ t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
 from .utils import run_asyncio_and_show_errors
-
-gbulb.install()
 
 DATA = "/var/run/qubes/qubes-clipboard.bin"
 METADATA = "/var/run/qubes/qubes-clipboard.bin.metadata"

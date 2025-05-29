@@ -44,14 +44,19 @@ import gi
 gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk, Gdk, Gio  # isort:skip
 
+try:
+    from gi.events import GLibEventLoopPolicy
+
+    asyncio.set_event_loop_policy(GLibEventLoopPolicy())
+except ImportError:
+    import gbulb
+
+    gbulb.install()
+
 from qui.devices import backend
 from qui.devices import actionable_widgets
 
 from qubes_config.widgets.gtk_utils import is_theme_light
-
-import gbulb
-
-gbulb.install()
 
 import gettext
 

@@ -48,7 +48,11 @@ BuildRequires:  python%{python3_pkgversion}-setuptools
 BuildRequires:  gettext
 
 Requires:  python%{python3_pkgversion}-setuptools
+%if 0%{?fedora} < 42
 Requires:  python%{python3_pkgversion}-gbulb
+%else
+Requires:   python%{python3_pkgversion}-gobject >= 3.50.0
+%endif
 Requires:  python%{python3_pkgversion}-inotify
 Requires:  libappindicator-gtk3
 Requires:  python%{python3_pkgversion}-systemd
