@@ -24,7 +24,7 @@ import subprocess
 import threading
 import time
 import gi
-from typing import Dict, List
+from typing import Dict
 
 gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk, Gdk, GLib, GObject  # isort:skip
@@ -231,7 +231,9 @@ class ProgressPage:
 
     def read_stdouts(self, proc, rows):
         curr_name_out = ""
-        for untrusted_line in iter(proc.stdout.readline, "__COMMUNICATION_IS_DONE__"):
+        for untrusted_line in iter(
+            proc.stdout.readline, "__COMMUNICATION_IS_DONE__"
+        ):
             if untrusted_line != "__COMMUNICATION_IS_DONE__":
                 line = self._sanitize_line(untrusted_line)
                 maybe_name, text = line.split(" ", 1)
