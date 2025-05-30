@@ -201,7 +201,7 @@ def test_populate_restart_list(
     expected,
     real_builder,
     test_qapp,
-    updatable_vms_list,
+    updateable_vms_list,
     mock_next_button,
     mock_cancel_button,
     mock_settings,
@@ -224,7 +224,7 @@ def test_populate_restart_list(
     )
     sut.summary_list = mock_tree_view
 
-    for row in updatable_vms_list:
+    for row in updateable_vms_list:
         row.set_status(UpdateStatus.Success)
         if row.vm.klass == "TemplateVM":
             for i, appvm in enumerate(row.vm.appvms):
@@ -233,7 +233,7 @@ def test_populate_restart_list(
                 else:
                     appvm.is_running = lambda *_args: False
 
-    sut.populate_restart_list(True, updatable_vms_list, mock_settings)
+    sut.populate_restart_list(True, updateable_vms_list, mock_settings)
 
     assert len(sut.list_store) == UP_VMS
     assert sum(row.selected for row in sut.list_store) == expected

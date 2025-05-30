@@ -205,7 +205,7 @@ class IntroPage:
         for row in self.list_store:
             row.selected = row.updates_available in self.head_checkbox.allowed
 
-    def select_rows_ignoring_conditions(self, cliargs, dom0):
+    def select_rows_ignoring_conditions(self, cliargs):
         cmd = ["qubes-vm-update", "--dry-run", "--quiet"]
 
         args = [a for a in dir(cliargs) if not a.startswith("_")]
@@ -213,6 +213,7 @@ class IntroPage:
             if arg in (
                 "non_interactive",
                 "non_default_select",
+                "dom0",
                 "restart",
                 "apply_to_sys",
                 "apply_to_all",
@@ -229,10 +230,12 @@ class IntroPage:
                 cmd.append(f"--{arg.replace('_', '-')}")
                 if not isinstance(value, bool):
                     cmd.append(str(value))
+        if cliargs.dom0:
+            cmd.extend(["--targets", "dom0"])
 
         to_update = set()
         non_default_select = [
-            "--" + arg for arg in cliargs.non_default_select if arg != "dom0"  # TODO remove dom0 flag
+            "--" + arg for arg in cliargs.non_default_select if arg != "dom0"
         ]
         non_default = [a for a in cmd if a in non_default_select]
         if non_default or cliargs.non_interactive:
@@ -251,12 +254,14 @@ class IntroPage:
             result = set()
             if "dom0" in output_lines[0]:
                 result.add("dom0")
-            if ":" not in output_lines[1]:
+
+            second_line = output_lines[1] if len(output_lines) > 1 else ""
+            if ":" not in second_line:
                 return result
 
             return result.union({
                 vm_name.strip()
-                for vm_name in output_lines[1].split(":", maxsplit=1)[1].split(",")
+                for vm_name in second_line.split(":", maxsplit=1)[1].split(",")
             })
         except subprocess.CalledProcessError as err:
             if err.returncode != 100:
