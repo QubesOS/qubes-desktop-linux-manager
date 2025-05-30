@@ -84,7 +84,7 @@ def test_perform_update(
     mock_next_button,
     mock_cancel_button,
     mock_label,
-    updatable_vms_list,
+    updateable_vms_list,
 ):
     mock_log = Mock()
     mock_callback = Mock()
@@ -97,7 +97,7 @@ def test_perform_update(
         mock_callback,
     )
 
-    sut.vms_to_update = updatable_vms_list
+    sut.vms_to_update = updateable_vms_list
 
     class VMConsumer:
         def __call__(self, vm_rows, *args, **kwargs):
@@ -130,7 +130,7 @@ def test_update_templates(
     idle_add,
     interrupted,
     real_builder,
-    updatable_vms_list,
+    updateable_vms_list,
     mock_next_button,
     mock_cancel_button,
     mock_label,
@@ -154,15 +154,15 @@ def test_update_templates(
 
     sut.update_details.progress_textview = mock_text_view
     # chose vm to show details
-    sut.update_details.active_row = updatable_vms_list[0]
-    for i, row in enumerate(updatable_vms_list):
+    sut.update_details.active_row = updateable_vms_list[0]
+    for i, row in enumerate(updateable_vms_list):
         row.buffer = f"Details {i}"
 
     if interrupted:
         sut.interrupt_update()
-    sut.update_selected(updatable_vms_list, mock_settings)
+    sut.update_selected(updateable_vms_list, mock_settings)
 
-    sut.update_details.set_active_row(updatable_vms_list[2])
+    sut.update_details.set_active_row(updateable_vms_list[2])
 
     calls = [
         call(sut.set_total_progress, 100),
@@ -252,7 +252,7 @@ def test_get_update_summary(
     mock_next_button,
     mock_cancel_button,
     mock_label,
-    updatable_vms_list,
+    updateable_vms_list,
 ):
     mock_log = Mock()
     mock_callback = Mock()
@@ -265,12 +265,12 @@ def test_get_update_summary(
         mock_callback,
     )
 
-    updatable_vms_list[0].set_status(UpdateStatus.NoUpdatesFound)
-    updatable_vms_list[1].set_status(UpdateStatus.Error)
-    updatable_vms_list[2].set_status(UpdateStatus.Cancelled)
-    updatable_vms_list[3].set_status(UpdateStatus.Success)
+    updateable_vms_list[0].set_status(UpdateStatus.NoUpdatesFound)
+    updateable_vms_list[1].set_status(UpdateStatus.Error)
+    updateable_vms_list[2].set_status(UpdateStatus.Cancelled)
+    updateable_vms_list[3].set_status(UpdateStatus.Success)
 
-    sut.vms_to_update = updatable_vms_list
+    sut.vms_to_update = updateable_vms_list
 
     updated, no_updates, failed, cancelled = sut.get_update_summary()
 
@@ -281,9 +281,9 @@ def test_get_update_summary(
     mock_callback.assert_not_called()
 
 
-def test_set_active_row(real_builder, updatable_vms_list):
+def test_set_active_row(real_builder, updateable_vms_list):
     sut = QubeUpdateDetails(real_builder)
-    row = updatable_vms_list[0]
+    row = updateable_vms_list[0]
     sut.set_active_row(row)
 
     assert sut.details_label.get_text().strip() == "Details for"
