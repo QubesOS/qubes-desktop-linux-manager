@@ -1,3 +1,17 @@
+qubes-desktop-linux-manager (4.3.13-1) unstable; urgency=medium
+
+  [ Ali Mirjamali ]
+  * Allow user to save valid modified policy on 1st char
+  * Exclude volatile DispVMs from Global Config
+
+  [ Marek Marczykowski-Górecki ]
+  * Use glib's native asyncio integration when available
+
+  [ Ali Mirjamali ]
+  * Add concurrent updates settings to tab-stops
+
+ -- Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>  Mon, 02 Jun 2025 02:09:54 +0200
+
 qubes-desktop-linux-manager (4.3.12-1) unstable; urgency=medium
 
   [ Ali Mirjamali ]
