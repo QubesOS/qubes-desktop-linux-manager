@@ -125,9 +125,7 @@ class NeverNotifyItem(Gtk.CheckMenuItem):
         self.set_label(_("Do not show notifications about this qube"))
 
         try:
-            self.set_active(
-                self.vm.features.get("disk-space-not-notify", False)
-            )
+            self.set_active(self.vm.features.get("disk-space-not-notify", False))
         except exc.QubesDaemonCommunicationError:
             self.set_active(False)
             self.set_sensitive(False)
@@ -344,9 +342,7 @@ def emit_notification(gtk_app, title, text, vm=None):
     notification.set_icon(Gio.ThemedIcon.new("dialog-warning"))
 
     if vm:
-        notification.add_button(
-            _("Open qube settings"), f"app.prefs::{vm.name}"
-        )
+        notification.add_button(_("Open qube settings"), f"app.prefs::{vm.name}")
 
     gtk_app.send_notification(None, notification)
 
@@ -393,8 +389,7 @@ class DiskSpace(Gtk.Application):
                 emit_notification(
                     self,
                     _("Disk usage warning!"),
-                    _("You are running out of disk space.")
-                    + "".join(pool_warning),
+                    _("You are running out of disk space.") + "".join(pool_warning),
                 )
                 self.pool_warned = True
         else:
@@ -414,9 +409,7 @@ class DiskSpace(Gtk.Application):
                     emit_notification(
                         self,
                         _("Qube usage warning"),
-                        _("Qube {} is running out of storage space.").format(
-                            vm.name
-                        ),
+                        _("Qube {} is running out of storage space.").format(vm.name),
                         vm=vm,
                     )
                     self.vms_warned.add(vm)

@@ -64,11 +64,13 @@ def test_populate_vm_list(
     assert len(sut.get_vms_to_update()) == 2
 
 
+# i-th expectations value is an expected number of selected VMs after clicking on the
+# colum header i times
 @pytest.mark.parametrize(
     "updates_available, expectations",
     (
-        pytest.param((2, 6), (0, 2, 6, 12, 0)),
-        pytest.param((6, 0), (0, 6, 12, 0)),
+        pytest.param((2, 6), (0, 2, 6, 13, 0)),
+        pytest.param((6, 0), (0, 6, 13, 0)),
     ),
 )
 def test_on_header_toggled(
@@ -88,7 +90,7 @@ def test_on_header_toggled(
     for vm in test_qapp.domains:
         sut.list_store.append_vm(vm)
 
-    assert len(sut.list_store) == 12
+    assert len(sut.list_store) == 13
 
     for i, row in enumerate(sut.list_store):
         if i < updates_available[0]:
@@ -107,9 +109,9 @@ def test_on_header_toggled(
         assert selected_num == expected
         assert (
             sut.checkbox_column_button.get_inconsistent()
-            and expected not in (0, 12)
+            and expected not in (0, 13)
             or sut.checkbox_column_button.get_active()
-            and expected == 12
+            and expected == 13
             or not sut.checkbox_column_button.get_active()
             and expected == 0
         )
@@ -128,7 +130,7 @@ def test_on_checkbox_toggled(
     for vm in test_qapp.domains:
         sut.list_store.append_vm(vm)
 
-    assert len(sut.list_store) == 12
+    assert len(sut.list_store) == 13
 
     sut.head_checkbox.state = HeaderCheckbox.NONE
     sut.head_checkbox.set_buttons()
@@ -186,7 +188,7 @@ def test_prohibit_start(
     for vm in test_qapp.domains:
         sut.list_store.append_vm(vm)
 
-    assert len(sut.list_store) == 12
+    assert len(sut.list_store) == 13
 
     sut.head_checkbox.state = HeaderCheckbox.NONE
     sut.head_checkbox.set_buttons()
@@ -358,9 +360,7 @@ _derived_qubes = _domains.difference(_non_derived_qubes)
         ),
         # `qubes-update-gui --dom0`
         # Target dom0
-        pytest.param(
-            ("--dom0", "--force-update"), b"", b"", {"dom0"}, None, id="dom0"
-        ),
+        pytest.param(("--dom0", "--force-update"), b"", b"", {"dom0"}, None, id="dom0"),
         # `qubes-update-gui --dom0 --skip dom0`
         # Comma separated list of VMs to be skipped,
         # works with all other options.
@@ -398,9 +398,7 @@ _derived_qubes = _domains.difference(_non_derived_qubes)
             ("--skip", "fedora-36,garbage-name", "--templates"),
             id="templates with skip",
         ),
-        pytest.param(
-            ("--force-update",), b"", b"", set(), None, id="force-update"
-        ),
+        pytest.param(("--force-update",), b"", b"", set(), None, id="force-update"),
     ),
 )
 def test_select_rows_ignoring_conditions(
@@ -424,13 +422,12 @@ def test_select_rows_ignoring_conditions(
     for vm in test_qapp.domains:
         sut.list_store.append_vm(vm)
 
-    assert len(sut.list_store) == 12
+    assert len(sut.list_store) == 13
 
     result = b""
     if tmpls_and_stndas:
         result += (
-            b"Following templates and standalones will be updated: "
-            + tmpls_and_stndas
+            b"Following templates and standalones will be updated: " + tmpls_and_stndas
         )
     if derived_qubes:
         if result:

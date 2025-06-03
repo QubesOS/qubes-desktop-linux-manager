@@ -57,9 +57,7 @@ class QubesUpdater(Gtk.Application):
         self.cliargs = cliargs
         self.retcode = 0
 
-        log_handler = logging.FileHandler(
-            QubesUpdater.LOGPATH, encoding="utf-8"
-        )
+        log_handler = logging.FileHandler(QubesUpdater.LOGPATH, encoding="utf-8")
         log_formatter = logging.Formatter(QubesUpdater.LOG_FORMAT)
         log_handler.setFormatter(log_formatter)
 
@@ -94,9 +92,7 @@ class QubesUpdater(Gtk.Application):
         self.main_window: Gtk.Window = self.builder.get_object("main_window")
         self.next_button: Gtk.Button = self.builder.get_object("button_next")
         self.next_button.connect("clicked", self.next_clicked)
-        self.cancel_button: Gtk.Button = self.builder.get_object(
-            "button_cancel"
-        )
+        self.cancel_button: Gtk.Button = self.builder.get_object("button_cancel")
         self.cancel_button.connect("clicked", self.cancel_clicked)
 
         self.EffectiveCssProvider = load_theme(
@@ -130,9 +126,7 @@ class QubesUpdater(Gtk.Application):
             self.progress_page.back_by_row_selection,
         )
 
-        self.button_settings: Gtk.Button = self.builder.get_object(
-            "button_settings"
-        )
+        self.button_settings: Gtk.Button = self.builder.get_object("button_settings")
         self.button_settings.connect("clicked", self.open_settings_window)
         settings_pixbuf = load_icon_at_gtk_size(
             "qubes-customize", Gtk.IconSize.LARGE_TOOLBAR
@@ -184,12 +178,8 @@ class QubesUpdater(Gtk.Application):
             cell.set_property("markup", str(obj))
 
         for col, name in headers:
-            renderer: Gtk.CellRenderer = self.builder.get_object(
-                name + "_renderer"
-            )
-            column: Gtk.TreeViewColumn = self.builder.get_object(
-                name + "_column"
-            )
+            renderer: Gtk.CellRenderer = self.builder.get_object(name + "_renderer")
+            column: Gtk.TreeViewColumn = self.builder.get_object(name + "_column")
             column.set_cell_data_func(renderer, cell_data_func, col)
             renderer.props.ypad = 10
             if not name.endswith("name") and name != "summary_status":
@@ -213,14 +203,10 @@ class QubesUpdater(Gtk.Application):
         else:
             # default update_if_stale -> do nothing
             if self.cliargs.update_if_available:
-                self.intro_page.head_checkbox.state = (
-                    self.intro_page.head_checkbox.SAFE
-                )
+                self.intro_page.head_checkbox.state = self.intro_page.head_checkbox.SAFE
                 self.intro_page.select_rows()
             elif self.cliargs.force_update:
-                self.intro_page.head_checkbox.state = (
-                    self.intro_page.head_checkbox.ALL
-                )
+                self.intro_page.head_checkbox.state = self.intro_page.head_checkbox.ALL
                 self.intro_page.select_rows()
             self.log.info("Show intro page.")
         self.main_window.show_all()
@@ -271,9 +257,7 @@ class QubesUpdater(Gtk.Application):
                 self.summary_page.show(updated, no_updates, failed + cancelled)
             else:
                 # at this point retcode is in (0, 100)
-                self._restart_phase(
-                    show_only_error=self.cliargs.non_interactive
-                )
+                self._restart_phase(show_only_error=self.cliargs.non_interactive)
                 # at thi point retcode is in (0, 100)
                 # or an error message have been already shown
                 if self.cliargs.non_interactive and self.retcode in (0, 100):
@@ -308,8 +292,7 @@ class QubesUpdater(Gtk.Application):
         )
         msg = "Nothing to do."
         if (  # at least all vms with available updates was updated
-            (self.cliargs.all and not self.cliargs.skip)
-            or not non_default_select
+            (self.cliargs.all and not self.cliargs.skip) or not non_default_select
         ) and self.retcode in (0, 100):
             msg = "Qubes OS is up to date."
         elif self.retcode == 0:
@@ -407,8 +390,7 @@ def parse_args(args, app):
     parser.add_argument(
         "--signal-no-updates",
         action="store_true",
-        help="Return exit code 100 instread of 0 "
-        "if there is no updates available.",
+        help="Return exit code 100 instread of 0 if there is no updates available.",
     )
 
     restart = parser.add_mutually_exclusive_group()
@@ -435,8 +417,7 @@ def parse_args(args, app):
     update_state.add_argument(
         "--force-update",
         action="store_true",
-        help="Attempt to update all targeted VMs "
-        "even if no updates are available",
+        help="Attempt to update all targeted VMs even if no updates are available",
     )
     update_state.add_argument(
         "--update-if-stale",
@@ -492,8 +473,7 @@ def parse_args(args, app):
     parser.add_argument(
         "--dom0",
         action="store_true",
-        help="Target dom0. "
-        "If present, skip manual selection of qubes to update.",
+        help="Target dom0. If present, skip manual selection of qubes to update.",
     )
 
     parser.add_argument(

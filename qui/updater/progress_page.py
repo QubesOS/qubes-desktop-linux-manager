@@ -62,19 +62,15 @@ class ProgressPage:
         progress_store = self.progressbar.get_model()
         progress_store.append([0])
         self.total_progress = progress_store[-1]
-        self.progressbar_renderer: Gtk.CellRendererProgress = (
-            self.builder.get_object("progressbar_renderer")
+        self.progressbar_renderer: Gtk.CellRendererProgress = self.builder.get_object(
+            "progressbar_renderer"
         )
         self.progressbar_renderer.set_fixed_size(-1, 26)
 
-        self.progress_list: Gtk.TreeView = self.builder.get_object(
-            "progress_list"
-        )
+        self.progress_list: Gtk.TreeView = self.builder.get_object("progress_list")
         self.selection: Gtk.TreeSelection = self.progress_list.get_selection()
         self.progress_list.connect("row-activated", self.row_selected)
-        progress_column: Gtk.TreeViewColumn = self.builder.get_object(
-            "progress_column"
-        )
+        progress_column: Gtk.TreeViewColumn = self.builder.get_object("progress_column")
         renderer = CellRendererProgressWithResult()
         renderer.props.ypad = 10
         progress_column.pack_start(renderer, True)
@@ -111,18 +107,12 @@ class ProgressPage:
         """
         self.log.debug("Interrupting updates")
         self.exit_triggered = True
-        GLib.idle_add(
-            self.header_label.set_text, l("Interrupting the update...")
-        )
+        GLib.idle_add(self.header_label.set_text, l("Interrupting the update..."))
 
     def perform_update(self, settings):
         """Updates dom0 and then other vms."""
-        admins = [
-            row for row in self.vms_to_update if row.vm.klass == "AdminVM"
-        ]
-        templs = [
-            row for row in self.vms_to_update if row.vm.klass != "AdminVM"
-        ]
+        admins = [row for row in self.vms_to_update if row.vm.klass == "AdminVM"]
+        templs = [row for row in self.vms_to_update if row.vm.klass != "AdminVM"]
         GLib.idle_add(self.set_total_progress, 0)
 
         if admins:
@@ -195,9 +185,7 @@ class ProgressPage:
                     if returncode != 0:
                         GLib.idle_add(admin.set_status, UpdateStatus.Error)
                     else:
-                        GLib.idle_add(
-                            admin.set_status, UpdateStatus.NoUpdatesFound
-                        )
+                        GLib.idle_add(admin.set_status, UpdateStatus.NoUpdatesFound)
                     self.update_details.update_buffer()
                     return
 
@@ -311,9 +299,7 @@ class ProgressPage:
         self.log.debug("Start templateVM updating")
 
         for row in to_update:
-            GLib.idle_add(
-                row.append_text_view, l("Updating {}\n").format(row.name)
-            )
+            GLib.idle_add(row.append_text_view, l("Updating {}\n").format(row.name))
             GLib.idle_add(row.set_status, UpdateStatus.InProgress)
         self.update_details.update_buffer()
 
@@ -332,9 +318,7 @@ class ProgressPage:
                 GLib.idle_add(row.set_status, UpdateStatus.Error)
         self.update_details.update_buffer()
 
-    def do_update_templates(
-        self, rows: Dict[str, RowWrapper], settings: Settings
-    ):
+    def do_update_templates(self, rows: Dict[str, RowWrapper], settings: Settings):
         """Runs `qubes-vm-update` command."""
         targets = ",".join((name for name in rows.keys()))
 
@@ -357,12 +341,8 @@ class ProgressPage:
             stdout=subprocess.PIPE,
         )
 
-        read_err_thread = threading.Thread(
-            target=self.read_stderrs, args=(proc, rows)
-        )
-        read_out_thread = threading.Thread(
-            target=self.read_stdouts, args=(proc, rows)
-        )
+        read_err_thread = threading.Thread(target=self.read_stderrs, args=(proc, rows))
+        read_out_thread = threading.Thread(target=self.read_stdouts, args=(proc, rows))
         read_err_thread.start()
         read_out_thread.start()
 
@@ -479,9 +459,7 @@ class ProgressPage:
         Set updated details (name of vm and textview)."""
         self.selection.unselect_all()
         self.selection.select_path(path)
-        self.update_details.set_active_row(
-            self.vms_to_update[path.get_indices()[0]]
-        )
+        self.update_details.set_active_row(self.vms_to_update[path.get_indices()[0]])
 
     def get_update_summary(self):
         """Returns update summary.
@@ -492,11 +470,7 @@ class ProgressPage:
         3. vms that update was canceled before starting.
         """
         updated = len(
-            [
-                row
-                for row in self.vms_to_update
-                if row.status == UpdateStatus.Success
-            ]
+            [row for row in self.vms_to_update if row.status == UpdateStatus.Success]
         )
         no_updates = len(
             [
@@ -506,18 +480,10 @@ class ProgressPage:
             ]
         )
         failed = len(
-            [
-                row
-                for row in self.vms_to_update
-                if row.status == UpdateStatus.Error
-            ]
+            [row for row in self.vms_to_update if row.status == UpdateStatus.Error]
         )
         cancelled = len(
-            [
-                row
-                for row in self.vms_to_update
-                if row.status == UpdateStatus.Cancelled
-            ]
+            [row for row in self.vms_to_update if row.status == UpdateStatus.Cancelled]
         )
         return updated, no_updates, failed, cancelled
 
@@ -561,8 +527,8 @@ class QubeUpdateDetails:
         self.progress_textview: Gtk.TextView = self.builder.get_object(
             "progress_textview"
         )
-        self.progress_scrolled_window: Gtk.ScrolledWindow = (
-            self.builder.get_object("progress_scrolled_window")
+        self.progress_scrolled_window: Gtk.ScrolledWindow = self.builder.get_object(
+            "progress_scrolled_window"
         )
 
     def copy_content(self, _emitter):
@@ -601,9 +567,7 @@ class QubeUpdateDetails:
 
     def _autoscroll(self):
         adjustment = self.progress_scrolled_window.get_vadjustment()
-        adjustment.set_value(
-            adjustment.get_upper() - adjustment.get_page_size()
-        )
+        adjustment.set_value(adjustment.get_upper() - adjustment.get_page_size())
 
 
 class CellRendererProgressWithResult(Gtk.CellRendererProgress):

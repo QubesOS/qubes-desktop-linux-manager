@@ -96,7 +96,7 @@ def test_on_header_toggled(
     sut.head_checkbox._allowed[0] = AppVMType.SERVICEVM
     service_num = 3
     sut.head_checkbox._allowed[1] = AppVMType.NON_SERVICEVM
-    non_excluded_num = 6
+    non_excluded_num = 7
 
     sut.head_checkbox.state = HeaderCheckbox.NONE
 
@@ -176,9 +176,9 @@ def test_on_checkbox_toggled(
 
 
 # expected data based on test_qapp setup
-UP_VMS = 7
+UP_VMS = 9
 UP_SERVICE_VMS = 3
-UP_APP_VMS = 4
+UP_APP_VMS = 6
 
 
 @pytest.mark.parametrize(
@@ -381,6 +381,7 @@ def test_perform_restart(
         "test-blue",
         "test-red",
         "test-vm",
+        "test-old",
         "vault",
     )
     expected_shutdown_calls = [
@@ -394,9 +395,7 @@ def test_perform_restart(
         "sys-net",
         "sys-usb",
     )
-    expected_start_calls = [
-        (tmpl, "admin.vm.Start", None, None) for tmpl in to_start
-    ]
+    expected_start_calls = [(tmpl, "admin.vm.Start", None, None) for tmpl in to_start]
     for call_ in expected_start_calls:
         test_qapp.expected_calls[call_] = b"0\x00"
 

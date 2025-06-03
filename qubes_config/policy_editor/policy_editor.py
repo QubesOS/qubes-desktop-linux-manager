@@ -45,8 +45,7 @@ from gi.repository import Gtk, GtkSource, Gio, Gdk
 
 
 HEADER_NORMAL = (
-    " service_name\targument\tsource_qube"
-    "\ttarget_qube\taction [parameter=value]    "
+    " service_name\targument\tsource_qube\ttarget_qube\taction [parameter=value]    "
 )
 
 
@@ -73,9 +72,7 @@ class OpenDialogHandler:
         self.dialog_window: Gtk.Dialog = builder.get_object("open_dialog")
         self.file_list: Gtk.ListBox = builder.get_object("open_policy_list")
         self.ok_button: Gtk.Button = builder.get_object("open_button_ok")
-        self.cancel_button: Gtk.Button = builder.get_object(
-            "open_button_cancel"
-        )
+        self.cancel_button: Gtk.Button = builder.get_object("open_button_cancel")
 
         self.file_list.connect("row-activated", self._ok)
 
@@ -133,10 +130,7 @@ class PolicyClientWrapper:
         with include/"""
         file_list = self.policy_client.policy_list()
         file_list.extend(
-            [
-                "include/" + name
-                for name in self.policy_client.policy_include_list()
-            ]
+            ["include/" + name for name in self.policy_client.policy_include_list()]
         )
         return file_list
 
@@ -186,15 +180,11 @@ class PolicyEditor(Gtk.Application):
         """
         The function that performs actual widget realization and setup.
         """
-        self.clipboard: Gtk.Clipboard = Gtk.Clipboard.get(
-            Gdk.SELECTION_CLIPBOARD
-        )
+        self.clipboard: Gtk.Clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
 
         self.builder = Gtk.Builder()
 
-        glade_ref = (
-            importlib.resources.files("qubes_config") / "policy_editor.glade"
-        )
+        glade_ref = importlib.resources.files("qubes_config") / "policy_editor.glade"
         with importlib.resources.as_file(glade_ref) as path:
             self.builder.add_from_file(str(path))
 
@@ -202,9 +192,7 @@ class PolicyEditor(Gtk.Application):
             self.builder, self.policy_client, self.open_policy_file
         )
 
-        self.main_window: Gtk.ApplicationWindow = self.builder.get_object(
-            "main_window"
-        )
+        self.main_window: Gtk.ApplicationWindow = self.builder.get_object("main_window")
 
         # Reserving 3 pixels for window border on all sides (most themes use 2)
         # Reserving 32x2 pixels for taskbar (default on top) and Window title.
@@ -212,9 +200,7 @@ class PolicyEditor(Gtk.Application):
         self.main_window.set_size_request(1024 - 3 * 2, 768 - 3 * 2 - 32 * 2)
         width = min(1920, self.main_window.get_screen().get_width())
         height = min(1280, self.main_window.get_screen().get_height())
-        self.main_window.set_default_size(
-            width - 3 * 2, height - 3 * 2 - 32 * 2
-        )
+        self.main_window.set_default_size(width - 3 * 2, height - 3 * 2 - 32 * 2)
         # ToDo: Considering maximizing by default as it packs too much info.
         # self.main_window.maximize()
 
@@ -229,9 +215,7 @@ class PolicyEditor(Gtk.Application):
         self.header_view.set_monospace(True)
         self.header_view.set_editable(False)
 
-        self.source_viewport: Gtk.Viewport = self.builder.get_object(
-            "source_viewport"
-        )
+        self.source_viewport: Gtk.Viewport = self.builder.get_object("source_viewport")
 
         self.source_view = GtkSource.View()
         self.source_buffer: GtkSource.Buffer = self.source_view.get_buffer()
@@ -239,15 +223,9 @@ class PolicyEditor(Gtk.Application):
         self.source_view.set_hexpand(True)
         self.source_viewport.add(self.source_view)
 
-        self.help_window: Gtk.ScrolledWindow = self.builder.get_object(
-            "help_window"
-        )
-        self.about_window: Gtk.AboutDialog = self.builder.get_object(
-            "about_window"
-        )
-        self.about_window.connect(
-            "response", lambda *_args: self.about_window.hide()
-        )
+        self.help_window: Gtk.ScrolledWindow = self.builder.get_object("help_window")
+        self.about_window: Gtk.AboutDialog = self.builder.get_object("about_window")
+        self.about_window.connect("response", lambda *_args: self.about_window.hide())
         self.about_window.connect("activate-link", self._open_docs)
 
         self.error_info: Gtk.Label = self.builder.get_object("error_info")
@@ -311,33 +289,19 @@ class PolicyEditor(Gtk.Application):
         file_item = self._get_menu_item("_File")
         file_item.set_submenu(file_menu)
         file_menu.add(self._get_menu_item_with_ac("_New", "win.new", Gdk.KEY_n))
-        file_menu.add(
-            self._get_menu_item_with_ac("_Open", "win.open", Gdk.KEY_o)
-        )
-        file_menu.add(
-            self._get_menu_item_with_ac("_Save", "win.save", Gdk.KEY_s)
-        )
-        file_menu.add(
-            self._get_menu_item_with_ac("_Quit", "win.quit", Gdk.KEY_q)
-        )
+        file_menu.add(self._get_menu_item_with_ac("_Open", "win.open", Gdk.KEY_o))
+        file_menu.add(self._get_menu_item_with_ac("_Save", "win.save", Gdk.KEY_s))
+        file_menu.add(self._get_menu_item_with_ac("_Quit", "win.quit", Gdk.KEY_q))
         self.menu_bar.add(file_item)
 
         # Edit
         edit_menu = Gtk.Menu()
         edit_item = self._get_menu_item("_Edit")
         edit_item.set_submenu(edit_menu)
-        edit_menu.add(
-            self._get_menu_item_with_ac("_Redo", "win.redo", Gdk.KEY_y)
-        )
-        edit_menu.add(
-            self._get_menu_item_with_ac("_Undo", "win.undo", Gdk.KEY_z)
-        )
-        edit_menu.add(
-            self._get_menu_item_with_ac("_Copy", "win.copy", Gdk.KEY_c)
-        )
-        edit_menu.add(
-            self._get_menu_item_with_ac("_Paste", "win.paste", Gdk.KEY_v)
-        )
+        edit_menu.add(self._get_menu_item_with_ac("_Redo", "win.redo", Gdk.KEY_y))
+        edit_menu.add(self._get_menu_item_with_ac("_Undo", "win.undo", Gdk.KEY_z))
+        edit_menu.add(self._get_menu_item_with_ac("_Copy", "win.copy", Gdk.KEY_c))
+        edit_menu.add(self._get_menu_item_with_ac("_Paste", "win.paste", Gdk.KEY_v))
         edit_menu.add(self._get_menu_item_with_ac("Re_set", "win.reset", None))
         self.menu_bar.add(edit_item)
 
@@ -346,9 +310,7 @@ class PolicyEditor(Gtk.Application):
         help_item = self._get_menu_item("_Help")
         help_item.set_submenu(help_menu)
         help_menu.add(
-            self._get_menu_item_with_ac(
-                "_Show/Hide Help", "win.help", Gdk.KEY_h
-            )
+            self._get_menu_item_with_ac("_Show/Hide Help", "win.help", Gdk.KEY_h)
         )
         help_menu.add(self._get_menu_item_with_ac("_About", "win.about", None))
         self.menu_bar.add(help_item)
@@ -489,9 +451,7 @@ class PolicyEditor(Gtk.Application):
                 self.filename, self.policy_text, self.token
             )
         except subprocess.CalledProcessError as ex:
-            err_msg = (
-                "An error occurred while trying to save the policy file:\n"
-            )
+            err_msg = "An error occurred while trying to save the policy file:\n"
             if ex.stdout:
                 err_msg += ex.stdout.decode()
             else:
@@ -619,9 +579,7 @@ class PolicyEditor(Gtk.Application):
         if errors:
             self.error_info.get_style_context().remove_class("error_ok")
             self.error_info.get_style_context().add_class("error_bad")
-            self.error_info.set_markup(
-                "<b>Errors found:</b>\n" + "\n".join(errors)
-            )
+            self.error_info.set_markup("<b>Errors found:</b>\n" + "\n".join(errors))
         else:
             self.error_info.get_style_context().remove_class("error_bad")
             self.error_info.get_style_context().add_class("error_ok")

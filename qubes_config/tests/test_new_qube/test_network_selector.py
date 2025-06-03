@@ -59,10 +59,5 @@ def test_network_handler_whonix(test_qapp_whonix, new_qube_builder):
 
     handler.network_tor.set_active(True)
 
-    assert (
-        handler.get_selected_netvm() == test_qapp_whonix.domains["sys-whonix"]
-    )
-    assert (
-        handler.network_current_widget.vm
-        == test_qapp_whonix.domains["sys-whonix"]
-    )
+    assert handler.get_selected_netvm() == test_qapp_whonix.domains["sys-whonix"]
+    assert handler.network_current_widget.vm == test_qapp_whonix.domains["sys-whonix"]

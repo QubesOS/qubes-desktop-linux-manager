@@ -68,9 +68,7 @@ def load_icon(icon_name: str, backup_name: str, size: int = 24):
                     + icon_name
                     + ".svg"
                 )
-                return GdkPixbuf.Pixbuf.new_from_file_at_size(
-                    icon_path, size, size
-                )
+                return GdkPixbuf.Pixbuf.new_from_file_at_size(icon_path, size, size)
             except (GLib.Error, TypeError):
                 # we are giving up and just using a blank icon
                 pixbuf: GdkPixbuf.Pixbuf = GdkPixbuf.Pixbuf.new(
@@ -166,9 +164,7 @@ class VMAttachmentDiagram(Gtk.Box):
         backend_vm = device.backend_domain
         frontend_vms = list(device.attachments)
         # backend is always there
-        backend_vm_icon = VMWithIcon(
-            backend_vm, name_extension=device.id_string
-        )
+        backend_vm_icon = VMWithIcon(backend_vm, name_extension=device.id_string)
         backend_vm_icon.get_style_context().add_class("main_device_vm")
         self.pack_start(backend_vm_icon, False, False, 4)
 
@@ -246,12 +242,8 @@ class AttachWidget(ActionableWidget, VMWithIcon):
 class DetachWidget(ActionableWidget, SimpleActionWidget):
     """Detach device from a VM"""
 
-    def __init__(
-        self, vm: backend.VM, device: backend.Device, variant: str = "dark"
-    ):
-        super().__init__(
-            "detach", "<b>Detach from " + vm.name + "</b>", variant
-        )
+    def __init__(self, vm: backend.VM, device: backend.Device, variant: str = "dark"):
+        super().__init__("detach", "<b>Detach from " + vm.name + "</b>", variant)
         self.vm = vm
         self.device = device
 
@@ -262,9 +254,7 @@ class DetachWidget(ActionableWidget, SimpleActionWidget):
 class DetachAndShutdownWidget(ActionableWidget, SimpleActionWidget):
     """Detach device from a disposable VM and shut it down."""
 
-    def __init__(
-        self, vm: backend.VM, device: backend.Device, variant: str = "dark"
-    ):
+    def __init__(self, vm: backend.VM, device: backend.Device, variant: str = "dark"):
         super().__init__(
             "detach", "<b>Detach and shut down " + vm.name + "</b>", variant
         )
@@ -279,9 +269,7 @@ class DetachAndShutdownWidget(ActionableWidget, SimpleActionWidget):
 class DetachAndAttachWidget(ActionableWidget, VMWithIcon):
     """Detach device from current attachment(s) and attach to another"""
 
-    def __init__(
-        self, vm: backend.VM, device: backend.Device, variant: str = "dark"
-    ):
+    def __init__(self, vm: backend.VM, device: backend.Device, variant: str = "dark"):
         super().__init__(vm, variant=variant)
         self.vm = vm
         self.device = device
@@ -295,17 +283,13 @@ class DetachAndAttachWidget(ActionableWidget, VMWithIcon):
 class AttachDisposableWidget(ActionableWidget, VMWithIcon):
     """Attach to a new disposable qube"""
 
-    def __init__(
-        self, vm: backend.VM, device: backend.Device, variant: str = "dark"
-    ):
+    def __init__(self, vm: backend.VM, device: backend.Device, variant: str = "dark"):
         super().__init__(vm, variant=variant)
         self.vm = vm
         self.device = device
 
     def widget_action(self, *_args):
-        new_dispvm = qubesadmin.vm.DispVM.from_appvm(
-            self.vm.vm_object.app, self.vm
-        )
+        new_dispvm = qubesadmin.vm.DispVM.from_appvm(self.vm.vm_object.app, self.vm)
         new_dispvm.start()
 
         self.device.attach_to_vm(backend.VM(new_dispvm))
@@ -314,18 +298,14 @@ class AttachDisposableWidget(ActionableWidget, VMWithIcon):
 class DetachAndAttachDisposableWidget(ActionableWidget, VMWithIcon):
     """Detach from all current attachments and attach to new disposable"""
 
-    def __init__(
-        self, vm: backend.VM, device: backend.Device, variant: str = "dark"
-    ):
+    def __init__(self, vm: backend.VM, device: backend.Device, variant: str = "dark"):
         super().__init__(vm, variant=variant)
         self.vm = vm
         self.device = device
 
     def widget_action(self, *_args):
         self.device.detach_from_vm(self.vm)
-        new_dispvm = qubesadmin.vm.DispVM.from_appvm(
-            self.vm.vm_object.app, self.vm
-        )
+        new_dispvm = qubesadmin.vm.DispVM.from_appvm(self.vm.vm_object.app, self.vm)
         new_dispvm.start()
 
         self.device.attach_to_vm(backend.VM(new_dispvm))
@@ -466,9 +446,7 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
         self.vm_diagram = VMAttachmentDiagram(device, self.variant)
         self.attach(self.vm_diagram, 1, 1, 3, 1)
 
-    def get_child_widgets(
-        self, vms, disp_vm_templates
-    ) -> Iterable[ActionableWidget]:
+    def get_child_widgets(self, vms, disp_vm_templates) -> Iterable[ActionableWidget]:
         """
         Get type-appropriate list of child widgets.
         :return: iterable of ActionableWidgets, ready to be packed in somewhere
@@ -496,9 +474,7 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
             yield InfoHeader("Detach and attach to new disposable qube:")
 
             for vm in disp_vm_templates:
-                yield DetachAndAttachDisposableWidget(
-                    vm, self.device, self.variant
-                )
+                yield DetachAndAttachDisposableWidget(vm, self.device, self.variant)
 
         else:
             yield InfoHeader("Attach to qube:")

@@ -50,16 +50,10 @@ class AdvancedHandler:
         """
         self.qapp = qapp
 
-        self.events: Gtk.Button = gtk_builder.get_object(
-            "event_button_advanced"
-        )
+        self.events: Gtk.Button = gtk_builder.get_object("event_button_advanced")
         self.box: Gtk.Box = gtk_builder.get_object("advanced_box")
-        self.expander_icon: Gtk.Image = gtk_builder.get_object(
-            "advanced_expander"
-        )
-        self.expander_label: Gtk.Label = gtk_builder.get_object(
-            "advanced_label"
-        )
+        self.expander_icon: Gtk.Image = gtk_builder.get_object("advanced_expander")
+        self.expander_label: Gtk.Label = gtk_builder.get_object("advanced_label")
 
         self.expander_handler = ExpanderHandler(
             event_button=self.events,
@@ -82,12 +76,8 @@ class AdvancedHandler:
             "check_launch_settings"
         )
 
-        self.pool: Gtk.ComboBoxText = gtk_builder.get_object(
-            "storage_pool_combobox"
-        )
-        self.initram: Gtk.SpinButton = gtk_builder.get_object(
-            "initram_spin_button"
-        )
+        self.pool: Gtk.ComboBoxText = gtk_builder.get_object("storage_pool_combobox")
+        self.initram: Gtk.SpinButton = gtk_builder.get_object("initram_spin_button")
 
         pools: Dict[str, Any] = {}
         for pool in self.qapp.pools.values():

@@ -60,16 +60,12 @@ def test_setup_non_interactive_nothing_to_do(
 def test_setup_update_if_available(
     select, populate_vm_list, _mock_logging, __mock_logging, test_qapp
 ):
-    sut = QubesUpdater(
-        test_qapp, parse_args(("--update-if-available",), test_qapp)
-    )
+    sut = QubesUpdater(test_qapp, parse_args(("--update-if-available",), test_qapp))
     sut.perform_setup()
     calls = [call(sut.qapp, sut.settings)]
     populate_vm_list.assert_has_calls(calls)
     select.assert_called_once()
-    assert (
-        sut.intro_page.head_checkbox.state == sut.intro_page.head_checkbox.SAFE
-    )
+    assert sut.intro_page.head_checkbox.state == sut.intro_page.head_checkbox.SAFE
 
 
 @patch("logging.FileHandler")
@@ -84,9 +80,7 @@ def test_setup_force_update(
     calls = [call(sut.qapp, sut.settings)]
     populate_vm_list.assert_has_calls(calls)
     select.assert_called_once()
-    assert (
-        sut.intro_page.head_checkbox.state == sut.intro_page.head_checkbox.ALL
-    )
+    assert sut.intro_page.head_checkbox.state == sut.intro_page.head_checkbox.ALL
 
 
 @patch("logging.FileHandler")
@@ -168,9 +162,7 @@ def test_retcode(
 
     assert not sut.intro_page.active
     assert sut.progress_page.is_visible
-    sut.progress_page.init_update.assert_called_once_with(
-        vms_to_update, sut.settings
-    )
+    sut.progress_page.init_update.assert_called_once_with(vms_to_update, sut.settings)
 
     # set sut.summary_page.is_populated = False
     sut.summary_page.list_store = None
@@ -234,9 +226,7 @@ def test_dialog(
 
     assert not sut.intro_page.active
     assert sut.progress_page.is_visible
-    sut.progress_page.init_update.assert_called_once_with(
-        vms_to_update, sut.settings
-    )
+    sut.progress_page.init_update.assert_called_once_with(vms_to_update, sut.settings)
 
     # set sut.summary_page.is_populated = False
     sut.summary_page.list_store = None

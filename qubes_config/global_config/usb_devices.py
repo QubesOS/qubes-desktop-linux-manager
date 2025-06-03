@@ -54,9 +54,7 @@ _ = t.gettext
 class InputActionWidget(Gtk.Box):
     """A simple widget for a combobox for policy actions."""
 
-    def __init__(
-        self, rule: RuleTargetedAdminVM, action_choices: Dict[str, str]
-    ):
+    def __init__(self, rule: RuleTargetedAdminVM, action_choices: Dict[str, str]):
         """
         :param rule: wrapped policy rule
         :param action_choices: Dictionary of "nice rule name": "actual action"
@@ -159,14 +157,10 @@ qubes.InputKeyboard * {vm.name} @adminvm deny
 qubes.InputTablet * {vm.name} @adminvm deny"""
 
         for col_num, vm in enumerate(self.usb_qubes):
-            self.policy_grid.attach(
-                TokenName(vm.name, self.qapp), 1 + col_num, 0, 1, 1
-            )
+            self.policy_grid.attach(TokenName(vm.name, self.qapp), 1 + col_num, 0, 1, 1)
 
-        self.rules, self.current_token = (
-            self.policy_manager.get_rules_from_filename(
-                self.policy_file_name, self.default_policy
-            )
+        self.rules, self.current_token = self.policy_manager.get_rules_from_filename(
+            self.policy_file_name, self.default_policy
         )
 
         for rule in self.rules:
@@ -209,9 +203,7 @@ qubes.InputTablet * {vm.name} @adminvm deny"""
         self.policy_grid.show_all()
 
     def _warn(self, error_descr: str):
-        self.warn_label.set_text(
-            self.warn_label.get_text() + "\n" + error_descr
-        )
+        self.warn_label.set_text(self.warn_label.get_text() + "\n" + error_descr)
         self.warn_box.set_visible(True)
 
     def save(self):
@@ -224,9 +216,7 @@ qubes.InputTablet * {vm.name} @adminvm deny"""
             widget.rule.action = widget.model.get_selected()
             rules.append(widget.rule.raw_rule)
 
-        self.policy_manager.save_rules(
-            self.policy_file_name, rules, self.current_token
-        )
+        self.policy_manager.save_rules(self.policy_file_name, rules, self.current_token)
         _r, self.current_token = self.policy_manager.get_rules_from_filename(
             self.policy_file_name, self.default_policy
         )
@@ -289,16 +279,12 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
         self.enable_check: Gtk.CheckButton = gtk_builder.get_object(
             "usb_u2f_enable_check"
         )  # general enable
-        self.box: Gtk.Box = gtk_builder.get_object(
-            "usb_u2f_enable_box"
-        )  # general box
+        self.box: Gtk.Box = gtk_builder.get_object("usb_u2f_enable_box")  # general box
 
         self.register_check: Gtk.CheckButton = gtk_builder.get_object(
             "usb_u2f_register_check"
         )
-        self.register_box: Gtk.Box = gtk_builder.get_object(
-            "usb_u2f_register_box"
-        )
+        self.register_box: Gtk.Box = gtk_builder.get_object("usb_u2f_register_box")
         self.register_all_radio: Gtk.RadioButton = gtk_builder.get_object(
             "usb_u2f_register_all_radio"
         )
@@ -310,9 +296,7 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
             "usb_u2f_blanket_check"
         )
 
-        self.usb_qube_combo: Gtk.ComboBox = gtk_builder.get_object(
-            "u2f_usb_combo"
-        )
+        self.usb_qube_combo: Gtk.ComboBox = gtk_builder.get_object("u2f_usb_combo")
 
         self.initially_enabled_vms: List[qubesadmin.vm.QubesVM] = []
         self.available_vms: List[qubesadmin.vm.QubesVM] = []
@@ -366,9 +350,7 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
 
         self.initial_enable_state: bool = self.enable_check.get_active()
         self.initial_register_state: bool = self.register_check.get_active()
-        self.initial_register_all_state: bool = (
-            self.register_all_radio.get_active()
-        )
+        self.initial_register_all_state: bool = self.register_all_radio.get_active()
         self.initial_blanket_check_state: bool = self.blanket_check.get_active()
 
         self.conflict_file_handler = ConflictFileHandler(
@@ -384,9 +366,7 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
         )
 
         if self.usb_qube_model:
-            self.usb_qube_model.connect_change_callback(
-                self.load_rules_for_usb_qube
-            )
+            self.usb_qube_model.connect_change_callback(self.load_rules_for_usb_qube)
 
     @staticmethod
     def _enable_clicked(
@@ -411,10 +391,8 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
         self.problem_fatal_box.set_visible(False)
 
         # guess at the current sys-usb
-        self.rules, self.current_token = (
-            self.policy_manager.get_rules_from_filename(
-                self.policy_filename, self.default_policy
-            )
+        self.rules, self.current_token = self.policy_manager.get_rules_from_filename(
+            self.policy_filename, self.default_policy
         )
 
         if not self.usb_qubes:
@@ -426,9 +404,7 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
 
         usb_qube_candidates = set()
         for qube in self.usb_qubes:
-            if qube.features.check_with_template(
-                self.SUPPORTED_SERVICE_FEATURE
-            ):
+            if qube.features.check_with_template(self.SUPPORTED_SERVICE_FEATURE):
                 usb_qube_candidates.add(qube)
 
         self.usb_qubes = usb_qube_candidates
@@ -673,9 +649,7 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
                     )
                 )
 
-        self.policy_manager.save_rules(
-            self.policy_filename, rules, self.current_token
-        )
+        self.policy_manager.save_rules(self.policy_filename, rules, self.current_token)
         self._initialize_data()
 
     def reset(self):
@@ -710,23 +684,16 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
 
         if self.initial_register_state != self.register_check.get_active():
             unsaved.append(_("U2F key registration settings changed"))
-        elif (
-            self.initial_register_all_state
-            != self.register_all_radio.get_active()
-        ):
+        elif self.initial_register_all_state != self.register_all_radio.get_active():
             unsaved.append(_("U2F key registration settings changed"))
-        elif (
-            self.register_some_handler.selected_vms != self.initial_register_vms
-        ):
+        elif self.register_some_handler.selected_vms != self.initial_register_vms:
             unsaved.append(_("U2F key registration settings changed"))
 
         if (
             self.initial_blanket_check_state != self.blanket_check.get_active()
             or self.blanket_handler.selected_vms != self.initial_blanket_vms
         ):
-            unsaved.append(
-                _("List of qubes with unrestricted U2F key access changed")
-            )
+            unsaved.append(_("List of qubes with unrestricted U2F key access changed"))
         return "\n".join(unsaved)
 
 

@@ -187,9 +187,7 @@ def test_targeted_tokens():
     allow_rule = make_rule("vm1", "@default", "allow target=vm2")
     wrapped_rule = RuleTargeted(allow_rule)
     wrapped_rule.target = "@anyvm"
-    assert str(wrapped_rule.raw_rule) == str(
-        make_rule("vm1", "@anyvm", "allow")
-    )
+    assert str(wrapped_rule.raw_rule) == str(make_rule("vm1", "@anyvm", "allow"))
 
     ask_rule = make_rule("vm1", "@default", "ask default_target=vm2")
     wrapped_rule = RuleTargeted(ask_rule)
@@ -257,15 +255,11 @@ def test_targeted_adminvm_change_tokens():
     wrapped_ask.source = "vm2"
     wrapped_deny.source = "vm2"
 
-    assert str(wrapped_allow.raw_rule) == str(
-        make_rule("vm2", "@adminvm", "allow")
-    )
+    assert str(wrapped_allow.raw_rule) == str(make_rule("vm2", "@adminvm", "allow"))
     assert str(wrapped_ask.raw_rule) == str(
         make_rule("vm2", "@adminvm", "ask default_target=@adminvm")
     )
-    assert str(wrapped_deny.raw_rule) == str(
-        make_rule("vm2", "@adminvm", "deny")
-    )
+    assert str(wrapped_deny.raw_rule) == str(make_rule("vm2", "@adminvm", "deny"))
 
 
 def test_targeted_fundamental():
@@ -281,12 +275,8 @@ def test_targeted_fundamental():
 
 
 def test_targeted_validity():
-    assert RuleTargeted.get_rule_errors(
-        source="vm1", target="@anyvm", action="ask"
-    )
-    assert RuleTargeted.get_rule_errors(
-        source="vm1", target="@anyvm", action="allow"
-    )
+    assert RuleTargeted.get_rule_errors(source="vm1", target="@anyvm", action="ask")
+    assert RuleTargeted.get_rule_errors(source="vm1", target="@anyvm", action="allow")
     assert not RuleTargeted.get_rule_errors(
         source="vm1", target="@anyvm", action="deny"
     )
@@ -301,15 +291,9 @@ def test_targeted_validity():
         source="vm1", target="@dispvm", action="deny"
     )
 
-    assert not RuleTargeted.get_rule_errors(
-        source="vm1", target="vm2", action="ask"
-    )
-    assert not RuleTargeted.get_rule_errors(
-        source="vm1", target="vm2", action="allow"
-    )
-    assert not RuleTargeted.get_rule_errors(
-        source="vm1", target="vm2", action="deny"
-    )
+    assert not RuleTargeted.get_rule_errors(source="vm1", target="vm2", action="ask")
+    assert not RuleTargeted.get_rule_errors(source="vm1", target="vm2", action="allow")
+    assert not RuleTargeted.get_rule_errors(source="vm1", target="vm2", action="deny")
 
 
 def test_targeted_conflict():

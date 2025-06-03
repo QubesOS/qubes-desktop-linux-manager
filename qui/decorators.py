@@ -110,34 +110,24 @@ class DomainDecorator(PropertiesDecorator):
                 if not self.template_name:
                     self.template_name = getattr(self.vm, "template", None)
                     self.template_name = (
-                        _("None")
-                        if not self.template_name
-                        else str(self.template_name)
+                        _("None") if not self.template_name else str(self.template_name)
                     )
 
                 if not self.netvm_name or netvm_changed:
-                    self.netvm_name = getattr(
-                        self.vm, "netvm", _("permission denied")
-                    )
+                    self.netvm_name = getattr(self.vm, "netvm", _("permission denied"))
                     self.netvm_name = (
-                        _("None")
-                        if not self.netvm_name
-                        else str(self.netvm_name)
+                        _("None") if not self.netvm_name else str(self.netvm_name)
                     )
 
                 if not self.cur_storage or storage_changed:
                     try:
-                        self.cur_storage = (
-                            self.vm.get_disk_utilization() / 1024**3
-                        )
+                        self.cur_storage = self.vm.get_disk_utilization() / 1024**3
                     except (exc.QubesDaemonNoResponseError, KeyError):
                         self.cur_storage = 0
 
                 if not self.max_storage or storage_changed:
                     try:
-                        self.max_storage = (
-                            self.vm.volumes["private"].size / 1024**3
-                        )
+                        self.max_storage = self.vm.volumes["private"].size / 1024**3
                     except (exc.QubesDaemonNoResponseError, KeyError):
                         self.max_storage = 0
 
@@ -160,9 +150,7 @@ class DomainDecorator(PropertiesDecorator):
                 )
 
                 if self.outdated:
-                    tooltip += _(
-                        "\n\nRestart qube to apply changes in template."
-                    )
+                    tooltip += _("\n\nRestart qube to apply changes in template.")
 
                 if self.updates_available:
                     tooltip += _("\n\nUpdates available.")
