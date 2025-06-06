@@ -1,3 +1,58 @@
+qubes-desktop-linux-manager (4.2.26-1) unstable; urgency=medium
+
+  [ Ali Mirjamali ]
+  * Make consistent use of MiB & GiB in GUI/CLI tools
+  * Add Ctrl+A Accelerator to GUI Updater Intro page
+  * Select stale qubes for update too
+
+  [ Marek Marczykowski-Górecki ]
+  * Fix typo in showing Xen version on the "This Device" tab
+
+  [ Ali Mirjamali ]
+  * Do not allow whitespace in Policy filename
+  * Unset `netvm` for TemplateVMs in Create New Qube
+  * Inform users about restart of qubes after update
+
+  [ Marta Marczykowska-Górecka ]
+  * Improve colors on selected updater row
+
+  [ Ali Mirjamali ]
+  * Show progress bar after loading CSS theme
+
+  [ Marta Marczykowska-Górecka ]
+  * Fix test error
+  * Don't change combobox on mouse scroll
+
+  [ Demi Marie Obenour ]
+  * updater: make UpdateListIter a proper iterator
+
+  [ Ali Mirjamali ]
+  * Mark inactive "create" button as gray
+  * Make updater width enoguh for update details
+
+  [ ooops ]
+  * Clarify updater settings
+
+  [ kennethrrosen ]
+  * Update qui/updater.glade
+
+  [ Ali Mirjamali ]
+  * Maximize Updater GUI on openQA display
+  * Exclude volatile DispVMs from Global Config
+  * Allow user to save valid modified policy on 1st char
+
+  [ Rusty Bird ]
+  * Fix outdated status of disposables
+
+  [ Ali Mirjamali ]
+  * Add concurrent updates settings to tab-stops
+
+  [ Marek Marczykowski-Górecki ]
+  * Use glib's native asyncio integration when available
+  * Workaround pylint issue
+
+ -- Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>  Fri, 06 Jun 2025 15:44:39 +0200
+
 qubes-desktop-linux-manager (4.2.25-1) unstable; urgency=medium
 
   [ ooops ]
