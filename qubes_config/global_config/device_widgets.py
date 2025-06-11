@@ -25,7 +25,7 @@ from typing import List, Any, Callable
 
 import gi
 
-from ..widgets.gtk_utils import ask_question
+from ..widgets.gtk_utils import ask_question, resize_window_to_reasonable
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
@@ -146,6 +146,11 @@ class DevPolicyDialogHandler:
         self.ok_button.connect("clicked", self._save_changes)
         self.cancel_button.connect("clicked", self._cancel)
 
+        self.dialog.connect("size-allocate", self._resize_window)
+
+    def _resize_window(self, *_args):
+        resize_window_to_reasonable(self.dialog)
+
     def _cancel(self, *_args):
         if self.remove_on_cancel and self.current_row:
             self.current_row.get_parent().remove(self.current_row)
@@ -176,6 +181,7 @@ class DevPolicyDialogHandler:
         self.remove_on_cancel = True
 
         self.dialog.show()
+        self._resize_window()
 
         return new_row
 
@@ -185,6 +191,7 @@ class DevPolicyDialogHandler:
         self.validate()
         self.remove_on_cancel = False
         self.dialog.show()
+        self._resize_window()
 
     def validate(self, *_args):
         """Connect this function to any events that should trigger

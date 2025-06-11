@@ -509,6 +509,7 @@ class RequiredDeviceDialog(DevPolicyDialogHandler):
         self._init_check(self.no_strict_check, False, False, "not selected")
         self._init_check(self.port_check, False, False, "not selected")
 
+        self.dev_combo.set_active_id(None)
         self.unknown_box.set_visible(False)
         self.qube_handler.reset()
         self.validate()
@@ -989,7 +990,7 @@ class DevAttachmentHandler(PageHandler):
             prefix="devices_auto",
             device_policy_manager=self.device_manager,
             classes=["block", "mic", "usb"],
-            assignment_filter=self._filter_required,
+            assignment_filter=self._filter_auto,
             edit_dialog_class=AutoDeviceDialog,
         )
         self.required_devices_handler = AttachmentHandler(
@@ -998,7 +999,7 @@ class DevAttachmentHandler(PageHandler):
             prefix="devices_required",
             device_policy_manager=self.device_manager,
             classes=["block", "pci"],
-            assignment_filter=self._filter_auto,
+            assignment_filter=self._filter_required,
             edit_dialog_class=RequiredDeviceDialog,
         )
 

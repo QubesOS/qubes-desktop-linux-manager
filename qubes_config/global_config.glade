@@ -63,182 +63,198 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox">
+          <object class="GtkScrolledWindow">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="orientation">vertical</property>
+            <property name="can-focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
+            <property name="shadow-type">in</property>
+            <property name="propagate-natural-width">True</property>
+            <property name="propagate-natural-height">True</property>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkViewport">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="halign">start</property>
-                <property name="label" translatable="yes">Qube</property>
-                <style>
-                  <class name="section_title"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="spacing">10</property>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="valign">center</property>
-                    <property name="vexpand">True</property>
-                    <property name="label" translatable="yes">Select qube:</property>
-                    <property name="xalign">0</property>
-                    <style>
-                      <class name="main_text"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkComboBox" id="device_policy_vm_combo">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="valign">center</property>
-                    <property name="margin-start">5</property>
-                    <property name="margin-bottom">5</property>
-                    <property name="hexpand">True</property>
-                    <property name="has-entry">True</property>
-                    <child internal-child="entry">
-                      <object class="GtkEntry">
-                        <property name="can-focus">True</property>
-                        <property name="width-chars">24</property>
-                      </object>
-                    </child>
-                    <style>
-                      <class name="flat_combo"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="device_policy_new_label">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="valign">center</property>
-                <property name="vexpand">True</property>
-                <property name="label" translatable="yes">Select a qube to be able to select device types to block.</property>
-                <property name="use-markup">True</property>
-                <property name="wrap">True</property>
-                <property name="xalign">0</property>
-                <style>
-                  <class name="explanation"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox" id="device_policy_block_box">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="orientation">vertical</property>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">Deny device attachment</property>
-                    <style>
-                      <class name="section_title"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="valign">center</property>
-                    <property name="vexpand">True</property>
-                    <property name="label" translatable="yes">You will not be able to manually attach any of the selected device types to this qube. This does &lt;b&gt;NOT&lt;/b&gt; apply to automatic attachments.</property>
-                    <property name="use-markup">True</property>
-                    <property name="wrap">True</property>
-                    <property name="xalign">0</property>
-                    <style>
-                      <class name="explanation"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkScrolledWindow">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="vexpand">True</property>
-                    <property name="shadow-type">in</property>
-                    <property name="min-content-height">300</property>
+                    <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkViewport">
+                      <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Qube</property>
+                        <style>
+                          <class name="section_title"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="spacing">10</property>
                         <child>
-                          <object class="GtkListBox" id="device_policy_listbox">
+                          <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="selection-mode">none</property>
+                            <property name="valign">center</property>
+                            <property name="vexpand">True</property>
+                            <property name="label" translatable="yes">Select qube:</property>
+                            <property name="xalign">0</property>
                             <style>
-                              <class name="permission_list"/>
+                              <class name="main_text"/>
                             </style>
                           </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkComboBox" id="device_policy_vm_combo">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="valign">center</property>
+                            <property name="margin-start">5</property>
+                            <property name="margin-bottom">5</property>
+                            <property name="hexpand">True</property>
+                            <property name="has-entry">True</property>
+                            <child internal-child="entry">
+                              <object class="GtkEntry">
+                                <property name="can-focus">True</property>
+                              </object>
+                            </child>
+                            <style>
+                              <class name="flat_combo"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
                         </child>
                       </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">1</property>
+                      </packing>
                     </child>
+                    <child>
+                      <object class="GtkLabel" id="device_policy_new_label">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="valign">center</property>
+                        <property name="vexpand">True</property>
+                        <property name="label" translatable="yes">Select a qube to be able to select device types to block.</property>
+                        <property name="use-markup">True</property>
+                        <property name="wrap">True</property>
+                        <property name="xalign">0</property>
+                        <style>
+                          <class name="explanation"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="device_policy_block_box">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Deny device attachment</property>
+                            <style>
+                              <class name="section_title"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="valign">center</property>
+                            <property name="vexpand">True</property>
+                            <property name="label" translatable="yes">You will not be able to manually attach any of the selected device types to this qube. This does &lt;b&gt;NOT&lt;/b&gt; apply to automatic attachments.</property>
+                            <property name="use-markup">True</property>
+                            <property name="wrap">True</property>
+                            <property name="xalign">0</property>
+                            <style>
+                              <class name="explanation"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkScrolledWindow">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="vexpand">True</property>
+                            <property name="shadow-type">in</property>
+                            <property name="min-content-height">300</property>
+                            <child>
+                              <object class="GtkViewport">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <child>
+                                  <object class="GtkListBox" id="device_policy_listbox">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="selection-mode">none</property>
+                                    <style>
+                                      <class name="permission_list"/>
+                                    </style>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <style>
+                      <class name="content_box"/>
+                    </style>
                   </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
                 </child>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">3</property>
-              </packing>
             </child>
-            <style>
-              <class name="content_box"/>
-            </style>
           </object>
           <packing>
             <property name="expand">True</property>
@@ -310,370 +326,16 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox">
+          <object class="GtkScrolledWindow">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="orientation">vertical</property>
+            <property name="can-focus">True</property>
+            <property name="shadow-type">in</property>
+            <property name="propagate-natural-width">True</property>
+            <property name="propagate-natural-height">True</property>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkViewport">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="halign">start</property>
-                <property name="label" translatable="yes">Device</property>
-                <style>
-                  <class name="section_title"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="spacing">10</property>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="valign">center</property>
-                    <property name="vexpand">True</property>
-                    <property name="label" translatable="yes">Device:</property>
-                    <property name="xalign">0</property>
-                    <style>
-                      <class name="main_text"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkComboBox" id="edit_device_device_combo">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <style>
-                      <class name="normal_combo"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox" id="edit_device_unknown_box">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="halign">center</property>
-                <property name="margin-bottom">20</property>
-                <property name="spacing">20</property>
-                <child>
-                  <object class="GtkImage">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="valign">center</property>
-                    <property name="pixel-size">48</property>
-                    <property name="icon-name">qubes-unplug</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="edit_device_info">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">This device is not currently connected. The assignment cannot be modified.</property>
-                    <property name="use-markup">True</property>
-                    <property name="wrap">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <style>
-                  <class name="info_box"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="valign">center</property>
-                <property name="vexpand">True</property>
-                <property name="label" translatable="yes">Apply rule to devices matching:</property>
-                <property name="xalign">0</property>
-                <style>
-                  <class name="main_text"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox" id="edit_device_backend_box">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <child>
-                  <object class="GtkCheckButton" id="edit_device_backend_check">
-                    <property name="label" translatable="yes">Backend qube:</property>
-                    <property name="visible">True</property>
-                    <property name="sensitive">False</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="tooltip-text" translatable="yes">Backend qube cannot be changed dynamically. Select a device from desired backend qube.</property>
-                    <property name="active">True</property>
-                    <property name="draw-indicator">True</property>
-                    <style>
-                      <class name="main_text"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <child>
-                  <object class="GtkCheckButton" id="edit_device_devclass_check">
-                    <property name="label" translatable="yes">Device class: </property>
-                    <property name="visible">True</property>
-                    <property name="sensitive">False</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="tooltip-text" translatable="yes">Device class cannot be set independently. Select a device from desired class.</property>
-                    <property name="active">True</property>
-                    <property name="draw-indicator">True</property>
-                    <style>
-                      <class name="main_text"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="edit_device_devclass_label">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="valign">center</property>
-                    <property name="vexpand">True</property>
-                    <property name="label" translatable="yes"> </property>
-                    <property name="xalign">0</property>
-                    <style>
-                      <class name="main_text"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">5</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <child>
-                  <object class="GtkCheckButton" id="edit_device_devident_check">
-                    <property name="label" translatable="yes">Device identity:</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="halign">start</property>
-                    <property name="valign">start</property>
-                    <property name="draw-indicator">True</property>
-                    <style>
-                      <class name="main_text"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="edit_device_devident_label">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="valign">start</property>
-                    <property name="margin-top">2</property>
-                    <property name="vexpand">True</property>
-                    <property name="xalign">0</property>
-                    <style>
-                      <class name="main_text"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">6</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <child>
-                  <object class="GtkCheckButton" id="edit_device_port_check">
-                    <property name="label" translatable="yes">Port: </property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="draw-indicator">True</property>
-                    <style>
-                      <class name="main_text"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="edit_device_port_label">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="valign">center</property>
-                    <property name="vexpand">True</property>
-                    <property name="xalign">0</property>
-                    <style>
-                      <class name="main_text"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">7</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">&lt;b&gt;Port&lt;/b&gt; refers to the port this device is currently plugged in. If you select matching the port, the device &lt;b&gt;must&lt;/b&gt; be plugged into this port to be automatically attached. If you select port and not device identity, all devices plugged into this port will be automatically attached.</property>
-                <property name="use-markup">True</property>
-                <property name="wrap">True</property>
-                <property name="xalign">0</property>
-                <style>
-                  <class name="explanation"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">8</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="halign">start</property>
-                <property name="label" translatable="yes">Action</property>
-                <style>
-                  <class name="section_title"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">9</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="valign">center</property>
-                <property name="vexpand">True</property>
-                <property name="label" translatable="yes">Select what happens when the device becomes available.</property>
-                <property name="xalign">0</property>
-                <style>
-                  <class name="explanation"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">10</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkRadioButton" id="edit_device_auto_radio">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">False</property>
-                <property name="active">True</property>
-                <property name="draw-indicator">True</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
@@ -683,12 +345,10 @@
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="valign">center</property>
-                        <property name="vexpand">True</property>
-                        <property name="label" translatable="yes">Automatically attach the device to the selected qube</property>
-                        <property name="xalign">0</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Device</property>
                         <style>
-                          <class name="main_text"/>
+                          <class name="section_title"/>
                         </style>
                       </object>
                       <packing>
@@ -698,12 +358,296 @@
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="spacing">10</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="valign">center</property>
+                            <property name="vexpand">True</property>
+                            <property name="label" translatable="yes">Device:</property>
+                            <property name="xalign">0</property>
+                            <style>
+                              <class name="main_text"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkComboBox" id="edit_device_device_combo">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <style>
+                              <class name="normal_combo"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="edit_device_unknown_box">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">center</property>
+                        <property name="margin-bottom">20</property>
+                        <property name="spacing">20</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="valign">center</property>
+                            <property name="pixel-size">48</property>
+                            <property name="icon-name">qubes-unplug</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="edit_device_info">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">This device is not currently connected. The assignment cannot be modified.</property>
+                            <property name="use-markup">True</property>
+                            <property name="wrap">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <style>
+                          <class name="info_box"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="valign">center</property>
                         <property name="vexpand">True</property>
-                        <property name="label" translatable="yes">If multiple qubes are selected and running when the device is connected, you will be asked to choose one of them.</property>
+                        <property name="label" translatable="yes">Apply rule to devices matching:</property>
+                        <property name="xalign">0</property>
+                        <style>
+                          <class name="main_text"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="edit_device_backend_box">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <child>
+                          <object class="GtkCheckButton" id="edit_device_backend_check">
+                            <property name="label" translatable="yes">Backend qube:</property>
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="tooltip-text" translatable="yes">Backend qube cannot be changed dynamically. Select a device from desired backend qube.</property>
+                            <property name="active">True</property>
+                            <property name="draw-indicator">True</property>
+                            <style>
+                              <class name="main_text"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <child>
+                          <object class="GtkCheckButton" id="edit_device_devclass_check">
+                            <property name="label" translatable="yes">Device class: </property>
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="tooltip-text" translatable="yes">Device class cannot be set independently. Select a device from desired class.</property>
+                            <property name="active">True</property>
+                            <property name="draw-indicator">True</property>
+                            <style>
+                              <class name="main_text"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="edit_device_devclass_label">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="valign">center</property>
+                            <property name="vexpand">True</property>
+                            <property name="label" translatable="yes"> </property>
+                            <property name="xalign">0</property>
+                            <style>
+                              <class name="main_text"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <child>
+                          <object class="GtkCheckButton" id="edit_device_devident_check">
+                            <property name="label" translatable="yes">Device identity:</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="halign">start</property>
+                            <property name="valign">start</property>
+                            <property name="draw-indicator">True</property>
+                            <style>
+                              <class name="main_text"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="edit_device_devident_label">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="valign">start</property>
+                            <property name="margin-top">2</property>
+                            <property name="vexpand">True</property>
+                            <property name="xalign">0</property>
+                            <style>
+                              <class name="main_text"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">6</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <child>
+                          <object class="GtkCheckButton" id="edit_device_port_check">
+                            <property name="label" translatable="yes">Port: </property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="draw-indicator">True</property>
+                            <style>
+                              <class name="main_text"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="edit_device_port_label">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="valign">center</property>
+                            <property name="vexpand">True</property>
+                            <property name="xalign">0</property>
+                            <style>
+                              <class name="main_text"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">7</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">&lt;b&gt;Port&lt;/b&gt; refers to the port this device is currently plugged in. If you select matching the port, the device &lt;b&gt;must&lt;/b&gt; be plugged into this port to be automatically attached. If you select port and not device identity, all devices plugged into this port will be automatically attached.</property>
+                        <property name="use-markup">True</property>
                         <property name="wrap">True</property>
                         <property name="xalign">0</property>
                         <style>
@@ -713,133 +657,66 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">1</property>
+                        <property name="position">8</property>
                       </packing>
                     </child>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">11</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkRadioButton" id="edit_device_ask_radio">
-                <property name="label" translatable="yes">Ask to attach to one of the selected qubes</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">False</property>
-                <property name="draw-indicator">True</property>
-                <property name="group">edit_device_auto_radio</property>
-                <style>
-                  <class name="main_text"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">12</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkCheckButton" id="edit_device_read_only">
-                <property name="label" translatable="yes">Read-only (only for block devices)</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">False</property>
-                <property name="margin-top">10</property>
-                <property name="draw-indicator">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">13</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="halign">start</property>
-                <property name="label" translatable="yes">Qubes</property>
-                <style>
-                  <class name="section_title"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">14</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox" id="edit_device_box">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="orientation">vertical</property>
-                <child>
-                  <object class="GtkFlowBox" id="edit_device_flowbox">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="margin-end">40</property>
-                    <style>
-                      <class name="flowbox_container"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkBox" id="edit_device_add_box">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="margin-top">5</property>
-                    <property name="spacing">10</property>
                     <child>
-                      <object class="GtkComboBox" id="edit_device_qube_combo">
+                      <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="valign">center</property>
-                        <property name="margin-start">5</property>
-                        <property name="margin-bottom">5</property>
-                        <property name="has-entry">True</property>
-                        <child internal-child="entry">
-                          <object class="GtkEntry">
-                            <property name="can-focus">False</property>
-                          </object>
-                        </child>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Action</property>
                         <style>
-                          <class name="flat_combo"/>
+                          <class name="section_title"/>
                         </style>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">0</property>
+                        <property name="position">9</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="edit_device_add_button">
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="valign">center</property>
+                        <property name="vexpand">True</property>
+                        <property name="label" translatable="yes">Select what happens when the device becomes available.</property>
+                        <property name="xalign">0</property>
+                        <style>
+                          <class name="explanation"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">10</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="edit_device_auto_radio">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
-                        <property name="receives-default">True</property>
-                        <property name="halign">start</property>
-                        <property name="relief">none</property>
+                        <property name="receives-default">False</property>
+                        <property name="active">True</property>
+                        <property name="draw-indicator">True</property>
                         <child>
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="spacing">10</property>
+                            <property name="orientation">vertical</property>
                             <child>
-                              <object class="GtkImage">
+                              <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="icon-name">qubes-icon-add</property>
+                                <property name="valign">center</property>
+                                <property name="vexpand">True</property>
+                                <property name="label" translatable="yes">Automatically attach the device to the selected qube</property>
+                                <property name="xalign">0</property>
+                                <style>
+                                  <class name="main_text"/>
+                                </style>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -851,10 +728,13 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="xpad">5</property>
-                                <property name="label" translatable="yes">Add qube</property>
+                                <property name="valign">center</property>
+                                <property name="vexpand">True</property>
+                                <property name="label" translatable="yes">If multiple qubes are selected and running when the device is connected, you will be asked to choose one of them.</property>
+                                <property name="wrap">True</property>
+                                <property name="xalign">0</property>
                                 <style>
-                                  <class name="add_label"/>
+                                  <class name="explanation"/>
                                 </style>
                               </object>
                               <packing>
@@ -865,52 +745,198 @@
                             </child>
                           </object>
                         </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">11</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="edit_device_ask_radio">
+                        <property name="label" translatable="yes">Ask to attach to one of the selected qubes</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="draw-indicator">True</property>
+                        <property name="group">edit_device_auto_radio</property>
                         <style>
-                          <class name="add_button"/>
-                          <class name="flat"/>
+                          <class name="main_text"/>
                         </style>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">1</property>
+                        <property name="position">12</property>
                       </packing>
                     </child>
+                    <child>
+                      <object class="GtkCheckButton" id="edit_device_read_only">
+                        <property name="label" translatable="yes">Read-only (only for block devices)</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="margin-top">10</property>
+                        <property name="draw-indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">13</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Qubes</property>
+                        <style>
+                          <class name="section_title"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">14</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="edit_device_box">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkFlowBox" id="edit_device_flowbox">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-end">40</property>
+                            <style>
+                              <class name="flowbox_container"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkBox" id="edit_device_add_box">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-top">5</property>
+                            <property name="spacing">10</property>
+                            <child>
+                              <object class="GtkComboBox" id="edit_device_qube_combo">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="valign">center</property>
+                                <property name="margin-start">5</property>
+                                <property name="margin-bottom">5</property>
+                                <property name="has-entry">True</property>
+                                <style>
+                                  <class name="flat_combo"/>
+                                </style>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="edit_device_add_button">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="halign">start</property>
+                                <property name="relief">none</property>
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="spacing">10</property>
+                                    <child>
+                                      <object class="GtkImage">
+                                        <property name="visible">True</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="icon-name">qubes-icon-add</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="xpad">5</property>
+                                        <property name="label" translatable="yes">Add qube</property>
+                                        <style>
+                                          <class name="add_label"/>
+                                        </style>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                </child>
+                                <style>
+                                  <class name="add_button"/>
+                                  <class name="flat"/>
+                                </style>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">15</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="edit_device_err_label">
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">A device cannot be attached to its own backend qube.</property>
+                        <property name="use-markup">True</property>
+                        <property name="wrap">True</property>
+                        <property name="xalign">0</property>
+                        <style>
+                          <class name="explanation"/>
+                          <class name="error_label"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">16</property>
+                      </packing>
+                    </child>
+                    <style>
+                      <class name="content_box"/>
+                    </style>
                   </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
                 </child>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">15</property>
-              </packing>
             </child>
-            <child>
-              <object class="GtkLabel" id="edit_device_err_label">
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">A device cannot be attached to its own backend qube.</property>
-                <property name="use-markup">True</property>
-                <property name="wrap">True</property>
-                <property name="xalign">0</property>
-                <style>
-                  <class name="explanation"/>
-                  <class name="error_label"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">16</property>
-              </packing>
-            </child>
-            <style>
-              <class name="content_box"/>
-            </style>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -9330,314 +9356,29 @@ to global clipboard</property>
           </packing>
         </child>
         <child>
-          <object class="GtkBox">
+          <object class="GtkScrolledWindow">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="orientation">vertical</property>
+            <property name="can-focus">True</property>
+            <property name="shadow-type">in</property>
+            <property name="propagate-natural-width">True</property>
+            <property name="propagate-natural-height">True</property>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkViewport">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="halign">start</property>
-                <property name="label" translatable="yes">Device</property>
-                <style>
-                  <class name="section_title"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="spacing">10</property>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="valign">center</property>
-                    <property name="vexpand">True</property>
-                    <property name="label" translatable="yes">Device:</property>
-                    <property name="xalign">0</property>
-                    <style>
-                      <class name="main_text"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkComboBox" id="required_device_device_combo">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <style>
-                      <class name="normal_combo"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Select available PCI or block device.</property>
-                <property name="wrap">True</property>
-                <property name="xalign">0</property>
-                <style>
-                  <class name="explanation"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox" id="required_device_unknown_box">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="no-show-all">True</property>
-                <property name="halign">center</property>
-                <property name="margin-bottom">20</property>
-                <property name="spacing">20</property>
-                <child>
-                  <object class="GtkImage">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="valign">center</property>
-                    <property name="pixel-size">48</property>
-                    <property name="icon-name">qubes-unplug</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="edit_device_info1">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">This device is not currently connected. The assignment cannot be modified.</property>
-                    <property name="use-markup">True</property>
-                    <property name="wrap">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <style>
-                  <class name="info_box"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="required_device_devident">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="valign">start</property>
-                <property name="margin-top">2</property>
-                <property name="vexpand">True</property>
-                <property name="label" translatable="yes">Device class:
-Other description:</property>
-                <property name="xalign">0</property>
-                <style>
-                  <class name="main_text"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="halign">start</property>
-                <property name="label" translatable="yes">Options</property>
-                <style>
-                  <class name="section_title"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">5</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="required_device_pci_label">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">&lt;b&gt;No strict reset&lt;/b&gt; and &lt;b&gt;permissive&lt;/b&gt; options should only be used in case of compatibility problems. They can lead to security issues.</property>
-                <property name="use-markup">True</property>
-                <property name="wrap">True</property>
-                <property name="xalign">0</property>
-                <style>
-                  <class name="explanation"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">6</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkCheckButton" id="required_device_nostrict_check">
-                <property name="label" translatable="yes">No strict reset</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">False</property>
-                <property name="draw-indicator">True</property>
-                <style>
-                  <class name="main_text"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">7</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkCheckButton" id="required_device_permissive_check">
-                <property name="label" translatable="yes">Permissive</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">False</property>
-                <property name="draw-indicator">True</property>
-                <style>
-                  <class name="main_text"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">8</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkCheckButton" id="required_device_readonly_check">
-                <property name="label" translatable="yes">Read-only</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">False</property>
-                <property name="draw-indicator">True</property>
-                <style>
-                  <class name="main_text"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">9</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkCheckButton" id="required_device_port_check">
-                <property name="label" translatable="yes">Require port (device will match only when plugged into the currently used port)</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">False</property>
-                <property name="draw-indicator">True</property>
-                <style>
-                  <class name="main_text"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">10</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="halign">start</property>
-                <property name="label" translatable="yes">Qubes</property>
-                <style>
-                  <class name="section_title"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">11</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox" id="required_device_box">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="orientation">vertical</property>
-                <child>
-                  <object class="GtkFlowBox" id="required_device_flowbox">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="margin-end">40</property>
-                    <style>
-                      <class name="flowbox_container"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkBox" id="required_device_add_box">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="margin-top">5</property>
-                    <property name="spacing">10</property>
+                    <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkComboBox" id="required_device_qube_combo">
+                      <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="valign">center</property>
-                        <property name="margin-start">5</property>
-                        <property name="margin-bottom">5</property>
-                        <property name="has-entry">True</property>
-                        <child internal-child="entry">
-                          <object class="GtkEntry">
-                            <property name="can-focus">True</property>
-                          </object>
-                        </child>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Device</property>
                         <style>
-                          <class name="flat_combo"/>
+                          <class name="section_title"/>
                         </style>
                       </object>
                       <packing>
@@ -9647,22 +9388,289 @@ Other description:</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="required_device_add_button">
+                      <object class="GtkBox">
                         <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="receives-default">True</property>
-                        <property name="halign">start</property>
-                        <property name="relief">none</property>
+                        <property name="can-focus">False</property>
+                        <property name="spacing">10</property>
                         <child>
-                          <object class="GtkBox">
+                          <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="valign">center</property>
+                            <property name="vexpand">True</property>
+                            <property name="label" translatable="yes">Device:</property>
+                            <property name="xalign">0</property>
+                            <style>
+                              <class name="main_text"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkComboBox" id="required_device_device_combo">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <style>
+                              <class name="normal_combo"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Select available PCI or block device.</property>
+                        <property name="wrap">True</property>
+                        <property name="xalign">0</property>
+                        <style>
+                          <class name="explanation"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="required_device_unknown_box">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="no-show-all">True</property>
+                        <property name="halign">center</property>
+                        <property name="margin-bottom">20</property>
+                        <property name="spacing">20</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="valign">center</property>
+                            <property name="pixel-size">48</property>
+                            <property name="icon-name">qubes-unplug</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="edit_device_info1">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">This device is not currently connected. The assignment cannot be modified.</property>
+                            <property name="use-markup">True</property>
+                            <property name="wrap">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <style>
+                          <class name="info_box"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="required_device_devident">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="valign">start</property>
+                        <property name="margin-top">2</property>
+                        <property name="vexpand">True</property>
+                        <property name="label" translatable="yes">Device class:
+Other description:</property>
+                        <property name="xalign">0</property>
+                        <style>
+                          <class name="main_text"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Options</property>
+                        <style>
+                          <class name="section_title"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="required_device_pci_label">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">&lt;b&gt;No strict reset&lt;/b&gt; and &lt;b&gt;permissive&lt;/b&gt; options should only be used in case of compatibility problems. They can lead to security issues.</property>
+                        <property name="use-markup">True</property>
+                        <property name="wrap">True</property>
+                        <property name="xalign">0</property>
+                        <style>
+                          <class name="explanation"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">6</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="required_device_nostrict_check">
+                        <property name="label" translatable="yes">No strict reset</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="draw-indicator">True</property>
+                        <style>
+                          <class name="main_text"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">7</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="required_device_permissive_check">
+                        <property name="label" translatable="yes">Permissive</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="draw-indicator">True</property>
+                        <style>
+                          <class name="main_text"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">8</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="required_device_readonly_check">
+                        <property name="label" translatable="yes">Read-only</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="draw-indicator">True</property>
+                        <style>
+                          <class name="main_text"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">9</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="required_device_port_check">
+                        <property name="label" translatable="yes">Require port (device will match only when plugged into the currently used port)</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">False</property>
+                        <property name="draw-indicator">True</property>
+                        <style>
+                          <class name="main_text"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">10</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Qubes</property>
+                        <style>
+                          <class name="section_title"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">11</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="required_device_box">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkFlowBox" id="required_device_flowbox">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-end">40</property>
+                            <style>
+                              <class name="flowbox_container"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkBox" id="required_device_add_box">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-top">5</property>
                             <property name="spacing">10</property>
                             <child>
-                              <object class="GtkImage">
+                              <object class="GtkComboBox" id="required_device_qube_combo">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="icon-name">qubes-icon-add</property>
+                                <property name="valign">center</property>
+                                <property name="margin-start">5</property>
+                                <property name="margin-bottom">5</property>
+                                <property name="has-entry">True</property>
+                                <style>
+                                  <class name="flat_combo"/>
+                                </style>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -9671,13 +9679,50 @@ Other description:</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel">
+                              <object class="GtkButton" id="required_device_add_button">
                                 <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="xpad">5</property>
-                                <property name="label" translatable="yes">Add qube</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="halign">start</property>
+                                <property name="relief">none</property>
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="spacing">10</property>
+                                    <child>
+                                      <object class="GtkImage">
+                                        <property name="visible">True</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="icon-name">qubes-icon-add</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="xpad">5</property>
+                                        <property name="label" translatable="yes">Add qube</property>
+                                        <style>
+                                          <class name="add_label"/>
+                                        </style>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                </child>
                                 <style>
-                                  <class name="add_label"/>
+                                  <class name="add_button"/>
+                                  <class name="flat"/>
                                 </style>
                               </object>
                               <packing>
@@ -9687,53 +9732,44 @@ Other description:</property>
                               </packing>
                             </child>
                           </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
                         </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">13</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="required_device_err_label">
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">A device cannot be attached to its own backend qube.</property>
+                        <property name="use-markup">True</property>
+                        <property name="wrap">True</property>
+                        <property name="xalign">0</property>
                         <style>
-                          <class name="add_button"/>
-                          <class name="flat"/>
+                          <class name="explanation"/>
+                          <class name="error_label"/>
                         </style>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">1</property>
+                        <property name="position">14</property>
                       </packing>
                     </child>
+                    <style>
+                      <class name="content_box"/>
+                    </style>
                   </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
                 </child>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">13</property>
-              </packing>
             </child>
-            <child>
-              <object class="GtkLabel" id="required_device_err_label">
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">A device cannot be attached to its own backend qube.</property>
-                <property name="use-markup">True</property>
-                <property name="wrap">True</property>
-                <property name="xalign">0</property>
-                <style>
-                  <class name="explanation"/>
-                  <class name="error_label"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">14</property>
-              </packing>
-            </child>
-            <style>
-              <class name="content_box"/>
-            </style>
           </object>
           <packing>
             <property name="expand">False</property>

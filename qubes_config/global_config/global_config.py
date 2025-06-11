@@ -35,6 +35,7 @@ from ..widgets.gtk_utils import (
     show_dialog_with_icon,
     load_theme,
     is_theme_light,
+    resize_window_to_reasonable,
 )
 from ..widgets.gtk_widgets import ProgressBarDialog, ViewportHandler
 from ..widgets.utils import open_url_in_disposable
@@ -58,7 +59,7 @@ from .device_attachments import DevAttachmentHandler
 import gi
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, GLib, GObject, Gio, Gdk
+from gi.repository import Gtk, GLib, GObject, Gio
 
 logger = logging.getLogger("qubes-global-config")
 
@@ -299,27 +300,7 @@ class GlobalConfig(Gtk.Application):
         self.perform_setup()
         assert self.main_window
         self.main_window.show()
-        # resize to screen size
-        if (
-            self.main_window.get_allocated_width()
-            > self.main_window.get_screen().get_width()
-        ):
-            width = int(self.main_window.get_screen().get_width() * 0.9)
-        else:
-            # try to have at least 1100 pixels
-            width = min(int(self.main_window.get_screen().get_width() * 0.9), 1100)
-        if (
-            self.main_window.get_allocated_height()
-            > self.main_window.get_screen().get_height() * 0.9
-        ):
-            height = int(self.main_window.get_screen().get_height() * 0.9)
-        else:
-            height = self.main_window.get_allocated_height()
-        self.main_window.resize(width, height)
-        self.main_window.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
-        self.main_window.set_gravity(Gdk.Gravity.CENTER)
-        self.main_window.move(0, 0)
-        self.main_window.set_position(Gtk.WindowPosition.CENTER)
+        resize_window_to_reasonable(self.main_window)
 
         # open at specified location
         if self.open_at:

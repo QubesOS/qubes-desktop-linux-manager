@@ -138,6 +138,8 @@ class VMFlowboxHandler:
             filter_function=filter_function,
         )
 
+        self.add_qube_model.connect_change_callback(self._check_for_add_validity)
+
         self.flowbox.set_sort_func(self._sort_flowbox)
         self.placeholder = PlaceholderText()
         self.flowbox.add(self.placeholder)
@@ -150,6 +152,12 @@ class VMFlowboxHandler:
 
         self.add_button.connect("clicked", self._add_confirm_clicked)
         self.flowbox.connect("child-removed", self._vm_removed)
+
+    def _check_for_add_validity(self, *_args):
+        if self.add_qube_model.get_selected() is None:
+            self.add_button.set_sensitive(False)
+        else:
+            self.add_button.set_sensitive(True)
 
     @staticmethod
     def _sort_flowbox(child_1, child_2):
