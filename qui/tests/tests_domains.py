@@ -48,9 +48,7 @@ class DomainsWidgetTest(unittest.TestCase):
         for menu_item in self.widget.tray_menu:
             domain = self.qapp.domains[menu_item.vm["name"]]
             domains_in_widget.append(domain)
-            self.assertTrue(
-                domain.is_running(), "halted domain listed incorrectly"
-            )
+            self.assertTrue(domain.is_running(), "halted domain listed incorrectly")
         for domain in self.qapp.domains:
             if domain.klass != "AdminVM":
                 self.assertEqual(

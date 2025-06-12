@@ -34,8 +34,7 @@ def test_conflict_files():
 
     manager = PolicyManager()
     with patch(
-        "qubes_config.global_config.policy_manager."
-        "PolicyClient.policy_get_files"
+        "qubes_config.global_config.policy_manager.PolicyClient.policy_get_files"
     ) as mock_get:
         mock_get.side_effect = return_files
 
@@ -48,9 +47,7 @@ def test_conflict_files():
             "a-test",
             "b-test",
         ]
-        assert manager.get_conflicting_policy_files("test", "b-test") == [
-            "a-test"
-        ]
+        assert manager.get_conflicting_policy_files("test", "b-test") == ["a-test"]
         assert not manager.get_conflicting_policy_files("test", "a-test")
         assert not manager.get_conflicting_policy_files("other", "test")
 
@@ -127,25 +124,15 @@ Test +Test2 work @anyvm allow"""
 Test * work @anyvm allow"""
 
     rules_1 = [
-        Rule.from_line(
-            None, "Test * @anyvm @anyvm deny", filepath=None, lineno=0
-        )
+        Rule.from_line(None, "Test * @anyvm @anyvm deny", filepath=None, lineno=0)
     ]
     rules_2 = [
-        Rule.from_line(
-            None, "Test * @anyvm @anyvm deny", filepath=None, lineno=0
-        ),
-        Rule.from_line(
-            None, "Test +Test2 work @anyvm allow", filepath=None, lineno=0
-        ),
+        Rule.from_line(None, "Test * @anyvm @anyvm deny", filepath=None, lineno=0),
+        Rule.from_line(None, "Test +Test2 work @anyvm allow", filepath=None, lineno=0),
     ]
     rules_3 = [
-        Rule.from_line(
-            None, "Test * @anyvm @anyvm deny", filepath=None, lineno=0
-        ),
-        Rule.from_line(
-            None, "Test * work @anyvm allow", filepath=None, lineno=0
-        ),
+        Rule.from_line(None, "Test * @anyvm @anyvm deny", filepath=None, lineno=0),
+        Rule.from_line(None, "Test * work @anyvm allow", filepath=None, lineno=0),
     ]
 
     assert manager.compare_rules_to_text(rules_1, rule_text_1)
@@ -160,9 +147,7 @@ Test * work @anyvm allow"""
 def test_new_rule():
     manager = PolicyManager()
 
-    rule_1 = Rule.from_line(
-        None, "Test * @anyvm @anyvm deny", filepath=None, lineno=0
-    )
+    rule_1 = Rule.from_line(None, "Test * @anyvm @anyvm deny", filepath=None, lineno=0)
     rule_2 = Rule.from_line(
         None,
         "Test +Test @anyvm vault allow target=dom0",
@@ -170,9 +155,7 @@ def test_new_rule():
         lineno=0,
     )
 
-    assert str(manager.new_rule("Test", "@anyvm", "@anyvm", "deny")) == str(
-        rule_1
-    )
+    assert str(manager.new_rule("Test", "@anyvm", "@anyvm", "deny")) == str(rule_1)
     assert str(
         manager.new_rule(
             service="Test",
@@ -188,9 +171,7 @@ def test_save_policy():
     manager = PolicyManager()
 
     rule_text = "Test\t*\t@anyvm\t@anyvm\tdeny"
-    rule = Rule.from_line(
-        None, "Test * @anyvm @anyvm deny", filepath=None, lineno=0
-    )
+    rule = Rule.from_line(None, "Test * @anyvm @anyvm deny", filepath=None, lineno=0)
 
     def replace_file(file_name: str, new_text: str, _token):
         if file_name == "test":
@@ -202,8 +183,7 @@ def test_save_policy():
         assert False
 
     with patch(
-        "qubes_config.global_config.policy_manager."
-        "PolicyClient.policy_replace"
+        "qubes_config.global_config.policy_manager.PolicyClient.policy_replace"
     ) as mock_replace:
         mock_replace.side_effect = replace_file
         manager.save_rules("test", [rule], "any")

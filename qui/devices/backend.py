@@ -98,9 +98,7 @@ class VM:
 
 
 class Device:
-    def __init__(
-        self, dev: qubesadmin.devices.DeviceInfo, gtk_app: Gtk.Application
-    ):
+    def __init__(self, dev: qubesadmin.devices.DeviceInfo, gtk_app: Gtk.Application):
         self.gtk_app: Gtk.Application = gtk_app
         self._dev: qubesadmin.devices.DeviceInfo = dev
         self.__hash = hash(dev)
@@ -256,9 +254,9 @@ class Device:
         except Exception as ex:  # pylint: disable=broad-except
             self.gtk_app.emit_notification(
                 _("Error"),
-                _(
-                    "Attaching device {0} to {1} failed. Error: {2} - {3}"
-                ).format(self.description, vm, type(ex).__name__, ex),
+                _("Attaching device {0} to {1} failed. Error: {2} - {3}").format(
+                    self.description, vm, type(ex).__name__, ex
+                ),
                 Gio.NotificationPriority.HIGH,
                 error=True,
                 notification_id=self.notification_id,

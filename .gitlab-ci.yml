@@ -46,3 +46,4 @@ checks:black:
   variables:
     DIR: .
     SKIP_PYLINT: 1
+    BLACK_ARGS: -l88 -v --diff --color --check

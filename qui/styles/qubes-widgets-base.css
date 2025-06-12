@@ -121,6 +121,11 @@ radiobutton radio {
     color: white;
 }
 
+.button_save:disabled {
+    background: @medium-gray;
+    color: black;
+}
+
 .button_cancel {
     background: @button-color;
     color: @dark-text-color;

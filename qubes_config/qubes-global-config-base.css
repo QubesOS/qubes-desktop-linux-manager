@@ -28,9 +28,9 @@ separator {
     border-style: solid;
     padding-left: 30px;
     padding-right: 30px;
-    padding-top: 30px;
+    padding-top: 10px;
     box-shadow: none;
-    padding-bottom: 50px;
+    padding-bottom: 10px;
 }
 
 #main_notebook {
@@ -145,9 +145,21 @@ separator {
     padding-bottom: 5px;
 }
 
+.alternate_rows row:nth-child(even) {
+    background: @alt-row;
+}
+
+.alternate_rows row:selected {
+    background: @qubes-blue;
+}
+
 .permission_row {
     background: @top-background-2;
     padding:5px;
+}
+
+.error_row {
+    background: @problem-background;
 }
 
 .permission_row:hover {
@@ -254,4 +266,20 @@ separator {
 
 .info_grid {
     margin: 20px;
+}
+
+.add_rule_box {
+    padding: 10px 10px 10px 10px;
+    margin: 5px 0px 5px 0px;
+    background: white;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 4px;
+    border-color: @dark-gray;
+}
+
+.error_label {
+    color: @red-label;
+    font-style: italic;
+    font-weight: bold;
 }

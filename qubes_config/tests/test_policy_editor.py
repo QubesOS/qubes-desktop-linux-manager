@@ -46,9 +46,7 @@ def test_open_file(test_policy_client):
 
 
 def test_open_file_not_found(test_policy_client):
-    with patch(
-        "qubes_config.policy_editor.policy_editor.ask_question"
-    ) as mock_ask:
+    with patch("qubes_config.policy_editor.policy_editor.ask_question") as mock_ask:
         mock_ask.return_value = Gtk.ResponseType.CANCEL
         policy_editor = PolicyEditor("new-file", test_policy_client)
         with patch.object(policy_editor, "_quit") as mock_quit:
@@ -65,9 +63,7 @@ def test_open_file_not_found(test_policy_client):
             )
             assert mock_quit.call_count == 1
 
-    with patch(
-        "qubes_config.policy_editor.policy_editor.ask_question"
-    ) as mock_ask:
+    with patch("qubes_config.policy_editor.policy_editor.ask_question") as mock_ask:
         mock_ask.return_value = Gtk.ResponseType.NO
         policy_editor = PolicyEditor("new-file", test_policy_client)
         with patch.object(policy_editor, "_quit") as mock_quit:
@@ -77,9 +73,7 @@ def test_open_file_not_found(test_policy_client):
             assert not policy_editor.source_view.get_sensitive()
             assert mock_quit.call_count == 0
 
-    with patch(
-        "qubes_config.policy_editor.policy_editor.ask_question"
-    ) as mock_ask:
+    with patch("qubes_config.policy_editor.policy_editor.ask_question") as mock_ask:
         mock_ask.return_value = Gtk.ResponseType.YES
         policy_editor = PolicyEditor("new-file", test_policy_client)
         with patch.object(policy_editor, "_quit") as mock_quit:
@@ -103,42 +97,30 @@ def test_detect_changes(test_policy_client):
     policy_editor.perform_setup()
 
     assert not policy_editor.builder.get_object("button_save").get_sensitive()
-    assert not policy_editor.builder.get_object(
-        "button_save_exit"
-    ).get_sensitive()
+    assert not policy_editor.builder.get_object("button_save_exit").get_sensitive()
     assert policy_editor.error_info.get_style_context().has_class("error_ok")
-    assert not policy_editor.error_info.get_style_context().has_class(
-        "error_bad"
-    )
+    assert not policy_editor.error_info.get_style_context().has_class("error_bad")
 
     policy_editor.source_buffer.set_text("Test * @anyvm @anyvm allow")
 
     assert policy_editor.builder.get_object("button_save").get_sensitive()
     assert policy_editor.builder.get_object("button_save_exit").get_sensitive()
     assert policy_editor.error_info.get_style_context().has_class("error_ok")
-    assert not policy_editor.error_info.get_style_context().has_class(
-        "error_bad"
-    )
+    assert not policy_editor.error_info.get_style_context().has_class("error_bad")
 
     policy_editor.source_buffer.set_text("Test * @anyvm @anyvm andruty")
 
     assert not policy_editor.builder.get_object("button_save").get_sensitive()
-    assert not policy_editor.builder.get_object(
-        "button_save_exit"
-    ).get_sensitive()
+    assert not policy_editor.builder.get_object("button_save_exit").get_sensitive()
     assert policy_editor.error_info.get_style_context().has_class("error_bad")
-    assert not policy_editor.error_info.get_style_context().has_class(
-        "error_ok"
-    )
+    assert not policy_editor.error_info.get_style_context().has_class("error_ok")
 
     policy_editor.source_buffer.set_text("Test +any work @anyvm allow")
 
     assert policy_editor.builder.get_object("button_save").get_sensitive()
     assert policy_editor.builder.get_object("button_save_exit").get_sensitive()
     assert policy_editor.error_info.get_style_context().has_class("error_ok")
-    assert not policy_editor.error_info.get_style_context().has_class(
-        "error_bad"
-    )
+    assert not policy_editor.error_info.get_style_context().has_class("error_bad")
 
 
 def test_open_another_file(test_policy_client):
@@ -175,9 +157,7 @@ def test_open_another_file(test_policy_client):
 Test * test-red test-blue deny"""
     )
     assert not policy_editor.builder.get_object("button_save").get_sensitive()
-    assert not policy_editor.builder.get_object(
-        "button_save_exit"
-    ).get_sensitive()
+    assert not policy_editor.builder.get_object("button_save_exit").get_sensitive()
 
 
 def test_save_changes(test_policy_client):
@@ -199,20 +179,14 @@ def test_save_changes(test_policy_client):
 
     assert test_policy_client.files["a-test"] == "Test * @anyvm @anyvm allow"
     assert not policy_editor.builder.get_object("button_save").get_sensitive()
-    assert not policy_editor.builder.get_object(
-        "button_save_exit"
-    ).get_sensitive()
+    assert not policy_editor.builder.get_object("button_save_exit").get_sensitive()
     assert policy_editor.error_info.get_style_context().has_class("error_ok")
-    assert not policy_editor.error_info.get_style_context().has_class(
-        "error_bad"
-    )
+    assert not policy_editor.error_info.get_style_context().has_class("error_bad")
 
 
 def test_save_from_new(test_policy_client):
     policy_editor = PolicyEditor("c-test", test_policy_client)
-    with patch(
-        "qubes_config.policy_editor.policy_editor.ask_question"
-    ) as mock_ask:
+    with patch("qubes_config.policy_editor.policy_editor.ask_question") as mock_ask:
         mock_ask.return_value = Gtk.ResponseType.YES
         policy_editor.perform_setup()
     assert "c-test" not in test_policy_client.files
@@ -242,9 +216,7 @@ def test_deselect_file_on_hide(test_policy_client):
 
     policy_editor.action_items["open"].activate()
     assert policy_editor.file_select_handler.dialog_window.get_visible()
-    assert (
-        policy_editor.file_select_handler.file_list.get_selected_row() is None
-    )
+    assert policy_editor.file_select_handler.file_list.get_selected_row() is None
     policy_editor.file_select_handler.cancel_button.clicked()
 
     assert (

@@ -25,6 +25,7 @@
 import time
 from unittest.mock import patch
 
+from qubesadmin.tests.mock_app import MockQube
 from ..global_config.global_config import (
     GlobalConfig,
     ClipboardHandler,
@@ -54,6 +55,21 @@ show_dialog_with_icon_path = (
 
 @patch("qubesadmin.app.VMCollection", TestVMCollection)
 def test_vmcollection_global_config(test_qapp):
+    test_qapp._qubes["disp123"] = MockQube(
+        name="disp123",
+        qapp=test_qapp,
+        klass="DispVM",
+        auto_cleanup=True,
+    )
+    # this dispvm will die suddenly in the middle of Global Config running
+    test_qapp._qubes["disp666"] = MockQube(
+        name="disp666",
+        qapp=test_qapp,
+        klass="DispVM",
+    )
+
+    test_qapp.update_vm_calls()
+
     collection = VMCollection(test_qapp)
     test_qapp.expected_calls[
         ("disp666", "admin.vm.property.Get", "auto_cleanup", None)
@@ -84,9 +100,7 @@ def test_global_config_init(
 
     # switch across pages, nothing should happen
     while (
-        app.main_notebook.get_nth_page(
-            app.main_notebook.get_current_page()
-        ).get_name()
+        app.main_notebook.get_nth_page(app.main_notebook.get_current_page()).get_name()
         != "thisdevice"
     ):
         app.main_notebook.next_page()
@@ -95,9 +109,7 @@ def test_global_config_init(
     app.main_notebook.set_current_page(0)
 
     while (
-        app.main_notebook.get_nth_page(
-            app.main_notebook.get_current_page()
-        ).get_name()
+        app.main_notebook.get_nth_page(app.main_notebook.get_current_page()).get_name()
         != "clipboard"
     ):
         app.main_notebook.next_page()
@@ -148,9 +160,7 @@ def test_global_config_page_change(
     assert test_builder
 
     while (
-        app.main_notebook.get_nth_page(
-            app.main_notebook.get_current_page()
-        ).get_name()
+        app.main_notebook.get_nth_page(app.main_notebook.get_current_page()).get_name()
         != "file"
     ):
         app.main_notebook.next_page()
@@ -287,9 +297,7 @@ def test_global_config_broken_system(
 
     # switch across pages, nothing should happen
     while (
-        app.main_notebook.get_nth_page(
-            app.main_notebook.get_current_page()
-        ).get_name()
+        app.main_notebook.get_nth_page(app.main_notebook.get_current_page()).get_name()
         != "thisdevice"
     ):
         app.main_notebook.next_page()

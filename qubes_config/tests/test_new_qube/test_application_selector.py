@@ -54,10 +54,7 @@ def test_app_handler(mock_subprocess, test_qapp, new_qube_builder):
     mock_subprocess.side_effect = mock_output
 
     template_handler = TemplateHandler(new_qube_builder, test_qapp)
-    assert (
-        template_handler.get_selected_template()
-        == test_qapp.domains["fedora-36"]
-    )
+    assert template_handler.get_selected_template() == test_qapp.domains["fedora-36"]
     app_selector = ApplicationBoxHandler(new_qube_builder, template_handler)
 
     # default template is selected at start, so:
@@ -103,10 +100,7 @@ def test_app_handler_show_hide(mock_subprocess, test_qapp, new_qube_builder):
     mock_subprocess.side_effect = mock_output
 
     template_handler = TemplateHandler(new_qube_builder, test_qapp)
-    assert (
-        template_handler.get_selected_template()
-        == test_qapp.domains["fedora-36"]
-    )
+    assert template_handler.get_selected_template() == test_qapp.domains["fedora-36"]
     app_selector = ApplicationBoxHandler(new_qube_builder, template_handler)
 
     # click the plus button
@@ -156,9 +150,7 @@ def test_app_handler_show_hide(mock_subprocess, test_qapp, new_qube_builder):
 
 
 @patch("subprocess.check_output")
-def test_app_handler_change_template(
-    mock_subprocess, test_qapp, new_qube_builder
-):
+def test_app_handler_change_template(mock_subprocess, test_qapp, new_qube_builder):
     def mock_output(command):
         vm_name = command[-1]
         if command[1] == "--get-available":
@@ -183,10 +175,7 @@ def test_app_handler_change_template(
     mock_subprocess.side_effect = mock_output
 
     template_handler = TemplateHandler(new_qube_builder, test_qapp)
-    assert (
-        template_handler.get_selected_template()
-        == test_qapp.domains["fedora-36"]
-    )
+    assert template_handler.get_selected_template() == test_qapp.domains["fedora-36"]
     app_selector = ApplicationBoxHandler(new_qube_builder, template_handler)
 
     assert app_selector.get_selected_apps() == ["firefox.desktop"]
@@ -272,10 +261,7 @@ def test_app_handler_do_template(mock_subprocess, test_qapp, new_qube_builder):
     mock_subprocess.side_effect = mock_output
 
     template_handler = TemplateHandler(new_qube_builder, test_qapp)
-    assert (
-        template_handler.get_selected_template()
-        == test_qapp.domains["fedora-36"]
-    )
+    assert template_handler.get_selected_template() == test_qapp.domains["fedora-36"]
     app_selector = ApplicationBoxHandler(new_qube_builder, template_handler)
 
     for child in app_selector.flowbox.get_children():
@@ -309,10 +295,7 @@ def test_app_handler_do_template(mock_subprocess, test_qapp, new_qube_builder):
     else:
         assert False  # didn't find udon
 
-    assert (
-        template_handler.get_selected_template()
-        == test_qapp.domains["fedora-35"]
-    )
+    assert template_handler.get_selected_template() == test_qapp.domains["fedora-35"]
 
 
 @patch("subprocess.check_output")
@@ -341,10 +324,7 @@ def test_app_handler_delete(mock_subprocess, test_qapp, new_qube_builder):
     mock_subprocess.side_effect = mock_output
 
     template_handler = TemplateHandler(new_qube_builder, test_qapp)
-    assert (
-        template_handler.get_selected_template()
-        == test_qapp.domains["fedora-36"]
-    )
+    assert template_handler.get_selected_template() == test_qapp.domains["fedora-36"]
     app_selector = ApplicationBoxHandler(new_qube_builder, template_handler)
 
     assert app_selector.get_selected_apps() == ["firefox.desktop"]

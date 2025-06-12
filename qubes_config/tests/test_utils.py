@@ -72,9 +72,9 @@ def test_get_feature(test_qapp):
     apply_feature_change(vm, feature_name, "text")
     assert call in test_qapp.actual_calls
 
-    test_qapp.expected_calls[
-        ("test-vm", "admin.vm.feature.List", None, None)
-    ] = b"0\x00test_feature"
+    test_qapp.expected_calls[("test-vm", "admin.vm.feature.List", None, None)] = (
+        b"0\x00test_feature"
+    )
     test_qapp.expected_calls[
         ("test-vm", "admin.vm.feature.Remove", feature_name, None)
     ] = b"0\x001"
@@ -134,9 +134,9 @@ def test_apply_change_from_widget(test_qapp):
     ] = b"0\0"
     apply_feature_change_from_widget(MockWidget(True, "text"), vm, feature_name)
 
-    test_qapp.expected_calls[
-        ("test-vm", "admin.vm.feature.List", None, None)
-    ] = b"0\x00other-feature"
+    test_qapp.expected_calls[("test-vm", "admin.vm.feature.List", None, None)] = (
+        b"0\x00other-feature"
+    )
     test_qapp.expected_calls[
         ("test-vm", "admin.vm.feature.Remove", feature_name, None)
     ] = b"0\x001"

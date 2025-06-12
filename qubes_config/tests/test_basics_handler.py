@@ -331,9 +331,9 @@ def test_kernels(test_qapp):
     handler.widget.set_active_id("(none)")
     assert handler.get_unsaved() == "Default kernel"
 
-    test_qapp.expected_calls[
-        ("dom0", "admin.property.Set", "default_kernel", b"")
-    ] = b"0\x00"
+    test_qapp.expected_calls[("dom0", "admin.property.Set", "default_kernel", b"")] = (
+        b"0\x00"
+    )
     handler.save()
     assert handler.get_unsaved() == ""
 
@@ -345,9 +345,7 @@ def test_basics_handler(real_builder, test_qapp):
 
     # all handlers are tested above, so now just use one as example
     # change clockvm
-    clockvm_combo: Gtk.ComboBox = real_builder.get_object(
-        "basics_clockvm_combo"
-    )
+    clockvm_combo: Gtk.ComboBox = real_builder.get_object("basics_clockvm_combo")
     initial_clockvm = clockvm_combo.get_active_id()
     assert initial_clockvm != "test-blue"
     clockvm_combo.set_active_id("test-blue")

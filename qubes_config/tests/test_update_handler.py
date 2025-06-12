@@ -117,9 +117,7 @@ def test_repo_handler_error(mock_output, real_builder):
     assert handler.problems_repo_box.get_visible()
 
 
-def mock_qrexec(
-    _vm, service, arg, repo_list="", enable_repos=None, disable_repos=None
-):
+def mock_qrexec(_vm, service, arg, repo_list="", enable_repos=None, disable_repos=None):
     if "qubes.repos.List" in service:
         return repo_list
 
@@ -225,9 +223,7 @@ def test_repo_handler_save_fail(real_builder):
 
     handler.dom0_stable_radio.set_active(True)
 
-    with patch(
-        "qubes_config.global_config.updates_handler.qrexec_call"
-    ) as mock_output:
+    with patch("qubes_config.global_config.updates_handler.qrexec_call") as mock_output:
         mock_output.side_effect = RuntimeError()
         with pytest.raises(qubesadmin.exc.QubesException):
             handler.save()
@@ -352,9 +348,7 @@ def test_updates_checker_init_disabled(real_builder, test_qapp):
     handler = UpdateCheckerHandler(real_builder, test_qapp)
     assert handler.disable_radio.get_active()
     assert handler.exceptions_check.get_active()
-    assert [
-        str(vm) for vm in handler.flowbox_handler.selected_vms
-    ] == expected_qubes
+    assert [str(vm) for vm in handler.flowbox_handler.selected_vms] == expected_qubes
 
 
 def test_updates_checker_exceptions(real_builder, test_qapp):
@@ -388,9 +382,7 @@ def test_updates_checker_exceptions(real_builder, test_qapp):
     handler = UpdateCheckerHandler(real_builder, test_qapp)
     assert handler.enable_radio.get_active()
     assert handler.exceptions_check.get_active()
-    assert [
-        str(vm) for vm in handler.flowbox_handler.selected_vms
-    ] == disabled_vms
+    assert [str(vm) for vm in handler.flowbox_handler.selected_vms] == disabled_vms
 
     # switch to disable
     handler.disable_radio.set_active(True)
@@ -490,9 +482,7 @@ def test_updates_checker_save_dom0(mock_feature, real_builder, test_qapp):
 
 
 @patch("qubes_config.global_config.updates_handler.apply_feature_change")
-def test_updates_checker_save_dom0_initial_none(
-    mock_feature, real_builder, test_qapp
-):
+def test_updates_checker_save_dom0_initial_none(mock_feature, real_builder, test_qapp):
     test_qapp.expected_calls[
         (
             "dom0",
@@ -501,8 +491,7 @@ def test_updates_checker_save_dom0_initial_none(
             None,
         )
     ] = (
-        b"2\x00QubesFeatureNotFoundError\x00\x00service."
-        b"qubes-update-check\x00"
+        b"2\x00QubesFeatureNotFoundError\x00\x00service." b"qubes-update-check\x00"
     )
 
     handler = UpdateCheckerHandler(real_builder, test_qapp)
@@ -515,9 +504,7 @@ def test_updates_checker_save_dom0_initial_none(
 
 
 @patch("qubes_config.global_config.updates_handler.apply_feature_change")
-def test_updates_checker_save_add_exception(
-    mock_feature, real_builder, test_qapp
-):
+def test_updates_checker_save_add_exception(mock_feature, real_builder, test_qapp):
     test_qapp.expected_calls[
         (
             "dom0",
@@ -581,9 +568,7 @@ def test_updates_checker_save_del_exception(
 
 
 @patch("qubes_config.global_config.updates_handler.apply_feature_change")
-def test_updates_checker_save_change_default(
-    mock_feature, real_builder, test_qapp
-):
+def test_updates_checker_save_change_default(mock_feature, real_builder, test_qapp):
     test_qapp.expected_calls[
         (
             "dom0",
@@ -678,9 +663,7 @@ def test_updates_check_reset(mock_question, real_builder, test_qapp):
     ]
 
 
-def test_update_proxy_init_no_whonix(
-    real_builder, test_qapp, test_policy_manager
-):
+def test_update_proxy_init_no_whonix(real_builder, test_qapp, test_policy_manager):
     handler = UpdateProxy(
         real_builder, test_qapp, test_policy_manager, "proxy-test", "proxy"
     )
@@ -692,9 +675,7 @@ def test_update_proxy_init_no_whonix(
     assert not handler.whonix_updatevm_box.get_visible()
 
 
-def test_update_proxy_init_whonix(
-    real_builder, test_qapp_whonix, test_policy_manager
-):
+def test_update_proxy_init_whonix(real_builder, test_qapp_whonix, test_policy_manager):
     handler = UpdateProxy(
         real_builder,
         test_qapp_whonix,
@@ -916,9 +897,7 @@ Proxy * @type:TemplateVM @default allow target=sys-firewall
         file, rules, arg = mock_save.mock_calls[0].args
         assert arg is None
         assert file == "proxy-file"
-        assert [str(rule) for rule in expected_rules] == [
-            str(rule) for rule in rules
-        ]
+        assert [str(rule) for rule in expected_rules] == [str(rule) for rule in rules]
 
         assert len(mock_feature.mock_calls) == 4
         assert (
@@ -1017,9 +996,7 @@ Proxy * @type:TemplateVM @default allow target=sys-net
         file, rules, arg = mock_save.mock_calls[0].args
         assert arg is None
         assert file == "proxy-file"
-        assert [str(rule) for rule in expected_rules] == [
-            str(rule) for rule in rules
-        ]
+        assert [str(rule) for rule in expected_rules] == [str(rule) for rule in rules]
 
         assert len(mock_feature.mock_calls) == 3
         assert (
@@ -1083,9 +1060,7 @@ Proxy * @type:TemplateVM @default allow target=sys-net
         file, rules, arg = mock_save.mock_calls[0].args
         assert arg is None
         assert file == "proxy-file"
-        assert [str(rule) for rule in expected_rules] == [
-            str(rule) for rule in rules
-        ]
+        assert [str(rule) for rule in expected_rules] == [str(rule) for rule in rules]
 
         assert len(mock_feature.mock_calls) == 3
         assert (
@@ -1114,9 +1089,7 @@ Proxy * @type:TemplateVM @default allow target=sys-net
         )
 
 
-def test_update_proxy_reset(
-    real_builder, test_qapp_whonix, test_policy_manager
-):
+def test_update_proxy_reset(real_builder, test_qapp_whonix, test_policy_manager):
     policy = """
 Proxy * fedora-36 @default allow target=sys-net
 Proxy * @type:TemplateVM @default allow target=sys-firewall
@@ -1144,9 +1117,7 @@ Proxy * @tag:whonix-updatevm @default allow target=anon-whonix"""
 
     # change things
 
-    assert handler.updatevm_model.is_vm_available(
-        test_qapp_whonix.domains["sys-net"]
-    )
+    assert handler.updatevm_model.is_vm_available(test_qapp_whonix.domains["sys-net"])
     handler.updatevm_model.select_value("sys-net")
 
     # add exception
@@ -1179,17 +1150,12 @@ Proxy * @tag:whonix-updatevm @default allow target=anon-whonix"""
 
 
 @patch("qubes_config.global_config.updates_handler.qrexec_call")
-def test_complete_handler(
-    mock_output, real_builder, test_qapp, test_policy_manager
-):
+def test_complete_handler(mock_output, real_builder, test_qapp, test_policy_manager):
     mock_output.return_value = ALL_ENABLED
     handler = UpdatesHandler(test_qapp, test_policy_manager, real_builder)
 
     # check if dom0 updatevm worked
-    assert (
-        handler.dom0_updatevm_model.get_selected()
-        == test_qapp.domains["sys-net"]
-    )
+    assert handler.dom0_updatevm_model.get_selected() == test_qapp.domains["sys-net"]
 
     # change selection
     assert handler.dom0_updatevm_model.is_vm_available(
@@ -1209,10 +1175,7 @@ def test_complete_handler(
     handler.reset()
 
     assert handler.get_unsaved() == ""
-    assert (
-        handler.dom0_updatevm_model.get_selected()
-        == test_qapp.domains["sys-net"]
-    )
+    assert handler.dom0_updatevm_model.get_selected() == test_qapp.domains["sys-net"]
     assert handler.update_checker.dom0_update_check.get_active()
 
 
@@ -1224,10 +1187,7 @@ def test_complete_handle_dom0updatevm(
     handler = UpdatesHandler(test_qapp, test_policy_manager, real_builder)
 
     # check if dom0 updatevm worked
-    assert (
-        handler.dom0_updatevm_model.get_selected()
-        == test_qapp.domains["sys-net"]
-    )
+    assert handler.dom0_updatevm_model.get_selected() == test_qapp.domains["sys-net"]
 
     # change selection
     assert handler.dom0_updatevm_model.is_vm_available(
