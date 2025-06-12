@@ -331,9 +331,9 @@ def test_kernels(test_qapp):
     handler.widget.set_active_id("(none)")
     assert handler.get_unsaved() == "Default kernel"
 
-    test_qapp.expected_calls[
-        ("dom0", "admin.property.Set", "default_kernel", b"")
-    ] = b"0\x00"
+    test_qapp.expected_calls[("dom0", "admin.property.Set", "default_kernel", b"")] = (
+        b"0\x00"
+    )
     handler.save()
     assert handler.get_unsaved() == ""
 

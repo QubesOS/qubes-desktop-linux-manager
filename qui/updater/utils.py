@@ -117,9 +117,7 @@ def on_head_checkbox_toggled(list_store, head_checkbox, select_rows):
         head_checkbox.state = HeaderCheckbox.NONE
         selected_num = 0
     else:
-        selected_num = selected_num_old = sum(
-            row.selected for row in list_store
-        )
+        selected_num = selected_num_old = sum(row.selected for row in list_store)
         while selected_num == selected_num_old:
             head_checkbox.next_state()
             select_rows()

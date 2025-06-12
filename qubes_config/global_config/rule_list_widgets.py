@@ -87,9 +87,7 @@ class VMWidget(Gtk.Box):
         initial_value: str,
         additional_text: Optional[str] = None,
         additional_widget: Optional[Gtk.Widget] = None,
-        filter_function: Optional[
-            Callable[[qubesadmin.vm.QubesVM], bool]
-        ] = None,
+        filter_function: Optional[Callable[[qubesadmin.vm.QubesVM], bool]] = None,
         change_callback: Optional[Callable] = None,
     ):
         """
@@ -229,9 +227,7 @@ class ActionWidget(Gtk.Box):
         self.name_widget.get_style_context().add_class(action_style_class)
         if self.verb_description:
             self.additional_text_widget = Gtk.Label()
-            self.additional_text_widget.get_style_context().add_class(
-                "didascalia"
-            )
+            self.additional_text_widget.get_style_context().add_class("didascalia")
         else:
             self.additional_text_widget = None
 
@@ -314,9 +310,7 @@ class RuleListBoxRow(Gtk.ListBoxRow):
         enable_delete: bool = True,
         enable_vm_edit: bool = True,
         initial_verb: str = _("will"),
-        custom_deletion_warning: str = _(
-            "Are you sure you want to delete this rule?"
-        ),
+        custom_deletion_warning: str = _("Are you sure you want to delete this rule?"),
         is_new_row: bool = False,
         enable_adminvm: bool = False,
     ):
@@ -371,9 +365,7 @@ class RuleListBoxRow(Gtk.ListBoxRow):
         self.main_widget_box.pack_start(self.target_widget, False, True, 0)
         self.outer_box.pack_start(self.main_widget_box, False, False, 0)
 
-        self.additional_widget_box = Gtk.Box(
-            orientation=Gtk.Orientation.HORIZONTAL
-        )
+        self.additional_widget_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         save_button = ImageTextButton(
             icon_name="qubes-ok",
             label=_("ACCEPT"),
@@ -417,9 +409,7 @@ class RuleListBoxRow(Gtk.ListBoxRow):
 
     def get_action_widget(self) -> ActionWidget:
         """Widget to be used for Action"""
-        return ActionWidget(
-            self.rule.ACTION_CHOICES, self.verb_description, self.rule
-        )
+        return ActionWidget(self.rule.ACTION_CHOICES, self.verb_description, self.rule)
 
     def _get_delete_button(self) -> Gtk.Button:
         """Get a delete button appropriate for the class."""

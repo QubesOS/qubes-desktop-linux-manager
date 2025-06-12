@@ -54,9 +54,7 @@ class PolicyManager:
         except subprocess.CalledProcessError:
             return []
 
-    def get_conflicting_policy_files(
-        self, service: str, own_file: str
-    ) -> List[str]:
+    def get_conflicting_policy_files(self, service: str, own_file: str) -> List[str]:
         """
         Get a list of policy files (as str) that apply to the selected service
         and are before it in load order.
@@ -112,9 +110,7 @@ class PolicyManager:
             lineno=0,
         )
 
-    def save_rules(
-        self, file_name: str, rules_list: List[Rule], token: Optional[str]
-    ):
+    def save_rules(self, file_name: str, rules_list: List[Rule], token: Optional[str]):
         """Save provided list of rules to a file. Must provide
         a token corresponding to last file access, to avoid unexpected
         overwriting."""

@@ -76,10 +76,9 @@ def apply_feature_change(
     except qubesadmin.exc.QubesDaemonAccessError:
         # pylint: disable=raise-missing-from
         raise qubesadmin.exc.QubesException(
-            _(
-                "Failed to set {feature_name} due to insufficient "
-                "permissions"
-            ).format(feature_name=feature_name)
+            _("Failed to set {feature_name} due to insufficient permissions").format(
+                feature_name=feature_name
+            )
         )
 
 
@@ -108,9 +107,7 @@ class BiDictionary(dict):
         super().__delitem__(key)
 
 
-def compare_rule_lists(
-    rule_list_1: List[Rule], rule_list_2: List[Rule]
-) -> bool:
+def compare_rule_lists(rule_list_1: List[Rule], rule_list_2: List[Rule]) -> bool:
     """Check if two provided rule lists are the same. Return True if yes."""
     if len(rule_list_1) != len(rule_list_2):
         return False

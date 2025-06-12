@@ -12,9 +12,7 @@ assert (
 # Modifying the environment while multiple threads
 # are running leads to use-after-free in glibc, so
 # ensure that only one thread is running.
-assert (
-    len(os.listdir("/proc/self/task")) == 1
-), "multiple threads already running"
+assert len(os.listdir("/proc/self/task")) == 1, "multiple threads already running"
 
 # Only the X11 backend is supported
 os.environ["GDK_BACKEND"] = "x11"
@@ -144,9 +142,7 @@ class X11FullscreenWindowHackXWayland(X11FullscreenWindowHack):
         self._window.hide()
 
     # pylint: disable=line-too-long
-    def on_button_press(
-        self, window: Gtk.Window, _event: Gdk.EventButton, /
-    ) -> None:
+    def on_button_press(self, window: Gtk.Window, _event: Gdk.EventButton, /) -> None:
         # Hide the window and the widget.
         window.hide()
         self._widget.hide()

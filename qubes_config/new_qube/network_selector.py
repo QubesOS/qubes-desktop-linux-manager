@@ -59,23 +59,15 @@ class NetworkSelector:
             QubeName(self.qapp.default_netvm), False, False, 0
         )
 
-        self.network_tor_box: Gtk.Box = gtk_builder.get_object(
-            "network_tor_box"
-        )
-        self.network_custom: Gtk.RadioButton = gtk_builder.get_object(
-            "network_custom"
-        )
+        self.network_tor_box: Gtk.Box = gtk_builder.get_object("network_tor_box")
+        self.network_custom: Gtk.RadioButton = gtk_builder.get_object("network_custom")
         self.network_custom_combo: Gtk.ComboBox = gtk_builder.get_object(
             "network_custom_combo"
         )
         self.network_custom.connect("toggled", self._custom_toggled)
 
-        self.network_none: Gtk.RadioButton = gtk_builder.get_object(
-            "network_none"
-        )
-        self.network_tor: Gtk.RadioButton = gtk_builder.get_object(
-            "network_tor"
-        )
+        self.network_none: Gtk.RadioButton = gtk_builder.get_object("network_none")
+        self.network_tor: Gtk.RadioButton = gtk_builder.get_object("network_tor")
         self.network_default: Gtk.RadioButton = gtk_builder.get_object(
             "network_default"
         )

@@ -275,3 +275,22 @@ def copy_to_global_clipboard(text: str):
             source.write("dom0")
         with open(XEVENT, "w", encoding="ascii") as timestamp:
             timestamp.write(str(Gtk.get_current_event_time()))
+
+
+def resize_window_to_reasonable(window: Gtk.Window, min_width: int = 1100):
+    """Make sure the provided window is visible and does not exceed available screen
+    space."""
+    if window.get_allocated_width() > window.get_screen().get_width():
+        width = int(window.get_screen().get_width() * 0.9)
+    else:
+        # try to have at least min_width pixels
+        width = min(int(window.get_screen().get_width() * 0.9), min_width)
+    if window.get_allocated_height() > window.get_screen().get_height() * 0.9:
+        height = int(window.get_screen().get_height() * 0.9)
+    else:
+        height = window.get_allocated_height()
+    window.resize(width, height)
+    window.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
+    window.set_gravity(Gdk.Gravity.CENTER)
+    window.move(0, 0)
+    window.set_position(Gtk.WindowPosition.CENTER)

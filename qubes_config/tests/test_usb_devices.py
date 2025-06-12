@@ -38,9 +38,7 @@ gi.require_version("GdkPixbuf", "2.0")
 from gi.repository import Gtk
 
 
-def test_input_devices_simple_policy(
-    test_qapp, test_policy_manager, real_builder
-):
+def test_input_devices_simple_policy(test_qapp, test_policy_manager, real_builder):
     sys_usb = test_qapp.domains["sys-usb"]
     test_policy_manager.policy_client.files[
         "50-config-input"
@@ -59,8 +57,7 @@ qubes.InputTablet * sys-usb @adminvm allow
         assert widget.get_parent()
 
     assert (
-        handler.widgets[("qubes.InputMouse", "sys-usb")].model.get_selected()
-        == "ask"
+        handler.widgets[("qubes.InputMouse", "sys-usb")].model.get_selected() == "ask"
     )
     assert (
         handler.widgets[("qubes.InputKeyboard", "sys-usb")].model.get_selected()
@@ -87,14 +84,10 @@ qubes.InputTablet * sys-usb @adminvm deny
         )
         assert len(mock_save.mock_calls) == 1
         _, rules, _ = mock_save.mock_calls[0].args
-        assert [str(rule) for rule in expected_rules] == [
-            str(rule) for rule in rules
-        ]
+        assert [str(rule) for rule in expected_rules] == [str(rule) for rule in rules]
 
 
-def test_input_devices_complex_policy(
-    test_qapp, test_policy_manager, real_builder
-):
+def test_input_devices_complex_policy(test_qapp, test_policy_manager, real_builder):
     sys_usb = test_qapp.domains["sys-usb"]
     sys_net = test_qapp.domains["sys-net"]
     test_policy_manager.policy_client.files[
@@ -117,8 +110,7 @@ qubes.InputTablet * sys-net @adminvm allow
         assert widget.get_parent()
 
     assert (
-        handler.widgets[("qubes.InputMouse", "sys-usb")].model.get_selected()
-        == "ask"
+        handler.widgets[("qubes.InputMouse", "sys-usb")].model.get_selected() == "ask"
     )
     assert (
         handler.widgets[("qubes.InputKeyboard", "sys-usb")].model.get_selected()
@@ -129,8 +121,7 @@ qubes.InputTablet * sys-net @adminvm allow
         == "allow"
     )
     assert (
-        handler.widgets[("qubes.InputMouse", "sys-net")].model.get_selected()
-        == "deny"
+        handler.widgets[("qubes.InputMouse", "sys-net")].model.get_selected() == "deny"
     )
     assert (
         handler.widgets[("qubes.InputKeyboard", "sys-net")].model.get_selected()
@@ -171,9 +162,7 @@ qubes.InputTablet * sys-net @adminvm allow
         )
 
 
-def test_input_devices_no_policy_one_usb(
-    test_qapp, test_policy_manager, real_builder
-):
+def test_input_devices_no_policy_one_usb(test_qapp, test_policy_manager, real_builder):
     sys_usb = test_qapp.domains["sys-usb"]
     handler = InputDeviceHandler(
         test_qapp, test_policy_manager, real_builder, {sys_usb}
@@ -214,9 +203,7 @@ qubes.InputTablet * sys-usb @adminvm deny
         )
         assert len(mock_save.mock_calls) == 1
         _, rules, _ = mock_save.mock_calls[0].args
-        assert [str(rule) for rule in expected_rules] == [
-            str(rule) for rule in rules
-        ]
+        assert [str(rule) for rule in expected_rules] == [str(rule) for rule in rules]
 
 
 def test_input_devices_faulty_policy_lines(
@@ -296,9 +283,7 @@ qubes.InputTablet * sys-usb @adminvm allow
         )
         assert len(mock_save.mock_calls) == 1
         _, rules, _ = mock_save.mock_calls[0].args
-        assert [str(rule) for rule in expected_rules] == [
-            str(rule) for rule in rules
-        ]
+        assert [str(rule) for rule in expected_rules] == [str(rule) for rule in rules]
 
 
 def test_input_devices_no_usbvm(test_qapp, test_policy_manager, real_builder):
@@ -311,9 +296,7 @@ qubes.InputTablet * sys-usb @adminvm deny
 """
     test_policy_manager.policy_client.file_tokens["50-config-input"] = "55"
 
-    handler = InputDeviceHandler(
-        test_qapp, test_policy_manager, real_builder, set()
-    )
+    handler = InputDeviceHandler(test_qapp, test_policy_manager, real_builder, set())
 
     for widget in handler.widgets.values():
         assert not widget.get_parent()
@@ -328,9 +311,7 @@ qubes.InputTablet * sys-usb @adminvm deny
         assert len(mock_save.mock_calls) == 0
 
 
-def test_input_devices_faulty_policy_err(
-    test_qapp, test_policy_manager, real_builder
-):
+def test_input_devices_faulty_policy_err(test_qapp, test_policy_manager, real_builder):
     test_policy_manager.policy_client.files[
         "50-config-input"
     ] = """
@@ -355,9 +336,7 @@ qubes.InputKeyboard * sys-usb @adminvm ask default_target=sys-net
 
 def test_u2f_handler_init(test_qapp, test_policy_manager, real_builder):
     sys_usb = test_qapp.domains["sys-usb"]
-    handler = U2FPolicyHandler(
-        test_qapp, test_policy_manager, real_builder, {sys_usb}
-    )
+    handler = U2FPolicyHandler(test_qapp, test_policy_manager, real_builder, {sys_usb})
 
     assert handler.get_unsaved() == ""
 
@@ -372,12 +351,8 @@ def test_u2f_handler_init(test_qapp, test_policy_manager, real_builder):
     assert handler.enable_some_handler.selected_vms == [testvm]
     assert handler.enable_some_handler.add_qube_model.is_vm_available(testvm)
     assert handler.enable_some_handler.add_qube_model.is_vm_available(fedora35)
-    assert not handler.enable_some_handler.add_qube_model.is_vm_available(
-        testred
-    )
-    assert not handler.enable_some_handler.add_qube_model.is_vm_available(
-        sysusb
-    )
+    assert not handler.enable_some_handler.add_qube_model.is_vm_available(testred)
+    assert not handler.enable_some_handler.add_qube_model.is_vm_available(sysusb)
 
     assert not handler.register_check.get_active()
     assert not handler.register_some_handler.selected_vms
@@ -401,17 +376,13 @@ def test_u2f_handler_init_disable(test_qapp, test_policy_manager, real_builder):
         + b"\x00"
     )
 
-    handler = U2FPolicyHandler(
-        test_qapp, test_policy_manager, real_builder, {sys_usb}
-    )
+    handler = U2FPolicyHandler(test_qapp, test_policy_manager, real_builder, {sys_usb})
 
     assert not handler.enable_check.get_active()
     assert not handler.problem_fatal_box.get_visible()
 
 
-def test_u2f_handler_init_no_u2f_in_sysub(
-    test_qapp, test_policy_manager, real_builder
-):
+def test_u2f_handler_init_no_u2f_in_sysub(test_qapp, test_policy_manager, real_builder):
     sys_usb = test_qapp.domains["sys-usb"]
     test_qapp.expected_calls[
         (
@@ -426,9 +397,7 @@ def test_u2f_handler_init_no_u2f_in_sysub(
         + b"\x00"
     )
 
-    handler = U2FPolicyHandler(
-        test_qapp, test_policy_manager, real_builder, {sys_usb}
-    )
+    handler = U2FPolicyHandler(test_qapp, test_policy_manager, real_builder, {sys_usb})
 
     assert not handler.enable_check.get_sensitive()
     assert not handler.enable_check.get_active()
@@ -436,9 +405,7 @@ def test_u2f_handler_init_no_u2f_in_sysub(
 
 
 def test_u2f_handler_no_usb_vm(test_qapp, test_policy_manager, real_builder):
-    handler = U2FPolicyHandler(
-        test_qapp, test_policy_manager, real_builder, set()
-    )
+    handler = U2FPolicyHandler(test_qapp, test_policy_manager, real_builder, set())
 
     assert not handler.enable_check.get_sensitive()
     assert not handler.enable_check.get_active()
@@ -468,9 +435,7 @@ u2f.Authenticate * test-vm sys-usb allow
 """
     test_policy_manager.policy_client.file_tokens["50-config-u2f"] = "55"
 
-    handler = U2FPolicyHandler(
-        test_qapp, test_policy_manager, real_builder, {sys_usb}
-    )
+    handler = U2FPolicyHandler(test_qapp, test_policy_manager, real_builder, {sys_usb})
 
     assert handler.enable_check.get_active()
     assert handler.enable_some_handler.selected_vms == [fedora35, testvm]
@@ -483,9 +448,7 @@ u2f.Authenticate * test-vm sys-usb allow
     assert handler.blanket_handler.selected_vms == [testvm]
 
 
-def test_u2f_handler_init_no_policy(
-    test_qapp, test_policy_manager, real_builder
-):
+def test_u2f_handler_init_no_policy(test_qapp, test_policy_manager, real_builder):
     sys_usb = test_qapp.domains["sys-usb"]
     # disable service
     test_qapp.expected_calls[
@@ -501,9 +464,7 @@ def test_u2f_handler_init_no_policy(
         + b"\x00"
     )
 
-    handler = U2FPolicyHandler(
-        test_qapp, test_policy_manager, real_builder, {sys_usb}
-    )
+    handler = U2FPolicyHandler(test_qapp, test_policy_manager, real_builder, {sys_usb})
 
     assert handler.enable_check.get_sensitive()
     assert not handler.enable_check.get_active()
@@ -515,9 +476,7 @@ def test_u2f_handler_init_no_policy(
     assert not handler.blanket_check.get_active()
 
 
-def test_u2f_handler_init_policy_2(
-    test_qapp, test_policy_manager, real_builder
-):
+def test_u2f_handler_init_policy_2(test_qapp, test_policy_manager, real_builder):
     sys_usb = test_qapp.domains["sys-usb"]
     fedora35 = test_qapp.domains["fedora-35"]
     testvm = test_qapp.domains["test-vm"]
@@ -538,9 +497,7 @@ u2f.Register * @anyvm sys-usb allow
 """
     test_policy_manager.policy_client.file_tokens["50-config-u2f"] = "55"
 
-    handler = U2FPolicyHandler(
-        test_qapp, test_policy_manager, real_builder, {sys_usb}
-    )
+    handler = U2FPolicyHandler(test_qapp, test_policy_manager, real_builder, {sys_usb})
 
     assert handler.enable_check.get_active()
     assert handler.enable_some_handler.selected_vms == [fedora35, testvm]
@@ -552,9 +509,7 @@ u2f.Register * @anyvm sys-usb allow
     assert not handler.problem_fatal_box.get_visible()
 
 
-def test_u2f_handler_init_policy_mismatch(
-    test_qapp, test_policy_manager, real_builder
-):
+def test_u2f_handler_init_policy_mismatch(test_qapp, test_policy_manager, real_builder):
     sys_usb = test_qapp.domains["sys-usb"]
     fedora35 = test_qapp.domains["fedora-35"]
     testvm = test_qapp.domains["test-vm"]
@@ -587,9 +542,7 @@ u2f.Register * @anyvm test-standalone allow
 """
     test_policy_manager.policy_client.file_tokens["50-config-u2f"] = "55"
 
-    handler = U2FPolicyHandler(
-        test_qapp, test_policy_manager, real_builder, {sys_usb}
-    )
+    handler = U2FPolicyHandler(test_qapp, test_policy_manager, real_builder, {sys_usb})
     assert handler.usb_qube_model.get_selected() == sys_usb
 
     assert handler.enable_check.get_active()
@@ -647,9 +600,7 @@ u2f.Register * @anyvm test-standalone allow
     assert not handler.error_handler.error_box.get_visible()
 
 
-def test_u2f_handler_2_usbvms_switch(
-    test_qapp, test_policy_manager, real_builder
-):
+def test_u2f_handler_2_usbvms_switch(test_qapp, test_policy_manager, real_builder):
     sys_usb = test_qapp.domains["sys-usb"]
     test_standalone = test_qapp.domains["test-standalone"]
     testvm = test_qapp.domains["test-vm"]
@@ -716,9 +667,7 @@ u2f.Register * @anyvm test-standalone allow
     assert not handler.error_handler.error_box.get_visible()
 
 
-def test_u2f_handler_2_usbvms_broken(
-    test_qapp, test_policy_manager, real_builder
-):
+def test_u2f_handler_2_usbvms_broken(test_qapp, test_policy_manager, real_builder):
     sys_usb = test_qapp.domains["sys-usb"]
     test_standalone = test_qapp.domains["test-standalone"]
     testvm = test_qapp.domains["test-vm"]
@@ -761,9 +710,7 @@ u2f.Register * @anyvm test-standalone allow
 
 def test_u2f_unsaved_reset(test_qapp, test_policy_manager, real_builder):
     sys_usb = test_qapp.domains["sys-usb"]
-    handler = U2FPolicyHandler(
-        test_qapp, test_policy_manager, real_builder, {sys_usb}
-    )
+    handler = U2FPolicyHandler(test_qapp, test_policy_manager, real_builder, {sys_usb})
     testvm = test_qapp.domains["test-vm"]
     fedora35 = test_qapp.domains["fedora-35"]
 
@@ -812,9 +759,7 @@ def test_u2f_unsaved_reset(test_qapp, test_policy_manager, real_builder):
 
 def test_u2f_save_disable(test_qapp, test_policy_manager, real_builder):
     sys_usb = test_qapp.domains["sys-usb"]
-    handler = U2FPolicyHandler(
-        test_qapp, test_policy_manager, real_builder, {sys_usb}
-    )
+    handler = U2FPolicyHandler(test_qapp, test_policy_manager, real_builder, {sys_usb})
 
     handler.enable_check.set_active(False)
 
@@ -837,16 +782,12 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
         )
         assert len(mock_save.mock_calls) == 1
         _, rules, _ = mock_save.mock_calls[0].args
-        assert [str(rule) for rule in expected_rules] == [
-            str(rule) for rule in rules
-        ]
+        assert [str(rule) for rule in expected_rules] == [str(rule) for rule in rules]
 
 
 def test_u2f_save_service(test_qapp, test_policy_manager, real_builder):
     sys_usb = test_qapp.domains["sys-usb"]
-    handler = U2FPolicyHandler(
-        test_qapp, test_policy_manager, real_builder, {sys_usb}
-    )
+    handler = U2FPolicyHandler(test_qapp, test_policy_manager, real_builder, {sys_usb})
     fedora35 = test_qapp.domains["fedora-35"]
 
     assert handler.enable_check.get_active()
@@ -870,9 +811,7 @@ policy.RegisterArgument +u2f.Authenticate @anyvm @anyvm deny
         )
         assert len(mock_save.mock_calls) == 1
         _, rules, _ = mock_save.mock_calls[0].args
-        assert [str(rule) for rule in expected_rules] == [
-            str(rule) for rule in rules
-        ]
+        assert [str(rule) for rule in expected_rules] == [str(rule) for rule in rules]
 
 
 def test_u2f_handler_save_complex(test_qapp, test_policy_manager, real_builder):
@@ -892,9 +831,7 @@ def test_u2f_handler_save_complex(test_qapp, test_policy_manager, real_builder):
         + b"\x00"
     )
 
-    handler = U2FPolicyHandler(
-        test_qapp, test_policy_manager, real_builder, {sys_usb}
-    )
+    handler = U2FPolicyHandler(test_qapp, test_policy_manager, real_builder, {sys_usb})
 
     assert not handler.enable_check.get_active()
 
@@ -932,14 +869,10 @@ u2f.Authenticate * test-vm sys-usb allow
         )
         assert len(mock_save.mock_calls) == 1
         _, rules, _ = mock_save.mock_calls[0].args
-        assert [str(rule) for rule in expected_rules] == [
-            str(rule) for rule in rules
-        ]
+        assert [str(rule) for rule in expected_rules] == [str(rule) for rule in rules]
 
 
-def test_u2f_handler_save_complex_2(
-    test_qapp, test_policy_manager, real_builder
-):
+def test_u2f_handler_save_complex_2(test_qapp, test_policy_manager, real_builder):
     sys_usb = test_qapp.domains["sys-usb"]
     testvm = test_qapp.domains["test-vm"]
     fedora35 = test_qapp.domains["fedora-35"]
@@ -956,9 +889,7 @@ def test_u2f_handler_save_complex_2(
         + b"\x00"
     )
 
-    handler = U2FPolicyHandler(
-        test_qapp, test_policy_manager, real_builder, {sys_usb}
-    )
+    handler = U2FPolicyHandler(test_qapp, test_policy_manager, real_builder, {sys_usb})
 
     assert not handler.enable_check.get_active()
 
@@ -997,20 +928,14 @@ policy.RegisterArgument +u2f.Authenticate sys-usb @anyvm allow target=dom0
         )
         assert len(mock_save.mock_calls) == 1
         _, rules, _ = mock_save.mock_calls[0].args
-        assert [str(rule) for rule in expected_rules] == [
-            str(rule) for rule in rules
-        ]
+        assert [str(rule) for rule in expected_rules] == [str(rule) for rule in rules]
 
 
-def test_u2f_handler_add_without_service(
-    test_qapp, test_policy_manager, real_builder
-):
+def test_u2f_handler_add_without_service(test_qapp, test_policy_manager, real_builder):
     sys_usb = test_qapp.domains["sys-usb"]
     fedora35 = test_qapp.domains["fedora-35"]
     testvm = test_qapp.domains["test-vm"]
-    handler = U2FPolicyHandler(
-        test_qapp, test_policy_manager, real_builder, {sys_usb}
-    )
+    handler = U2FPolicyHandler(test_qapp, test_policy_manager, real_builder, {sys_usb})
 
     assert handler.get_unsaved() == ""
 
@@ -1023,24 +948,19 @@ def test_u2f_handler_add_without_service(
     assert not handler.register_some_handler.selected_vms
     assert handler.enable_some_handler.selected_vms == [testvm]
 
-    handler.register_some_handler.add_button.clicked()
     handler.register_some_handler.add_qube_model.select_value("fedora-35")
     # refuse
-    with patch(
-        "qubes_config.global_config.usb_devices.ask_question"
-    ) as mock_question:
+    with patch("qubes_config.global_config.usb_devices.ask_question") as mock_question:
         mock_question.return_value = Gtk.ResponseType.NO
-        handler.register_some_handler.add_confirm.clicked()
+        handler.register_some_handler.add_button.clicked()
         assert mock_question.mock_calls
     assert not handler.register_some_handler.selected_vms
     assert handler.enable_some_handler.selected_vms == [testvm]
 
     # accept
-    with patch(
-        "qubes_config.global_config.usb_devices.ask_question"
-    ) as mock_question:
+    with patch("qubes_config.global_config.usb_devices.ask_question") as mock_question:
         mock_question.return_value = Gtk.ResponseType.YES
-        handler.register_some_handler.add_confirm.clicked()
+        handler.register_some_handler.add_button.clicked()
         assert mock_question.mock_calls
     assert handler.register_some_handler.selected_vms == [fedora35]
 
@@ -1055,9 +975,7 @@ def test_devices_handler_unsaved(test_qapp, test_policy_manager, real_builder):
         b"backend_domain='dom0' mode='required' "
         b"_no-strict-reset='yes'\n"
     )
-    test_qapp.expected_calls[
-        ("dom0", "admin.vm.device.pci.Available", None, None)
-    ] = (
+    test_qapp.expected_calls[("dom0", "admin.vm.device.pci.Available", None, None)] = (
         b"0\x0000_0d.0 device_id='0000:0000::p0c0300' port_id='00_0d.0' "
         b"devclass='pci' backend_domain='dom0' interfaces='p0c0300' "
         b"_function='0' _bus='00' _libvirt_name='pci_0000_00_0d_0' "
@@ -1069,9 +987,7 @@ def test_devices_handler_unsaved(test_qapp, test_policy_manager, real_builder):
     assert handler.get_unsaved() == ""
 
     # some changes
-    kb_widget = handler.input_handler.widgets[
-        ("qubes.InputKeyboard", "sys-usb")
-    ]
+    kb_widget = handler.input_handler.widgets[("qubes.InputKeyboard", "sys-usb")]
     assert kb_widget.model.get_selected() == "deny"
     kb_widget.model.select_value("ask")
 
@@ -1082,9 +998,7 @@ def test_devices_handler_unsaved(test_qapp, test_policy_manager, real_builder):
     assert "U2F disabled" in handler.get_unsaved()
 
 
-def test_devices_handler_detect_usbvms(
-    test_qapp, test_policy_manager, real_builder
-):
+def test_devices_handler_detect_usbvms(test_qapp, test_policy_manager, real_builder):
     test_qapp.expected_calls[
         ("sys-usb", "admin.vm.device.pci.Attached", None, None)
     ] = (
@@ -1099,9 +1013,7 @@ def test_devices_handler_detect_usbvms(
         b"backend_domain='dom0' mode='required' "
         b"_no-strict-reset='yes'\n"
     )
-    test_qapp.expected_calls[
-        ("dom0", "admin.vm.device.pci.Available", None, None)
-    ] = (
+    test_qapp.expected_calls[("dom0", "admin.vm.device.pci.Available", None, None)] = (
         b"0\x0000_0f.0 device_id='0000:0000::p0c0300' port_id='00_0f.0' "
         b"devclass='pci' backend_domain='dom0' interfaces='p0c0300' "
         b"_function='0' _bus='00' _libvirt_name='pci_0000_00_0f_0' "
@@ -1120,9 +1032,7 @@ def test_devices_handler_detect_usbvms(
     assert handler.input_handler.usb_qubes == {sys_usb, test_standalone}
 
 
-def test_devices_handler_save_reset(
-    test_qapp, test_policy_manager, real_builder
-):
+def test_devices_handler_save_reset(test_qapp, test_policy_manager, real_builder):
     handler = DevicesHandler(test_qapp, test_policy_manager, real_builder)
 
     # check all handlers have their save/reset called
@@ -1144,9 +1054,7 @@ def test_devices_handler_save_reset(
 def test_devices_handler_no_sys_usb(
     test_qapp_simple, test_policy_manager, real_builder
 ):
-    handler = DevicesHandler(
-        test_qapp_simple, test_policy_manager, real_builder
-    )
+    handler = DevicesHandler(test_qapp_simple, test_policy_manager, real_builder)
 
     assert not handler.input_handler.usb_qubes
     assert handler.u2f_handler.problem_fatal_box.get_visible()

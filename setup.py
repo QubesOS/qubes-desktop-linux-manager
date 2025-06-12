@@ -11,17 +11,14 @@ class InstallWithLocale(setuptools.command.install.install):
         data_files = []
         localedir = "locale"
         po_dirs = [
-            localedir + "/" + l + "/LC_MESSAGES/"
-            for l in next(os.walk(localedir))[1]
+            localedir + "/" + l + "/LC_MESSAGES/" for l in next(os.walk(localedir))[1]
         ]
         for d in po_dirs:
             mo_dir = os.path.join(self.root, "usr/share", d)
             os.makedirs(mo_dir, exist_ok=True)
             mo_files = []
             po_files = [
-                f
-                for f in next(os.walk(d))[2]
-                if os.path.splitext(f)[1] == ".po"
+                f for f in next(os.walk(d))[2] if os.path.splitext(f)[1] == ".po"
             ]
             for po_file in po_files:
                 filename, extension = os.path.splitext(po_file)

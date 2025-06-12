@@ -356,9 +356,9 @@ def test_limit_concurrency(test_qapp):
     # Set True
     sut.show()
     sut.limit_concurrency_checkbox.set_active(True)
-    test_qapp.expected_calls[
-        (*dom0_set_max_concurrency, sut.DEFAULT_CONCURRENCY)
-    ] = b"0\x00"
+    test_qapp.expected_calls[(*dom0_set_max_concurrency, sut.DEFAULT_CONCURRENCY)] = (
+        b"0\x00"
+    )
     sut.save_and_close(None)
     test_qapp.expected_calls[dom0_get_max_concurrency] = (
         b"0\x00" + str(sut.DEFAULT_CONCURRENCY).encode()
@@ -378,9 +378,7 @@ def test_limit_concurrency(test_qapp):
     # Set concurrency to max value again
     sut.show()
     sut.limit_concurrency_checkbox.set_active(True)
-    del test_qapp.expected_calls[
-        (*dom0_set_max_concurrency, sut.DEFAULT_CONCURRENCY)
-    ]
+    del test_qapp.expected_calls[(*dom0_set_max_concurrency, sut.DEFAULT_CONCURRENCY)]
     sut.save_and_close(None)
 
     # Set False
