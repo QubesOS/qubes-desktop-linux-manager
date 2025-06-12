@@ -70,6 +70,13 @@ available locations are:
   - no locations available, can only be used as a page, without specific
     location.
 
+## Code formatting
+
+Code in this repository is formatted using `black`. Before commiting changes run:
+
+    black .
+
+This repository uses black's default line length of 88 chars. It's an exception to the 80 limit used in other repositories.
 
 ## Translation
 
