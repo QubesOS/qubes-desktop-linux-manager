@@ -1,3 +1,20 @@
+qubes-desktop-linux-manager (4.3.14-1) unstable; urgency=medium
+
+  [ Marta Marczykowska-Górecka ]
+  * Changed VM flowbox for improved UX
+  * Change global config tests to use Mock Qubes API
+  * Add config for device attachments to Global Config
+  * Review fixes
+  * pacify black
+  * Fix updater tests for new mocks
+  * Last round of review fixes
+
+  [ Marek Marczykowski-Górecki ]
+  * Bump required qubes-core-admin-client version
+  * Add note about black line length
+
+ -- Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>  Thu, 12 Jun 2025 10:53:34 +0200
+
 qubes-desktop-linux-manager (4.3.13-1) unstable; urgency=medium
 
   [ Ali Mirjamali ]
