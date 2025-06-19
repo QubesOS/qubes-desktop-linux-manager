@@ -231,12 +231,13 @@ class ProgressPage:
 
     def read_stdouts(self, proc, rows):
         curr_name_out = ""
-        for untrusted_line in iter(
-            proc.stdout.readline, "__COMMUNICATION_IS_DONE__"
-        ):
-            if untrusted_line != "__COMMUNICATION_IS_DONE__":
+        for untrusted_line in iter(proc.stdout.readline, ""):
+            if untrusted_line:
                 line = self._sanitize_line(untrusted_line)
-                maybe_name, text = line.split(" ", 1)
+                try:
+                    maybe_name, text = line.split(" ", 1)
+                except ValueError:
+                    continue
                 suffix = len(":out:")
                 if maybe_name[:-suffix] in rows.keys():
                     curr_name_out = maybe_name[:-suffix]
