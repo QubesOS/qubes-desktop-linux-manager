@@ -17,14 +17,14 @@
 #
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program; if not, see <http://www.gnu.org/licenses/>.
-from typing import Set, Dict, Optional
+from typing import Set, Dict, Optional, List
 
 import qubesadmin
 import qubesadmin.exc
 import qubesadmin.devices
 import qubesadmin.vm
 from qubesadmin.utils import size_to_human
-from qubesadmin.device_protocol import DeviceAssignment
+from qubesadmin.device_protocol import DeviceAssignment, DeviceCategory
 
 import gi
 
@@ -35,6 +35,9 @@ import gettext
 
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
+
+FEATURE_HIDE_CHILDREN = "device-hide-children"
+FEATURE_ATTACH_WITH_MIC = "device-attach-with-mic"
 
 
 class VM:
@@ -96,13 +99,33 @@ class VM:
         """
         return getattr(self._vm, "auto_cleanup", False)
 
+    def toggle_feature_value(self, feature_name, value):
+        """
+        If provided value is part of a comma-separated list in feature_name, remove it.
+        If it is not, add it.
+        """
+        feature = self._vm.features.get(feature_name, "")
+        all_devs: List[str] = [f for f in feature.split(" ") if f]
+
+        if value in all_devs:
+            all_devs.remove(value)
+        else:
+            all_devs.append(value)
+
+        new_feature = " ".join(all_devs)
+        self._vm.features[feature_name] = new_feature
+
 
 class Device:
+    @classmethod
+    def id_from_device(cls, dev: qubesadmin.devices.DeviceInfo) -> str:
+        return str(dev.port) + ":" + str(dev.device_id)
+
     def __init__(self, dev: qubesadmin.devices.DeviceInfo, gtk_app: Gtk.Application):
         self.gtk_app: Gtk.Application = gtk_app
         self._dev: qubesadmin.devices.DeviceInfo = dev
         self.__hash = hash(dev)
-        self._port: str = ""
+        self._port: str = str(dev.port)
         # Monotonic connection timestamp only for new devices
         self.connection_timestamp: float = None
 
@@ -113,9 +136,22 @@ class Device:
         self._ident: str = getattr(dev, "port_id", "unknown")
         self._description: str = getattr(dev, "description", "unknown")
         self._devclass: str = getattr(dev, "devclass", "unknown")
+
+        main_category = None
+        for interface in dev.interfaces:
+            if interface.category.name != "Other":
+                main_category = interface.category
+                break
+        else:
+            main_category = DeviceCategory.Other
+
+        self._category: DeviceCategory = main_category
+
         self._data: Dict = getattr(dev, "data", {})
         self._device_id = getattr(dev, "device_id", "*")
+        self.parent = str(getattr(dev, "parent_device", None) or "")
         self.attachments: Set[VM] = set()
+        self.assignments: Set[VM] = set()
         backend_domain = getattr(dev, "backend_domain", None)
         if backend_domain:
             self._backend_domain: Optional[VM] = VM(backend_domain)
@@ -128,6 +164,12 @@ class Device:
             )
         except qubesadmin.exc.QubesException:
             self.vm_icon: str = "appvm-black"
+        self._full_id = self.id_from_device(dev)
+
+        self.devices_to_attach_with_me: List[Device] = []
+        self.has_children: bool = False
+        self.show_children: bool = True
+        self.hide_this_device: bool = False
 
     def __str__(self):
         return self._dev_name
@@ -146,7 +188,7 @@ class Device:
     @property
     def id_string(self) -> str:
         """Unique id string"""
-        return self._ident
+        return self._full_id
 
     @property
     def description(self) -> str:
@@ -166,10 +208,31 @@ class Device:
     @property
     def device_icon(self) -> str:
         """Device icon"""
-        if self.device_class == "block":
-            return "harddrive"
-        if self.device_class == "mic":
-            return "mic"
+        match self._category:
+            case DeviceCategory.Network:
+                return "network"
+            case DeviceCategory.Keyboard:
+                return "keyboard"
+            case DeviceCategory.Mouse:
+                return "mouse"
+            case DeviceCategory.Input:
+                return "keyboard"
+            case DeviceCategory.Printer:
+                return "printer"
+            case DeviceCategory.Camera:
+                return "camera"
+            case DeviceCategory.Audio:
+                return "audio"
+            case DeviceCategory.Microphone:
+                return "mic"
+            case DeviceCategory.USB_Storage:
+                return "harddrive"
+            case DeviceCategory.Block_Storage:
+                return "harddrive"
+            case DeviceCategory.Storage:
+                return "harddrive"
+            case DeviceCategory.Bluetooth:
+                return "bluetooth"
         return ""
 
     @property
@@ -190,59 +253,25 @@ class Device:
     @property
     def device_group(self) -> str:
         """Device group for purposes of menus."""
-        if self._devclass == "block":
-            return "Data (Block) Devices"
-        if self._devclass == "usb":
-            return "USB Devices"
-        if self._devclass == "mic":
-            return "Microphones"
-        # TODO: those below come from new API, may need an update
-        if self._devclass == "Other":
-            return "Other Devices"
-        if self._devclass == "Communication":
-            return "Other Devices"  # eg. modems
-        if self._devclass in ("Input", "Keyboard", "Mouse"):
-            return "Input Devices"
-        if self._devclass in ("Printer", "Scanner"):
-            return "Printers and Scanners"
-        if self._devclass == "Multimedia":
-            return "Other Devices"
-            # Multimedia = Audio, Video, Displays etc.
-        if self._devclass == "Wireless":
-            return "Other Devices"
-        if self._devclass == "Bluetooth":
-            return "Bluetooth Devices"
-        if self._devclass == "Mass_Data":
-            return "Other Devices"
-        if self._devclass == "Network":
-            return "Other Devices"
-        if self._devclass == "Memory":
-            return "Other Devices"
-        if self._devclass.startswith("PCI"):
-            return "PCI Devices"
-        if self._devclass == "Docking Station":
-            return "Docking Station"
-        if self._devclass == "Processor":
-            return "Other Devices"
-        return "Other Devices"
+        return str(self._category.name).replace("_", " ")
 
     @property
     def sorting_key(self) -> str:
         """Key used for sorting devices in menus"""
         return self.device_group + self._devclass + self.name
 
-    def attach_to_vm(self, vm: VM):
+    def attach_to_vm(self, vm: VM, with_aux_devices: bool = True):
         """
-        Perform attachment to provided VM.
+        Perform attachment to provided VM. If with_aux_devices is False,
+        ignore devices_to_attach_with_me
         """
         try:
             assignment = DeviceAssignment.new(
                 self.backend_domain,
-                port_id=self.id_string,
+                port_id=self._ident,
                 devclass=self.device_class,
                 device_id=self._device_id,
             )
-
             vm.vm_object.devices[self.device_class].attach(assignment)
             self.gtk_app.emit_notification(
                 _("Attaching device"),
@@ -250,6 +279,13 @@ class Device:
                 Gio.NotificationPriority.NORMAL,
                 notification_id=self.notification_id,
             )
+            if self.devices_to_attach_with_me and with_aux_devices:
+                for device in self.devices_to_attach_with_me:
+                    if device is self:
+                        # this should never happen, but....
+                        continue
+                    device.detach_from_all()
+                    device.attach_to_vm(vm, with_aux_devices=False)
 
         except Exception as ex:  # pylint: disable=broad-except
             self.gtk_app.emit_notification(
@@ -262,9 +298,10 @@ class Device:
                 notification_id=self.notification_id,
             )
 
-    def detach_from_vm(self, vm: VM):
+    def detach_from_vm(self, vm: VM, with_aux_devices: bool = True):
         """
-        Detach device from listed VM.
+        Detach device from listed VM. If with_aux_devices is False,
+        ignore devices_to_attach_with_me.
         """
         self.gtk_app.emit_notification(
             _("Detaching device"),
@@ -277,6 +314,12 @@ class Device:
                 self.backend_domain, self._ident, self.device_class
             )
             vm.vm_object.devices[self.device_class].detach(assignment)
+            if self.devices_to_attach_with_me and with_aux_devices:
+                for device in self.devices_to_attach_with_me:
+                    if device is self:
+                        # this should never happen, but....
+                        continue
+                    device.detach_from_all(with_aux_devices=False)
         except qubesadmin.exc.QubesException as ex:
             self.gtk_app.emit_notification(
                 _("Error"),
@@ -288,9 +331,10 @@ class Device:
                 notification_id=self.notification_id,
             )
 
-    def detach_from_all(self):
+    def detach_from_all(self, with_aux_devices: bool = True):
         """
-        Detach from all VMs
+        Detach from all VMs. If with_aux_devices is False,
+        ignore devices_to_attach_with_me.
         """
         for vm in self.attachments:
-            self.detach_from_vm(vm)
+            self.detach_from_vm(vm, with_aux_devices)
