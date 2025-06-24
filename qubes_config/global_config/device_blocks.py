@@ -301,7 +301,7 @@ class DeviceCategoryModeler:
         self.root_device.children.append(
             DeviceCategoryWrapper(
                 _("Image input devices"),
-                DeviceCategory.Image_Input,
+                DeviceCategory.Camera,
                 _("Scanners and cameras"),
             )
         )

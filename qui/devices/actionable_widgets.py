@@ -23,8 +23,11 @@ other widgets, e.g. MenuItems and ListRows.
 
 Use generate_wrapper_widget to get a wrapped widget.
 """
+import asyncio
+import functools
 import pathlib
-from typing import Iterable, Callable, Optional
+from typing import Iterable, Callable, Optional, List
+
 import qubesadmin
 import qubesadmin.devices
 import qubesadmin.vm
@@ -87,7 +90,7 @@ class ActionableWidget:
         # should this widget be sensitive?
         self.actionable: bool = True
 
-    def widget_action(self, *_args):
+    async def widget_action(self, *_args):
         """What should happen when this widget is activated/clicked"""
 
 
@@ -127,23 +130,21 @@ class VMWithIcon(Gtk.Box):
         vm: backend.VM,
         size: int = 18,
         variant: str = "dark",
-        name_extension: Optional[str] = None,
+        name: Optional[str] = None,
     ):
         """
-        Icon with VM name and optional text name extension in parentheses.
+        Icon with VM name or optional other text in parentheses.
         :param vm: VM object
         :param size: icon size
         :param variant: light / dark string
-        :param name_extension: optional text to be added after vm name
+        :param name: optional text to put instead of vm name
         after colon
         """
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL)
         self.backend_icon = VariantIcon(vm.icon_name, variant, size)
 
         self.backend_label = Gtk.Label(xalign=0)
-        backend_label: str = vm.name
-        if name_extension:
-            backend_label += ": " + name_extension
+        backend_label: str = name or vm.name
         self.backend_label.set_markup(backend_label)
 
         self.pack_start(self.backend_icon, False, False, 4)
@@ -152,10 +153,15 @@ class VMWithIcon(Gtk.Box):
         self.get_style_context().add_class("vm_item")
 
 
-class VMAttachmentDiagram(Gtk.Box):
+class VMInfoBox(Gtk.Box):
     """
-    Device attachment scheme, in the following form:
-    backend_vm (device name) [-> frontend_vm[, other_frontend+]]
+    Information about device.
+    For all devices, it has:
+        Device attachment scheme, in the following form:
+        backend_vm (device name) [-> frontend_vm[, other_frontend+]]
+    If relevant, also:
+        - information that the device attaches with microphone
+        - information that the device is a child of another device
     """
 
     def __init__(self, device: backend.Device, variant: str = "dark"):
@@ -164,7 +170,7 @@ class VMAttachmentDiagram(Gtk.Box):
         backend_vm = device.backend_domain
         frontend_vms = list(device.attachments)
         # backend is always there
-        backend_vm_icon = VMWithIcon(backend_vm, name_extension=device.id_string)
+        backend_vm_icon = VMWithIcon(backend_vm, name=device.port)
         backend_vm_icon.get_style_context().add_class("main_device_vm")
         self.pack_start(backend_vm_icon, False, False, 4)
 
@@ -235,7 +241,7 @@ class AttachWidget(ActionableWidget, VMWithIcon):
         self.vm = vm
         self.device = device
 
-    def widget_action(self, *_args):
+    async def widget_action(self, *_args):
         self.device.attach_to_vm(self.vm)
 
 
@@ -247,8 +253,27 @@ class DetachWidget(ActionableWidget, SimpleActionWidget):
         self.vm = vm
         self.device = device
 
-    def widget_action(self, *_args):
-        self.device.detach_from_vm(self.vm)
+    async def widget_action(self, *_args):
+        self.device.detach_from_vm(self.vm, False)
+
+
+class DetachWithWidget(ActionableWidget, SimpleActionWidget):
+    """Detach device from a VM with another device"""
+
+    def __init__(self, vm: backend.VM, device: backend.Device, variant: str = "dark"):
+        second_device_names = ", ".join(
+            [dev.name for dev in device.devices_to_attach_with_me]
+        )
+        super().__init__(
+            "detach",
+            "<b>Detach from " + vm.name + " with " + second_device_names + "</b>",
+            variant,
+        )
+        self.vm = vm
+        self.device = device
+
+    async def widget_action(self, *_args):
+        self.device.detach_from_vm(self.vm, True)
 
 
 class DetachAndShutdownWidget(ActionableWidget, SimpleActionWidget):
@@ -261,8 +286,8 @@ class DetachAndShutdownWidget(ActionableWidget, SimpleActionWidget):
         self.vm = vm
         self.device = device
 
-    def widget_action(self, *_args):
-        self.device.detach_from_vm(self.vm)
+    async def widget_action(self, *_args):
+        self.device.detach_from_vm(self.vm, True)
         self.vm.vm_object.shutdown()
 
 
@@ -274,9 +299,9 @@ class DetachAndAttachWidget(ActionableWidget, VMWithIcon):
         self.vm = vm
         self.device = device
 
-    def widget_action(self, *_args):
+    async def widget_action(self, *_args):
         for vm in self.device.attachments:
-            self.device.detach_from_vm(vm)
+            self.device.detach_from_vm(vm, True)
         self.device.attach_to_vm(self.vm)
 
 
@@ -288,7 +313,7 @@ class AttachDisposableWidget(ActionableWidget, VMWithIcon):
         self.vm = vm
         self.device = device
 
-    def widget_action(self, *_args):
+    async def widget_action(self, *_args):
         new_dispvm = qubesadmin.vm.DispVM.from_appvm(self.vm.vm_object.app, self.vm)
         new_dispvm.start()
 
@@ -303,7 +328,7 @@ class DetachAndAttachDisposableWidget(ActionableWidget, VMWithIcon):
         self.vm = vm
         self.device = device
 
-    def widget_action(self, *_args):
+    async def widget_action(self, *_args):
         self.device.detach_from_vm(self.vm)
         new_dispvm = qubesadmin.vm.DispVM.from_appvm(self.vm.vm_object.app, self.vm)
         new_dispvm.start()
@@ -311,7 +336,32 @@ class DetachAndAttachDisposableWidget(ActionableWidget, VMWithIcon):
         self.device.attach_to_vm(backend.VM(new_dispvm))
 
 
-#### Other actions
+class ToggleFeatureItem(ActionableWidget, SimpleActionWidget):
+    def __init__(
+        self, icon_name, text, state, device, feature_name, variant: str = "dark"
+    ):
+        """
+        Widget representing a toggleable feature.
+        :param icon_name: name of the 'on' icon
+        :param text: text on the widget
+        :param state: whether the item is toggled or not toggled
+        :param device: Device object
+        :param feature_name: name of the feature
+        :param variant: color variant
+        """
+        super().__init__(icon_name if state else "", text, variant)
+        self.device = device
+        self.feature_name = feature_name
+
+    async def widget_action(self, *_args):
+        """Toggle the state of the feature: either add the device ID to it or remove
+        it."""
+        self.device.backend_domain.toggle_feature_value(
+            self.feature_name, str(self.device.id_string)
+        )
+
+
+#### Configuration-related actions
 
 
 class DeviceSettingsWidget(ActionableWidget, SimpleActionWidget):
@@ -321,10 +371,60 @@ class DeviceSettingsWidget(ActionableWidget, SimpleActionWidget):
 
     def __init__(self, device: backend.Device, variant: str = "dark"):
         super().__init__("settings", "<b>Device settings</b>", variant)
+        self.variant = variant
         self.device = device
 
-    def widget_action(self, *_args):
-        pass
+    def get_child_widgets(self):
+        if self.device.device_group == "Camera":
+            yield ToggleFeatureItem(
+                "check",
+                "Attach with Microphone",
+                bool(self.device.devices_to_attach_with_me),
+                self.device,
+                backend.FEATURE_ATTACH_WITH_MIC,
+                self.variant,
+            )
+
+        if self.device.has_children:
+            yield ToggleFeatureItem(
+                "check",
+                "Show child devices",
+                self.device.show_children,
+                self.device,
+                backend.FEATURE_HIDE_CHILDREN,
+                self.variant,
+            )
+
+        gaw_item = GlobalAttachmentWidget(self.device, self.variant)
+        yield gaw_item
+
+    def toggle_feature(self, feature_name, *_args):
+        feature = self.device.backend_domain.features.get(feature_name, "")
+        all_devs: List[str] = feature.split(" ")
+
+        if self.device.id_string in all_devs:
+            all_devs.remove(self.device.id_string)
+        else:
+            all_devs.append(self.device.id_string)
+
+        new_feature = " ".join(all_devs)
+        self.device.backend_domain.features[feature_name] = new_feature
+
+    async def widget_action(self, *_args):
+        """No-op, only shows child item."""
+
+
+class GlobalAttachmentWidget(ActionableWidget, SimpleActionWidget):
+    """
+    Open Global Config at Device Attachments
+    """
+
+    def __init__(self, device: backend.Device, variant: str = "dark"):
+        super().__init__("settings", "<b>Auto Attach Settings...</b>", variant)
+        self.device = device
+
+    async def widget_action(self, *_args):
+        await asyncio.create_subprocess_exec("qubes-global-config", "-o", "attachments")
 
 
 class GlobalSettingsWidget(ActionableWidget, SimpleActionWidget):
@@ -336,8 +436,8 @@ class GlobalSettingsWidget(ActionableWidget, SimpleActionWidget):
         super().__init__("settings", "<b>Global device settings</b>", variant)
         self.device = device
 
-    def widget_action(self, *_args):
-        pass
+    async def widget_action(self, *_args):
+        await asyncio.create_subprocess_exec("qubes-global-config", "-o", "attachments")
 
 
 class HelpWidget(ActionableWidget, SimpleActionWidget):
@@ -349,7 +449,7 @@ class HelpWidget(ActionableWidget, SimpleActionWidget):
         super().__init__("question-icon", "<b>Help</b>", variant)
         self.device = device
 
-    def widget_action(self, *_args):
+    async def widget_action(self, *_args):
         pass
 
 
@@ -361,40 +461,35 @@ class DeviceHeaderWidget(Gtk.Box, ActionableWidget):
         """General information about the device - name, in the future also
         a button to rename the device."""
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
-        # FUTURE: this is proposed layout for new API
-        # self.device_label = Gtk.Label()
-        # self.device_label.set_markup(device.name)
-        # self.device_label.get_style_context().add_class('device_name')
-        # self.edit_icon = VariantIcon('edit', 'dark', 24)
-        # self.detailed_description_label = Gtk.Label()
-        # self.detailed_description_label.set_text(device.description)
-        # self.backend_icon = VariantIcon(device.vm_icon, 'dark', 24)
-        # self.backend_label = Gtk.Label(xalign=0)
-        # self.backend_label.set_markup(str(device.backend_domain))
-        #
-        # self.title_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        # self.title_box.add(self.device_label)
-        # self.title_box.add(self.edit_icon)
-        #
-        # self.attachment_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        # self.attachment_box.add(self.backend_icon)
-        # self.attachment_box.add(self.backend_label)
-        #
-        # self.add(self.title_box)
-        # self.add(self.detailed_description_label)
-        # self.add(self.attachment_box)
-
         self.device_label = Gtk.Label()
         self.device_label.set_markup(device.name)
         self.device_label.get_style_context().add_class("device_name")
         self.device_label.set_xalign(Gtk.Align.CENTER)
         self.device_label.set_halign(Gtk.Align.CENTER)
 
-        self.diagram = VMAttachmentDiagram(device, variant)
+        self.diagram = VMInfoBox(device, variant)
         self.diagram.set_halign(Gtk.Align.CENTER)
 
         self.add(self.device_label)
         self.add(self.diagram)
+
+        if device.parent:
+            parent_label = Gtk.Label()
+            parent_label.set_halign(Gtk.Align.CENTER)
+            parent_label.set_markup(
+                "This device is a child of <b>" + str(device.parent) + "</b>"
+            )
+            self.add(parent_label)
+
+        if device.devices_to_attach_with_me:
+            mic_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+            mic_label = Gtk.Label()
+            mic_label.set_markup("This device will attach with microphone")
+            mic_box.add(mic_label)
+            mic_img = VariantIcon("mic", variant, 18)
+            mic_box.add(mic_img)
+            mic_box.set_halign(Gtk.Align.CENTER)
+            self.add(mic_box)
 
         self.actionable = False
 
@@ -443,7 +538,7 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
         self.attach(self.device_icon, 0, 0, 1, 1)
         self.attach(self.device_label, 1, 0, 3, 1)
 
-        self.vm_diagram = VMAttachmentDiagram(device, self.variant)
+        self.vm_diagram = VMInfoBox(device, self.variant)
         self.attach(self.vm_diagram, 1, 1, 3, 1)
 
     def get_child_widgets(self, vms, disp_vm_templates) -> Iterable[ActionableWidget]:
@@ -451,22 +546,41 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
         Get type-appropriate list of child widgets.
         :return: iterable of ActionableWidgets, ready to be packed in somewhere
         """
+
+        attached_vms = [vm for vm in vms if vm in self.device.attachments]
+        assigned_vms = [
+            vm
+            for vm in vms
+            if vm in self.device.assignments and vm not in self.device.attachments
+        ]
+        other_vms = [
+            vm
+            for vm in vms
+            if vm not in self.device.attachments and vm not in self.device.assignments
+        ]
+
         # all devices have a header
         yield DeviceHeaderWidget(self.device, self.variant)
         yield SeparatorItem()
 
         # if attached
-        if self.device.attachments:
-            for vm in self.device.attachments:
+        if attached_vms:
+            for vm in attached_vms:
                 yield DetachWidget(vm, self.device, self.variant)
                 if vm.should_be_cleaned_up:
                     yield DetachAndShutdownWidget(vm, self.device, self.variant)
-
+                if self.device.devices_to_attach_with_me:
+                    yield DetachWithWidget(vm, self.device, self.variant)
             yield SeparatorItem()
+
+            if assigned_vms:
+                yield InfoHeader("Detach and attach to preferred qube:")
+                for vm in assigned_vms:
+                    yield DetachAndAttachWidget(vm, self.device, self.variant)
 
             yield InfoHeader("Detach and attach to other qube:")
 
-            for vm in vms:
+            for vm in other_vms:
                 yield DetachAndAttachWidget(vm, self.device, self.variant)
 
             yield SeparatorItem()
@@ -477,8 +591,13 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
                 yield DetachAndAttachDisposableWidget(vm, self.device, self.variant)
 
         else:
+            if assigned_vms:
+                yield InfoHeader("Attach to preferred qube:")
+                for vm in assigned_vms:
+                    yield AttachWidget(vm, self.device)
+
             yield InfoHeader("Attach to qube:")
-            for vm in vms:
+            for vm in other_vms:
                 yield AttachWidget(vm, self.device)
 
             yield SeparatorItem()
@@ -487,6 +606,8 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
 
             for vm in disp_vm_templates:
                 yield AttachDisposableWidget(vm, self.device, self.variant)
+
+        yield DeviceSettingsWidget(self.device, self.variant)
 
 
 def generate_wrapper_widget(
@@ -501,6 +622,10 @@ def generate_wrapper_widget(
     """
     widget = widget_class()
     widget.add(inside_widget)
-    widget.connect(signal, inside_widget.widget_action)
+
+    def run_async(func, *_args):
+        asyncio.create_task(func())
+
+    widget.connect(signal, functools.partial(run_async, inside_widget.widget_action))
     widget.set_sensitive(inside_widget.actionable)
     return widget

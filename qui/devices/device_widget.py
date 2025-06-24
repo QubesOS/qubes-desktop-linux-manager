@@ -23,7 +23,7 @@ from ..tray.gtk3_xwayland_menu_dismisser import (
     get_fullscreen_window_hack,
 )  # isort:skip
 
-from typing import Set, List, Dict
+from typing import Set, List, Dict, Optional, Any
 import asyncio
 import sys
 import time
@@ -80,10 +80,21 @@ class DeviceMenu(Gtk.Menu):
         super().__init__()
 
         for child_widget in main_item.get_child_widgets(vms, dispvm_templates):
-            item = actionable_widgets.generate_wrapper_widget(
+            child_item = actionable_widgets.generate_wrapper_widget(
                 Gtk.MenuItem, "activate", child_widget
             )
-            self.add(item)
+            if hasattr(child_widget, "get_child_widgets"):
+                submenu = Gtk.Menu()
+                submenu.set_reserve_toggle_size(False)
+
+                for menu_item_widget in child_widget.get_child_widgets():
+                    menu_item = actionable_widgets.generate_wrapper_widget(
+                        Gtk.MenuItem, "activate", menu_item_widget
+                    )
+                    submenu.add(menu_item)
+                submenu.show_all()
+                child_item.set_submenu(submenu)
+            self.add(child_item)
 
         self.show_all()
 
@@ -100,6 +111,8 @@ class DevicesTray(Gtk.Application):
         self.devices: Dict[str, backend.Device] = {}
         self.vms: Set[backend.VM] = set()
         self.dispvm_templates: Set[backend.VM] = set()
+        self.parent_ports_to_hide = []
+        self.sysusb: backend.VM | None = None
 
         self.dispatcher: qubesadmin.events.EventsDispatcher = dispatcher
         self.qapp: qubesadmin.Qubes = qapp
@@ -109,6 +122,7 @@ class DevicesTray(Gtk.Application):
 
         self.initialize_vm_data()
         self.initialize_dev_data()
+        self.initialize_features()
 
         for devclass in DEV_TYPES:
             self.dispatcher.add_handler(
@@ -137,6 +151,15 @@ class DevicesTray(Gtk.Application):
             "property-del:template_for_dispvms", self.vm_dispvm_template_change
         )
 
+        for feature in [backend.FEATURE_HIDE_CHILDREN, backend.FEATURE_ATTACH_WITH_MIC]:
+
+            self.dispatcher.add_handler(
+                f"domain-feature-set:{feature}", self.update_single_feature
+            )
+            self.dispatcher.add_handler(
+                f"domain-feature-delete:{feature}", self.update_single_feature
+            )
+
         self.widget_icon = Gtk.StatusIcon()
         self.widget_icon.set_from_icon_name("qubes-devices")
         self.widget_icon.connect("button-press-event", self.show_menu)
@@ -144,23 +167,44 @@ class DevicesTray(Gtk.Application):
             "<b>Qubes Devices</b>\nView and manage devices."
         )
 
-    def device_list_update(self, vm, _event, **_kwargs):
-
-        changed_devices: Dict[str, backend.Device] = {}
-
+    def device_list_update(self, vm, event, **_kwargs):
+        devclass = event.split(":")[1]
+        changed_devices: Dict[str, Any] = {}
         # create list of all current devices from the changed VM
         try:
-            for devclass in DEV_TYPES:
-                for device in vm.devices[devclass]:
-                    changed_devices[str(device.port)] = backend.Device(device, self)
-
+            for device in vm.devices[devclass]:
+                changed_devices[backend.Device.id_from_device(device)] = device
         except qubesadmin.exc.QubesException:
             changed_devices = {}  # VM was removed
 
-        for dev_port, dev in changed_devices.items():
-            if dev_port not in self.devices:
+        microphone = self.devices.get("dom0:mic:dom0:mic::m000000", None)
+
+        for dev_id, device in changed_devices.items():
+            if dev_id not in self.devices:
+                dev = backend.Device(device, self)
                 dev.connection_timestamp = time.monotonic()
-                self.devices[dev_port] = dev
+                self.devices[dev_id] = dev
+                if dev.parent:
+                    for potential_parent in self.devices.values():
+                        if potential_parent.port == dev.parent:
+                            potential_parent.has_children = True
+
+                # connect with mic
+                mic_feature = vm.features.get(
+                    backend.FEATURE_ATTACH_WITH_MIC, ""
+                ).split(" ")
+                if dev_id in mic_feature:
+                    microphone.devices_to_attach_with_me.append(dev)
+                    dev.devices_to_attach_with_me = [microphone]
+
+                # hide children
+                child_feature = vm.features.get(
+                    backend.FEATURE_HIDE_CHILDREN, ""
+                ).split(" ")
+                if dev_id in child_feature:
+                    self.parent_ports_to_hide.append(dev.port)
+                    dev.show_children = False
+
                 self.emit_notification(
                     _("Device available"),
                     _("Device {} is available.").format(dev.description),
@@ -169,20 +213,27 @@ class DevicesTray(Gtk.Application):
                 )
 
         dev_to_remove = []
-        for dev_port, dev in self.devices.items():
-            if dev.backend_domain != vm:
-                continue
-            if dev_port not in changed_devices:
-                dev_to_remove.append((dev_port, dev))
 
-        for dev_port, dev in dev_to_remove:
+        for dev_id, dev in self.devices.items():
+            if dev.backend_domain != vm or dev.device_class != devclass:
+                continue
+            if dev_id not in changed_devices:
+                dev_to_remove.append((dev_id, dev))
+
+        for dev_id, dev in dev_to_remove:
             self.emit_notification(
                 _("Device removed"),
                 _("Device {} has been removed.").format(dev.description),
                 Gio.NotificationPriority.NORMAL,
                 notification_id=dev.notification_id,
             )
-            del self.devices[dev_port]
+            if dev in microphone.devices_to_attach_with_me:
+                microphone.devices_to_attach_with_me.remove(dev)
+            if dev.port in self.parent_ports_to_hide:
+                self.parent_ports_to_hide.remove(dev.port)
+            del self.devices[dev_id]
+
+        self.hide_child_devices()
 
     def initialize_vm_data(self):
         for vm in self.qapp.domains:
@@ -202,25 +253,141 @@ class DevicesTray(Gtk.Application):
             for devclass in DEV_TYPES:
                 try:
                     for device in domain.devices[devclass]:
-                        self.devices[str(device.port)] = backend.Device(device, self)
+                        dev_id = backend.Device.id_from_device(device)
+                        self.devices[dev_id] = backend.Device(device, self)
                 except qubesadmin.exc.QubesException:
                     # we have no permission to access VM's devices
                     continue
 
-        # list existing device attachments
+        # list children devices
+        for device in self.devices.values():
+            if device.parent:
+                for potential_parent in self.devices.values():
+                    if potential_parent.port == device.parent:
+                        potential_parent.has_children = True
+
+        # list existing device attachments and assignments
         for domain in self.qapp.domains:
             for devclass in DEV_TYPES:
                 try:
                     for device in domain.devices[devclass].get_attached_devices():
-                        dev = str(device.port)
+                        dev = backend.Device.id_from_device(device)
                         if dev in self.devices:
                             # occassionally ghost UnknownDevices appear when a
                             # device was removed but not detached from a VM
                             # FUTURE: is this still true after api changes?
                             self.devices[dev].attachments.add(backend.VM(domain))
+
+                    for device in domain.devices[devclass].get_assigned_devices():
+                        dev = backend.Device.id_from_device(device)
+                        if dev in self.devices:
+                            self.devices[dev].assignments.add(backend.VM(domain))
                 except qubesadmin.exc.QubesException:
                     # we have no permission to access VM's devices
                     continue
+
+    def update_single_feature(self, _vm, _event, feature, value=None, oldvalue=None):
+        if not value:
+            new = set()
+        else:
+            new = set(value.split(" "))
+        if not oldvalue:
+            old = set()
+        else:
+            old = set(oldvalue.split(" "))
+
+        add = new - old
+        remove = old - new
+
+        microphone = self.devices.get("dom0:mic:dom0:mic::m000000", None)
+
+        for dev_name in remove:
+            if feature == backend.FEATURE_ATTACH_WITH_MIC:
+                dev = self.devices.get(dev_name, None)
+                if dev:
+                    dev.devices_to_attach_with_me = []
+                    if dev in microphone.devices_to_attach_with_me:
+                        microphone.devices_to_attach_with_me.remove(dev)
+            if feature == backend.FEATURE_HIDE_CHILDREN:
+                dev = self.devices.get(dev_name, None)
+                if dev and dev.port in self.parent_ports_to_hide:
+                    dev.show_children = True
+                    self.parent_ports_to_hide.remove(dev.port)
+                    self.hide_child_devices(dev.port, True)
+
+        for dev_name in add:
+            if feature == backend.FEATURE_ATTACH_WITH_MIC and microphone:
+                dev = self.devices.get(dev_name, None)
+                if dev:
+                    dev.devices_to_attach_with_me = [microphone]
+                    microphone.devices_to_attach_with_me.append(dev)
+            if feature == backend.FEATURE_HIDE_CHILDREN:
+                dev = self.devices.get(dev_name, None)
+                if dev:
+                    dev.show_children = False
+                    self.parent_ports_to_hide.append(dev.port)
+                    self.hide_child_devices(dev.port, False)
+
+    def initialize_features(self, *_args, **_kwargs):
+        """
+        Initialize all feature-related states
+        :return:
+        """
+        domains = self.qapp.domains
+
+        microphone = self.devices.get("dom0:mic:dom0:mic::m000000", None)
+        # clear existing feature mappings
+        for dev in self.devices.values():
+            dev.devices_to_attach_with_me = []
+            dev.hide_this_device = False
+            dev.show_children = True
+
+        mic_dev_strings = []
+        if microphone:
+            for domain in domains:
+                mic_feature = domain.features.get(
+                    backend.FEATURE_ATTACH_WITH_MIC, False
+                )
+                if isinstance(mic_feature, str):
+                    mic_dev_strings.extend(
+                        [dev for dev in mic_feature.split(" ") if dev]
+                    )
+
+            microphone.devices_to_attach_with_me = []
+
+            for dev in mic_dev_strings:
+                if dev in self.devices:
+                    self.devices[dev].devices_to_attach_with_me = [microphone]
+                    microphone.devices_to_attach_with_me.append(self.devices[dev])
+
+        self.parent_ports_to_hide = []
+        parent_ids_to_hide = []
+        for domain in domains:
+            children_feature = domain.features.get(backend.FEATURE_HIDE_CHILDREN, False)
+            if isinstance(children_feature, str):
+                parent_ids_to_hide.extend([s for s in children_feature.split(" ") if s])
+
+        for dev in self.devices.values():
+            if dev.id_string in parent_ids_to_hide:
+                self.parent_ports_to_hide.append(dev.port)
+                dev.show_children = False
+
+        self.hide_child_devices()
+
+    def hide_child_devices(
+        self, parent_port: Optional[str] = None, state: bool = False
+    ):
+        """Hide (if state=False) or show (if state=True) all children of the device
+        with provided parent_port, or all devices
+        whose parents are in self.parent_ports_to_hide"""
+        if not parent_port:
+            for port in self.parent_ports_to_hide:
+                self.hide_child_devices(port, state)
+
+        for device in self.devices.values():
+            if str(device.parent) == parent_port:
+                device.hide_this_device = not state
+                self.hide_child_devices(str(device.port), state)
 
     def device_attached(self, vm, _event, device, **_kwargs):
         try:
@@ -230,12 +397,13 @@ class DevicesTray(Gtk.Application):
             # we don't have access to VM state
             return
 
-        if str(device.port) not in self.devices:
-            self.devices[str(device.port)] = backend.Device(device, self)
+        dev_id = backend.Device.id_from_device(device)
+        if dev_id not in self.devices:
+            self.devices[dev_id] = backend.Device(device, self)
 
         vm_wrapped = backend.VM(vm)
 
-        self.devices[str(device.port)].attachments.add(vm_wrapped)
+        self.devices[dev_id].attachments.add(vm_wrapped)
 
     def device_detached(self, vm, _event, port, **_kwargs):
         try:
@@ -248,8 +416,9 @@ class DevicesTray(Gtk.Application):
         port = str(port)
         vm_wrapped = backend.VM(vm)
 
-        if port in self.devices:
-            self.devices[port].attachments.discard(vm_wrapped)
+        for device in self.devices.values():
+            if device.port == port:
+                device.attachments.discard(vm_wrapped)
 
     def vm_start(self, vm, _event, **_kwargs):
         wrapped_vm = backend.VM(vm)
@@ -259,9 +428,9 @@ class DevicesTray(Gtk.Application):
         for devclass in DEV_TYPES:
             try:
                 for device in vm.devices[devclass].get_attached_devices():
-                    dev = str(device.port)
-                    if dev in self.devices:
-                        self.devices[dev].attachments.add(wrapped_vm)
+                    dev_id = backend.Device.id_from_device(device)
+                    if dev_id in self.devices:
+                        self.devices[dev_id].attachments.add(wrapped_vm)
             except qubesadmin.exc.QubesDaemonAccessError:
                 # we don't have access to devices
                 return
@@ -281,28 +450,6 @@ class DevicesTray(Gtk.Application):
             self.dispvm_templates.add(wrapped_vm)
         else:
             self.dispvm_templates.discard(wrapped_vm)
-
-    #
-    # def on_label_changed(self, vm, _event, **_kwargs):
-    #     if not vm:  # global properties changed
-    #         return
-    #     try:
-    #         name = vm.name
-    #     except qubesadmin.exc.QubesPropertyAccessError:
-    #         return  # the VM was deleted before its status could be updated
-    #     for domain in self.vms:
-    #         if str(domain) == name:
-    #             try:
-    #                 domain.icon = vm.label.icon
-    #             except qubesadmin.exc.QubesPropertyAccessError:
-    #                 domain.icon = 'appvm-block'
-    #
-    #     for device in self.devices.values():
-    #         if device.backend_domain == name:
-    #             try:
-    #                 device.vm_icon = vm.label.icon
-    #             except qubesadmin.exc.QubesPropertyAccessError:
-    #                 device.vm_icon = 'appvm-black'
 
     @staticmethod
     def load_css(widget) -> str:
@@ -334,7 +481,10 @@ class DevicesTray(Gtk.Application):
         menu_items = []
         sorted_vms = sorted(self.vms)
         sorted_dispvms = sorted(self.dispvm_templates)
-        sorted_devices = sorted(self.devices.values(), key=lambda x: x.sorting_key)
+        sorted_devices = sorted(
+            [dev for dev in self.devices.values() if not dev.hide_this_device],
+            key=lambda x: x.sorting_key,
+        )
 
         for i, dev in enumerate(sorted_devices):
             if i == 0 or dev.device_group != sorted_devices[i - 1].device_group:
