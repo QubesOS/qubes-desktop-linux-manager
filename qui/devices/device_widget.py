@@ -243,6 +243,9 @@ class DevicesTray(Gtk.Application):
                     self.vms.add(wrapped_vm)
                 if wrapped_vm.is_dispvm_template:
                     self.dispvm_templates.add(wrapped_vm)
+                if vm.name == "sys-usb":
+                    self.sysusb = wrapped_vm
+                    self.sysusb.is_running = vm.is_running()
             except qubesadmin.exc.QubesException:
                 # we don't have access to VM state
                 pass
@@ -424,6 +427,8 @@ class DevicesTray(Gtk.Application):
         wrapped_vm = backend.VM(vm)
         if wrapped_vm.is_attachable:
             self.vms.add(wrapped_vm)
+        if wrapped_vm == self.sysusb:
+            self.sysusb.is_running = True
 
         for devclass in DEV_TYPES:
             try:
@@ -437,6 +442,9 @@ class DevicesTray(Gtk.Application):
 
     def vm_shutdown(self, vm, _event, **_kwargs):
         wrapped_vm = backend.VM(vm)
+        if wrapped_vm == self.sysusb:
+            self.sysusb.is_running = False
+
         self.vms.discard(wrapped_vm)
         self.dispvm_templates.discard(wrapped_vm)
 
@@ -507,6 +515,14 @@ class DevicesTray(Gtk.Application):
             device_item.set_submenu(device_menu)
 
             menu_items.append(device_item)
+
+        if not self.sysusb.is_running:
+            sysusb_item = actionable_widgets.generate_wrapper_widget(
+                Gtk.MenuItem,
+                "activate",
+                actionable_widgets.StartSysUsb(self.sysusb, theme),
+            )
+            menu_items.append(sysusb_item)
 
         for item in menu_items:
             tray_menu.add(item)

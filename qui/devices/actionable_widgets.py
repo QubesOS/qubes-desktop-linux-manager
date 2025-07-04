@@ -361,6 +361,22 @@ class ToggleFeatureItem(ActionableWidget, SimpleActionWidget):
         )
 
 
+#### Start sys-usb
+
+
+class StartSysUsb(ActionableWidget, SimpleActionWidget):
+    def __init__(self, sysusb: backend.VM, variant: str = "dark"):
+        super().__init__(
+            icon_name=sysusb.icon_name,
+            text="<b>List USB Devices " "(start sys-usb)</b>",
+            variant=variant,
+        )
+        self.sysusb = sysusb
+
+    async def widget_action(self, *_args):
+        self.sysusb.vm_object.start()
+
+
 #### Configuration-related actions
 
 

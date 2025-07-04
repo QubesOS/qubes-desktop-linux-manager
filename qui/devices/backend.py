@@ -50,6 +50,8 @@ class VM:
         self._vm = vm
         self.name = vm.name
         self.vm_class = vm.klass
+        self.is_running = True  # in most cases, this is just True, unless we're at
+        # sysusb
 
     def __str__(self):
         return self.name
