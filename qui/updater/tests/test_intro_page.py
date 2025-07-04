@@ -69,8 +69,8 @@ def test_populate_vm_list(
 @pytest.mark.parametrize(
     "updates_available, expectations",
     (
-        pytest.param((2, 6), (0, 2, 6, 13, 0)),
-        pytest.param((6, 0), (0, 6, 13, 0)),
+        pytest.param((2, 6), (0, 2, 6, 14, 0)),
+        pytest.param((6, 0), (0, 6, 14, 0)),
     ),
 )
 def test_on_header_toggled(
@@ -90,7 +90,7 @@ def test_on_header_toggled(
     for vm in test_qapp.domains:
         sut.list_store.append_vm(vm)
 
-    assert len(sut.list_store) == 13
+    assert len(sut.list_store) == 14
 
     for i, row in enumerate(sut.list_store):
         if i < updates_available[0]:
@@ -109,9 +109,9 @@ def test_on_header_toggled(
         assert selected_num == expected
         assert (
             sut.checkbox_column_button.get_inconsistent()
-            and expected not in (0, 13)
+            and expected not in (0, 14)
             or sut.checkbox_column_button.get_active()
-            and expected == 13
+            and expected == 14
             or not sut.checkbox_column_button.get_active()
             and expected == 0
         )
@@ -130,7 +130,7 @@ def test_on_checkbox_toggled(
     for vm in test_qapp.domains:
         sut.list_store.append_vm(vm)
 
-    assert len(sut.list_store) == 13
+    assert len(sut.list_store) == 14
 
     sut.head_checkbox.state = HeaderCheckbox.NONE
     sut.head_checkbox.set_buttons()
@@ -188,7 +188,7 @@ def test_prohibit_start(
     for vm in test_qapp.domains:
         sut.list_store.append_vm(vm)
 
-    assert len(sut.list_store) == 13
+    assert len(sut.list_store) == 14
 
     sut.head_checkbox.state = HeaderCheckbox.NONE
     sut.head_checkbox.set_buttons()
@@ -422,7 +422,7 @@ def test_select_rows_ignoring_conditions(
     for vm in test_qapp.domains:
         sut.list_store.append_vm(vm)
 
-    assert len(sut.list_store) == 13
+    assert len(sut.list_store) == 14
 
     result = b""
     if tmpls_and_stndas:

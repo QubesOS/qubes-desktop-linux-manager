@@ -96,7 +96,7 @@ def test_on_header_toggled(
     sut.head_checkbox._allowed[0] = AppVMType.SERVICEVM
     service_num = 3
     sut.head_checkbox._allowed[1] = AppVMType.NON_SERVICEVM
-    non_excluded_num = 7
+    non_excluded_num = 8
 
     sut.head_checkbox.state = HeaderCheckbox.NONE
 
@@ -378,6 +378,7 @@ def test_perform_restart(
         "sys-firewall",
         "sys-net",
         "sys-usb",
+        "default-dvm",
         "test-blue",
         "test-red",
         "test-vm",
