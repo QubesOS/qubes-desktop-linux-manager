@@ -316,8 +316,12 @@ class SummaryPage:
                 self.log.error("Cannot shutdown %s because %s",
                                vm.name, str(err))
                 self.status = RestartStatus.ERROR_TMPL_DOWN
-
-        loop = asyncio.get_event_loop()
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            # changes between GLib versions and python versions mean that the
+            # above can fail on some dom0/gui domain configurations
+            loop = asyncio.new_event_loop()
         loop.run_until_complete(wait_for_domain_shutdown(wait_for))
 
         return wait_for
