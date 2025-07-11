@@ -21,13 +21,14 @@
 # pylint: disable=import-error
 """Global Qubes Config tool."""
 import sys
+import threading
+import time
 from typing import Dict, Optional, List, Union, Any
 from html import escape
 import importlib.resources
 import logging
 
 import qubesadmin
-import qubesadmin.events
 import qubesadmin.exc
 import qubesadmin.vm
 from ..widgets.gtk_utils import (
@@ -36,6 +37,7 @@ from ..widgets.gtk_utils import (
     load_theme,
     is_theme_light,
     resize_window_to_reasonable,
+    show_dialog,
 )
 from ..widgets.gtk_widgets import ProgressBarDialog, ViewportHandler
 from ..widgets.utils import open_url_in_disposable
@@ -267,6 +269,8 @@ class GlobalConfig(Gtk.Application):
         self.progress_bar_dialog = ProgressBarDialog(
             self, _("Loading system settings...")
         )
+        self.save_thread: threading.Thread | None = None
+        self.save_errors: List[str] = []
         self.handlers: Dict[str, PageHandler] = {}
 
     def do_command_line(self, command_line):
@@ -555,13 +559,11 @@ class GlobalConfig(Gtk.Application):
             self.main_notebook.get_nth_page(page_num).get_name(), None
         )
 
-    def save_page(self, page: PageHandler) -> bool:
-        """Save provided page and emit any necessary signals;
-        return True if successful, False otherwise"""
+    def perform_save(self, page):
+        """Actual saving thread"""
         # pylint: disable=protected-access
         # need to invalidate cache before and after saving to avoid
         # stale cache
-
         self.qapp._invalidate_cache_all()
         try:
             page.save()
@@ -572,11 +574,52 @@ class GlobalConfig(Gtk.Application):
             self.qapp._invalidate_cache_all()
             page.reset()
         except Exception as ex:
+            self.save_errors.append(str(ex))
+
+    def save_page(self, page: PageHandler) -> bool:
+        """Save provided page and emit any necessary signals;
+        return True if successful, False otherwise"""
+        self.save_thread = threading.Thread(target=self.perform_save, args=[page])
+        self.save_thread.start()
+
+        spinner = None
+        dialog = None
+        time.sleep(0.01)
+
+        if self.save_thread.is_alive():
+            # show waiting dialog
+            spinner = Gtk.Spinner()
+            spinner.start()
+            dialog = show_dialog(
+                self.main_window,
+                _("Saving changes"),
+                _("Saving global configuration changes..."),
+                {},
+                spinner,
+            )
+            dialog.set_deletable(False)
+            dialog.show()
+
+        # wait for thread and spin spinner
+        while self.save_thread.is_alive():
+            while Gtk.events_pending():
+                Gtk.main_iteration()
+            time.sleep(0.1)
+
+        # cleanup
+        if spinner:
+            spinner.stop()
+        if dialog:
+            dialog.destroy()
+
+        if self.save_errors:
             show_error(
                 self.main_window,
                 _("Could not save changes"),
-                _("The following error occurred: ") + escape(str(ex)),
+                _("The following error occurred: ")
+                + escape("\n".join(self.save_errors)),
             )
+            self.save_errors = []
             return False
         return True
 
