@@ -1,3 +1,18 @@
+qubes-desktop-linux-manager (4.3.15-1) unstable; urgency=medium
+
+  [ Marek Marczykowski-Górecki ]
+  * Update updater tests
+
+  [ Marta Marczykowska-Górecka ]
+  * Add cairo-devel dependency to CI
+  * Show a "saving changes" dialog when saving changes in global config
+  * More flexible behavior for async behavior
+
+  [ Ali Mirjamali ]
+  * Add conspicuous EOL indicator for dom0
+
+ -- Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>  Wed, 16 Jul 2025 03:54:18 +0200
+
 qubes-desktop-linux-manager (4.3.14-1) unstable; urgency=medium
 
   [ Marta Marczykowska-Górecka ]
