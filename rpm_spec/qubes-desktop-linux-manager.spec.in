@@ -315,6 +315,7 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 /usr/share/icons/hicolor/scalable/apps/qui-domains-scalable.svg
 /usr/share/icons/hicolor/scalable/apps/qui-disk-space.svg
 /usr/share/icons/hicolor/scalable/apps/qui-disk-space-warn.svg
+/usr/share/icons/hicolor/scalable/apps/qui-red-warn.svg
 /usr/share/icons/hicolor/scalable/apps/qui-updates.svg
 /usr/share/icons/hicolor/scalable/apps/qui-updates-dark.svg
 /usr/share/icons/hicolor/scalable/apps/qui-updates-light.svg
