@@ -133,9 +133,6 @@ class DevicesTray(Gtk.Application):
             self.dispatcher.add_handler(
                 "device-detach:" + devclass, self.device_detached
             )
-            self.dispatcher.add_handler(
-                "device-list-change:" + devclass, self._update_queue
-            )
             self.dispatcher.add_handler("device-added:" + devclass, self.device_added)
             self.dispatcher.add_handler(
                 "device-removed:" + devclass, self.device_removed
@@ -179,7 +176,7 @@ class DevicesTray(Gtk.Application):
             "<b>Qubes Devices</b>\nView and manage devices."
         )
 
-    def _update_queue(self, vm, device, **_kwargs):
+    def _update_queue(self, vm, device, device_class):
         """Handle certain operations that should not be done too often."""
         # update children
         if vm not in self.vm_update_queue:
@@ -187,9 +184,9 @@ class DevicesTray(Gtk.Application):
             asyncio.create_task(self.update_parents(vm))
         if device not in self.dev_update_queue:
             self.dev_update_queue.add(device)
-            asyncio.create_task(self.update_assignments())
+            asyncio.create_task(self.update_assignments(device_class))
 
-    async def update_assignments(self):
+    async def update_assignments(self, dev_class):
         """Scan vm list for new assignments"""
         await asyncio.sleep(0.3)
 
@@ -199,20 +196,19 @@ class DevicesTray(Gtk.Application):
         self.dev_update_queue.clear()
 
         for domain in self.qapp.domains:
-            for devclass in DEV_TYPES:
-                try:
-                    for device in domain.devices[devclass].get_attached_devices():
-                        dev = backend.Device.id_from_device(device)
-                        if dev in devs and dev in self.devices:
-                            self.devices[dev].attachments.add(backend.VM(domain))
+            try:
+                for device in domain.devices[dev_class].get_attached_devices():
+                    dev = backend.Device.id_from_device(device)
+                    if dev in devs and dev in self.devices:
+                        self.devices[dev].attachments.add(backend.VM(domain))
 
-                    for device in domain.devices[devclass].get_assigned_devices():
-                        dev = backend.Device.id_from_device(device)
-                        if dev in devs and dev in self.devices:
-                            self.devices[dev].assignments.add(backend.VM(domain))
-                except qubesadmin.exc.QubesException:
-                    # we have no permission to access VM's devices
-                    continue
+                for device in domain.devices[dev_class].get_assigned_devices():
+                    dev = backend.Device.id_from_device(device)
+                    if dev in devs and dev in self.devices:
+                        self.devices[dev].assignments.add(backend.VM(domain))
+            except qubesadmin.exc.QubesException:
+                # we have no permission to access VM's devices
+                continue
 
     async def update_parents(self, vm):
         await asyncio.sleep(0.3)
@@ -270,7 +266,7 @@ class DevicesTray(Gtk.Application):
             notification_id=dev.notification_id,
         )
 
-        self._update_queue(vm, dev_id)
+        self._update_queue(vm, dev_id, dev.device_class)
 
     def device_removed(self, vm, _event, port):
         for potential_dev_id, potential_dev in self.devices.items():

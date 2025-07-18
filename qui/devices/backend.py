@@ -132,7 +132,7 @@ class Device:
         self.connection_timestamp: float = None
 
         self._dev_name: str = getattr(dev, "description", "unknown")
-        if dev.devclass == "block" and "size" in dev.data:
+        if dev.devclass == "block" and "size" in getattr(dev, "data", {}):
             self._dev_name += " (" + size_to_human(int(dev.data["size"])) + ")"
 
         self._ident: str = getattr(dev, "port_id", "unknown")
