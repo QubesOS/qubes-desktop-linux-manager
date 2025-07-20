@@ -26,7 +26,7 @@ Description: Qubes UI Applications
 Package: python3-qui
 Architecture: any
 Depends:
- python3-qubesadmin (>= 4.3.17),
+ python3-qubesadmin (>= 4.3.19),
  python3-gi,
  ${python3:Depends},
  ${misc:Depends}
