@@ -252,8 +252,14 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 
 /usr/share/icons/hicolor/scalable/apps/arrow-dark.svg
 /usr/share/icons/hicolor/scalable/apps/arrow-light.svg
+/usr/share/icons/hicolor/scalable/apps/audio-dark.svg
+/usr/share/icons/hicolor/scalable/apps/audio-light.svg
+/usr/share/icons/hicolor/scalable/apps/bluetooth-dark.svg
+/usr/share/icons/hicolor/scalable/apps/bluetooth-light.svg
 /usr/share/icons/hicolor/scalable/apps/camera-dark.svg
 /usr/share/icons/hicolor/scalable/apps/camera-light.svg
+/usr/share/icons/hicolor/scalable/apps/check-dark.svg
+/usr/share/icons/hicolor/scalable/apps/check-light.svg
 /usr/share/icons/hicolor/scalable/apps/check_maybe.svg
 /usr/share/icons/hicolor/scalable/apps/check_no.svg
 /usr/share/icons/hicolor/scalable/apps/check_yes.svg
@@ -269,12 +275,18 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 /usr/share/icons/hicolor/scalable/apps/help-light.svg
 /usr/share/icons/hicolor/scalable/apps/key-dark.svg
 /usr/share/icons/hicolor/scalable/apps/key-light.svg
+/usr/share/icons/hicolor/scalable/apps/keyboard-dark.svg
+/usr/share/icons/hicolor/scalable/apps/keyboard-light.svg
 /usr/share/icons/hicolor/scalable/apps/laptop-dark.svg
 /usr/share/icons/hicolor/scalable/apps/laptop-light.svg
 /usr/share/icons/hicolor/scalable/apps/mic-dark.svg
 /usr/share/icons/hicolor/scalable/apps/mic-light.svg
 /usr/share/icons/hicolor/scalable/apps/mouse-dark.svg
 /usr/share/icons/hicolor/scalable/apps/mouse-light.svg
+/usr/share/icons/hicolor/scalable/apps/network-dark.svg
+/usr/share/icons/hicolor/scalable/apps/network-light.svg
+/usr/share/icons/hicolor/scalable/apps/printer-dark.svg
+/usr/share/icons/hicolor/scalable/apps/printer-light.svg
 /usr/share/icons/hicolor/scalable/apps/bug-play.svg
 /usr/share/icons/hicolor/scalable/apps/scroll-text.svg
 /usr/share/icons/hicolor/scalable/apps/qubes-ask.svg
