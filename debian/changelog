@@ -1,3 +1,16 @@
+qubes-desktop-linux-manager (4.3.16-1) unstable; urgency=medium
+
+  [ Marta Marczykowska-Górecka ]
+  * Use new API in the Devices Widget
+  * Add 'start sys-usb' if sys-usb is not running to qui-devices
+  * Make devices widget faster by batching some operations
+  * Stop relying on device-list-change in device widget
+
+  [ Marek Marczykowski-Górecki ]
+  * Require python3-qubesadmin >= 4.3.19
+
+ -- Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>  Sun, 20 Jul 2025 23:13:14 +0200
+
 qubes-desktop-linux-manager (4.3.15-1) unstable; urgency=medium
 
   [ Marek Marczykowski-Górecki ]
