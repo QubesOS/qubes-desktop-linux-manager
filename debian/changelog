@@ -1,3 +1,14 @@
+qubes-desktop-linux-manager (4.2.27-1) unstable; urgency=medium
+
+  [ Ali Mirjamali ]
+  * Add conspicuous EOL indicator for dom0
+
+  [ Marta Marczykowska-Górecka ]
+  * More flexible behavior for async behavior
+  * Add cairo-devel dependency to CI
+
+ -- Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>  Fri, 25 Jul 2025 05:27:35 +0200
+
 qubes-desktop-linux-manager (4.2.26-1) unstable; urgency=medium
 
   [ Ali Mirjamali ]
