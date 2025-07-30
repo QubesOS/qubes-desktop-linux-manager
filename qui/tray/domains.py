@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position,import-error,superfluous-parens
-""" A menu listing domains """
+"""A menu listing domains"""
 
 # Must be imported before creating threads
 from .gtk3_xwayland_menu_dismisser import (
@@ -765,6 +765,9 @@ class DomainTray(Gtk.Application):
         self.dispatcher.add_handler("domain-pre-shutdown", self.emit_notification)
         self.dispatcher.add_handler("domain-shutdown", self.emit_notification)
         self.dispatcher.add_handler("domain-shutdown-failed", self.emit_notification)
+        self.dispatcher.add_handler(
+            "domain-preload-dispvm-used", self.emit_notification
+        )
 
         self.dispatcher.add_handler("domain-start", self.check_pause_notify)
         self.dispatcher.add_handler("domain-paused", self.check_pause_notify)
@@ -816,7 +819,11 @@ class DomainTray(Gtk.Application):
         self.tray_menu.popup_at_pointer(event)  # None means current event
 
     def emit_notification(self, vm, event, **kwargs):
-        notification = Gio.Notification.new(_("Qube Status: {}").format(vm.name))
+        if event == "domain-preload-dispvm-used":
+            vm_name = kwargs["dispvm"]
+        else:
+            vm_name = vm.name
+        notification = Gio.Notification.new(_("Qube Status: {}").format(vm_name))
         notification.set_priority(Gio.NotificationPriority.NORMAL)
 
         if event == "domain-start-failed":
@@ -829,6 +836,12 @@ class DomainTray(Gtk.Application):
             notification.set_body(_("Qube {} is starting.").format(vm.name))
         elif event == "domain-start":
             notification.set_body(_("Qube {} has started.").format(vm.name))
+        elif event == "domain-preload-dispvm-used":
+            notification.set_body(
+                _("Qube {} was preloaded and is now being used.").format(
+                    kwargs["dispvm"]
+                )
+            )
         elif event == "domain-pre-shutdown":
             notification.set_body(
                 _("Qube {} is attempting to shut down.").format(vm.name)
@@ -1106,6 +1119,9 @@ class DomainTray(Gtk.Application):
         self.dispatcher.remove_handler("domain-pre-shutdown", self.emit_notification)
         self.dispatcher.remove_handler("domain-shutdown", self.emit_notification)
         self.dispatcher.remove_handler("domain-shutdown-failed", self.emit_notification)
+        self.dispatcher.remove_handler(
+            "domain-preload-dispvm-used", self.emit_notification
+        )
 
         self.dispatcher.remove_handler("domain-start", self.check_pause_notify)
         self.dispatcher.remove_handler("domain-paused", self.check_pause_notify)
