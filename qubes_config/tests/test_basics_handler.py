@@ -23,7 +23,7 @@
 # pylint: disable=protected-access
 
 import os
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, call as mock_call
 from ..global_config.basics_handler import (
     KernelVersion,
     PropertyHandler,
@@ -344,6 +344,8 @@ def test_kernels(test_qapp):
 def test_preload_handler(
     mock_apply, mock_get, real_builder, test_qapp
 ):  # pylint: disable=unused-argument
+    default_max = 1
+    default_threshold = 0
     description = "Number of preloaded disposables from default dispvm"
     mock_get.return_value = None
     basics_handler = BasicSettingsHandler(real_builder, test_qapp)
@@ -356,6 +358,9 @@ def test_preload_handler(
     preload_dispvm_spin: Gtk.SpinButton = real_builder.get_object(
         "basics_preload_dispvm"
     )
+    preload_dispvm_threshold_spin: Gtk.SpinButton = real_builder.get_object(
+        "basics_preload_dispvm_threshold"
+    )
     preload_dispvm_spin_check: Gtk.CheckButton = real_builder.get_object(
         "basics_preload_dispvm_check"
     )
@@ -364,11 +369,15 @@ def test_preload_handler(
 
     # Start available but unchecked.
     assert preload_dispvm_spin_check.is_sensitive()
+    assert preload_dispvm_spin.get_value_as_int() == 0
     assert not preload_dispvm_spin.is_sensitive()
+    assert preload_dispvm_threshold_spin.is_sensitive()
+    assert preload_dispvm_threshold_spin.get_value_as_int() == default_threshold
 
     # Check to allow spin.
     preload_dispvm_spin_check.set_active(True)
     assert preload_dispvm_spin.is_sensitive()
+    assert preload_dispvm_spin.get_value_as_int() == default_max
 
     # Assert that with no default_dispvm, even if changing preload spin button,
     # doesn't save the preload feature.
@@ -391,7 +400,7 @@ def test_preload_handler(
     # Assert that reset ignores insensitive.
     initial_preload_dispvm = preload_dispvm_spin.get_value_as_int()
     assert not preload_dispvm_spin.is_sensitive()
-    mock_get_count = mock_get.call_count
+    mock_get_count = mock_get.call_count + 1
     basics_handler.reset()
     assert mock_get_count == mock_get.call_count
 
@@ -416,48 +425,68 @@ def test_preload_handler(
         assert call not in test_qapp.actual_calls
     basics_handler.save()
     mock_apply.assert_called_once_with(
-        test_qapp.domains["dom0"], "preload-dispvm-max", str(new_preload_value)
+        test_qapp.domains["dom0"],
+        "preload-dispvm-max",
+        str(new_preload_value),
     )
     for call in expected_calls:
         assert call in test_qapp.actual_calls
     test_qapp.actual_calls = []
 
-    # Assert that saving '0' set the value '0' instead of feature deletion.
+    # Assert that saving '0' sets the value '0' instead of feature deletion.
     mock_get.return_value = new_preload_value
     preload_dispvm_spin.set_value(0)
     basics_handler.save()
-    assert mock_apply.call_args[0] == (
+    assert mock_apply.call_args == mock_call(
         test_qapp.domains["dom0"],
         "preload-dispvm-max",
         str(0),
     )
+    test_qapp.actual_calls = []
 
     # Assert that deselecting the check box deletes the feature.
     mock_get.return_value = 0
+    threshold_value = preload_dispvm_threshold_spin.get_value_as_int()
     preload_dispvm_spin.set_value(1)
     preload_dispvm_spin_check.set_active(False)
+    assert not preload_dispvm_spin.is_sensitive()
+    # Assert that threshold is not impacted.
+    assert preload_dispvm_threshold_spin.is_sensitive()
+    assert preload_dispvm_threshold_spin.get_value_as_int() == threshold_value
+    mock_apply_count = mock_apply.call_count
     basics_handler.save()
-    assert mock_apply.call_args[0] == (
+    assert mock_apply.call_count == mock_apply_count + 1
+    assert mock_apply.call_args == mock_call(
         test_qapp.domains["dom0"],
         "preload-dispvm-max",
         None,
     )
     assert not preload_dispvm_spin.is_sensitive()
 
-    # Assert that reset sets the current value.
+    # Assert that reset sets the current value of 'max' and 'threshold'
     preload_dispvm_spin_check.set_active(True)
     assert preload_dispvm_spin.is_sensitive()
     mock_get_count = mock_get.call_count
-    mock_get.return_value = 1
+
+    def feature_side_effect(_vm, feature, default=None):
+        if feature == "preload-dispvm-max":
+            return default_max
+        if feature == "preload-dispvm-threshold":
+            return default_threshold
+        return default
+
+    mock_get.side_effect = feature_side_effect
     basics_handler.reset()
-    assert mock_get.call_count == mock_get_count + 1
-    assert preload_dispvm_spin.get_value_as_int() == 1
+    assert mock_get.call_count == mock_get_count + 2
+    assert preload_dispvm_spin.get_value_as_int() == default_max
+    assert preload_dispvm_threshold_spin.get_value_as_int() == default_threshold
+    mock_get.side_effect = None
 
     # Assert that value is 1 when feature is None, get current value otherwise.
     mock_get.return_value = None
     preload_dispvm_spin_check.set_active(False)
     preload_dispvm_spin_check.set_active(True)
-    assert preload_dispvm_spin.get_value_as_int() == 1
+    assert preload_dispvm_spin.get_value_as_int() == default_max
 
     mock_get.return_value = 0
     preload_dispvm_spin_check.set_active(False)
@@ -472,7 +501,20 @@ def test_preload_handler(
     mock_get.return_value = 1
     preload_dispvm_spin_check.set_active(False)
     preload_dispvm_spin_check.set_active(True)
-    assert preload_dispvm_spin.get_value_as_int() == 1
+    assert preload_dispvm_spin.get_value_as_int() == default_max
+
+    mock_get.return_value = None
+    preload_dispvm_spin_check.set_active(False)
+    new_threshold = preload_dispvm_threshold_spin.get_value_as_int() + 1
+    preload_dispvm_threshold_spin.set_value(new_threshold)
+    mock_apply_count = mock_apply.call_count
+    basics_handler.save()
+    assert mock_apply.call_count == mock_apply_count + 1
+    assert mock_apply.call_args == mock_call(
+        test_qapp.domains["dom0"],
+        "preload-dispvm-threshold",
+        str(new_threshold),
+    )
 
 
 def test_basics_handler(real_builder, test_qapp):
