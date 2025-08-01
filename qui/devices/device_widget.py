@@ -147,6 +147,7 @@ class DevicesTray(Gtk.Application):
         self.dispatcher.add_handler("domain-shutdown", self.vm_shutdown)
         self.dispatcher.add_handler("domain-start-failed", self.vm_shutdown)
         self.dispatcher.add_handler("domain-start", self.vm_start)
+        self.dispatcher.add_handler("domain-unpaused", self.vm_unpaused)
 
         self.dispatcher.add_handler(
             "property-set:template_for_dispvms", self.vm_dispvm_template_change
@@ -158,6 +159,13 @@ class DevicesTray(Gtk.Application):
         )
         self.dispatcher.add_handler(
             "property-del:template_for_dispvms", self.vm_dispvm_template_change
+        )
+
+        self.dispatcher.add_handler(
+            "domain-feature-set:internal", self.update_internal_feature
+        )
+        self.dispatcher.add_handler(
+            "domain-feature-delete:internal", self.update_internal_feature
         )
 
         for feature in [backend.FEATURE_HIDE_CHILDREN, backend.FEATURE_ATTACH_WITH_MIC]:
@@ -229,10 +237,11 @@ class DevicesTray(Gtk.Application):
         for vm in self.qapp.domains:
             wrapped_vm = backend.VM(vm)
             try:
-                if wrapped_vm.is_attachable:
-                    self.vms.add(wrapped_vm)
-                if wrapped_vm.is_dispvm_template:
-                    self.dispvm_templates.add(wrapped_vm)
+                if not vm.features.get("internal"):
+                    if wrapped_vm.is_attachable:
+                        self.vms.add(wrapped_vm)
+                    if wrapped_vm.is_dispvm_template:
+                        self.dispvm_templates.add(wrapped_vm)
                 if vm.name == "sys-usb":
                     self.sysusb = wrapped_vm
                     self.sysusb.is_running = vm.is_running()
@@ -393,6 +402,36 @@ class DevicesTray(Gtk.Application):
                     self.parent_ports_to_hide.append(dev.port)
                     self.hide_child_devices(dev.port, False)
 
+    def vm_unpaused(self, vm, _event, **_kwargs):
+        wrapped_vm = backend.VM(vm)
+        try:
+            attachable = wrapped_vm.is_attachable
+            internal = vm.features.get("internal")
+        except qubesadmin.exc.QubesException:
+            attachable, internal = False, False
+        if attachable and not internal:
+            self.vms.add(wrapped_vm)
+
+    def update_internal_feature(
+        self, vm, _event, feature, value=None, oldvalue=None
+    ):  # pylint: disable=unused-argument
+        if bool(value) == bool(oldvalue):
+            return
+        wrapped_vm = backend.VM(vm)
+        if not value:
+            self.vms.discard(wrapped_vm)
+            self.dispvm_templates.discard(wrapped_vm)
+            return
+        try:
+            attachable = wrapped_vm.is_attachable
+            dispvm_template = wrapped_vm.is_dispvm_template
+        except qubesadmin.exc.QubesException:
+            attachable, dispvm_template = False, False
+        if attachable:
+            self.vms.add(wrapped_vm)
+        if dispvm_template:
+            self.dispvm_templates.add(wrapped_vm)
+
     def initialize_features(self, *_args, **_kwargs):
         """
         Initialize all feature-related states
@@ -487,7 +526,12 @@ class DevicesTray(Gtk.Application):
 
     def vm_start(self, vm, _event, **_kwargs):
         wrapped_vm = backend.VM(vm)
-        if wrapped_vm.is_attachable:
+        try:
+            internal = vm.features.get("internal")
+            attachable = wrapped_vm.is_attachable
+        except qubesadmin.exc.QubesException:
+            internal, attachable = False, False
+        if attachable and not internal:
             self.vms.add(wrapped_vm)
         if wrapped_vm == self.sysusb:
             self.sysusb.is_running = True
@@ -522,7 +566,12 @@ class DevicesTray(Gtk.Application):
     def vm_dispvm_template_change(self, vm, _event, **_kwargs):
         """Is template for dispvms property changed"""
         wrapped_vm = backend.VM(vm)
-        if wrapped_vm.is_dispvm_template:
+        try:
+            internal = vm.features.get("internal")
+            dispvm_template = wrapped_vm.is_dispvm_template
+        except qubesadmin.exc.QubesException:
+            internal, dispvm_template = False, False
+        if dispvm_template and not internal:
             self.dispvm_templates.add(wrapped_vm)
         else:
             self.dispvm_templates.discard(wrapped_vm)
