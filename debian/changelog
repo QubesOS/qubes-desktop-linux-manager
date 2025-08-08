@@ -1,3 +1,26 @@
+qubes-desktop-linux-manager (4.3.17-1) unstable; urgency=medium
+
+  [ Ben Grande ]
+  * Add preload disposable setting to global config
+  * Notify usage of preloaded disposable
+
+  [ Marek Marczykowski-Górecki ]
+  * CI: add cairo-devel to pylint job too
+
+  [ Ben Grande ]
+  * Hide internal qubes from device attachment
+
+  [ Marek Marczykowski-Górecki ]
+  * ci: add missing dependencies
+
+  [ Ben Grande ]
+  * Add preload memory threshold spin button
+
+  [ Yanase Yuki ]
+  * optimize SVG icons
+
+ -- Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>  Fri, 08 Aug 2025 19:38:49 +0200
+
 qubes-desktop-linux-manager (4.3.16-1) unstable; urgency=medium
 
   [ Marta Marczykowska-Górecka ]
