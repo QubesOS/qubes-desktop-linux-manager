@@ -201,9 +201,11 @@ class EventHandler(pyinotify.ProcessEvent):
         """Reacts to modifications of the FROM file"""
         metadata = {}
         with appviewer_lock():
-            if os.path.isfile(METADATA) and os.path.getmtime(
-                METADATA
-            ) >= os.path.getmtime(DATA):
+            if (
+                os.path.isfile(METADATA)
+                and os.path.isfile(DATA)
+                and os.path.getmtime(METADATA) >= os.path.getmtime(DATA)
+            ):
                 # parse JSON .metadata file if qubes-guid protocol 1.8 or newer
                 try:
                     with open(METADATA, "r", encoding="ascii") as metadata_file:
