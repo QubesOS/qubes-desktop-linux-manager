@@ -1,3 +1,10 @@
+qubes-desktop-linux-manager (4.3.18-1) unstable; urgency=medium
+
+  [ Marta Marczykowska-Górecka ]
+  * Fix a qui-clipboard crash
+
+ -- Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>  Tue, 26 Aug 2025 04:44:07 +0200
+
 qubes-desktop-linux-manager (4.3.17-1) unstable; urgency=medium
 
   [ Ben Grande ]
