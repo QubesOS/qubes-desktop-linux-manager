@@ -263,7 +263,8 @@ def main():
     app = UpdatesTray("org.qubes.qui.tray.Updates", qapp, dispatcher)
     app.run()
 
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
     return qui.utils.run_asyncio_and_show_errors(
         loop,

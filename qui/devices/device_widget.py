@@ -667,7 +667,8 @@ def main():
     # dispatcher = qubesadmin.tests.mock_app.MockDispatcher(qapp)
     app = DevicesTray("org.qubes.qui.tray.Devices", qapp, dispatcher)
 
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     return_code = qui.utils.run_asyncio_and_show_errors(
         loop,
         [asyncio.ensure_future(dispatcher.listen_for_events())],

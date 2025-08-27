@@ -1201,7 +1201,8 @@ def main():
     app = DomainTray("org.qubes.qui.tray.Domains", qapp, dispatcher, stats_dispatcher)
     app.run()
 
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     tasks = [
         asyncio.ensure_future(dispatcher.listen_for_events()),
         asyncio.ensure_future(stats_dispatcher.listen_for_events()),
