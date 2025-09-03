@@ -88,6 +88,19 @@ class VM:
         return self.vm_class != "AdminVM" and self._vm.is_running()
 
     @property
+    def is_usbvm(self) -> bool:
+        """
+        Does the VM have a PCI USB controller attached to it?
+        We do not need to cache this since it is checked only at Qui Devices
+        initialization as well a PCI assignment/un-assignment
+        """
+        for dev in self._vm.devices["pci"].get_assigned_devices():
+            for interface in dev.device.interfaces:
+                if interface.category == DeviceCategory.PCI_USB:
+                    return True
+        return False
+
+    @property
     def vm_object(self):
         """
         Get the qubesadmin.vm.QubesVM object.

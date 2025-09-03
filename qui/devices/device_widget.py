@@ -112,7 +112,8 @@ class DevicesTray(Gtk.Application):
         self.vms: Set[backend.VM] = set()
         self.dispvm_templates: Set[backend.VM] = set()
         self.parent_ports_to_hide = []
-        self.sysusb: backend.VM | None = None
+        self.active_usbvms: Set[backend.VM] = set()
+        self.dormant_usbvms: Set[backend.VM] = set()
         self.dev_update_queue: Set = set()
         self.vm_update_queue: Set = set()
 
@@ -143,6 +144,10 @@ class DevicesTray(Gtk.Application):
             self.dispatcher.add_handler(
                 "device-unassign:" + devclass, self.device_unassigned
             )
+
+        self.dispatcher.add_handler("device-assign:pci", self.pci_action)
+        self.dispatcher.add_handler("device-unassign:pci", self.pci_action)
+        self.dispatcher.add_handler("domain-pre-delete", self.remove_domain_item)
 
         self.dispatcher.add_handler("domain-shutdown", self.vm_shutdown)
         self.dispatcher.add_handler("domain-start-failed", self.vm_shutdown)
@@ -242,9 +247,12 @@ class DevicesTray(Gtk.Application):
                         self.vms.add(wrapped_vm)
                     if wrapped_vm.is_dispvm_template:
                         self.dispvm_templates.add(wrapped_vm)
-                if vm.name == "sys-usb":
-                    self.sysusb = wrapped_vm
-                    self.sysusb.is_running = vm.is_running()
+                # Keep track of USBVMs
+                if wrapped_vm.is_usbvm:
+                    if vm.is_running():
+                        self.active_usbvms.add(wrapped_vm)
+                    else:
+                        self.dormant_usbvms.add(wrapped_vm)
             except qubesadmin.exc.QubesException:
                 # we don't have access to VM state
                 pass
@@ -359,6 +367,24 @@ class DevicesTray(Gtk.Application):
             # it's ok, somehow we got an unassign for a device we didn't store as
             # assigned. Cheers!
             return
+
+    def pci_action(self, vm, _event, **_kwargs):
+        # We assume PCI controllers could be assigned only when qube is shutdown
+        wrapped_vm = backend.VM(vm)
+        if wrapped_vm.is_usbvm:
+            if wrapped_vm not in self.dormant_usbvms:
+                self.dormant_usbvms.add(wrapped_vm)
+        elif wrapped_vm in self.dormant_usbvms:
+            self.dormant_usbvms.discard(wrapped_vm)
+
+    def remove_domain_item(self, _submitter, _event, vm, **_kwargs):
+        # In a perfect world, core should trigger `device-unassign:pci` event
+        # for PCI devices attached to an HVM before actually removing it and
+        # this method should not be necessary. But we are not certain :/
+        for wrapped_vm in self.dormant_usbvms:
+            if wrapped_vm.name == vm:
+                self.dormant_usbvms.discard(wrapped_vm)
+                break
 
     def update_single_feature(self, _vm, _event, feature, value=None, oldvalue=None):
         if not value:
@@ -533,8 +559,9 @@ class DevicesTray(Gtk.Application):
             internal, attachable = False, False
         if attachable and not internal:
             self.vms.add(wrapped_vm)
-        if wrapped_vm == self.sysusb:
-            self.sysusb.is_running = True
+        if wrapped_vm in self.dormant_usbvms:
+            self.dormant_usbvms.discard(wrapped_vm)
+            self.active_usbvms.add(wrapped_vm)
 
         for devclass in DEV_TYPES:
             try:
@@ -548,8 +575,9 @@ class DevicesTray(Gtk.Application):
 
     def vm_shutdown(self, vm, _event, **_kwargs):
         wrapped_vm = backend.VM(vm)
-        if wrapped_vm == self.sysusb:
-            self.sysusb.is_running = False
+        if wrapped_vm in self.active_usbvms:
+            self.active_usbvms.discard(wrapped_vm)
+            self.dormant_usbvms.add(wrapped_vm)
 
         self.vms.discard(wrapped_vm)
         self.dispvm_templates.discard(wrapped_vm)
@@ -633,13 +661,13 @@ class DevicesTray(Gtk.Application):
 
             menu_items.append(device_item)
 
-        if not self.sysusb.is_running:
-            sysusb_item = actionable_widgets.generate_wrapper_widget(
+        for wrapped_vm in self.dormant_usbvms:
+            usbvm_item = actionable_widgets.generate_wrapper_widget(
                 Gtk.MenuItem,
                 "activate",
-                actionable_widgets.StartSysUsb(self.sysusb, theme),
+                actionable_widgets.StartUSBVM(wrapped_vm, theme),
             )
-            menu_items.append(sysusb_item)
+            menu_items.append(usbvm_item)
 
         for item in menu_items:
             tray_menu.add(item)
