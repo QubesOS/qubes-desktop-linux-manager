@@ -864,7 +864,8 @@ class DomainTray(Gtk.Application):
             notification.set_body(
                 _(
                     "All your qubes are currently paused. If this was an "
-                    "accident, simply click 'Unpause All' to unpause them. "
+                    "accident, simply click 'Unpause All' to unpause them "
+                    "(except preloaded disposables). "
                     "Otherwise, you can unpause individual qubes via the "
                     "Qubes Domains tray widget."
                 )
@@ -882,6 +883,11 @@ class DomainTray(Gtk.Application):
 
     def do_unpause_all(self, _vm, *_args, **_kwargs):
         for vm_name in self.menu_items:
+            if (
+                vm_name == "dom0"
+                or getattr(self.qapp.domains[vm_name], "is_preload", False)
+            ):
+                continue
             try:
                 self.qapp.domains[vm_name].unpause()
             except exc.QubesException:
@@ -897,14 +903,14 @@ class DomainTray(Gtk.Application):
     def have_running_and_all_are_paused(self):
         found_paused = False
         for vm in self.qapp.domains:
-            if vm.klass != "AdminVM":
-                if vm.is_running():
-                    if vm.is_paused():
-                        # a running that is paused
-                        found_paused = True
-                    else:
-                        # found running that wasn't paused
-                        return False
+            if vm.klass == "AdminVM" or getattr(vm, "is_preload", False):
+                continue
+            if vm.is_running() and vm.is_paused():
+                # a running that is paused
+                found_paused = True
+            else:
+                # found running that wasn't paused
+                return False
         return found_paused
 
     def add_domain_item(self, _submitter, event, vm, **_kwargs):
