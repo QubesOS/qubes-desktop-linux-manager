@@ -1,3 +1,10 @@
+qubes-desktop-linux-manager (4.3.19-1) unstable; urgency=medium
+
+  [ Ali Mirjamali ]
+  * Show "List USB Devices" option if sys-usb exists
+
+ -- Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>  Thu, 18 Sep 2025 18:05:44 +0200
+
 qubes-desktop-linux-manager (4.3.18-1) unstable; urgency=medium
 
   [ Marta Marczykowska-Górecka ]
