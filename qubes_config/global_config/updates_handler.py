@@ -468,6 +468,8 @@ class UpdateProxy:
     def _needs_updatevm_filter(vm):
         if vm.klass in ("AdminVM", "AppVM"):
             return False
+        if vm.klass == "StandaloneVM":
+            return bool(vm.features.get("service.updates-proxy-setup", False))
         if getattr(vm, "template", None):
             return False
         return bool(
