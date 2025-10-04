@@ -1,3 +1,20 @@
+qubes-desktop-linux-manager (4.3.20-1) unstable; urgency=medium
+
+  [ Marta Marczykowska-Górecka ]
+  * Fix fail to start on assignemnt of nonexistent device
+
+  [ Ben Grande ]
+  * Skip preloads and dom0 on unpause all action
+
+  [ Marta Marczykowska-Górecka ]
+  * Enable GUI for setting updateproxy for standaloneVMs
+
+  [ Marek Marczykowski-Górecki ]
+  * Adjust formating
+  * ci: install cairo-gobject-devel in the container
+
+ -- Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>  Sat, 04 Oct 2025 13:45:50 +0200
+
 qubes-desktop-linux-manager (4.3.19-1) unstable; urgency=medium
 
   [ Ali Mirjamali ]
