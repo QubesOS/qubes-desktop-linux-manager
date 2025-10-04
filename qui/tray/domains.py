@@ -883,9 +883,8 @@ class DomainTray(Gtk.Application):
 
     def do_unpause_all(self, _vm, *_args, **_kwargs):
         for vm_name in self.menu_items:
-            if (
-                vm_name == "dom0"
-                or getattr(self.qapp.domains[vm_name], "is_preload", False)
+            if vm_name == "dom0" or getattr(
+                self.qapp.domains[vm_name], "is_preload", False
             ):
                 continue
             try:
