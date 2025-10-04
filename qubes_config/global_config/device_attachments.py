@@ -28,6 +28,7 @@ from qubesadmin.device_protocol import (
     DeviceInfo,
     Port,
     DeviceInterface,
+    ProtocolError,
 )
 
 from ..widgets.gtk_widgets import TokenName
@@ -668,8 +669,16 @@ class AssignmentWrapper:
     def new_from_existing(cls, assignments: List[DeviceAssignment]):
         """Create new AssignmentWrapper from a list of DeviceAssignments;
         this assumes the DeviceAssignments are appropriately grouped"""
-        device = assignments[0].device
-        wrapped_device = DeviceWrapper.new_from_device_info(device_info=device)
+        try:
+            device = assignments[0].device
+            wrapped_device = DeviceWrapper.new_from_device_info(device_info=device)
+        except ProtocolError:
+            wrapped_device = DeviceWrapper(
+                assignments[0].devclass, assignments[0].backend_domain
+            )
+            wrapped_device.device_id = assignments[0].device_id
+            wrapped_device.port = assignments[0].port
+            wrapped_device.port_id = assignments[0].port_id
 
         aw = cls(wrapped_device)
         aw.assignments = assignments
