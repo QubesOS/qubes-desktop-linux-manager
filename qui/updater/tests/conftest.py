@@ -188,7 +188,7 @@ def all_vms_list(test_qapp, mock_list_store):
 
 
 @pytest.fixture
-def updatable_vms_list(test_qapp, mock_list_store):
+def updateable_vms_list(test_qapp, mock_list_store):
     result = ListWrapper(UpdateRowWrapper, mock_list_store)
     for vm in test_qapp.domains:
         if vm.klass in ("AdminVM", "TemplateVM", "StandaloneVM"):
