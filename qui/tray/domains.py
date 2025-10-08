@@ -206,13 +206,33 @@ class ShutdownItem(VMActionMenuItem):
         try:
             self.vm.shutdown()
         except exc.QubesException as ex:
-            show_error(
-                _("Error shutting down qube"),
-                _(
-                    "The following error occurred while attempting to "
-                    "shut down qube {0}:\n{1}"
-                ).format(self.vm.name, str(ex)),
+            dialog = Gtk.MessageDialog(
+                None, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.OK_CANCEL
             )
+            dialog.set_title("Error shutting down qube")
+            dialog.set_markup(
+                f"The qube {self.vm.name} couldn't be shut down "
+                "normally. The following error occurred: \n"
+                f"<tt>{str(ex)}</tt>\n\n"
+                "Do you want to force shutdown? \n\n<b>Warning:</b> "
+                "this may cause unexpected issues in connected qubes."
+            )
+            dialog.connect("response", self.react_to_question)
+            GLib.idle_add(dialog.show)
+
+    def react_to_question(self, widget, response):
+        if response == Gtk.ResponseType.OK:
+            try:
+                self.vm.shutdown(force=True)
+            except exc.QubesException as ex:
+                show_error(
+                    _("Error shutting down qube"),
+                    _(
+                        "The following error occurred while attempting to "
+                        "shut down qube {0}:\n{1}"
+                    ).format(self.vm.name, str(ex)),
+                )
+        widget.destroy()
 
 
 class RestartItem(VMActionMenuItem):
