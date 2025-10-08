@@ -66,11 +66,12 @@ def test_populate_vm_list(
 
 # i-th expectations value is an expected number of selected VMs after clicking on the
 # colum header i times
+N_QUBES = 17
 @pytest.mark.parametrize(
     "updates_available, expectations",
     (
-        pytest.param((2, 6), (0, 2, 6, 14, 0)),
-        pytest.param((6, 0), (0, 6, 14, 0)),
+        pytest.param((2, 6), (0, 2, 6, N_QUBES, 0)),
+        pytest.param((6, 0), (0, 6, N_QUBES, 0)),
     ),
 )
 def test_on_header_toggled(
@@ -90,7 +91,7 @@ def test_on_header_toggled(
     for vm in test_qapp.domains:
         sut.list_store.append_vm(vm)
 
-    assert len(sut.list_store) == 14
+    assert len(sut.list_store) == N_QUBES
 
     for i, row in enumerate(sut.list_store):
         if i < updates_available[0]:
@@ -109,9 +110,9 @@ def test_on_header_toggled(
         assert selected_num == expected
         assert (
             sut.checkbox_column_button.get_inconsistent()
-            and expected not in (0, 14)
+            and expected not in (0, N_QUBES)
             or sut.checkbox_column_button.get_active()
-            and expected == 14
+            and expected == N_QUBES
             or not sut.checkbox_column_button.get_active()
             and expected == 0
         )
@@ -130,7 +131,7 @@ def test_on_checkbox_toggled(
     for vm in test_qapp.domains:
         sut.list_store.append_vm(vm)
 
-    assert len(sut.list_store) == 14
+    assert len(sut.list_store) == N_QUBES
 
     sut.head_checkbox.state = HeaderCheckbox.NONE
     sut.head_checkbox.set_buttons()
@@ -188,7 +189,7 @@ def test_prohibit_start(
     for vm in test_qapp.domains:
         sut.list_store.append_vm(vm)
 
-    assert len(sut.list_store) == 14
+    assert len(sut.list_store) == N_QUBES
 
     sut.head_checkbox.state = HeaderCheckbox.NONE
     sut.head_checkbox.set_buttons()
@@ -422,7 +423,7 @@ def test_select_rows_ignoring_conditions(
     for vm in test_qapp.domains:
         sut.list_store.append_vm(vm)
 
-    assert len(sut.list_store) == 14
+    assert len(sut.list_store) == N_QUBES
 
     result = b""
     if tmpls_and_stndas:
