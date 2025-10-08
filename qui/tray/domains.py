@@ -10,7 +10,6 @@ from .gtk3_xwayland_menu_dismisser import (
 
 import asyncio
 import os
-import subprocess
 import sys
 import traceback
 import abc
@@ -117,12 +116,8 @@ class ActionMenuItem(Gtk.MenuItem, metaclass=ABCGtkMenuItemMeta):
             box.pack_start(placeholder, False, False, 0)
 
         # Add a label to the menu item
-        label_widget = label
-        if isinstance(label_widget, Gtk.Label):
-            label_widget.set_xalign(0)
-        else:
-            label_widget = Gtk.Label(label=label, xalign=0)
-        box.pack_start(label_widget, True, True, 0)
+        self.label = Gtk.Label(label=label, xalign=0)
+        box.pack_start(self.label, True, True, 0)
 
         # Add the box to the menu item
         self.add(box)
@@ -197,41 +192,127 @@ class UnpauseItem(VMActionMenuItem):
 class ShutdownItem(VMActionMenuItem):
     """Shutdown menu Item. When activated shutdowns the domain."""
 
-    def __init__(self, vm, icon_cache):
-        super().__init__(
-            vm, label=_("Shutdown"), icon_cache=icon_cache, icon_name="shutdown"
-        )
+    def __init__(self, vm, icon_cache, force=False):
+        if force:
+            super().__init__(
+                vm,
+                label=_("Force shutdown"),
+                icon_cache=icon_cache,
+                icon_name="shutdown",
+            )
+        else:
+            super().__init__(
+                vm, label=_("Shutdown"), icon_cache=icon_cache, icon_name="shutdown"
+            )
+        self.force = force
+
+    def set_force(self, force):
+        self.force = force
+        if self.force:
+            self.label.set_text(_("Force shutdown"))
+        else:
+            self.label.set_text(_("Shutdown"))
 
     async def perform_action(self):
         try:
-            self.vm.shutdown()
+            self.vm.shutdown(force=self.force)
         except exc.QubesException as ex:
-            show_error(
-                _("Error shutting down qube"),
-                _(
-                    "The following error occurred while attempting to "
-                    "shut down qube {0}:\n{1}"
-                ).format(self.vm.name, str(ex)),
+            if self.force:
+                show_error(
+                    _("Error shutting down qube"),
+                    _(
+                        "The following error occurred while attempting to "
+                        "shut down qube {0}:\n{1}"
+                    ).format(self.vm.name, str(ex)),
+                )
+                return
+            dialog = Gtk.MessageDialog(
+                None, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.OK_CANCEL
             )
+            dialog.set_title("Error shutting down qube")
+            dialog.set_markup(
+                f"The qube {self.vm.name} couldn't be shut down "
+                "normally. The following error occurred: \n"
+                f"<tt>{str(ex)}</tt>\n\n"
+                "Do you want to force shutdown? \n\n<b>Warning:</b> "
+                "this may cause unexpected issues in connected qubes."
+            )
+            dialog.connect("response", self.react_to_question)
+            GLib.idle_add(dialog.show)
+
+    def react_to_question(self, widget, response):
+        if response == Gtk.ResponseType.OK:
+            try:
+                self.vm.shutdown(force=True)
+            except exc.QubesException as ex:
+                show_error(
+                    _("Error shutting down qube"),
+                    _(
+                        "The following error occurred while attempting to "
+                        "shut down qube {0}:\n{1}"
+                    ).format(self.vm.name, str(ex)),
+                )
+        widget.destroy()
 
 
 class RestartItem(VMActionMenuItem):
     """Restart menu Item. When activated shutdowns the domain and
     then starts it again."""
 
-    def __init__(self, vm, icon_cache):
-        super().__init__(
-            vm, label=_("Restart"), icon_cache=icon_cache, icon_name="restart"
-        )
-        self.restart_thread = None
+    def __init__(self, vm, icon_cache, force=False):
+        if force:
+            super().__init__(
+                vm, label=_("Force restart"), icon_cache=icon_cache, icon_name="restart"
+            )
+        else:
+            super().__init__(
+                vm, label=_("Restart"), icon_cache=icon_cache, icon_name="restart"
+            )
+        self.force = force
+        self.give_up = False
+
+    def set_force(self, force):
+        self.force = force
+        if self.force:
+            self.label.set_text(_("Force restart"))
+        else:
+            self.label.set_text(_("Restart"))
 
     async def perform_action(self, *_args, **_kwargs):
         try:
-            self.vm.shutdown()
+            self.vm.shutdown(force=self.force)
+        except exc.QubesException as ex:
+            if self.force:
+                # we already tried forcing it, let's just give up
+                show_error(
+                    _("Error restarting qube"),
+                    _(
+                        "The following error occurred while attempting to restart"
+                        "qube {0}:\n{1}"
+                    ).format(self.vm.name, str(ex)),
+                )
+                return
+            dialog = Gtk.MessageDialog(
+                None, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.OK_CANCEL
+            )
+            dialog.set_title("Error restarting qube")
+            dialog.set_markup(
+                f"The qube {self.vm.name} couldn't be shut down "
+                "normally. The following error occurred: \n"
+                f"<tt>{str(ex)}</tt>\n\n"
+                "Do you want to force shutdown? \n\n<b>Warning:</b> "
+                "this may cause unexpected issues in connected qubes."
+            )
+            dialog.connect("response", self.react_to_question)
+            GLib.idle_add(dialog.show)
+
+        try:
             while self.vm.is_running():
+                if self.give_up:
+                    return
                 await asyncio.sleep(1)
             proc = await asyncio.create_subprocess_exec(
-                "qvm-start", self.vm.name, stderr=subprocess.PIPE
+                "qvm-start", self.vm.name, stderr=asyncio.subprocess.PIPE
             )
             _stdout, stderr = await proc.communicate()
             if proc.returncode != 0:
@@ -240,10 +321,27 @@ class RestartItem(VMActionMenuItem):
             show_error(
                 _("Error restarting qube"),
                 _(
-                    "The following error occurred while attempting to "
-                    "restart qube {0}:\n{1}"
+                    "The following error occurred while attempting to restart"
+                    "qube {0}:\n{1}"
                 ).format(self.vm.name, str(ex)),
             )
+
+    def react_to_question(self, widget, response):
+        if response == Gtk.ResponseType.OK:
+            try:
+                self.vm.shutdown(force=True)
+            except exc.QubesException as ex:
+                show_error(
+                    _("Error shutting down qube"),
+                    _(
+                        "The following error occurred while attempting to "
+                        "shut down qube {0}:\n{1}"
+                    ).format(self.vm.name, str(ex)),
+                )
+                self.give_up = True
+        else:
+            self.give_up = True
+        widget.destroy()
 
 
 class KillItem(VMActionMenuItem):
@@ -278,9 +376,7 @@ class PreferencesItem(VMActionMenuItem):
 
     async def perform_action(self):
         # pylint: disable=consider-using-with
-        await asyncio.create_subprocess_exec(
-            "qubes-vm-settings", self.vm.name, stderr=subprocess.PIPE
-        )
+        await asyncio.create_subprocess_exec("qubes-vm-settings", self.vm.name)
 
 
 class LogItem(ActionMenuItem):
@@ -293,24 +389,20 @@ class LogItem(ActionMenuItem):
         self.path = path
 
     async def perform_action(self):
-        await asyncio.create_subprocess_exec(
-            "qubes-log-viewer", self.path, stderr=subprocess.PIPE
-        )
+        await asyncio.create_subprocess_exec("qubes-log-viewer", self.path)
 
 
 class RunTerminalItem(VMActionMenuItem):
     """Run Terminal menu Item. When activated runs a terminal emulator."""
 
     def __init__(self, vm, icon_cache, as_root=False):
-        label = Gtk.Label(label=RunTerminalItem.dynamic_label(as_root))
         super().__init__(
             vm,
-            label=label,
+            label=RunTerminalItem.dynamic_label(as_root),
             icon_cache=icon_cache,
             icon_name="terminal",
         )
         self.as_root = as_root
-        self.label = label
 
     @staticmethod
     def dynamic_label(as_root):
@@ -359,9 +451,7 @@ class RunDebugConsoleItem(VMActionMenuItem):
 
     async def perform_action(self):
         # pylint: disable=consider-using-with
-        await asyncio.create_subprocess_exec(
-            "qvm-console-dispvm", self.vm.name, stderr=subprocess.PIPE
-        )
+        await asyncio.create_subprocess_exec("qvm-console-dispvm", self.vm.name)
 
 
 class OpenFileManagerItem(VMActionMenuItem):
@@ -390,8 +480,7 @@ class OpenFileManagerItem(VMActionMenuItem):
 
 
 class InternalInfoItem(Gtk.MenuItem):
-    """Restart menu Item. When activated shutdowns the domain and
-    then starts it again."""
+    """Internal info label."""
 
     def __init__(self):
         super().__init__()
@@ -415,7 +504,7 @@ class StartedMenu(Gtk.Menu):
         self.app = app
 
         self.add(OpenFileManagerItem(self.vm, icon_cache))
-        self.add(RunTerminalItem(self.vm, icon_cache, as_root=app.terminal_as_root))
+        self.add(RunTerminalItem(self.vm, icon_cache, as_root=app.shift_pressed))
 
         # Debug console for developers, troubleshooting, headless qubes
         self.debug_console = RunDebugConsoleItem(self.vm, icon_cache)
@@ -423,9 +512,9 @@ class StartedMenu(Gtk.Menu):
 
         self.add(PreferencesItem(self.vm, icon_cache))
         self.add(PauseItem(self.vm, icon_cache))
-        self.add(ShutdownItem(self.vm, icon_cache))
+        self.add(ShutdownItem(self.vm, icon_cache, force=app.shift_pressed))
         if self.vm.klass != "DispVM" or not self.vm.auto_cleanup:
-            self.add(RestartItem(self.vm, icon_cache))
+            self.add(RestartItem(self.vm, icon_cache, force=app.shift_pressed))
 
         self.set_reserve_toggle_size(False)
         self.debug_console_update()
@@ -562,9 +651,7 @@ class QubesManagerItem(Gtk.MenuItem):
 
     async def perform_action(self):
         # pylint: disable=consider-using-with
-        await asyncio.create_subprocess_exec(
-            "qubes-qube-manager", stderr=subprocess.PIPE
-        )
+        await asyncio.create_subprocess_exec("qubes-qube-manager")
 
 
 class DomainMenuItem(Gtk.MenuItem):
@@ -815,7 +902,7 @@ class DomainTray(Gtk.Application):
                 submenu.debug_console_update()
 
     def show_menu(self, _unused, event):
-        self.terminal_as_root = False
+        self.shift_pressed = False
         self.tray_menu.popup_at_pointer(event)  # None means current event
 
     def emit_notification(self, vm, event, **kwargs):
@@ -1163,19 +1250,19 @@ class DomainTray(Gtk.Application):
         self.stats_dispatcher.remove_handler("vm-stats", self.update_stats)
 
     @property
-    def terminal_as_root(self):
+    def shift_pressed(self):
         try:
-            return self._terminal_as_root
+            return self._shift_pressed
         except AttributeError:
-            self._terminal_as_root = False
-            return self.terminal_as_root
+            self._shift_pressed = False
+            return self.shift_pressed
 
-    @terminal_as_root.setter
-    def terminal_as_root(self, as_root):
-        if as_root == self.terminal_as_root:
+    @shift_pressed.setter
+    def shift_pressed(self, shift_pressed):
+        if shift_pressed == self.shift_pressed:
             return
 
-        self._terminal_as_root = as_root
+        self._shift_pressed = shift_pressed
         for item in self.menu_items.values():
             if item.vm:
                 submenu = item.get_submenu()
@@ -1184,16 +1271,18 @@ class DomainTray(Gtk.Application):
 
                 def do_emit(child):
                     if isinstance(child, RunTerminalItem):
-                        child.set_as_root(as_root)
+                        child.set_as_root(shift_pressed)
+                    if isinstance(child, (RestartItem, ShutdownItem)):
+                        child.set_force(shift_pressed)
 
                 submenu.foreach(do_emit)
 
     def key_event(self, _unused, event):
         if event.keyval in [Gdk.KEY_Shift_L, Gdk.KEY_Shift_R]:
             if event.type == Gdk.EventType.KEY_PRESS:
-                self.terminal_as_root = True
+                self.shift_pressed = True
             elif event.type == Gdk.EventType.KEY_RELEASE:
-                self.terminal_as_root = False
+                self.shift_pressed = False
 
 
 def main():
