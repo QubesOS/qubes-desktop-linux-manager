@@ -351,11 +351,13 @@ class NotificationApp(Gtk.Application):
 
     def update_clipboard_contents(self, vm=None, size=0, message=None, icon=None):
         if not vm or not size:
+            self.clear_menu_item.set_sensitive(False)
             self.clipboard_label.set_markup(_("<i>Global clipboard is empty</i>"))
             self.icon.set_from_icon_name("qui-clipboard")
             # todo the icon should be empty and full depending on state
 
         else:
+            self.clear_menu_item.set_sensitive(True)
             self.clipboard_label.set_markup(
                 _("<i>Global clipboard contents: {0} from <b>{1}</b></i>").format(
                     size, vm
@@ -387,7 +389,6 @@ class NotificationApp(Gtk.Application):
         clipboard_content_item = Gtk.MenuItem()
         clipboard_content_item.set_sensitive(False)
         clipboard_content_item.add(self.clipboard_label)
-        self.update_clipboard_contents()
         self.menu.append(clipboard_content_item)
 
         self.menu.append(Gtk.SeparatorMenuItem())
@@ -405,6 +406,11 @@ class NotificationApp(Gtk.Application):
         self.menu.append(help_item)
 
         self.menu.append(Gtk.SeparatorMenuItem())
+
+        self.clear_menu_item = Gtk.MenuItem(_("Clear global clipboard"))
+        self.clear_menu_item.connect("activate", self.clear_clipboard)
+        self.menu.append(self.clear_menu_item)
+        self.update_clipboard_contents()
 
         dom0_item = Gtk.MenuItem(_("Copy dom0 clipboard"))
         dom0_item.connect("activate", self.copy_dom0_clipboard)
@@ -447,6 +453,9 @@ class NotificationApp(Gtk.Application):
                             buffer_size="256000",
                         )
                     )
+            self.update_clipboard_contents(
+                "dom0", "{} bytes".format(os.path.getsize(DATA))
+            )
         except Exception:  # pylint: disable=broad-except
             self.send_notify(
                 _("Error while accessing global clipboard!"),
@@ -477,6 +486,41 @@ class NotificationApp(Gtk.Application):
         if len(key) == 1:
             return key.upper()
         return key
+
+    def clear_clipboard(self, *_args, **_kwargs):
+        try:
+            with appviewer_lock():
+                with open(DATA, "w", encoding="utf-8") as contents:
+                    contents.truncate(0)
+                with open(FROM, "w", encoding="ascii") as source:
+                    source.write("dom0")
+                with open(XEVENT, "w", encoding="ascii") as timestamp:
+                    timestamp.write(str(Gtk.get_current_event_time()))
+                with open(METADATA, "w", encoding="ascii") as metadata:
+                    metadata.write(
+                        "{{\n"
+                        '"vmname":"dom0",\n'
+                        '"xevent_timestamp":{xevent_timestamp},\n'
+                        '"successful":1,\n'
+                        '"cleared":1,\n'
+                        '"copy_action":0,\n'
+                        '"paste_action":0,\n'
+                        '"malformed_request":0,\n'
+                        '"qrexec_clipboard":0,\n'
+                        '"sent_size":0,\n'
+                        '"buffer_size":{buffer_size},\n'
+                        '"protocol_version_xside":65544,\n'
+                        '"protocol_version_vmside":65544,\n'
+                        "}}\n".format(
+                            xevent_timestamp=str(Gtk.get_current_event_time()),
+                            buffer_size="256000",
+                        )
+                    )
+                self.update_clipboard_contents(
+                    vm=None, size=0, message=("Global clipboard cleared")
+                )
+        except Exception:  # pylint: disable=broad-except
+            self.send_notify(_("Error while clearing global clipboard!"))
 
 
 def main():
