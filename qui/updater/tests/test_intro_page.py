@@ -64,9 +64,11 @@ def test_populate_vm_list(
     assert len(sut.get_vms_to_update()) == 2
 
 
+N_QUBES = 17
+
+
 # i-th expectations value is an expected number of selected VMs after clicking on the
 # colum header i times
-N_QUBES = 17
 @pytest.mark.parametrize(
     "updates_available, expectations",
     (
