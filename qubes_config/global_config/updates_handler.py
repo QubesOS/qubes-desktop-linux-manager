@@ -430,13 +430,7 @@ class UpdateProxy:
             current_value=None,
             additional_options={"None": _("(none)")},
         )
-        self.whonix_updatevm_model = VMListModeler(
-            combobox=self.whonix_updatevm_combo,
-            qapp=self.qapp,
-            filter_function=self._whonixupdatevm_filter,
-            current_value=None,
-            additional_options={"None": _("(none)")},
-        )
+        self.whonix_updatevm_model = None  # will be initialized by load_rules below
 
         self.load_rules()
 
@@ -500,8 +494,13 @@ class UpdateProxy:
             self.updatevm_model.update_initial()
 
         if self.has_whonix:
-            self.whonix_updatevm_model.select_value(str(def_whonix_updatevm))
-            self.whonix_updatevm_model.update_initial()
+            self.whonix_updatevm_combo.set_model(None)
+            self.whonix_updatevm_model = VMListModeler(
+                combobox=self.whonix_updatevm_combo,
+                qapp=self.qapp,
+                filter_function=self._whonixupdatevm_filter,
+                current_value=def_whonix_updatevm,
+            )
 
         self.exception_list_handler.initialize_with_rules(self.rules)
 
