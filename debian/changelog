@@ -1,3 +1,20 @@
+qubes-desktop-linux-manager (4.3.21-1) unstable; urgency=medium
+
+  [ Ben Grande ]
+  * Adjust number of mocked qubes
+
+  [ Marek Marczykowski-Górecki ]
+  * Fix formatting
+
+  [ Ali Mirjamali ]
+  * Global clipboard clearing option
+  * Fix `qui-update` icons
+
+  [ Marek Marczykowski-Górecki ]
+  * ci: update astroid workaround for 4.0.1
+
+ -- Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>  Thu, 23 Oct 2025 04:41:22 +0200
+
 qubes-desktop-linux-manager (4.3.20-1) unstable; urgency=medium
 
   [ Marta Marczykowska-Górecka ]
