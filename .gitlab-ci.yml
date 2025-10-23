@@ -34,7 +34,9 @@ checks:pylint:
   - mypy --install-types --non-interactive
   # remove when https://github.com/pylint-dev/astroid/issues/2190 is fixed
   - file_to_patch=$(python3 -c 'import astroid.builder;print(astroid.builder.__file__)') &&
-    curl -sSL https://github.com/QubesOS/qubes-continuous-integration/raw/main/scripts/pylint-astroid-workaround-2190.patch | sudo patch "$file_to_patch"
+    patch_url=https://github.com/QubesOS/qubes-continuous-integration/raw/main/scripts/pylint-astroid-workaround-2190.patch &&
+    if grep -q 'from_node, global_names' "$file_to_patch"; then patch_url=${patch_url/.patch/-4.0.1.patch}; fi &&
+    curl -sSL "$patch_url" | sudo patch "$file_to_patch"
   - git clone https://github.com/QubesOS/qubes-core-admin-client ~/core-admin-client
   - git clone https://github.com/QubesOS/qubes-core-qrexec ~/core-qrexec
   script:
