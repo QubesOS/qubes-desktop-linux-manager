@@ -38,7 +38,7 @@ import gettext
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
-NONE_CATEGORY = {"None": _("(none)")}
+NONE_CATEGORY: dict[Any | str | None, str] = {"None": _("(none)")}
 
 
 class TokenName(Gtk.Box):
@@ -50,12 +50,12 @@ class TokenName(Gtk.Box):
         self,
         token_name: str,
         qapp: qubesadmin.Qubes,
-        categories: Optional[Dict[str, str]] = None,
+        categories: Optional[Dict[Any | str | None, str]] = None,
     ):
         """
         :param token_name: string for of the token
         :param qapp: Qubes object
-        :param categories: dict of human-readable names for token strings
+        :param categories: dict of human-readable names for tokens
         """
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL)
         self.qapp = qapp
@@ -228,12 +228,12 @@ class VMListModeler(TraitSelector):
         self,
         combobox: Gtk.ComboBox,
         qapp: qubesadmin.Qubes,
-        filter_function: Optional[Callable[[qubesadmin.vm.QubesVM], bool]] = None,
-        event_callback: Optional[Callable[[], None]] = None,
-        default_value: Optional[Union[qubesadmin.vm.QubesVM, str]] = None,
-        current_value: Optional[Union[qubesadmin.vm.QubesVM, str]] = None,
+        filter_function: Callable[[qubesadmin.vm.QubesVM], bool] | None = None,
+        event_callback: Callable[[], None] | None = None,
+        default_value: qubesadmin.vm.QubesVM | str | None = None,
+        current_value: qubesadmin.vm.QubesVM | str | None = None,
         style_changes: bool = False,
-        additional_options: Optional[Dict[str, str]] = None,
+        additional_options: Dict[qubesadmin.vm.QubesVM | str | None, str] | None = None,
     ):
         """
         :param combobox: target ComboBox object
@@ -253,7 +253,7 @@ class VMListModeler(TraitSelector):
         :param style_changes: if True, combo-changed style class will be
         applied when combobox value changes
         :param additional_options: Dictionary of token: readable name of
-        addiitonal options to be added to the combobox
+        additonal options to be added to the combobox
         """
         self.qapp = qapp
         self.combo = combobox
@@ -321,10 +321,10 @@ class VMListModeler(TraitSelector):
 
     def _create_entries(
         self,
-        filter_function: Optional[Callable[[qubesadmin.vm.QubesVM], bool]],
-        default_value: Optional[Union[qubesadmin.vm.QubesVM, str]],
-        additional_options: Optional[Dict[str, str]] = None,
-        current_value: Optional[str] = None,
+        filter_function: Callable[[qubesadmin.vm.QubesVM], bool] | None,
+        default_value: qubesadmin.vm.QubesVM | str | None,
+        additional_options: Dict[qubesadmin.vm.QubesVM | str | None, str] | None = None,
+        current_value: str | None = None,
     ):
 
         if additional_options:

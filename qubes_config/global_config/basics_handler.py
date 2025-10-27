@@ -134,7 +134,7 @@ class PropertyHandler(AbstractTraitHolder):
         widget: Gtk.ComboBox,
         vm_filter: Optional[Callable] = None,
         readable_name: Optional[str] = None,
-        additional_options: Optional[Dict[str, str]] = None,
+        additional_options: Dict[Any | str | None, str] | None = None,
     ):
         self.qapp = qapp
         self.trait_holder = trait_holder
