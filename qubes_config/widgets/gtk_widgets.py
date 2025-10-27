@@ -29,7 +29,7 @@ import itertools
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GdkPixbuf
 
-from typing import Optional, Callable, Dict, Any, Union, List
+from typing import Callable, Any
 
 from .gtk_utils import load_icon, is_theme_light
 
@@ -50,7 +50,7 @@ class TokenName(Gtk.Box):
         self,
         token_name: str,
         qapp: qubesadmin.Qubes,
-        categories: Optional[Dict[Any | str | None, str]] = None,
+        categories: dict[Any | str | None, str] | None = None,
     ):
         """
         :param token_name: string for of the token
@@ -88,7 +88,7 @@ class QubeName(Gtk.Box):
     bolded.
     """
 
-    def __init__(self, vm: Optional[qubesadmin.vm.QubesVM]):
+    def __init__(self, vm: qubesadmin.vm.QubesVM | None):
         """
         :param vm: Qubes VM to be represented.
         """
@@ -151,8 +151,8 @@ class TextModeler(TraitSelector):
     def __init__(
         self,
         combobox: Gtk.ComboBoxText,
-        values: Dict[str, Any],
-        selected_value: Optional[Any] = None,
+        values: dict[str, Any],
+        selected_value: Any = None,
         style_changes: bool = False,
     ):
         """
@@ -166,7 +166,7 @@ class TextModeler(TraitSelector):
         applied when combobox value is different from initial value.
         """
         self._combo: Gtk.ComboBoxText = combobox
-        self._values: Dict[str, Any] = values
+        self._values: dict[str, Any] = values
 
         if selected_value and selected_value not in self._values.values():
             self._values[selected_value] = selected_value
@@ -233,7 +233,7 @@ class VMListModeler(TraitSelector):
         default_value: qubesadmin.vm.QubesVM | str | None = None,
         current_value: qubesadmin.vm.QubesVM | str | None = None,
         style_changes: bool = False,
-        additional_options: Dict[qubesadmin.vm.QubesVM | str | None, str] | None = None,
+        additional_options: dict[qubesadmin.vm.QubesVM | str | None, str] | None = None,
     ):
         """
         :param combobox: target ComboBox object
@@ -261,9 +261,9 @@ class VMListModeler(TraitSelector):
         self.change_function = event_callback
         self.style_changes = style_changes
 
-        self._entries: Dict[str, Dict[str, Any]] = {}
+        self._entries: dict[str, dict[str, Any]] = {}
 
-        self._icons: Dict[str, Gtk.Image] = {}
+        self._icons: dict[str, Gtk.Image] = {}
         self._icon_size = 20
 
         self._create_entries(
@@ -323,7 +323,7 @@ class VMListModeler(TraitSelector):
         self,
         filter_function: Callable[[qubesadmin.vm.QubesVM], bool] | None,
         default_value: qubesadmin.vm.QubesVM | str | None,
-        additional_options: Dict[qubesadmin.vm.QubesVM | str | None, str] | None = None,
+        additional_options: dict[qubesadmin.vm.QubesVM | str | None, str] | None = None,
         current_value: str | None = None,
     ):
 
@@ -458,7 +458,7 @@ class VMListModeler(TraitSelector):
     def __str__(self):
         return self.entry_box.get_text()
 
-    def get_selected(self) -> Optional[qubesadmin.vm.QubesVM]:
+    def get_selected(self) -> qubesadmin.vm.QubesVM | None:
         """
         Get currently selected VM, if any
         :return: QubesVM object
@@ -498,9 +498,9 @@ class ImageListModeler(TraitSelector):
     def __init__(
         self,
         combobox: Gtk.ComboBox,
-        value_list: Dict[str, Dict[str, Any]],
-        event_callback: Optional[Callable[[], None]] = None,
-        selected_value: Optional[str] = None,
+        value_list: dict[str, dict[str, Any]],
+        event_callback: Callable[[], None] | None = None,
+        selected_value: str | None = None,
         style_changes: bool = False,
     ):
         """
@@ -522,7 +522,7 @@ class ImageListModeler(TraitSelector):
 
         self.icon_size = 20
 
-        self._entries: Dict[str, Dict[str, Any]] = value_list
+        self._entries: dict[str, dict[str, Any]] = value_list
 
         for entry in self._entries.values():
             entry["loaded_icon"] = load_icon(
@@ -609,7 +609,7 @@ class ImageListModeler(TraitSelector):
     def __str__(self):
         return self.entry_box.get_text()
 
-    def get_selected(self) -> Optional[Any]:
+    def get_selected(self) -> Any:
         """
         Get currently selected object, if any
         :return: any object
@@ -633,9 +633,9 @@ class ImageTextButton(Gtk.Button):
     def __init__(
         self,
         icon_name: str,
-        label: Optional[str],
-        click_function: Optional[Callable[[Any], Any]] = None,
-        style_classes: Optional[List[str]] = None,
+        label: str | None,
+        click_function: Callable[[Any], Any] | None = None,
+        style_classes: list[str] | None = None,
     ):
         super().__init__()
         self.box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
@@ -707,10 +707,10 @@ class ExpanderHandler:
         event_button: Gtk.Button,
         data_container: Gtk.Container,
         icon: Gtk.Image,
-        label: Optional[Gtk.Label] = None,
-        text_shown: Optional[str] = None,
-        text_hidden: Optional[str] = None,
-        event_callback: Optional[Callable[[bool], None]] = None,
+        label: Gtk.Label | None = None,
+        text_shown: str | None = None,
+        text_hidden: str | None = None,
+        event_callback: Callable[[bool], None] | None = None,
     ):
         """
         :param event_button: Gtk.Button that collects the click event
@@ -773,7 +773,7 @@ class ViewportHandler:
     def __init__(
         self,
         main_window: Gtk.Window,
-        scrolled_windows: List[Gtk.ScrolledWindow],
+        scrolled_windows: list[Gtk.ScrolledWindow],
     ):
         self.scrolled_windows = scrolled_windows
         self.main_window = main_window
