@@ -1,3 +1,12 @@
+qubes-desktop-linux-manager (4.3.22-1) unstable; urgency=medium
+
+  [ Marta Marczykowska-Górecka ]
+  * Add option to use --force in qui-domains shutdown
+  * Fix setting default updatevm/whonix updatevm to none
+  * Cleanup some typing
+
+ -- Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>  Mon, 03 Nov 2025 04:26:07 +0100
+
 qubes-desktop-linux-manager (4.3.21-1) unstable; urgency=medium
 
   [ Ben Grande ]
