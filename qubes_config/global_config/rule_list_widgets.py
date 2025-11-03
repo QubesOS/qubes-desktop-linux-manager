@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program; if not, see <http://www.gnu.org/licenses/>.
 """Widgets used by various list of policy rules."""
-from typing import Optional, Dict, Callable
+from typing import Optional, Dict, Callable, Any
 
 from ..widgets.gtk_widgets import (
     VMListModeler,
@@ -43,14 +43,14 @@ import gettext
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
-SOURCE_CATEGORIES = {
+SOURCE_CATEGORIES: dict[Any | str | None, str] | None = {
     "@anyvm": _("ALL QUBES"),
     "@type:AppVM": _("TYPE: APP"),
     "@type:TemplateVM": _("TYPE: TEMPLATES"),
     "@type:DispVM": _("TYPE: DISPOSABLE"),
 }
 
-SOURCE_CATEGORIES_ADMIN = {
+SOURCE_CATEGORIES_ADMIN: dict[Any | str | None, str] | None = {
     "@anyvm": _("ALL QUBES"),
     "@type:AppVM": _("TYPE: APP"),
     "@type:TemplateVM": _("TYPE: TEMPLATES"),
@@ -58,7 +58,7 @@ SOURCE_CATEGORIES_ADMIN = {
     "@adminvm": _("TYPE: ADMINVM"),
 }
 
-TARGET_CATEGORIES = {
+TARGET_CATEGORIES: dict[Any | str | None, str] | None = {
     "@anyvm": _("ALL QUBES"),
     "@dispvm": _("Default Disposable Qube"),
     "@type:AppVM": _("TYPE: APP"),
@@ -66,13 +66,13 @@ TARGET_CATEGORIES = {
     "@type:DispVM": _("TYPE: DISPOSABLE"),
 }
 
-LIMITED_CATEGORIES = {
+LIMITED_CATEGORIES: dict[Any | str | None, str] | None = {
     "@type:AppVM": _("TYPE: APP"),
     "@type:TemplateVM": _("TYPE: TEMPLATES"),
     "@type:DispVM": _("TYPE: DISPOSABLE"),
 }
 
-DISPVM_CATEGORIES = {
+DISPVM_CATEGORIES: dict[Any | str | None, str] | None = {
     "@dispvm": _("Default Disposable Template"),
 }
 
@@ -83,12 +83,12 @@ class VMWidget(Gtk.Box):
     def __init__(
         self,
         qapp: qubesadmin.Qubes,
-        categories: Optional[Dict[str, str]],
+        categories: Dict[Any | str | None, str] | None,
         initial_value: str,
         additional_text: Optional[str] = None,
-        additional_widget: Optional[Gtk.Widget] = None,
-        filter_function: Optional[Callable[[qubesadmin.vm.QubesVM], bool]] = None,
-        change_callback: Optional[Callable] = None,
+        additional_widget: Gtk.Widget | None = None,
+        filter_function: Callable[[qubesadmin.vm.QubesVM], bool] | None = None,
+        change_callback: Callable | None = None,
     ):
         """
         :param qapp: Qubes object

@@ -491,13 +491,18 @@ class UpdateProxy:
 
         for rule in reversed(self.rules):
             if rule.source == "@type:TemplateVM":
-                def_updatevm = rule.action.target
+                if rule.action == "deny":
+                    def_updatevm = None
+                else:
+                    def_updatevm = rule.action.target
             elif rule.source == "@tag:whonix-updatevm":
-                def_whonix_updatevm = rule.action.target
+                if rule.action == "deny":
+                    def_whonix_updatevm = None
+                else:
+                    def_whonix_updatevm = rule.action.target
 
-        if def_updatevm:
-            self.updatevm_model.select_value(str(def_updatevm))
-            self.updatevm_model.update_initial()
+        self.updatevm_model.select_value(str(def_updatevm))
+        self.updatevm_model.update_initial()
 
         if self.has_whonix:
             self.whonix_updatevm_model.select_value(str(def_whonix_updatevm))
@@ -589,27 +594,41 @@ class UpdateProxy:
             new_update_proxies.add(self.qapp.domains[rule.target])
 
         if self.has_whonix:
-            raw_rules.append(
-                self.policy_manager.new_rule(
+            if self.whonix_updatevm_model.get_selected():
+                rule = self.policy_manager.new_rule(
                     service=self.service_name,
                     source="@tag:whonix-updatevm",
                     target="@default",
                     action="allow "
                     f"target={self.whonix_updatevm_model.get_selected()}",
                 )
-            )
+            else:
+                rule = self.policy_manager.new_rule(
+                    service=self.service_name,
+                    source="@tag:whonix-updatevm",
+                    target="@default",
+                    action="deny",
+                )
+            raw_rules.append(rule)
             new_update_proxies.add(self.whonix_updatevm_model.get_selected())
 
+        # always have a rule for updatevm
         if self.updatevm_model.get_selected():
-            raw_rules.append(
-                self.policy_manager.new_rule(
-                    service=self.service_name,
-                    source="@type:TemplateVM",
-                    target="@default",
-                    action="allow " f"target={self.updatevm_model.get_selected()}",
-                )
+            rule = self.policy_manager.new_rule(
+                service=self.service_name,
+                source="@type:TemplateVM",
+                target="@default",
+                action=f"allow target={self.updatevm_model.get_selected()}",
             )
             new_update_proxies.add(self.updatevm_model.get_selected())
+        else:
+            rule = self.policy_manager.new_rule(
+                service=self.service_name,
+                source="@type:TemplateVM",
+                target="@default",
+                action="deny",
+            )
+        raw_rules.append(rule)
 
         self.policy_manager.save_rules(
             self.policy_file_name, raw_rules, self.current_token
