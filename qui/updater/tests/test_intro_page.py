@@ -40,9 +40,7 @@ def test_populate_vm_list(
         ("test-standalone", "admin.vm.feature.Get", "updates-available", None)
     ] = (b"0\x00" + str(1).encode())
     # inconsistent output of qubes-vm-update, but it does not matter
-    mock_subprocess.return_value = (
-        b"Following templates will be updated:test-standalone"
-    )
+    mock_subprocess.return_value = b"The admin VM will not be updated.\nFollowing templates will be updated:test-standalone"
 
     assert not sut.is_populated
 
@@ -56,12 +54,13 @@ def test_populate_vm_list(
         ("fedora-36", "admin.vm.feature.Get", "updates-available", None)
     ] = (b"0\x00" + str(1).encode())
     mock_subprocess.return_value = (
+        b"The admin VM (dom0) will be updated.\n"
         b"Following templates will be updated:test-standalone,fedora-36"
     )
 
     sut.populate_vm_list(test_qapp, mock_settings)
     assert len(sut.list_store) == 4
-    assert len(sut.get_vms_to_update()) == 2
+    assert len(sut.get_vms_to_update()) == 3
 
 
 N_QUBES = 17
@@ -345,33 +344,46 @@ _derived_qubes = _domains.difference(_non_derived_qubes)
         # Comma separated list of VMs to target
         pytest.param(
             ("--targets", "dom0,fedora-36"),
-            b"fedora-36",
+            b"dom0,fedora-36",
             b"",
             {"dom0", "fedora-36"},
-            ("--targets", "fedora-36"),
+            ("--targets", "dom0,fedora-36"),
             id="targets",
         ),
         # `qubes-update-gui --standalones`
         # Target all StandaloneVMs
         pytest.param(
             ("--standalones",),
-            b"",
             ",".join(_standalones).encode(),
+            b"",
             _standalones,
             ("--standalones",),
             id="standalones",
         ),
         # `qubes-update-gui --dom0`
         # Target dom0
-        pytest.param(("--dom0", "--force-update"), b"", b"", {"dom0"}, None, id="dom0"),
+        pytest.param(("--dom0", "--force-update"), b"", b"", {"dom0"},
+            ("--force-update", "--targets", "dom0"), id="dom0"),
         # `qubes-update-gui --dom0 --skip dom0`
         # Comma separated list of VMs to be skipped,
         # works with all other options.
         pytest.param(
-            ("--dom0", "--skip", "dom0"), b"", b"", set(), None, id="skip all"
+            ("--dom0", "--skip", "dom0"),
+            b"",
+            b"",
+            set(),
+            ("--skip", "dom0", "--targets", "dom0"),
+            id="skip all",
         ),
         # `qubes-update-gui --skip dom0`
-        pytest.param(("--skip", "dom0"), b"", b"", set(), None, id="skip dom0"),
+        pytest.param(
+            ("--skip", "dom0"),
+            b"",
+            b"",
+            set(),
+            ("--skip", "dom0"),
+            id="skip dom0",
+        ),
         # `qubes-update-gui --skip garbage-name`
         pytest.param(
             ("--skip", "garbage-name"),
@@ -388,7 +400,7 @@ _derived_qubes = _domains.difference(_non_derived_qubes)
             b"",
             b"",
             set(),
-            None,
+            ("--skip", "dom0", "--targets", "dom0"),
             id="skip all targets",
         ),
         # `qubes-update-gui --templates dom0 --skip fedora-36,garbage-name`
@@ -427,7 +439,11 @@ def test_select_rows_ignoring_conditions(
 
     assert len(sut.list_store) == N_QUBES
 
-    result = b""
+    if "dom0" in expected_selection:
+        result = b"The admin VM (dom0) will be updated.\n"
+    else:
+        result = b"The admin VM will not be updated.\n"
+
     if tmpls_and_stndas:
         result += (
             b"Following templates and standalones will be updated: " + tmpls_and_stndas
@@ -446,7 +462,7 @@ def test_select_rows_ignoring_conditions(
         ] = (b"0\x00" + b"3020-01-01 00:00:00")
 
     cliargs = parse_args(args, test_qapp)
-    sut.select_rows_ignoring_conditions(cliargs, test_qapp.domains["dom0"])
+    sut.select_rows_ignoring_conditions(cliargs)
     to_update = {row.name for row in sut.list_store if row.selected}
 
     assert to_update == expected_selection
