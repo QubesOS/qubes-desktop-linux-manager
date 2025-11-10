@@ -475,9 +475,12 @@ class DevicesTray(Gtk.Application):
         mic_dev_strings = []
         if microphone:
             for domain in domains:
-                mic_feature = domain.features.get(
-                    backend.FEATURE_ATTACH_WITH_MIC, False
-                )
+                try:
+                    mic_feature = domain.features.get(
+                        backend.FEATURE_ATTACH_WITH_MIC, False
+                    )
+                except qubesadmin.exc.QubesDaemonAccessError:
+                    continue
                 if isinstance(mic_feature, str):
                     mic_dev_strings.extend(
                         [dev for dev in mic_feature.split(" ") if dev]
@@ -493,7 +496,12 @@ class DevicesTray(Gtk.Application):
         self.parent_ports_to_hide = []
         parent_ids_to_hide = []
         for domain in domains:
-            children_feature = domain.features.get(backend.FEATURE_HIDE_CHILDREN, False)
+            try:
+                children_feature = domain.features.get(
+                    backend.FEATURE_HIDE_CHILDREN, False
+                )
+            except qubesadmin.exc.QubesDaemonAccessError:
+                continue
             if isinstance(children_feature, str):
                 parent_ids_to_hide.extend([s for s in children_feature.split(" ") if s])
 
