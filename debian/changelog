@@ -1,3 +1,13 @@
+qubes-desktop-linux-manager (4.3.23-1) unstable; urgency=medium
+
+  [ Marek Marczykowski-Górecki ]
+  * qui-devices: do not crash if some properties are denied in policy
+
+  [ Ali Mirjamali ]
+  * New qube name tooltip improvement
+
+ -- Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>  Sat, 15 Nov 2025 14:31:54 +0100
+
 qubes-desktop-linux-manager (4.3.22-1) unstable; urgency=medium
 
   [ Marta Marczykowska-Górecka ]
