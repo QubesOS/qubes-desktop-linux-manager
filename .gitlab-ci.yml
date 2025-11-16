@@ -30,6 +30,7 @@ checks:pylint:
   stage: checks
   before_script:
   - sudo dnf install -y python3-gobject gtk3 xorg-x11-server-Xvfb python3-mypy gtksourceview4 python3-pip curl cairo-devel python3-devel
+    cairo-gobject-devel
   - pip3 install --quiet -r ci/requirements.txt
   - mypy --install-types --non-interactive
   # remove when https://github.com/pylint-dev/astroid/issues/2190 is fixed
