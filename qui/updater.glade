@@ -260,6 +260,19 @@ Selected qubes will be automatically started if necessary and shutdown after suc
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
                 <property name="orientation">vertical</property>
+
+                <child>
+                  <object class="GtkPaned">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="height-request">100</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="orientation">vertical</property>
+
                 <child>
                   <object class="GtkTreeView" id="progressbar">
                     <property name="visible">True</property>
@@ -345,6 +358,20 @@ Selected qubes will be automatically started if necessary and shutdown after suc
                     <property name="position">1</property>
                   </packing>
                 </child>
+
+                      </object>
+                      <packing>
+                        <property name="resize">True</property>
+                        <property name="shrink">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="height-request">200</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="orientation">vertical</property>
+
                 <child>
                   <object class="GtkBox" id="qube_details">
                     <property name="visible">True</property>
@@ -481,6 +508,16 @@ Selected qubes will be automatically started if necessary and shutdown after suc
                     <property name="position">2</property>
                   </packing>
                 </child>
+
+                      </object>
+                      <packing>
+                        <property name="resize">True</property>
+                        <property name="shrink">False</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+
               </object>
               <packing>
                 <property name="position">1</property>
