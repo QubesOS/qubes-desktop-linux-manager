@@ -46,7 +46,7 @@ def test_setup_non_interactive_nothing_to_do(
     get_vms, select, subproc, _mock_logging, __mock_logging, test_qapp
 ):
     sut = QubesUpdater(test_qapp, parse_args(("-n",), test_qapp))
-    subproc.return_value = b""
+    subproc.return_value = b"The admin VM will not be updated."
     get_vms.return_value = ()
     sut.perform_setup()
     select.assert_called_once()
