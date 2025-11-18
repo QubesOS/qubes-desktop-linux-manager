@@ -157,13 +157,21 @@ class DevicesTray(Gtk.Application):
         self.dispatcher.add_handler(
             "property-set:template_for_dispvms", self.vm_dispvm_template_change
         )
-
         self.dispatcher.add_handler(
             "property-reset:template_for_dispvms",
             self.vm_dispvm_template_change,
         )
         self.dispatcher.add_handler(
             "property-del:template_for_dispvms", self.vm_dispvm_template_change
+        )
+        self.dispatcher.add_handler(
+            "property-set:devices_denied", self.vm_denied_changed
+        )
+        self.dispatcher.add_handler(
+            "property-reset:devices_denied", self.vm_denied_changed
+        )
+        self.dispatcher.add_handler(
+            "property-del:devices_denied", self.vm_denied_changed
         )
 
         self.dispatcher.add_handler(
@@ -603,6 +611,13 @@ class DevicesTray(Gtk.Application):
             self.dispvm_templates.add(wrapped_vm)
         else:
             self.dispvm_templates.discard(wrapped_vm)
+
+    def vm_denied_changed(self, vm, _event, **_kwargs):
+        """devices_denied property changed"""
+        for wrapped_vm in self.vms:
+            if wrapped_vm.name == vm.name:
+                wrapped_vm.update_denied_devices()
+                return
 
     @staticmethod
     def load_css(widget) -> str:
