@@ -167,7 +167,6 @@ class ProgressPage:
         # pylint: disable=consider-using-with
         proc = subprocess.Popen(
             [
-                "sudo",
                 "qubes-vm-update",
                 "--show-output",
                 "--just-print-progress",
