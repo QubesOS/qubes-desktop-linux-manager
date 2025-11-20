@@ -500,9 +500,15 @@ class DeviceHeaderWidget(Gtk.Box, ActionableWidget):
         if device.devices_to_attach_with_me:
             mic_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
             mic_label = Gtk.Label()
-            mic_label.set_markup("This device will attach with microphone")
-            mic_box.add(mic_label)
-            mic_img = VariantIcon("mic", variant, 18)
+            if device.device_class == "mic":
+                mic_label.set_markup("This device will attach with camera ")
+                mic_box.add(mic_label)
+            else:
+                mic_label.set_markup("This device will attach with microphone ")
+                mic_box.add(mic_label)
+            mic_img = VariantIcon(
+                "camera" if device.device_class == "mic" else "mic", variant, 18
+            )
             mic_box.add(mic_img)
             mic_box.set_halign(Gtk.Align.CENTER)
             self.add(mic_box)

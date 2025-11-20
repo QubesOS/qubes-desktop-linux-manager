@@ -152,7 +152,6 @@ class Device:
         self._description: str = getattr(dev, "description", "unknown")
         self._devclass: str = getattr(dev, "devclass", "unknown")
 
-        main_category = None
         for interface in dev.interfaces:
             if interface.category.name != "Other":
                 main_category = interface.category
