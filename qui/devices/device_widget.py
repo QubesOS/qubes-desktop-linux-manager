@@ -65,7 +65,7 @@ _ = t.gettext
 
 
 # FUTURE: this should be moved to backend with new API changes
-DEV_TYPES = ["block", "usb", "mic"]
+DEV_TYPES = ["block", "usb", "mic", "webcam"]
 
 
 class DeviceMenu(Gtk.Menu):
