@@ -112,6 +112,7 @@ class DevicesTray(Gtk.Application):
         self.vms: Set[backend.VM] = set()
         self.dispvm_templates: Set[backend.VM] = set()
         self.parent_ports_to_hide = []
+        self.cameras_to_hide = []
         self.active_usbvms: Set[backend.VM] = set()
         self.dormant_usbvms: Set[backend.VM] = set()
         self.dev_update_queue: Set = set()
@@ -266,6 +267,10 @@ class DevicesTray(Gtk.Application):
         if dev.parent:
             for potential_parent in self.devices.values():
                 if potential_parent.port == dev.parent:
+                    # hide parents of webcams
+                    if dev.device_class == "webcam":
+                        self.cameras_to_hide.append(dev.parent)
+                        potential_parent.hide_this_device = True
                     potential_parent.has_children = True
                     break
 
@@ -310,6 +315,12 @@ class DevicesTray(Gtk.Application):
             microphone.devices_to_attach_with_me.remove(dev)
         if dev.port in self.parent_ports_to_hide:
             self.parent_ports_to_hide.remove(dev.port)
+        if dev.parent in self.cameras_to_hide:
+            for potential_parent in self.devices.values():
+                if potential_parent.port == dev.parent:
+                    potential_parent.hide_this_device = False
+                    break
+            self.cameras_to_hide.remove(dev.parent)
         del self.devices[dev_id]
 
     def initialize_dev_data(self):
@@ -350,6 +361,12 @@ class DevicesTray(Gtk.Application):
                 except qubesadmin.exc.QubesException:
                     # we have no permission to access VM's devices
                     continue
+
+        # hide parents of webcams
+        for device in self.devices.values():
+            if device.device_class == "webcam":
+                if device.parent:
+                    self.cameras_to_hide.append(device.parent)
 
     def device_assigned(self, vm, _event, device, **_kwargs):
         dev_id = backend.Device.id_from_device(device)
@@ -519,6 +536,9 @@ class DevicesTray(Gtk.Application):
                 dev.show_children = False
 
         self.hide_child_devices()
+        for dev in self.devices.values():
+            if dev.port in self.cameras_to_hide:
+                dev.hide_this_device = True
 
     def hide_child_devices(
         self, parent_port: Optional[str] = None, state: bool = False
