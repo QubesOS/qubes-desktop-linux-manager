@@ -173,6 +173,13 @@ class DevicesTray(Gtk.Application):
         self.dispatcher.add_handler(
             "domain-feature-delete:internal", self.update_internal_feature
         )
+        self.dispatcher.add_handler(
+            "domain-feature-set:" + backend.FEATURE_RESOLUTION, self.update_resolution
+        )
+        self.dispatcher.add_handler(
+            "domain-feature-delete:" + backend.FEATURE_RESOLUTION,
+            self.update_resolution,
+        )
 
         for feature in [backend.FEATURE_HIDE_CHILDREN, backend.FEATURE_ATTACH_WITH_MIC]:
 
@@ -444,6 +451,28 @@ class DevicesTray(Gtk.Application):
                     dev.show_children = False
                     self.parent_ports_to_hide.append(dev.port)
                     self.hide_child_devices(dev.port, False)
+
+    def update_resolution(self, vm, _event, feature, value=None, oldvalue=None):
+        res_dict = {}
+        if value:
+            for word in value.split(" "):
+                try:
+                    k, v = word.split("=")
+                    res_dict[k] = v
+                except ValueError:
+                    # the feature is malformed, ignore it
+                    res_dict = {}
+
+        for device in self.devices.values():
+            if (
+                device.device_class == "webcam"
+                and device.backend_domain.name == vm.name
+            ):
+                resolution = res_dict.get(device.id_string, None)
+                if resolution:
+                    device.options["format"] = resolution
+                elif "format" in device.options:
+                    del device.options["format"]
 
     def vm_unpaused(self, vm, _event, **_kwargs):
         wrapped_vm = backend.VM(vm)
