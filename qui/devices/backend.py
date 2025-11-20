@@ -134,7 +134,7 @@ class VM:
 class Device:
     @classmethod
     def id_from_device(cls, dev: qubesadmin.devices.DeviceInfo) -> str:
-        return str(dev.port) + ":" + str(dev.device_id)
+        return str(dev.devclass) + ":" + str(dev.port) + ":" + str(dev.device_id)
 
     def __init__(self, dev: qubesadmin.devices.DeviceInfo, gtk_app: Gtk.Application):
         self.gtk_app: Gtk.Application = gtk_app

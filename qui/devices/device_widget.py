@@ -272,7 +272,7 @@ class DevicesTray(Gtk.Application):
         # connect with mic
         mic_feature = vm.features.get(backend.FEATURE_ATTACH_WITH_MIC, "").split(" ")
         if dev_id in mic_feature:
-            microphone = self.devices.get("dom0:mic:dom0:mic::m000000", None)
+            microphone = self.devices.get("mic:dom0:mic:dom0:mic::m000000", None)
             microphone.devices_to_attach_with_me.append(dev)
             dev.devices_to_attach_with_me = [microphone]
 
@@ -298,7 +298,7 @@ class DevicesTray(Gtk.Application):
             # we never knew the device anyway
             return
 
-        microphone = self.devices.get("dom0:mic:dom0:mic::m000000", None)
+        microphone = self.devices.get("mic:dom0:mic:dom0:mic::m000000", None)
 
         self.emit_notification(
             _("Device removed"),
@@ -399,7 +399,7 @@ class DevicesTray(Gtk.Application):
         add = new - old
         remove = old - new
 
-        microphone = self.devices.get("dom0:mic:dom0:mic::m000000", None)
+        microphone = self.devices.get("mic:dom0:mic:dom0:mic::m000000", None)
 
         for dev_name in remove:
             if feature == backend.FEATURE_ATTACH_WITH_MIC:
@@ -465,7 +465,7 @@ class DevicesTray(Gtk.Application):
         """
         domains = self.qapp.domains
 
-        microphone = self.devices.get("dom0:mic:dom0:mic::m000000", None)
+        microphone = self.devices.get("mic:dom0:mic:dom0:mic::m000000", None)
         # clear existing feature mappings
         for dev in self.devices.values():
             dev.devices_to_attach_with_me = []
@@ -479,13 +479,21 @@ class DevicesTray(Gtk.Application):
                     mic_feature = domain.features.get(
                         backend.FEATURE_ATTACH_WITH_MIC, False
                     )
+                    if not mic_feature:
+                        continue
                 except qubesadmin.exc.QubesDaemonAccessError:
                     continue
-                if isinstance(mic_feature, str):
-                    mic_dev_strings.extend(
-                        [dev for dev in mic_feature.split(" ") if dev]
-                    )
-
+                for dev in mic_feature.split(" "):
+                    if not dev:
+                        continue
+                    try:
+                        _class, vm_name, _rest = dev.split(":", 2)
+                        if vm_name != domain.name:
+                            continue
+                        mic_dev_strings.append(dev)
+                    except ValueError:
+                        # malformed name
+                        pass
             microphone.devices_to_attach_with_me = []
 
             for dev in mic_dev_strings:
