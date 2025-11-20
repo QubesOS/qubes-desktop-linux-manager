@@ -38,6 +38,7 @@ _ = t.gettext
 
 FEATURE_HIDE_CHILDREN = "device-hide-children"
 FEATURE_ATTACH_WITH_MIC = "device-attach-with-mic"
+FEATURE_RESOLUTION = "device-qvc-resolution"  # dev_id=resolution, space delimited
 
 
 class VM:
@@ -163,6 +164,7 @@ class Device:
 
         self._data: Dict = getattr(dev, "data", {})
         self._device_id = getattr(dev, "device_id", "*")
+        self.options = {}
         self.parent = str(getattr(dev, "parent_device", None) or "")
         self.attachments: Set[VM] = set()
         self.assignments: Set[VM] = set()
@@ -184,6 +186,20 @@ class Device:
         self.has_children: bool = False
         self.show_children: bool = True
         self.hide_this_device: bool = False
+
+        if self.device_class == "webcam" and self._backend_domain:
+            resolution_feature = self._backend_domain.vm_object.features.get(
+                FEATURE_RESOLUTION, ""
+            )
+            if resolution_feature:
+                for w in resolution_feature.split(" "):
+                    try:
+                        k, v = w.split("=")
+                        if k == self.id_string:
+                            self.options["format"] = v
+                    except ValueError:
+                        # malformed options, ignore them
+                        pass
 
     def __str__(self):
         return self._dev_name
@@ -285,6 +301,7 @@ class Device:
                 port_id=self._ident,
                 devclass=self.device_class,
                 device_id=self._device_id,
+                options=self.options,
             )
             vm.vm_object.devices[self.device_class].attach(assignment)
             self.gtk_app.emit_notification(
