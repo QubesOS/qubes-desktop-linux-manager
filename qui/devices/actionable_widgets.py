@@ -53,13 +53,13 @@ def load_icon(icon_name: str, backup_name: str, size: int = 24):
     """
     try:
         image: GdkPixbuf.Pixbuf = Gtk.IconTheme.get_default().load_icon(
-            icon_name, size, 0
+            icon_name, size, Gtk.IconLookupFlags.FORCE_SIZE
         )
         return image
     except (TypeError, GLib.Error):
         try:
             image: GdkPixbuf.Pixbuf = Gtk.IconTheme.get_default().load_icon(
-                backup_name, size, 0
+                backup_name, size, Gtk.IconLookupFlags.FORCE_SIZE
             )
             return image
         except (TypeError, GLib.Error):

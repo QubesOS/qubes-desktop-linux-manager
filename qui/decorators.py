@@ -222,7 +222,9 @@ class DomainDecorator(PropertiesDecorator):
         except exc.QubesDaemonCommunicationError:
             # no permission to access icon
             icon = "appvm-black"
-        icon_vm = Gtk.IconTheme.get_default().load_icon(icon, 16, 0)
+        icon_vm = Gtk.IconTheme.get_default().load_icon(
+            icon, 16, Gtk.IconLookupFlags.FORCE_SIZE
+        )
         icon_img = Gtk.Image.new_from_pixbuf(icon_vm)
         return icon_img
 
@@ -301,7 +303,9 @@ def create_icon(name) -> Gtk.Image:
     pixbuf = None
     for icon_name in names:
         try:
-            pixbuf = Gtk.IconTheme.get_default().load_icon(icon_name, 16, 0)
+            pixbuf = Gtk.IconTheme.get_default().load_icon(
+                icon_name, 16, Gtk.IconLookupFlags.FORCE_SIZE
+            )
             break
         except (TypeError, GLib.Error):
             continue
