@@ -578,7 +578,9 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
         other_vms = [
             vm
             for vm in vms
-            if vm not in self.device.attachments and vm not in self.device.assignments
+            if vm not in self.device.attachments
+            and vm not in self.device.assignments
+            and vm.name != self.device.backend_domain.name
         ]
 
         # all devices have a header
