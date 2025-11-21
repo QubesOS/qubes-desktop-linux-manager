@@ -81,7 +81,9 @@ class VMUsageData:
             icon = getattr(vm, "icon", vm.label.icon)
         except exc.QubesPropertyAccessError:
             icon = "appvm-black"
-        icon_vm = Gtk.IconTheme.get_default().load_icon(icon, 16, 0)
+        icon_vm = Gtk.IconTheme.get_default().load_icon(
+            icon, 16, Gtk.IconLookupFlags.FORCE_SIZE
+        )
         icon_img = Gtk.Image.new_from_pixbuf(icon_vm)
 
         # description widget
