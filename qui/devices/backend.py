@@ -24,7 +24,7 @@ import qubesadmin.exc
 import qubesadmin.devices
 import qubesadmin.vm
 from qubesadmin.utils import size_to_human
-from qubesadmin.device_protocol import DeviceAssignment, DeviceCategory
+from qubesadmin.device_protocol import DeviceAssignment, DeviceCategory, DeviceInterface
 
 import gi
 
@@ -50,8 +50,11 @@ class VM:
         self._vm = vm
         self.name = vm.name
         self.vm_class = vm.klass
+        self._devices_denied = []
         self.is_running = True  # in most cases, this is just True, unless we're at
         # sysusb
+
+        self.update_denied_devices()
 
     def __str__(self):
         return self.name
@@ -130,6 +133,18 @@ class VM:
         new_feature = " ".join(all_devs)
         self._vm.features[feature_name] = new_feature
 
+    @property
+    def devices_denied(self) -> List[DeviceInterface]:
+        return self._devices_denied
+
+    def update_denied_devices(self):
+        try:
+            self._devices_denied = DeviceInterface.from_str_bulk(
+                self._vm.devices_denied
+            )
+        except AttributeError:
+            self._devices_denied = []
+
 
 class Device:
     @classmethod
@@ -141,6 +156,7 @@ class Device:
         self._dev: qubesadmin.devices.DeviceInfo = dev
         self.__hash = hash(dev)
         self._port: str = str(dev.port)
+        self._interfaces = dev.interfaces
         # Monotonic connection timestamp only for new devices
         self.connection_timestamp: float = None
 
@@ -353,3 +369,10 @@ class Device:
         """
         for vm in self.attachments:
             self.detach_from_vm(vm, with_aux_devices)
+
+    def is_valid_for_vm(self, vm: VM):
+        for deny_interface in vm.devices_denied:
+            for interface in self._interfaces:
+                if deny_interface.matches(interface):
+                    return False
+        return True
