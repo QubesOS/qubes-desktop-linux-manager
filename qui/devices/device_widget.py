@@ -461,6 +461,7 @@ class DevicesTray(Gtk.Application):
                     self.hide_child_devices(dev.port, False)
 
     def update_resolution(self, vm, _event, feature, value=None, oldvalue=None):
+        # pylint: disable=unused-argument
         res_dict = {}
         if value:
             for word in value.split(" "):
