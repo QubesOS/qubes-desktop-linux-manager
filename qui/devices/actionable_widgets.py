@@ -240,6 +240,11 @@ class AttachWidget(ActionableWidget, VMWithIcon):
         super().__init__(vm)
         self.vm = vm
         self.device = device
+        if not self.device.is_valid_for_vm(self.vm):
+            self.backend_label.set_markup(
+                self.backend_label.get_text() + " <i>(blocked by policy)</i>"
+            )
+            self.actionable = False
 
     async def widget_action(self, *_args):
         self.device.attach_to_vm(self.vm)
