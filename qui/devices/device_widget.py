@@ -65,7 +65,7 @@ _ = t.gettext
 
 
 # FUTURE: this should be moved to backend with new API changes
-DEV_TYPES = ["block", "usb", "mic"]
+DEV_TYPES = ["block", "usb", "mic", "webcam"]
 
 
 class DeviceMenu(Gtk.Menu):
@@ -112,6 +112,7 @@ class DevicesTray(Gtk.Application):
         self.vms: Set[backend.VM] = set()
         self.dispvm_templates: Set[backend.VM] = set()
         self.parent_ports_to_hide = []
+        self.cameras_to_hide = []
         self.active_usbvms: Set[backend.VM] = set()
         self.dormant_usbvms: Set[backend.VM] = set()
         self.dev_update_queue: Set = set()
@@ -179,6 +180,13 @@ class DevicesTray(Gtk.Application):
         )
         self.dispatcher.add_handler(
             "domain-feature-delete:internal", self.update_internal_feature
+        )
+        self.dispatcher.add_handler(
+            "domain-feature-set:" + backend.FEATURE_RESOLUTION, self.update_resolution
+        )
+        self.dispatcher.add_handler(
+            "domain-feature-delete:" + backend.FEATURE_RESOLUTION,
+            self.update_resolution,
         )
 
         for feature in [backend.FEATURE_HIDE_CHILDREN, backend.FEATURE_ATTACH_WITH_MIC]:
@@ -274,13 +282,17 @@ class DevicesTray(Gtk.Application):
         if dev.parent:
             for potential_parent in self.devices.values():
                 if potential_parent.port == dev.parent:
+                    # hide parents of webcams
+                    if dev.device_class == "webcam":
+                        self.cameras_to_hide.append(dev.parent)
+                        potential_parent.hide_this_device = True
                     potential_parent.has_children = True
                     break
 
         # connect with mic
         mic_feature = vm.features.get(backend.FEATURE_ATTACH_WITH_MIC, "").split(" ")
         if dev_id in mic_feature:
-            microphone = self.devices.get("dom0:mic:dom0:mic::m000000", None)
+            microphone = self.devices.get("mic:dom0:mic:dom0:mic::m000000", None)
             microphone.devices_to_attach_with_me.append(dev)
             dev.devices_to_attach_with_me = [microphone]
 
@@ -306,7 +318,7 @@ class DevicesTray(Gtk.Application):
             # we never knew the device anyway
             return
 
-        microphone = self.devices.get("dom0:mic:dom0:mic::m000000", None)
+        microphone = self.devices.get("mic:dom0:mic:dom0:mic::m000000", None)
 
         self.emit_notification(
             _("Device removed"),
@@ -318,6 +330,12 @@ class DevicesTray(Gtk.Application):
             microphone.devices_to_attach_with_me.remove(dev)
         if dev.port in self.parent_ports_to_hide:
             self.parent_ports_to_hide.remove(dev.port)
+        if dev.parent in self.cameras_to_hide:
+            for potential_parent in self.devices.values():
+                if potential_parent.port == dev.parent:
+                    potential_parent.hide_this_device = False
+                    break
+            self.cameras_to_hide.remove(dev.parent)
         del self.devices[dev_id]
 
     def initialize_dev_data(self):
@@ -358,6 +376,12 @@ class DevicesTray(Gtk.Application):
                 except qubesadmin.exc.QubesException:
                     # we have no permission to access VM's devices
                     continue
+
+        # hide parents of webcams
+        for device in self.devices.values():
+            if device.device_class == "webcam":
+                if device.parent:
+                    self.cameras_to_hide.append(device.parent)
 
     def device_assigned(self, vm, _event, device, **_kwargs):
         dev_id = backend.Device.id_from_device(device)
@@ -407,7 +431,7 @@ class DevicesTray(Gtk.Application):
         add = new - old
         remove = old - new
 
-        microphone = self.devices.get("dom0:mic:dom0:mic::m000000", None)
+        microphone = self.devices.get("mic:dom0:mic:dom0:mic::m000000", None)
 
         for dev_name in remove:
             if feature == backend.FEATURE_ATTACH_WITH_MIC:
@@ -435,6 +459,28 @@ class DevicesTray(Gtk.Application):
                     dev.show_children = False
                     self.parent_ports_to_hide.append(dev.port)
                     self.hide_child_devices(dev.port, False)
+
+    def update_resolution(self, vm, _event, feature, value=None, oldvalue=None):
+        res_dict = {}
+        if value:
+            for word in value.split(" "):
+                try:
+                    k, v = word.split("=")
+                    res_dict[k] = v
+                except ValueError:
+                    # the feature is malformed, ignore it
+                    res_dict = {}
+
+        for device in self.devices.values():
+            if (
+                device.device_class == "webcam"
+                and device.backend_domain.name == vm.name
+            ):
+                resolution = res_dict.get(device.id_string, None)
+                if resolution:
+                    device.options["format"] = resolution
+                elif "format" in device.options:
+                    del device.options["format"]
 
     def vm_unpaused(self, vm, _event, **_kwargs):
         wrapped_vm = backend.VM(vm)
@@ -473,7 +519,7 @@ class DevicesTray(Gtk.Application):
         """
         domains = self.qapp.domains
 
-        microphone = self.devices.get("dom0:mic:dom0:mic::m000000", None)
+        microphone = self.devices.get("mic:dom0:mic:dom0:mic::m000000", None)
         # clear existing feature mappings
         for dev in self.devices.values():
             dev.devices_to_attach_with_me = []
@@ -487,13 +533,21 @@ class DevicesTray(Gtk.Application):
                     mic_feature = domain.features.get(
                         backend.FEATURE_ATTACH_WITH_MIC, False
                     )
+                    if not mic_feature:
+                        continue
                 except qubesadmin.exc.QubesDaemonAccessError:
                     continue
-                if isinstance(mic_feature, str):
-                    mic_dev_strings.extend(
-                        [dev for dev in mic_feature.split(" ") if dev]
-                    )
-
+                for dev in mic_feature.split(" "):
+                    if not dev:
+                        continue
+                    try:
+                        _class, vm_name, _rest = dev.split(":", 2)
+                        if vm_name != domain.name:
+                            continue
+                        mic_dev_strings.append(dev)
+                    except ValueError:
+                        # malformed name
+                        pass
             microphone.devices_to_attach_with_me = []
 
             for dev in mic_dev_strings:
@@ -519,6 +573,9 @@ class DevicesTray(Gtk.Application):
                 dev.show_children = False
 
         self.hide_child_devices()
+        for dev in self.devices.values():
+            if dev.port in self.cameras_to_hide:
+                dev.hide_this_device = True
 
     def hide_child_devices(
         self, parent_port: Optional[str] = None, state: bool = False

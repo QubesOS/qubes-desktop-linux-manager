@@ -73,7 +73,7 @@ class IconCache:
         else:
             try:
                 icon = Gtk.IconTheme.get_default().load_icon(
-                    self.icon_files[icon_name], 16, 0
+                    self.icon_files[icon_name], 16, Gtk.IconLookupFlags.FORCE_SIZE
                 )
                 self.icons[icon_name] = icon
             except (TypeError, GLib.Error):

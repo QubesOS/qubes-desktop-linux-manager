@@ -76,7 +76,7 @@ def load_icon(icon_name: str, width: int = 24, height: int = 24):
         try:
             # icon_name is a name
             image: GdkPixbuf.Pixbuf = Gtk.IconTheme.get_default().load_icon(
-                icon_name, width, 0
+                icon_name, width, Gtk.IconLookupFlags.FORCE_SIZE
             )
             return image
         except (TypeError, GLib.Error):

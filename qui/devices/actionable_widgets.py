@@ -53,13 +53,13 @@ def load_icon(icon_name: str, backup_name: str, size: int = 24):
     """
     try:
         image: GdkPixbuf.Pixbuf = Gtk.IconTheme.get_default().load_icon(
-            icon_name, size, 0
+            icon_name, size, Gtk.IconLookupFlags.FORCE_SIZE
         )
         return image
     except (TypeError, GLib.Error):
         try:
             image: GdkPixbuf.Pixbuf = Gtk.IconTheme.get_default().load_icon(
-                backup_name, size, 0
+                backup_name, size, Gtk.IconLookupFlags.FORCE_SIZE
             )
             return image
         except (TypeError, GLib.Error):
@@ -505,9 +505,15 @@ class DeviceHeaderWidget(Gtk.Box, ActionableWidget):
         if device.devices_to_attach_with_me:
             mic_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
             mic_label = Gtk.Label()
-            mic_label.set_markup("This device will attach with microphone")
-            mic_box.add(mic_label)
-            mic_img = VariantIcon("mic", variant, 18)
+            if device.device_class == "mic":
+                mic_label.set_markup("This device will attach with camera ")
+                mic_box.add(mic_label)
+            else:
+                mic_label.set_markup("This device will attach with microphone ")
+                mic_box.add(mic_label)
+            mic_img = VariantIcon(
+                "camera" if device.device_class == "mic" else "mic", variant, 18
+            )
             mic_box.add(mic_img)
             mic_box.set_halign(Gtk.Align.CENTER)
             self.add(mic_box)
@@ -577,7 +583,9 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
         other_vms = [
             vm
             for vm in vms
-            if vm not in self.device.attachments and vm not in self.device.assignments
+            if vm not in self.device.attachments
+            and vm not in self.device.assignments
+            and vm.name != self.device.backend_domain.name
         ]
 
         # all devices have a header
