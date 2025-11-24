@@ -1,3 +1,22 @@
+qubes-desktop-linux-manager (4.3.24-1) unstable; urgency=medium
+
+  [ Ali Mirjamali ]
+  * Make the progress page details and qube list paned
+  * Fix updater glade indentation
+  * ci: install cairo-gobject-devel for pylint
+
+  [ Marta Marczykowska-Górecka ]
+  * Disable trying to attach device to a blocked qube
+  * Enforce icon size
+  * Fix microphone saying it will attach with microphone
+  * Add device class to device_id and validate features
+  * Add Qubes Video Companion devices to widget
+  * Hide parent device of QVC webcam
+  * Add resolution settings to QCV attachment
+  * Don't propose attaching device to its backend
+
+ -- Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>  Mon, 24 Nov 2025 21:09:34 +0100
+
 qubes-desktop-linux-manager (4.3.23-1) unstable; urgency=medium
 
   [ Marek Marczykowski-Górecki ]
