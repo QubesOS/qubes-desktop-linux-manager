@@ -102,37 +102,14 @@ class IntroPage:
         self.list_store = ListWrapper(
             UpdateRowWrapper, self.vm_list.get_model()
         )
-        to_update = set()
-        if settings.hide_updated:
-            cmd = [
-                "qubes-vm-update",
-                "--quiet",
-                "--dry-run",
-                "--update-if-stale",
-                str(settings.update_if_stale),
-            ]
-            to_update = self._get_stale_qubes(cmd)
 
-        to_display = []
-        for vm in qapp.domains:
-            try:
-                if settings.hide_skipped and bool(
-                    vm.features.get("skip-update", False)
-                ):
-                    continue
-                if settings.hide_updated and not vm.name in to_update:
-                    # TODO: Make re-filtering possible without App restart
-                    continue
-            except exc.QubesDaemonCommunicationError:
-                continue
-            if getattr(vm, "updateable", False):
-                to_display.append(vm)
-        for vm in sorted(to_display, key=lambda vm: vm.klass):
-            self.list_store.append_vm(vm)
+        for vm in sorted(qapp.domains, key=lambda vm: vm.klass):
+            if getattr(vm, 'updateable', False):
+                self.list_store.append_vm(vm, state=False)
 
         self.refresh_update_list(settings.update_if_stale)
 
-    def refresh_update_list(self, update_if_stale):
+    def refresh_update_list(self, update_if_stale, hide_skipped=False, hide_updated=False):
         """
         Refreshes "Updates Available" column if settings changed.
         """
@@ -150,8 +127,19 @@ class IntroPage:
 
         to_update = self._get_stale_qubes(cmd)
 
-        for row in self.list_store:
-            row.updates_available = bool(row.vm.name in to_update)
+        rows = self.list_store.get_all()
+        self.list_store.clear()
+        for row in rows:
+            visible = True
+            try:
+                if hide_skipped and bool(row.vm.features.get("skip-update", False)):
+                    visible = False
+                if hide_updated and not row.vm.name in to_update:
+                    visible = False
+            except exc.QubesDaemonCommunicationError:
+                visible = False
+            state = bool(row.vm.name in to_update) if visible else None
+            self.list_store.append_vm(row.vm, state=state)
             row.selected = bool(row.vm.name in to_update) and not row.vm.features.get(
                 "prohibit-start", False
             )

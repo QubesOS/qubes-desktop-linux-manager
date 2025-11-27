@@ -23,7 +23,7 @@ import functools
 import gi
 
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk
@@ -228,11 +228,22 @@ class UpdateStatus(Enum):
 class RowWrapper:
     def __init__(self, list_store, vm, raw_row: list):
         super().__init__()
-        self.list_store = list_store
+        self.raw_row_list = raw_row
+        self.raw_row = None
+        self.__list_store = None
         self.vm = vm
+        self.list_store = list_store
 
-        self.list_store.append([self, *raw_row])
-        self.raw_row = self.list_store[-1]
+    @property
+    def list_store(self):
+        return self.__list_store
+
+    @list_store.setter
+    def list_store(self, value):
+        self.__list_store = value
+        if value is not None:
+            self.__list_store.append([self, *self.raw_row_list])
+            self.raw_row = self.__list_store[-1]
 
     def __eq__(self, other):
         if self.vm.klass == other.vm.klass:
@@ -286,6 +297,7 @@ class ListWrapper:
     def __init__(self, row_type, list_store_raw):
         self.list_store_raw = list_store_raw
         self.list_store_wrapped: list = []
+        self.hidden_rows: list = []
         self.row_type = row_type
         for idx in range(self.row_type.COLUMN_NUM):
             self.list_store_raw.set_sort_func(idx, self.sort_func, idx)
@@ -299,9 +311,21 @@ class ListWrapper:
     def __len__(self) -> int:
         return len(self.list_store_wrapped)
 
-    def append_vm(self, vm, state: bool = False):
-        qube_row = self.row_type(self.list_store_raw, vm, state)
-        self.list_store_wrapped.append(qube_row)
+    def append_vm(self, vm, state: Optional[bool] = False):
+        if state is not None:
+            qube_row = self.row_type(self.list_store_raw, vm, state)
+            self.list_store_wrapped.append(qube_row)
+        else:
+            qube_row = self.row_type(None, vm, state)
+            self.hidden_rows.append(qube_row)
+
+    def get_all(self) -> List[RowWrapper]:
+        return self.list_store_wrapped + self.hidden_rows
+
+    def clear(self):
+        self.list_store_raw.clear()
+        self.list_store_wrapped.clear()
+        self.hidden_rows.clear()
 
     def invert_selection(self, path):
         it = self.list_store_raw.get_iter(path)
