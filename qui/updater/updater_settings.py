@@ -361,7 +361,8 @@ class Settings:
                 apply_feature_change(vm, "restart-after-update", None)
             self.exceptions.save()
 
-        self.refresh_callback(self.update_if_stale)
+        self.refresh_callback(
+            self.update_if_stale, self.hide_skipped, self.hide_updated)
         self.settings_window.close()
 
     def _save_option(
