@@ -107,9 +107,20 @@ class IntroPage:
             if getattr(vm, 'updateable', False):
                 self.list_store.append_vm(vm, state=False)
 
-        self.refresh_update_list(settings.update_if_stale)
+        self.refresh_update_list(
+            settings.update_if_stale,
+            settings.hide_skipped,
+            settings.hide_updated,
+            settings.hide_prohibited,
+        )
 
-    def refresh_update_list(self, update_if_stale, hide_skipped=False, hide_updated=False, hide_prohibited=False):
+    def refresh_update_list(
+            self,
+            update_if_stale,
+            hide_skipped=False,
+            hide_updated=False,
+            hide_prohibited=False,
+    ):
         """
         Refreshes "Updates Available" column if settings changed.
         """
