@@ -109,7 +109,7 @@ class IntroPage:
 
         self.refresh_update_list(settings.update_if_stale)
 
-    def refresh_update_list(self, update_if_stale, hide_skipped=False, hide_updated=False):
+    def refresh_update_list(self, update_if_stale, hide_skipped=False, hide_updated=False, hide_prohibited=False):
         """
         Refreshes "Updates Available" column if settings changed.
         """
@@ -130,19 +130,23 @@ class IntroPage:
         rows = self.list_store.get_all()
         self.list_store.clear()
         for row in rows:
+
+            # Determine visibility
             visible = True
             try:
                 if hide_skipped and bool(row.vm.features.get("skip-update", False)):
                     visible = False
-                if hide_updated and not row.vm.name in to_update:
-                    visible = False
             except exc.QubesDaemonCommunicationError:
+                visible = True # in doubt, show the vm as default value is False
+            if hide_updated and not row.vm.name in to_update:
                 visible = False
+            if hide_prohibited and row.vm.features.get("prohibit-start", False):
+                visible = False
+
             state = bool(row.vm.name in to_update) if visible else None
             appended = self.list_store.append_vm(row.vm, state=state)
             if state is not None:
-                appended.selected = (bool(row.vm.name in to_update) and not
-                row.vm.features.get("prohibit-start", False))
+                appended.selected = bool(row.vm.name in to_update)
 
     def get_vms_to_update(self) -> ListWrapper:
         """Returns list of vms selected to be updated"""
@@ -493,8 +497,8 @@ class UpdatesAvailable(Enum):
     @staticmethod
     def from_features(
         updates_available: Optional[bool],
-        supported: Optional[str] = None,
-        prohibited: Optional[str] = None,
+        supported: Optional[bool] = None,
+        prohibited: Optional[bool] = None,
     ) -> "UpdatesAvailable":
         if prohibited:
             return UpdatesAvailable.PROHIBITED
