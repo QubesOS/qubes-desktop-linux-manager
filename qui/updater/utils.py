@@ -318,6 +318,7 @@ class ListWrapper:
         else:
             qube_row = self.row_type(None, vm, state)
             self.hidden_rows.append(qube_row)
+        return qube_row
 
     def get_all(self) -> List[RowWrapper]:
         return self.list_store_wrapped + self.hidden_rows
