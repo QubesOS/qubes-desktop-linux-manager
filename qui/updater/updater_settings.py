@@ -61,6 +61,7 @@ class Settings:
     DEFAULT_RESTART_OTHER_VMS = False
     DEFAULT_HIDE_SKIPPED = True
     DEFAULT_HIDE_UPDATED = False
+    DEFAULT_HIDE_PROHIBITED = True
 
     def __init__(
         self,
@@ -129,6 +130,10 @@ class Settings:
             "hide_updated"
         )
 
+        self.hide_prohibited_checkbox: Gtk.CheckButton = self.builder.get_object(
+            "hide_prohibited"
+        )
+
         self.available_vms = [
             vm
             for vm in self.qapp.domains
@@ -176,6 +181,7 @@ class Settings:
         self._init_max_concurrency: Optional[int] = None
         self._init_hide_skipped: Optional[bool] = None
         self._init_hide_updated: Optional[bool] = None
+        self._init_hide_prohibited: Optional[bool] = None
 
     @property
     def update_if_stale(self) -> int:
@@ -240,6 +246,14 @@ class Settings:
         )
 
     @property
+    def hide_prohibited(self) -> bool:
+        return get_boolean_feature(
+            self.vm,
+            "qubes-vm-update-hide-prohibited",
+            Settings.DEFAULT_HIDE_PROHIBITED,
+        )
+
+    @property
     def max_concurrency(self) -> Optional[int]:
         """Return the current (set by this window or manually) option value."""
         if self.overrides.max_concurrency is not None:
@@ -274,8 +288,10 @@ class Settings:
 
         self._init_hide_skipped = self.hide_skipped
         self._init_hide_updated = self.hide_updated
+        self._init_hide_prohibited = self.hide_prohibited
         self.hide_skipped_checkbox.set_active(self._init_hide_skipped)
         self.hide_updated_checkbox.set_active(self._init_hide_updated)
+        self.hide_prohibited_checkbox.set_active(self._init_hide_prohibited)
 
     def _show_restart_exceptions(self, _emitter=None):
         if self.restart_other_checkbox.get_active():
@@ -343,6 +359,13 @@ class Settings:
             default=Settings.DEFAULT_HIDE_UPDATED,
         )
 
+        self._save_option(
+            name="hide-prohibited",
+            value=self.hide_prohibited_checkbox.get_active(),
+            init=self._init_hide_prohibited,
+            default=Settings.DEFAULT_HIDE_PROHIBITED,
+        )
+
         limit_concurrency = self.limit_concurrency_checkbox.get_active()
         if self._init_limit_concurrency or limit_concurrency:
             if limit_concurrency:
@@ -362,7 +385,11 @@ class Settings:
             self.exceptions.save()
 
         self.refresh_callback(
-            self.update_if_stale, self.hide_skipped, self.hide_updated)
+            self.update_if_stale,
+            self.hide_skipped,
+            self.hide_updated,
+            self.hide_prohibited,
+        )
         self.settings_window.close()
 
     def _save_option(

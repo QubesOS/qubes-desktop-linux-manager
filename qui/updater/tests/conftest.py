@@ -175,6 +175,7 @@ def mock_settings():
             self.max_concurrency = None
             self.hide_skipped = True
             self.hide_updated = False
+            self.hide_prohibited = True
 
     return MockSettings()
 
