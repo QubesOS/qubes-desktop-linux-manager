@@ -139,10 +139,10 @@ class IntroPage:
             except exc.QubesDaemonCommunicationError:
                 visible = False
             state = bool(row.vm.name in to_update) if visible else None
-            self.list_store.append_vm(row.vm, state=state)
-            row.selected = bool(row.vm.name in to_update) and not row.vm.features.get(
-                "prohibit-start", False
-            )
+            appended = self.list_store.append_vm(row.vm, state=state)
+            if state is not None:
+                appended.selected = (bool(row.vm.name in to_update) and not
+                row.vm.features.get("prohibit-start", False))
 
     def get_vms_to_update(self) -> ListWrapper:
         """Returns list of vms selected to be updated"""
