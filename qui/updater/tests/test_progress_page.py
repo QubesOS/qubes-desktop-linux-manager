@@ -31,7 +31,7 @@ from gi.repository import Gtk
 
 from qui.updater.intro_page import UpdateRowWrapper
 from qui.updater.progress_page import ProgressPage, QubeUpdateDetails
-from qui.updater.tests.conftest import mock_settings
+from qui.updater.tests.conftest import mock_settings, expected_row
 from qui.updater.utils import ListWrapper, UpdateStatus
 
 
@@ -221,6 +221,7 @@ def test_do_update_selected(
     to_update = ListWrapper(UpdateRowWrapper, mock_list_store)
     for vm in test_qapp.domains:
         if vm.klass in ("AdminVM", "TemplateVM", "StandaloneVM"):
+            expected_row(vm.name, test_qapp)
             to_update.append_vm(vm)
 
     rows = {row.name: row for row in to_update}
@@ -230,7 +231,6 @@ def test_do_update_selected(
     calls = [
         call(
             [
-                "sudo",
                 "qubes-vm-update",
                 "--show-output",
                 "--just-print-progress",
