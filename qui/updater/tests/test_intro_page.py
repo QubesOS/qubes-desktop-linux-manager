@@ -18,16 +18,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 # USA.
-import argparse
-
 import pytest
 from unittest.mock import patch
 from unittest.mock import Mock
 
-from qui.updater.tests.conftest import test_qapp_impl
+from qui.updater.tests.conftest import test_qapp_impl, expected_row
 from qui.updater.intro_page import IntroPage, UpdateRowWrapper, UpdatesAvailable
 from qui.updater.updater import parse_args
 from qui.updater.utils import ListWrapper, HeaderCheckbox
+
 
 
 @patch("subprocess.check_output")
@@ -39,8 +38,15 @@ def test_populate_vm_list(
     test_qapp.expected_calls[
         ("test-standalone", "admin.vm.feature.Get", "updates-available", None)
     ] = (b"0\x00" + str(1).encode())
+
+    for qname in ("dom0", "test-standalone", "fedora-35", "fedora-36"):
+        expected_row(qname, test_qapp)
+
     # inconsistent output of qubes-vm-update, but it does not matter
-    mock_subprocess.return_value = b"The admin VM will not be updated.\nFollowing templates will be updated:test-standalone"
+    mock_subprocess.return_value = (
+        b"The admin VM will not be updated.\n"
+        b" templates will be updated:test-standalone"
+    )
 
     assert not sut.is_populated
 
@@ -63,16 +69,14 @@ def test_populate_vm_list(
     assert len(sut.get_vms_to_update()) == 3
 
 
-N_QUBES = 17
-
-
 # i-th expectations value is an expected number of selected VMs after clicking on the
 # colum header i times
+# -1 is a magic value for all qubes selected
 @pytest.mark.parametrize(
     "updates_available, expectations",
     (
-        pytest.param((2, 6), (0, 2, 6, N_QUBES, 0)),
-        pytest.param((6, 0), (0, 6, N_QUBES, 0)),
+        pytest.param((2, 6), (0, 2, 6, -1, 0)),
+        pytest.param((6, 0), (0, 6, -1, 0)),
     ),
 )
 def test_on_header_toggled(
@@ -84,15 +88,16 @@ def test_on_header_toggled(
     mock_settings,
     mock_list_store,
 ):
+    n_qubes = len(list(test_qapp.domains))
     mock_log = Mock()
     sut = IntroPage(real_builder, mock_log, mock_next_button)
 
     # populate_vm_list
     sut.list_store = ListWrapper(UpdateRowWrapper, mock_list_store)
     for vm in test_qapp.domains:
+        expected_row(vm.name, test_qapp)
         sut.list_store.append_vm(vm)
-
-    assert len(sut.list_store) == N_QUBES
+    assert len(sut.list_store) == n_qubes
 
     for i, row in enumerate(sut.list_store):
         if i < updates_available[0]:
@@ -107,13 +112,15 @@ def test_on_header_toggled(
     sut.head_checkbox.state = HeaderCheckbox.NONE
 
     for expected in expectations:
+        if expected == -1:
+            expected = n_qubes
         selected_num = len([row for row in sut.list_store if row.selected])
         assert selected_num == expected
         assert (
             sut.checkbox_column_button.get_inconsistent()
-            and expected not in (0, N_QUBES)
+            and expected not in (0, n_qubes)
             or sut.checkbox_column_button.get_active()
-            and expected == N_QUBES
+            and expected == n_qubes
             or not sut.checkbox_column_button.get_active()
             and expected == 0
         )
@@ -124,15 +131,17 @@ def test_on_header_toggled(
 def test_on_checkbox_toggled(
     real_builder, test_qapp, mock_next_button, mock_settings, mock_list_store
 ):
+    n_qubes = len(list(test_qapp.domains))
     mock_log = Mock()
     sut = IntroPage(real_builder, mock_log, mock_next_button)
 
     # populate_vm_list
     sut.list_store = ListWrapper(UpdateRowWrapper, mock_list_store)
     for vm in test_qapp.domains:
+        expected_row(vm.name, test_qapp)
         sut.list_store.append_vm(vm)
 
-    assert len(sut.list_store) == N_QUBES
+    assert len(sut.list_store) == n_qubes
 
     sut.head_checkbox.state = HeaderCheckbox.NONE
     sut.head_checkbox.set_buttons()
@@ -179,18 +188,18 @@ def test_on_checkbox_toggled(
 def test_prohibit_start(
     real_builder, test_qapp, mock_next_button, mock_settings, mock_list_store
 ):
+    n_qubes = len(list(test_qapp.domains))
     mock_log = Mock()
-    test_qapp.expected_calls[
-        ("test-standalone", "admin.vm.feature.Get", "prohibit-start", None)
-    ] = b"0\x00Control qube which should be un-selectable/un-updatable"
     sut = IntroPage(real_builder, mock_log, mock_next_button)
 
     # populate_vm_list
     sut.list_store = ListWrapper(UpdateRowWrapper, mock_list_store)
     for vm in test_qapp.domains:
+        prohibited = "1" if vm.name == "test-standalone" else ""
+        expected_row(vm.name, test_qapp, prohibit_start=prohibited)
         sut.list_store.append_vm(vm)
 
-    assert len(sut.list_store) == N_QUBES
+    assert len(sut.list_store) == n_qubes
 
     sut.head_checkbox.state = HeaderCheckbox.NONE
     sut.head_checkbox.set_buttons()
@@ -429,15 +438,17 @@ def test_select_rows_ignoring_conditions(
     mock_settings,
     mock_list_store,
 ):
+    n_qubes = len(list(test_qapp.domains))
     mock_log = Mock()
     sut = IntroPage(real_builder, mock_log, mock_next_button)
 
     # populate_vm_list
     sut.list_store = ListWrapper(UpdateRowWrapper, mock_list_store)
     for vm in test_qapp.domains:
+        expected_row(vm.name, test_qapp)
         sut.list_store.append_vm(vm)
 
-    assert len(sut.list_store) == N_QUBES
+    assert len(sut.list_store) == n_qubes
 
     if "dom0" in expected_selection:
         result = b"The admin VM (dom0) will be updated.\n"
@@ -460,7 +471,9 @@ def test_select_rows_ignoring_conditions(
         test_qapp.expected_calls[
             ("dom0", "admin.vm.feature.Get", "last-updates-check", None)
         ] = (b"0\x00" + b"3020-01-01 00:00:00")
-
+    test_qapp.expected_calls[
+        ('dom0', 'admin.vm.feature.Get', 'qubes-vm-update-update-if-stale', None)
+    ] = (b"0\x00" + str(7).encode())
     cliargs = parse_args(args, test_qapp)
     sut.select_rows_ignoring_conditions(cliargs)
     to_update = {row.name for row in sut.list_store if row.selected}

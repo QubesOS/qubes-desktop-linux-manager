@@ -109,16 +109,16 @@ class IntroPage:
 
         self.refresh_update_list(
             settings.update_if_stale,
-            settings.hide_skipped,
             settings.hide_updated,
+            settings.hide_skipped,
             settings.hide_prohibited,
         )
 
     def refresh_update_list(
             self,
             update_if_stale,
-            hide_skipped=False,
             hide_updated=False,
+            hide_skipped=False,
             hide_prohibited=False,
     ):
         """
@@ -144,15 +144,18 @@ class IntroPage:
 
             # Determine visibility
             visible = True
-            try:
-                if hide_skipped and bool(row.vm.features.get("skip-update", False)):
-                    visible = False
-            except exc.QubesDaemonCommunicationError:
-                visible = True # in doubt, show the vm as default value is False
             if hide_updated and not row.vm.name in to_update:
                 visible = False
-            if hide_prohibited and row.vm.features.get("prohibit-start", False):
-                visible = False
+            else:
+                try:
+                    if hide_skipped and bool(
+                            row.vm.features.get("skip-update", False)):
+                        visible = False
+                    if hide_prohibited and bool(
+                            row.vm.features.get("prohibit-start", False)):
+                        visible = False
+                except exc.QubesDaemonCommunicationError:
+                    visible = True
 
             state = bool(row.vm.name in to_update) if visible else None
             appended = self.list_store.append_vm(row.vm, state=state)

@@ -23,6 +23,8 @@ from unittest.mock import patch, call, Mock
 
 import gi
 
+from qui.updater.tests.conftest import expected_row
+
 gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk  # isort:skip
 
@@ -78,9 +80,13 @@ def test_show(
 def test_on_header_toggled(
     real_builder, test_qapp, appvms_list, mock_next_button, mock_cancel_button
 ):
+    for vm in appvms_list:
+        test_qapp.expected_calls[
+            (vm.name, "admin.vm.feature.Get", "restart-after-update", None)
+        ] = (b"0\x00" + "1".encode())
     test_qapp.expected_calls[
         ("test-blue", "admin.vm.feature.Get", "restart-after-update", None)
-    ] = (b"0\x00" + "".encode())
+    ] = b"0\x00"
 
     mock_log = Mock()
     sut = SummaryPage(
@@ -96,7 +102,7 @@ def test_on_header_toggled(
     sut.head_checkbox._allowed[0] = AppVMType.SERVICEVM
     service_num = 3
     sut.head_checkbox._allowed[1] = AppVMType.NON_SERVICEVM
-    non_excluded_num = 10
+    non_excluded_num = len(appvms_list) - 1
 
     sut.head_checkbox.state = HeaderCheckbox.NONE
 
@@ -123,6 +129,10 @@ def test_on_checkbox_toggled(
     mock_cancel_button,
     mock_settings,
 ):
+    for vm in appvms_list:
+        test_qapp.expected_calls[
+            (vm.name, "admin.vm.feature.Get", "restart-after-update", None)
+        ] = (b"0\x00" + "1".encode())
     mock_log = Mock()
     sut = SummaryPage(
         real_builder,
@@ -178,7 +188,7 @@ def test_on_checkbox_toggled(
 # expected data based on test_qapp setup
 UP_VMS = 11
 UP_SERVICE_VMS = 3
-UP_APP_VMS = 8
+UP_APP_VMS = UP_VMS - UP_SERVICE_VMS
 
 
 @pytest.mark.parametrize(
@@ -209,10 +219,18 @@ def test_populate_restart_list(
 ):
     mock_settings.restart_other_vms = restart_other_vms
     mock_settings.restart_service_vms = restart_service_vms
-    for exclude in excluded:
-        test_qapp.expected_calls[
-            (exclude, "admin.vm.feature.Get", "restart-after-update", None)
-        ] = (b"0\x00" + "".encode())
+    for vm in test_qapp.domains:
+        if vm.klass in ("AppVM", "DispVM"):
+            if vm.name in excluded:
+                test_qapp.expected_calls[
+                    (vm.name, "admin.vm.feature.Get", "restart-after-update",
+                     None)
+                ] = b"0\x00"
+            else:
+                test_qapp.expected_calls[
+                    (vm.name, "admin.vm.feature.Get", "restart-after-update",
+                     None)
+                ] = (b"0\x00" + "1".encode())
 
     mock_log = Mock()
     sut = SummaryPage(
@@ -414,7 +432,12 @@ def test_perform_restart(
     sut.updated_tmpls = ListWrapper(UpdateRowWrapper, mock_list_store)
     sut.list_store = ListWrapper(RestartRowWrapper, mock_list_store)
     for vm in test_qapp.domains:
+        if vm.klass in ("AppVM", "DispVM"):
+            test_qapp.expected_calls[
+                (vm.name, "admin.vm.feature.Get", "restart-after-update", None)
+            ] = (b"0\x00" + "1".encode())
         if vm.klass in ("TemplateVM",):
+            expected_row(vm.name, test_qapp)
             sut.updated_tmpls.append_vm(vm)
         if vm.klass in ("AppVM",):
             sut.list_store.append_vm(vm)
@@ -424,9 +447,14 @@ def test_perform_restart(
     sut.perform_restart()
 
     # ASSERT
-    assert all(
-        item in test_qapp.actual_calls
-        for item in expected_state_calls
-        + expected_shutdown_calls
-        + expected_start_calls
-    )
+    expected = set(expected_state_calls + expected_shutdown_calls
+                   + expected_start_calls)
+    actual = set(test_qapp.actual_calls)
+    difference = expected - actual
+    assert not difference
+    # assert all(
+    #     item in test_qapp.actual_calls
+    #     for item in expected_state_calls
+    #     + expected_shutdown_calls
+    #     + expected_start_calls
+    # )
