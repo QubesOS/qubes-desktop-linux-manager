@@ -125,6 +125,7 @@ class Settings:
         self.hide_updated_checkbox: Gtk.CheckButton = self.builder.get_object(
             "hide_updated"
         )
+        self.hide_updated_checkbox.connect("toggled", self._hide_updated_toggled)
 
         self.hide_skipped_checkbox: Gtk.CheckButton = self.builder.get_object(
             "hide_skipped"
@@ -300,6 +301,15 @@ class Settings:
         else:
             self.restart_exceptions_page.hide()
 
+    def _hide_updated_toggled(self, _emitter=None):
+        is_active = self.hide_updated_checkbox.get_active()
+        if is_active:
+            self.hide_skipped_checkbox.set_active(True)
+            self.hide_prohibited_checkbox.set_active(True)
+
+        self.hide_skipped_checkbox.set_sensitive(not is_active)
+        self.hide_prohibited_checkbox.set_sensitive(not is_active)
+
     def _limit_concurrency_toggled(self, _emitter=None):
         self.max_concurrency_button.set_sensitive(
             self.limit_concurrency_checkbox.get_active()
@@ -312,6 +322,7 @@ class Settings:
         self.settings_window.show_all()
         self._show_restart_exceptions()
         self._limit_concurrency_toggled()
+        self._hide_updated_toggled()
 
     def close_without_saving(self, _emitter, _):
         """Close without saving any changes."""
