@@ -109,7 +109,8 @@ def test_perform_update(
     sut.perform_update(mock_settings)
 
     assert len(sut.update_admin_vm.vm_rows) == 1
-    assert len(sut.update_templates.vm_rows) == len(sut.vms_to_update)
+    # AdminVM counted separately above
+    assert len(sut.update_templates.vm_rows) == len(sut.vms_to_update) - 1
 
     calls = [
         call(mock_next_button.set_sensitive, True),
