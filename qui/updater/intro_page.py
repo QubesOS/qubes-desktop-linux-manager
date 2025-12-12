@@ -99,12 +99,10 @@ class IntroPage:
     def populate_vm_list(self, qapp, settings):
         """Adds to list any updatable vms with update info."""
         self.log.debug("Populate update list")
-        self.list_store = ListWrapper(
-            UpdateRowWrapper, self.vm_list.get_model()
-        )
+        self.list_store = ListWrapper(UpdateRowWrapper, self.vm_list.get_model())
 
         for vm in sorted(qapp.domains, key=lambda vm: vm.klass):
-            if getattr(vm, 'updateable', False):
+            if getattr(vm, "updateable", False):
                 self.list_store.append_vm(vm, state=False)
 
         self.refresh_update_list(
@@ -115,11 +113,11 @@ class IntroPage:
         )
 
     def refresh_update_list(
-            self,
-            update_if_stale,
-            hide_updated=False,
-            hide_skipped=False,
-            hide_prohibited=False,
+        self,
+        update_if_stale,
+        hide_updated=False,
+        hide_skipped=False,
+        hide_prohibited=False,
     ):
         """
         Refreshes "Updates Available" column if settings changed.
@@ -148,11 +146,11 @@ class IntroPage:
                 visible = False
             else:
                 try:
-                    if hide_skipped and bool(
-                            row.vm.features.get("skip-update", False)):
+                    if hide_skipped and bool(row.vm.features.get("skip-update", False)):
                         visible = False
                     if hide_prohibited and bool(
-                            row.vm.features.get("prohibit-start", False)):
+                        row.vm.features.get("prohibit-start", False)
+                    ):
                         visible = False
                 except exc.QubesDaemonCommunicationError:
                     visible = True
@@ -265,10 +263,12 @@ class IntroPage:
             if ":" not in second_line:
                 return result
 
-            return result.union({
-                vm_name.strip()
-                for vm_name in second_line.split(":", maxsplit=1)[1].split(",")
-            })
+            return result.union(
+                {
+                    vm_name.strip()
+                    for vm_name in second_line.split(":", maxsplit=1)[1].split(",")
+                }
+            )
         except subprocess.CalledProcessError as err:
             if err.returncode != 100:
                 raise err

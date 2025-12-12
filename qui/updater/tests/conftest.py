@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program; if not, see <http://www.gnu.org/licenses/>.
 """Conftest helper pytest file: fixtures container here are
- reachable by all tests"""
+reachable by all tests"""
 import pytest
 import importlib.resources
 
@@ -181,28 +181,28 @@ def mock_settings():
 
 
 def expected_row(
-        qname,
-        test_qapp,
-        template_name="",
-        last_updates_check="3020-01-01 00:00:00",
-        last_update="3020-01-01 00:00:00",
-        prohibit_start=""
+    qname,
+    test_qapp,
+    template_name="",
+    last_updates_check="3020-01-01 00:00:00",
+    last_update="3020-01-01 00:00:00",
+    prohibit_start="",
 ):
     """
     Set expected calls in test_qapp if a *row* will be created for the qube.
     """
     # check support
-    test_qapp.expected_calls[
-        (qname, 'admin.vm.feature.Get', 'template-name', None)
-    ] = b"0\x00" + str(template_name).encode()
+    test_qapp.expected_calls[(qname, "admin.vm.feature.Get", "template-name", None)] = (
+        b"0\x00" + str(template_name).encode()
+    )
     # last update check column
     test_qapp.expected_calls[
         (qname, "admin.vm.feature.Get", "last-updates-check", None)
     ] = (b"0\x00" + str(last_updates_check).encode())
     # last update column
-    test_qapp.expected_calls[
-        (qname, "admin.vm.feature.Get", "last-update", None)
-    ] = (b"0\x00" + str(last_update).encode())
+    test_qapp.expected_calls[(qname, "admin.vm.feature.Get", "last-update", None)] = (
+        b"0\x00" + str(last_update).encode()
+    )
     # check if start is prohibited to display info
     test_qapp.expected_calls[
         (qname, "admin.vm.feature.Get", "prohibit-start", None)

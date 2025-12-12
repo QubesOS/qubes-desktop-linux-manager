@@ -223,13 +223,11 @@ def test_populate_restart_list(
         if vm.klass in ("AppVM", "DispVM"):
             if vm.name in excluded:
                 test_qapp.expected_calls[
-                    (vm.name, "admin.vm.feature.Get", "restart-after-update",
-                     None)
+                    (vm.name, "admin.vm.feature.Get", "restart-after-update", None)
                 ] = b"0\x00"
             else:
                 test_qapp.expected_calls[
-                    (vm.name, "admin.vm.feature.Get", "restart-after-update",
-                     None)
+                    (vm.name, "admin.vm.feature.Get", "restart-after-update", None)
                 ] = (b"0\x00" + "1".encode())
 
     mock_log = Mock()
@@ -447,8 +445,9 @@ def test_perform_restart(
     sut.perform_restart()
 
     # ASSERT
-    expected = set(expected_state_calls + expected_shutdown_calls
-                   + expected_start_calls)
+    expected = set(
+        expected_state_calls + expected_shutdown_calls + expected_start_calls
+    )
     actual = set(test_qapp.actual_calls)
     difference = expected - actual
     assert not difference

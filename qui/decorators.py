@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""" Decorators wrap a `qui.models.PropertiesModel` in a class
+"""Decorators wrap a `qui.models.PropertiesModel` in a class
 containing helpful representation methods.
 """
 # pylint: disable=wrong-import-position,import-error
