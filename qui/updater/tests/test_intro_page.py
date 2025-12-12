@@ -28,7 +28,6 @@ from qui.updater.updater import parse_args
 from qui.updater.utils import ListWrapper, HeaderCheckbox
 
 
-
 @patch("subprocess.check_output")
 def test_populate_vm_list(
     mock_subprocess, real_builder, test_qapp, mock_next_button, mock_settings
@@ -371,8 +370,14 @@ _derived_qubes = _domains.difference(_non_derived_qubes)
         ),
         # `qubes-update-gui --dom0`
         # Target dom0
-        pytest.param(("--dom0", "--force-update"), b"", b"", {"dom0"},
-            ("--force-update", "--targets", "dom0"), id="dom0"),
+        pytest.param(
+            ("--dom0", "--force-update"),
+            b"",
+            b"",
+            {"dom0"},
+            ("--force-update", "--targets", "dom0"),
+            id="dom0",
+        ),
         # `qubes-update-gui --dom0 --skip dom0`
         # Comma separated list of VMs to be skipped,
         # works with all other options.
@@ -472,7 +477,7 @@ def test_select_rows_ignoring_conditions(
             ("dom0", "admin.vm.feature.Get", "last-updates-check", None)
         ] = (b"0\x00" + b"3020-01-01 00:00:00")
     test_qapp.expected_calls[
-        ('dom0', 'admin.vm.feature.Get', 'qubes-vm-update-update-if-stale', None)
+        ("dom0", "admin.vm.feature.Get", "qubes-vm-update-update-if-stale", None)
     ] = (b"0\x00" + str(7).encode())
     cliargs = parse_args(args, test_qapp)
     sut.select_rows_ignoring_conditions(cliargs)
