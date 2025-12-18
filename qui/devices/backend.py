@@ -331,8 +331,9 @@ class Device:
                     if device is self:
                         # this should never happen, but....
                         continue
-                    device.detach_from_all()
-                    device.attach_to_vm(vm, with_aux_devices=False)
+                    device.detach_from_all(exceptions=[vm])
+                    if vm not in device.attachments:
+                        device.attach_to_vm(vm, with_aux_devices=False)
 
         except Exception as ex:  # pylint: disable=broad-except
             self.gtk_app.emit_notification(
@@ -378,13 +379,19 @@ class Device:
                 notification_id=self.notification_id,
             )
 
-    def detach_from_all(self, with_aux_devices: bool = True):
+    def detach_from_all(
+        self, with_aux_devices: bool = True, exceptions: List[VM] | None = None
+    ):
         """
         Detach from all VMs. If with_aux_devices is False,
         ignore devices_to_attach_with_me.
+        Exceptions means "do not unattach from those vms".
         """
+        if not exceptions:
+            exceptions = []
         for vm in self.attachments:
-            self.detach_from_vm(vm, with_aux_devices)
+            if vm not in exceptions:
+                self.detach_from_vm(vm, with_aux_devices)
 
     def is_valid_for_vm(self, vm: VM):
         for deny_interface in vm.devices_denied:
