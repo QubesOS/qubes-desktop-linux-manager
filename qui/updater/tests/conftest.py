@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program; if not, see <http://www.gnu.org/licenses/>.
 """Conftest helper pytest file: fixtures container here are
- reachable by all tests"""
+reachable by all tests"""
 import pytest
 import importlib.resources
 
