@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position,import-error
-""" A widget that monitors update availability and notifies the user
- about new updates to templates and standalone VMs"""
+"""A widget that monitors update availability and notifies the user
+about new updates to templates and standalone VMs"""
 
 # Must be imported before creating threads
 from .gtk3_xwayland_menu_dismisser import (

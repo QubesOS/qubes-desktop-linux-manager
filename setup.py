@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""" Setup.py file """
+"""Setup.py file"""
 import os
 import subprocess
 import setuptools.command.install
