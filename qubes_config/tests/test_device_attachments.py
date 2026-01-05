@@ -131,7 +131,7 @@ def test_auto_attach_edit_dialog(auto_attach_handler):
     expected_call = (
         "test-vm",
         "admin.vm.device.usb.Assign",
-        "sys-usb+*:1:2:u011010",
+        "sys-usb+_+1+2+u011010",
         b"device_id='1:2:u011010' port_id='*' devclass='usb' "
         b"backend_domain='sys-usb' mode='auto-attach'"
         b" frontend_domain='test-vm'",
@@ -165,7 +165,7 @@ def test_auto_attach_dialog_port_two_vms(auto_attach_handler):
         (
             "test-vm",
             "admin.vm.device.usb.Assign",
-            "sys-usb+2-23:*",
+            "sys-usb+2-23+_",
             b"device_id='*' port_id='2-23' devclass='usb' "
             b"backend_domain='sys-usb' mode='ask-to-attach' "
             b"frontend_domain='test-vm'",
@@ -173,7 +173,7 @@ def test_auto_attach_dialog_port_two_vms(auto_attach_handler):
         (
             "test-red",
             "admin.vm.device.usb.Assign",
-            "sys-usb+2-23:*",
+            "sys-usb+2-23+_",
             b"device_id='*' port_id='2-23' devclass='usb' "
             b"backend_domain='sys-usb' mode='ask-to-attach' "
             b"frontend_domain='test-red'",
@@ -181,7 +181,7 @@ def test_auto_attach_dialog_port_two_vms(auto_attach_handler):
         (
             "test-blue",
             "admin.vm.device.usb.Assign",
-            "sys-usb+2-23:*",
+            "sys-usb+2-23+_",
             b"device_id='*' port_id='2-23' devclass='usb' "
             b"backend_domain='sys-usb' mode='ask-to-attach' "
             b"frontend_domain='test-blue'",
@@ -226,7 +226,7 @@ def test_edit_rule_ident(auto_attach_handler):
         (
             "test-vm",
             "admin.vm.device.mic.Assign",
-            "dom0+*:dom0:mic::m000000",
+            "dom0+_+dom0+mic++m000000",
             b"device_id='dom0:mic::m000000' port_id='*' devclass='mic' "
             b"backend_domain='dom0' mode='auto-attach' "
             b"frontend_domain='test-vm'",
@@ -234,7 +234,7 @@ def test_edit_rule_ident(auto_attach_handler):
         (
             "test-vm",
             "admin.vm.device.usb.Unassign",
-            "sys-usb+2-23:1:2:u011010",
+            "sys-usb+2-23+1+2+u011010",
             None,
         ),
     ]
@@ -267,7 +267,7 @@ def test_edit_rule_action(auto_attach_handler):
         (
             "test-vm",
             "admin.vm.device.usb.Assign",
-            "sys-usb+2-23:1:2:u011010",
+            "sys-usb+2-23+1+2+u011010",
             b"device_id='1:2:u011010' port_id='2-23' devclass='usb' "
             b"backend_domain='sys-usb' mode='ask-to-attach' "
             b"frontend_domain='test-vm'",
@@ -275,7 +275,7 @@ def test_edit_rule_action(auto_attach_handler):
         (
             "test-vm",
             "admin.vm.device.usb.Unassign",
-            "sys-usb+2-23:1:2:u011010",
+            "sys-usb+2-23+1+2+u011010",
             None,
         ),
     ]
@@ -314,7 +314,7 @@ def test_edit_rule_vms(auto_attach_handler):
         (
             "test-red",
             "admin.vm.device.usb.Assign",
-            "sys-usb+2-23:1:2:u011010",
+            "sys-usb+2-23+1+2+u011010",
             b"device_id='1:2:u011010' port_id='2-23' devclass='usb' "
             b"backend_domain='sys-usb' mode='auto-attach' "
             b"frontend_domain='test-red'",
@@ -322,7 +322,7 @@ def test_edit_rule_vms(auto_attach_handler):
         (
             "test-blue",
             "admin.vm.device.usb.Assign",
-            "sys-usb+2-23:1:2:u011010",
+            "sys-usb+2-23+1+2+u011010",
             b"device_id='1:2:u011010' port_id='2-23' devclass='usb' "
             b"backend_domain='sys-usb' mode='auto-attach' "
             b"frontend_domain='test-blue'",
@@ -330,7 +330,7 @@ def test_edit_rule_vms(auto_attach_handler):
         (
             "test-vm",
             "admin.vm.device.usb.Unassign",
-            "sys-usb+2-23:1:2:u011010",
+            "sys-usb+2-23+1+2+u011010",
             None,
         ),
     ]
@@ -392,7 +392,7 @@ def test_edit_rule_unknown_opt(real_builder, test_qapp_devices):
         (
             "test-red",
             "admin.vm.device.usb.Assign",
-            "sys-usb+2-24:1:3:u011010",
+            "sys-usb+2-24+1+3+u011010",
             b"device_id='1:3:u011010' port_id='2-24' devclass='usb' "
             b"backend_domain='sys-usb' mode='auto-attach' "
             b"frontend_domain='test-red' _misc_opt='True'",
@@ -400,7 +400,7 @@ def test_edit_rule_unknown_opt(real_builder, test_qapp_devices):
         (
             "test-vm",
             "admin.vm.device.usb.Unassign",
-            "sys-usb+2-24:1:3:u011010",
+            "sys-usb+2-24+1+3+u011010",
             None,
         ),
     ]
@@ -466,7 +466,7 @@ def test_remove_rule(auto_attach_handler):
     expected_call = (
         "test-vm",
         "admin.vm.device.usb.Unassign",
-        "sys-usb+2-23:1:2:u011010",
+        "sys-usb+2-23+1+2+u011010",
         None,
     )
     qapp.expected_calls[expected_call] = b"0\x00"
@@ -529,7 +529,7 @@ def test_auto_attach_device_unavailable(auto_attach_handler):
     expected_call = (
         "test-vm",
         "admin.vm.device.usb.Unassign",
-        "sys-usb+2-30:0:0007:u01101",
+        "sys-usb+2-30+0+0007+u01101",
         None,
     )
     qapp.expected_calls[expected_call] = b"0\x00"
@@ -673,7 +673,7 @@ def test_auto_attach_block_read_only(auto_attach_handler):
         (
             "test-vm",
             "admin.vm.device.block.Assign",
-            "sys-usb+sda:444:888:b123422",
+            "sys-usb+sda+444+888+b123422",
             b"device_id='444:888:b123422' port_id='sda' devclass='block' "
             b"backend_domain='sys-usb' mode='ask-to-attach' "
             b"frontend_domain='test-vm' _read-only='True'",
@@ -681,7 +681,7 @@ def test_auto_attach_block_read_only(auto_attach_handler):
         (
             "test-red",
             "admin.vm.device.block.Assign",
-            "sys-usb+sda:444:888:b123422",
+            "sys-usb+sda+444+888+b123422",
             b"device_id='444:888:b123422' port_id='sda' devclass='block' "
             b"backend_domain='sys-usb' mode='ask-to-attach' "
             b"frontend_domain='test-red' _read-only='True'",
@@ -736,7 +736,7 @@ def test_req_edit_dialog(required_handler):
     expected_call = (
         "test-vm",
         "admin.vm.device.pci.Assign",
-        "dom0+0f.0:0x8086:0x51f0::p300000",
+        "dom0+0f.0+0x8086+0x51f0++p300000",
         b"device_id='0x8086:0x51f0::p300000' port_id='0f.0' "
         b"devclass='pci' backend_domain='dom0' mode='required'"
         b" frontend_domain='test-vm'",
@@ -769,7 +769,7 @@ def test_req_dialog_change_vm(required_handler):
         (
             "test-red",
             "admin.vm.device.pci.Assign",
-            "dom0+0c.0:0x8086:0x51f0::p028000",
+            "dom0+0c.0+0x8086+0x51f0++p028000",
             b"device_id='0x8086:0x51f0::p028000' port_id='0c.0' "
             b"devclass='pci' backend_domain='dom0' mode='required'"
             b" frontend_domain='test-red'",
@@ -777,7 +777,7 @@ def test_req_dialog_change_vm(required_handler):
         (
             "sys-net",
             "admin.vm.device.pci.Unassign",
-            "dom0+0c.0:0x8086:0x51f0::p028000",
+            "dom0+0c.0+0x8086+0x51f0++p028000",
             None,
         ),
     ]
@@ -810,7 +810,7 @@ def test_req_add_no_strict(required_handler):
     expected_call = (
         "test-vm",
         "admin.vm.device.pci.Assign",
-        "dom0+0f.0:0x8086:0x51f0::p300000",
+        "dom0+0f.0+0x8086+0x51f0++p300000",
         b"device_id='0x8086:0x51f0::p300000' port_id='0f.0' "
         b"devclass='pci' backend_domain='dom0' mode='required'"
         b" frontend_domain='test-vm' _no-strict-reset='True'",
@@ -845,7 +845,7 @@ def test_req_add_both_opts(required_handler):
     expected_call = (
         "test-vm",
         "admin.vm.device.pci.Assign",
-        "dom0+0f.0:0x8086:0x51f0::p300000",
+        "dom0+0f.0+0x8086+0x51f0++p300000",
         b"device_id='0x8086:0x51f0::p300000' port_id='0f.0' "
         b"devclass='pci' backend_domain='dom0' mode='required'"
         b" frontend_domain='test-vm' _no-strict-reset='True' "
@@ -913,7 +913,7 @@ def test_req_dialog_remove_opts(required_handler):
         (
             "test-red",
             "admin.vm.device.pci.Assign",
-            "dom0+0h.0:0x8086:0x51c8::p040300",
+            "dom0+0h.0+0x8086+0x51c8++p040300",
             b"device_id='0x8086:0x51c8::p040300' port_id='0h.0' "
             b"devclass='pci' backend_domain='dom0' mode='required'"
             b" frontend_domain='test-red' _permissive='True'",
@@ -921,7 +921,7 @@ def test_req_dialog_remove_opts(required_handler):
         (
             "test-red",
             "admin.vm.device.pci.Unassign",
-            "dom0+0h.0:0x8086:0x51c8::p040300",
+            "dom0+0h.0+0x8086+0x51c8++p040300",
             None,
         ),
     ]
@@ -1118,7 +1118,7 @@ def test_req_multiple_save(required_handler):
         (
             "test-vm",
             "admin.vm.device.pci.Assign",
-            "dom0+0f.0:0x8086:0x51f0::p300000",
+            "dom0+0f.0+0x8086+0x51f0++p300000",
             b"device_id='0x8086:0x51f0::p300000' port_id='0f.0' "
             b"devclass='pci' backend_domain='dom0' mode='required'"
             b" frontend_domain='test-vm'",
@@ -1126,13 +1126,13 @@ def test_req_multiple_save(required_handler):
         (
             "test-red",
             "admin.vm.device.pci.Unassign",
-            "dom0+0h.0:0x8086:0x51c8::p040300",
+            "dom0+0h.0+0x8086+0x51c8++p040300",
             None,
         ),  # remove edited assignment
         (
             "test-red",
             "admin.vm.device.pci.Assign",
-            "dom0+0h.0:0x8086:0x51c8::p040300",
+            "dom0+0h.0+0x8086+0x51c8++p040300",
             b"device_id='0x8086:0x51c8::p040300' port_id='0h.0' "
             b"devclass='pci' backend_domain='dom0' mode='required'"
             b" frontend_domain='test-red' _permissive='True'",
@@ -1140,7 +1140,7 @@ def test_req_multiple_save(required_handler):
         (
             "sys-net",
             "admin.vm.device.pci.Unassign",
-            "dom0+0c.0:0x8086:0x51f0::p028000",
+            "dom0+0c.0+0x8086+0x51f0++p028000",
             None,
         ),  # removed assignment
     ]
@@ -1185,7 +1185,7 @@ def test_req_options_after_save(required_handler):
         (
             "sys-net",
             "admin.vm.device.pci.Assign",
-            "dom0+0d.0:0x8086:0x461e::p0c0330",
+            "dom0+0d.0+0x8086+0x461e++p0c0330",
             b"device_id='0x8086:0x461e::p0c0330' port_id='0d.0' "
             b"devclass='pci' backend_domain='dom0' mode='required'"
             b" frontend_domain='sys-net' _permissive='True'",
@@ -1193,7 +1193,7 @@ def test_req_options_after_save(required_handler):
         (
             "sys-net",
             "admin.vm.device.pci.Unassign",
-            "dom0+0d.0:0x8086:0x461e::p0c0330",
+            "dom0+0d.0+0x8086+0x461e++p0c0330",
             None,
         ),  # remove edited assignment
     ]
@@ -1204,7 +1204,7 @@ def test_req_options_after_save(required_handler):
     # because the main program does a reset after save to ensure correctness,
     # we need to check that the data loads correctly
     qapp.expected_calls[("sys-net", "admin.vm.device.pci.Assigned", None, None)] = (
-        "0\x00dom0+0d.0:0x8086:0x461e::p0c0330 "
+        "0\x00dom0+0d.0+0x8086+0x461e++p0c0330 "
         "device_id='0x8086:0x461e::p0c0330' port_id='0d.0' devclass='pci' "
         "backend_domain='dom0' mode='required' frontend_domain='sys-net' "
         "_permissive='True'\n".encode()
@@ -1246,7 +1246,7 @@ def test_req_readonly(required_handler):
     expected_call = (
         "test-vm",
         "admin.vm.device.pci.Assign",
-        "dom0+0f.0:0x8086:0x51f0::p300000",
+        "dom0+0f.0+0x8086+0x51f0++p300000",
         b"device_id='0x8086:0x51f0::p300000' port_id='0f.0' "
         b"devclass='pci' backend_domain='dom0' mode='required'"
         b" frontend_domain='test-vm' _no-strict-reset='True'",
@@ -1322,7 +1322,7 @@ def test_req_port_not_required(required_handler):
         (
             "test-vm",
             "admin.vm.device.block.Assign",
-            "sys-usb+*:444:888:b123422",
+            "sys-usb+_+444+888+b123422",
             b"device_id='444:888:b123422' port_id='*' "
             b"devclass='block' backend_domain='sys-usb' mode='required'"
             b" frontend_domain='test-vm'",
