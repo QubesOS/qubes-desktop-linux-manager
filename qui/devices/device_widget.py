@@ -412,10 +412,15 @@ class DevicesTray(Gtk.Application):
     def remove_domain_item(self, _submitter, _event, vm, **_kwargs):
         # In a perfect world, core should trigger `device-unassign:pci` event
         # for PCI devices attached to an HVM before actually removing it and
-        # this method should not be necessary. But we are not certain :/
+        # this code should not be necessary. But we are not certain :/
         for wrapped_vm in self.dormant_usbvms:
             if wrapped_vm.name == vm:
                 self.dormant_usbvms.discard(wrapped_vm)
+                break
+
+        for wrapped_vm in self.dispvm_templates:
+            if wrapped_vm.name == vm:
+                self.dispvm_templates.discard(wrapped_vm)
                 break
 
     def update_single_feature(self, _vm, _event, feature, value=None, oldvalue=None):
@@ -654,7 +659,6 @@ class DevicesTray(Gtk.Application):
             self.dormant_usbvms.add(wrapped_vm)
 
         self.vms.discard(wrapped_vm)
-        self.dispvm_templates.discard(wrapped_vm)
 
         devs_to_remove = []
         for dev in self.devices.values():
