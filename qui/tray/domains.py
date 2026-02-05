@@ -1144,6 +1144,9 @@ class DomainTray(Gtk.Application):
 
         item.update_state(state)
 
+        if event == "property-reset:is_preload":
+            item.name.update_preload()
+
         if event == "domain-shutdown":
             self.handle_domain_shutdown(vm)
             # if the VM was shut down, it is no longer outdated
