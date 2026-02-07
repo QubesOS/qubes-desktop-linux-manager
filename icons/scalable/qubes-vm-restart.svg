@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" id="svg1" width="25" height="25" version="1.1" viewBox="0 0 5.821 5.821">
     <g id="layer1" transform="translate(-107.069 -148.459)">
         <g id="g3">
-            <g id="g1" style="fill:none;stroke:#6b7280;stroke-width:1.99937;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none" transform="translate(106.804 148.194)scale(.26458)">
+            <g id="g1" style="fill:none;stroke:#3b82f6;stroke-width:1.99937;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none" transform="translate(106.804 148.194)scale(.26458)">
                 <circle id="circle2" cx="12" cy="12" r="10" style="stroke-width:1.99937;stroke-dasharray:none"/>
             </g>
-            <g id="g2" style="fill:none;stroke:#6b7280;stroke-width:3.94645;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none" transform="translate(108.339 149.79)scale(.13404)">
+            <g id="g2" style="fill:none;stroke:#3b82f6;stroke-width:3.94645;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none" transform="translate(108.339 149.79)scale(.13404)">
                 <path id="path1-6" d="M3.802 15.778c.83 1.82 2.24 3.243 3.925 4.145 3.26 1.744 7.546 1.531 10.637-1.56C24.033 12.695 20.019 3 12 3a9.75 9.75 0 0 0-6.74 2.74L3 8" style="stroke-width:3.94645;stroke-dasharray:none"/>
                 <path id="path2-9" d="M3 3v5h5" style="stroke-width:3.94645;stroke-dasharray:none"/>
             </g>

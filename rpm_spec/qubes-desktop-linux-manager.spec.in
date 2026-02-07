@@ -335,7 +335,6 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 /usr/share/icons/hicolor/scalable/apps/settings-light.svg
 /usr/share/icons/hicolor/scalable/apps/smartphone-dark.svg
 /usr/share/icons/hicolor/scalable/apps/smartphone-light.svg
-/usr/share/icons/hicolor/scalable/apps/qubes-add.svg
 /usr/share/icons/hicolor/scalable/apps/url-dark.svg
 /usr/share/icons/hicolor/scalable/apps/url-light.svg
 /usr/share/icons/hicolor/scalable/apps/usb-dark.svg
