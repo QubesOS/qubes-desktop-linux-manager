@@ -450,11 +450,14 @@ class UpdateProxy:
 
     @staticmethod
     def _updatevm_filter(vm):
-        return getattr(vm, "provides_network", False)
+        return vm.klass != "AdminVM" and (
+            getattr(vm, "provides_network", False)
+            or vm.features.get("service.qubes-updates-proxy", False)
+        )
 
     @staticmethod
     def _whonixupdatevm_filter(vm):
-        return "anon-gateway" in vm.tags
+        return vm.klass not in ("AdminVM", "TemplateVM") and "anon-gateway" in vm.tags
 
     @staticmethod
     def _rule_filter(rule):
