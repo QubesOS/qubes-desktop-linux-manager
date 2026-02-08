@@ -43,7 +43,6 @@ gi.require_version("Gtk", "3.0")
 gi.require_version("GtkSource", "4")
 from gi.repository import Gtk, GtkSource, Gio, Gdk
 
-
 HEADER_NORMAL = (
     " service_name\targument\tsource_qube\ttarget_qube\taction [parameter=value]    "
 )
@@ -156,7 +155,10 @@ class PolicyEditor(Gtk.Application):
     """
 
     def __init__(self, filename: str, policy_client: PolicyClient):
-        super().__init__(application_id="org.qubesos.policyeditor")
+        super().__init__(
+            application_id="org.qubesos.policyeditor",
+            flags=Gio.ApplicationFlags.NON_UNIQUE,
+        )
         self.token: Optional[str] = None
         self.policy_client = PolicyClientWrapper(policy_client)
         self.filename = filename
