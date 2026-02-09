@@ -59,8 +59,9 @@ class Settings:
     MAX_UPDATE_IF_STALE = 99
     DEFAULT_RESTART_SERVICEVMS = True
     DEFAULT_RESTART_OTHER_VMS = False
-    DEFAULT_HIDE_SKIPPED = True
     DEFAULT_HIDE_UPDATED = False
+    DEFAULT_HIDE_SKIPPED = True
+    DEFAULT_HIDE_PROHIBITED = True
 
     def __init__(
         self,
@@ -121,12 +122,17 @@ class Settings:
         )
         self.restart_other_checkbox.connect("toggled", self._show_restart_exceptions)
 
+        self.hide_updated_checkbox: Gtk.CheckButton = self.builder.get_object(
+            "hide_updated"
+        )
+        self.hide_updated_checkbox.connect("toggled", self._hide_updated_toggled)
+
         self.hide_skipped_checkbox: Gtk.CheckButton = self.builder.get_object(
             "hide_skipped"
         )
 
-        self.hide_updated_checkbox: Gtk.CheckButton = self.builder.get_object(
-            "hide_updated"
+        self.hide_prohibited_checkbox: Gtk.CheckButton = self.builder.get_object(
+            "hide_prohibited"
         )
 
         self.available_vms = [
@@ -174,8 +180,9 @@ class Settings:
         self._init_restart_other_vms: Optional[bool] = None
         self._init_limit_concurrency: Optional[bool] = None
         self._init_max_concurrency: Optional[int] = None
-        self._init_hide_skipped: Optional[bool] = None
         self._init_hide_updated: Optional[bool] = None
+        self._init_hide_skipped: Optional[bool] = None
+        self._init_hide_prohibited: Optional[bool] = None
 
     @property
     def update_if_stale(self) -> int:
@@ -224,6 +231,14 @@ class Settings:
         )
 
     @property
+    def hide_updated(self) -> bool:
+        return get_boolean_feature(
+            self.vm,
+            "qubes-vm-update-hide-updated",
+            Settings.DEFAULT_HIDE_UPDATED,
+        )
+
+    @property
     def hide_skipped(self) -> bool:
         return get_boolean_feature(
             self.vm,
@@ -232,11 +247,11 @@ class Settings:
         )
 
     @property
-    def hide_updated(self) -> bool:
+    def hide_prohibited(self) -> bool:
         return get_boolean_feature(
             self.vm,
-            "qubes-vm-update-hide-updated",
-            Settings.DEFAULT_HIDE_UPDATED,
+            "qubes-vm-update-hide-prohibited",
+            Settings.DEFAULT_HIDE_PROHIBITED,
         )
 
     @property
@@ -272,10 +287,12 @@ class Settings:
         if self._init_limit_concurrency:
             self.max_concurrency_button.set_value(self._init_max_concurrency)
 
-        self._init_hide_skipped = self.hide_skipped
         self._init_hide_updated = self.hide_updated
-        self.hide_skipped_checkbox.set_active(self._init_hide_skipped)
+        self._init_hide_skipped = self.hide_skipped
+        self._init_hide_prohibited = self.hide_prohibited
         self.hide_updated_checkbox.set_active(self._init_hide_updated)
+        self.hide_skipped_checkbox.set_active(self._init_hide_skipped)
+        self.hide_prohibited_checkbox.set_active(self._init_hide_prohibited)
 
     def _show_restart_exceptions(self, _emitter=None):
         if self.restart_other_checkbox.get_active():
@@ -283,6 +300,15 @@ class Settings:
             self.exceptions.reset()
         else:
             self.restart_exceptions_page.hide()
+
+    def _hide_updated_toggled(self, _emitter=None):
+        is_active = self.hide_updated_checkbox.get_active()
+        if is_active:
+            self.hide_skipped_checkbox.set_active(True)
+            self.hide_prohibited_checkbox.set_active(True)
+
+        self.hide_skipped_checkbox.set_sensitive(not is_active)
+        self.hide_prohibited_checkbox.set_sensitive(not is_active)
 
     def _limit_concurrency_toggled(self, _emitter=None):
         self.max_concurrency_button.set_sensitive(
@@ -296,6 +322,7 @@ class Settings:
         self.settings_window.show_all()
         self._show_restart_exceptions()
         self._limit_concurrency_toggled()
+        self._hide_updated_toggled()
 
     def close_without_saving(self, _emitter, _):
         """Close without saving any changes."""
@@ -330,6 +357,13 @@ class Settings:
         )
 
         self._save_option(
+            name="hide-updated",
+            value=self.hide_updated_checkbox.get_active(),
+            init=self._init_hide_updated,
+            default=Settings.DEFAULT_HIDE_UPDATED,
+        )
+
+        self._save_option(
             name="hide-skipped",
             value=self.hide_skipped_checkbox.get_active(),
             init=self._init_hide_skipped,
@@ -337,10 +371,10 @@ class Settings:
         )
 
         self._save_option(
-            name="hide-updated",
-            value=self.hide_updated_checkbox.get_active(),
-            init=self._init_hide_updated,
-            default=Settings.DEFAULT_HIDE_UPDATED,
+            name="hide-prohibited",
+            value=self.hide_prohibited_checkbox.get_active(),
+            init=self._init_hide_prohibited,
+            default=Settings.DEFAULT_HIDE_PROHIBITED,
         )
 
         limit_concurrency = self.limit_concurrency_checkbox.get_active()
@@ -361,7 +395,12 @@ class Settings:
                 apply_feature_change(vm, "restart-after-update", None)
             self.exceptions.save()
 
-        self.refresh_callback(self.update_if_stale)
+        self.refresh_callback(
+            self.update_if_stale,
+            self.hide_updated,
+            self.hide_skipped,
+            self.hide_prohibited,
+        )
         self.settings_window.close()
 
     def _save_option(

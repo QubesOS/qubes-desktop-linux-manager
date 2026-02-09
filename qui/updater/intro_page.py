@@ -101,46 +101,24 @@ class IntroPage:
         self.log.debug("Populate update list")
         self.list_store = ListWrapper(UpdateRowWrapper, self.vm_list.get_model())
 
-        for vm in qapp.domains:
-            if vm.klass == "AdminVM":
-                try:
-                    if settings.hide_skipped and bool(
-                        vm.features.get("skip-update", False)
-                    ):
-                        continue
-                    state = bool(vm.features.get("updates-available", False))
-                except exc.QubesDaemonCommunicationError:
-                    state = False
-                self.list_store.append_vm(vm, state)
+        for vm in sorted(qapp.domains, key=lambda vm: vm.klass):
+            if getattr(vm, "updateable", False):
+                self.list_store.append_vm(vm, state=False)
 
-        to_update = set()
-        if settings.hide_updated:
-            cmd = [
-                "qubes-vm-update",
-                "--quiet",
-                "--dry-run",
-                "--update-if-stale",
-                str(settings.update_if_stale),
-            ]
-            to_update = self._get_stale_qubes(cmd)
+        self.refresh_update_list(
+            settings.update_if_stale,
+            settings.hide_updated,
+            settings.hide_skipped,
+            settings.hide_prohibited,
+        )
 
-        for vm in qapp.domains:
-            try:
-                if settings.hide_skipped and bool(
-                    vm.features.get("skip-update", False)
-                ):
-                    continue
-                if settings.hide_updated and not vm.name in to_update:
-                    # TODO: Make re-filtering possible without App restart
-                    continue
-            except exc.QubesDaemonCommunicationError:
-                continue
-            if getattr(vm, "updateable", False) and vm.klass != "AdminVM":
-                self.list_store.append_vm(vm)
-
-        self.refresh_update_list(settings.update_if_stale)
-
-    def refresh_update_list(self, update_if_stale):
+    def refresh_update_list(
+        self,
+        update_if_stale,
+        hide_updated=False,
+        hide_skipped=False,
+        hide_prohibited=False,
+    ):
         """
         Refreshes "Updates Available" column if settings changed.
         """
@@ -158,13 +136,29 @@ class IntroPage:
 
         to_update = self._get_stale_qubes(cmd)
 
-        for row in self.list_store:
-            if row.vm.name == "dom0":
-                continue
-            row.updates_available = bool(row.vm.name in to_update)
-            row.selected = bool(row.vm.name in to_update) and not row.vm.features.get(
-                "prohibit-start", False
-            )
+        rows = self.list_store.get_all()
+        self.list_store.clear()
+        for row in rows:
+
+            # Determine visibility
+            visible = True
+            if hide_updated and not row.vm.name in to_update:
+                visible = False
+            else:
+                try:
+                    if hide_skipped and bool(row.vm.features.get("skip-update", False)):
+                        visible = False
+                    if hide_prohibited and bool(
+                        row.vm.features.get("prohibit-start", False)
+                    ):
+                        visible = False
+                except exc.QubesDaemonCommunicationError:
+                    visible = True
+
+            state = bool(row.vm.name in to_update) if visible else None
+            appended = self.list_store.append_vm(row.vm, state=state)
+            if state is not None:
+                appended.selected = bool(row.vm.name in to_update)
 
     def get_vms_to_update(self) -> ListWrapper:
         """Returns list of vms selected to be updated"""
@@ -215,7 +209,7 @@ class IntroPage:
         for row in self.list_store:
             row.selected = row.updates_available in self.head_checkbox.allowed
 
-    def select_rows_ignoring_conditions(self, cliargs, dom0):
+    def select_rows_ignoring_conditions(self, cliargs):
         cmd = ["qubes-vm-update", "--dry-run", "--quiet"]
 
         args = [a for a in dir(cliargs) if not a.startswith("_")]
@@ -236,13 +230,12 @@ class IntroPage:
             if value:
                 if arg in ("skip", "targets"):
                     vms = set(value.split(","))
-                    vms_without_dom0 = vms.difference({"dom0"})
-                    if not vms_without_dom0:
-                        continue
-                    value = ",".join(sorted(vms_without_dom0))
+                    value = ",".join(sorted(vms))
                 cmd.append(f"--{arg.replace('_', '-')}")
                 if not isinstance(value, bool):
                     cmd.append(str(value))
+        if cliargs.dom0:
+            cmd.extend(["--targets", "dom0"])
 
         to_update = set()
         non_default_select = [
@@ -251,8 +244,6 @@ class IntroPage:
         non_default = [a for a in cmd if a in non_default_select]
         if non_default or cliargs.non_interactive:
             to_update = self._get_stale_qubes(cmd)
-
-        to_update = self._handle_cli_dom0(dom0, to_update, cliargs)
 
         for row in self.list_store:
             row.selected = row.name in to_update
@@ -264,13 +255,20 @@ class IntroPage:
             self.log.debug("Command returns: %s", output.decode())
 
             output_lines = output.decode().split("\n")
-            if ":" not in output_lines[0]:
-                return set()
+            result = set()
+            if "dom0" in output_lines[0]:
+                result.add("dom0")
 
-            return {
-                vm_name.strip()
-                for vm_name in output_lines[0].split(":", maxsplit=1)[1].split(",")
-            }
+            second_line = output_lines[1] if len(output_lines) > 1 else ""
+            if ":" not in second_line:
+                return result
+
+            return result.union(
+                {
+                    vm_name.strip()
+                    for vm_name in second_line.split(":", maxsplit=1)[1].split(",")
+                }
+            )
         except subprocess.CalledProcessError as err:
             if err.returncode != 100:
                 raise err
@@ -513,8 +511,8 @@ class UpdatesAvailable(Enum):
     @staticmethod
     def from_features(
         updates_available: Optional[bool],
-        supported: Optional[str] = None,
-        prohibited: Optional[str] = None,
+        supported: Optional[bool] = None,
+        prohibited: Optional[bool] = None,
     ) -> "UpdatesAvailable":
         if prohibited:
             return UpdatesAvailable.PROHIBITED

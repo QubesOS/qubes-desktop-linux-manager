@@ -213,10 +213,16 @@ class MockCallback:
     def __init__(self):
         self.call_num = 0
         self.value = None
+        self.hide_updated = None
+        self.hide_skipped = None
+        self.hide_prohibited = None
 
-    def __call__(self, value):
+    def __call__(self, value, hide_updated, hide_skipped, hide_prohibited):
         self.call_num += 1
         self.value = value
+        self.hide_updated = hide_updated
+        self.hide_skipped = hide_skipped
+        self.hide_prohibited = hide_prohibited
 
 
 @pytest.mark.parametrize(
@@ -239,6 +245,24 @@ class MockCallback:
             Settings.DEFAULT_RESTART_OTHER_VMS,
             True,
             "restart_other_checkbox",
+        ),
+        pytest.param(
+            "hide-updated",
+            Settings.DEFAULT_HIDE_UPDATED,
+            True,
+            "hide_updated_checkbox",
+        ),
+        pytest.param(
+            "hide-skipped",
+            Settings.DEFAULT_HIDE_SKIPPED,
+            False,
+            "hide_skipped_checkbox",
+        ),
+        pytest.param(
+            "hide-prohibited",
+            Settings.DEFAULT_HIDE_PROHIBITED,
+            False,
+            "hide_prohibited_checkbox",
         ),
     ),
 )
@@ -269,6 +293,12 @@ def test_save(feature, default_value, new_value, test_qapp, button_name):
     assert mock_callback.call_num == 1
     if feature == "update-if-stale":
         assert mock_callback.value == default_value
+    if feature == "hide-updated":
+        assert mock_callback.hide_updated == default_value
+    if feature == "hide-skipped":
+        assert mock_callback.hide_skipped == default_value
+    if feature == "hide-prohibited":
+        assert mock_callback.hide_prohibited == default_value
 
     # set feature
     sut.show()

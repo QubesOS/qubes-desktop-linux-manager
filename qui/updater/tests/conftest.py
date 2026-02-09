@@ -173,25 +173,57 @@ def mock_settings():
             self.restart_service_vms = True
             self.restart_other_vms = True
             self.max_concurrency = None
-            self.hide_skipped = True
             self.hide_updated = False
+            self.hide_skipped = True
+            self.hide_prohibited = True
 
     return MockSettings()
+
+
+def expected_row(
+    qname,
+    test_qapp,
+    template_name="",
+    last_updates_check="3020-01-01 00:00:00",
+    last_update="3020-01-01 00:00:00",
+    prohibit_start="",
+):
+    """
+    Set expected calls in test_qapp if a *row* will be created for the qube.
+    """
+    # check support
+    test_qapp.expected_calls[(qname, "admin.vm.feature.Get", "template-name", None)] = (
+        b"0\x00" + str(template_name).encode()
+    )
+    # last update check column
+    test_qapp.expected_calls[
+        (qname, "admin.vm.feature.Get", "last-updates-check", None)
+    ] = (b"0\x00" + str(last_updates_check).encode())
+    # last update column
+    test_qapp.expected_calls[(qname, "admin.vm.feature.Get", "last-update", None)] = (
+        b"0\x00" + str(last_update).encode()
+    )
+    # check if start is prohibited to display info
+    test_qapp.expected_calls[
+        (qname, "admin.vm.feature.Get", "prohibit-start", None)
+    ] = (b"0\x00" + str(prohibit_start).encode())
 
 
 @pytest.fixture
 def all_vms_list(test_qapp, mock_list_store):
     result = ListWrapper(UpdateRowWrapper, mock_list_store)
     for vm in test_qapp.domains:
+        expected_row(vm.name, test_qapp)
         result.append_vm(vm)
     return result
 
 
 @pytest.fixture
-def updatable_vms_list(test_qapp, mock_list_store):
+def updateable_vms_list(test_qapp, mock_list_store):
     result = ListWrapper(UpdateRowWrapper, mock_list_store)
     for vm in test_qapp.domains:
         if vm.klass in ("AdminVM", "TemplateVM", "StandaloneVM"):
+            expected_row(vm.name, test_qapp)
             result.append_vm(vm)
     return result
 
@@ -201,6 +233,7 @@ def appvms_list(test_qapp, mock_list_store):
     result = ListWrapper(RestartRowWrapper, mock_list_store)
     for vm in test_qapp.domains:
         if vm.klass == "AppVM":
+            expected_row(vm.name, test_qapp)
             result.append_vm(vm)
     return result
 

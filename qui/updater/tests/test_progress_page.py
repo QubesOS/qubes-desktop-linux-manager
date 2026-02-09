@@ -31,7 +31,7 @@ from gi.repository import Gtk
 
 from qui.updater.intro_page import UpdateRowWrapper
 from qui.updater.progress_page import ProgressPage, QubeUpdateDetails
-from qui.updater.tests.conftest import mock_settings
+from qui.updater.tests.conftest import mock_settings, expected_row
 from qui.updater.utils import ListWrapper, UpdateStatus
 
 
@@ -84,7 +84,7 @@ def test_perform_update(
     mock_next_button,
     mock_cancel_button,
     mock_label,
-    updatable_vms_list,
+    updateable_vms_list,
 ):
     mock_log = Mock()
     mock_callback = Mock()
@@ -97,19 +97,17 @@ def test_perform_update(
         mock_callback,
     )
 
-    sut.vms_to_update = updatable_vms_list
+    sut.vms_to_update = updateable_vms_list
 
     class VMConsumer:
         def __call__(self, vm_rows, *args, **kwargs):
             self.vm_rows = vm_rows
 
-    sut.update_admin_vm = VMConsumer()
-    sut.update_templates = VMConsumer()
+    sut.update_selected = VMConsumer()
 
     sut.perform_update(mock_settings)
 
-    assert len(sut.update_admin_vm.vm_rows) == 1
-    assert len(sut.update_templates.vm_rows) == 3
+    assert len(sut.update_selected.vm_rows) == 4
 
     calls = [
         call(mock_next_button.set_sensitive, True),
@@ -118,59 +116,6 @@ def test_perform_update(
     ]
     idle_add.assert_has_calls(calls, any_order=True)
     mock_callback.assert_called_once()
-
-
-@patch("gi.repository.GLib.idle_add")
-@patch("subprocess.check_output", return_value=b"")
-@pytest.mark.parametrize(
-    "interrupted",
-    (
-        pytest.param(True, id="interrupted"),
-        pytest.param(False, id="not interrupted"),
-    ),
-)
-def test_update_admin_vm(
-    mock_subprocess,
-    idle_add,
-    interrupted,
-    real_builder,
-    test_qapp,
-    mock_next_button,
-    mock_cancel_button,
-    mock_label,
-    mock_text_view,
-    mock_list_store,
-):
-    mock_log = Mock()
-    mock_callback = Mock()
-    sut = ProgressPage(
-        real_builder,
-        mock_log,
-        mock_label,
-        mock_next_button,
-        mock_cancel_button,
-        mock_callback,
-    )
-
-    admins = ListWrapper(UpdateRowWrapper, mock_list_store)
-    for vm in test_qapp.domains:
-        if vm.klass in ("AdminVM",):
-            admins.append_vm(vm)
-
-    sut.update_details.progress_textview = mock_text_view
-    # chose vm to show details
-    sut.update_details.active_row = admins[0]
-    admins[0].buffer = "Update details"
-
-    if interrupted:
-        sut.interrupt_update()
-    sut.update_admin_vm(admins=admins)
-
-    calls = [call(mock_text_view.buffer.set_text, "Update details")]
-    idle_add.assert_has_calls(calls)
-    if not interrupted:
-        mock_subprocess.assert_called()
-    mock_callback.assert_not_called()
 
 
 @patch("gi.repository.GLib.idle_add")
@@ -185,11 +130,12 @@ def test_update_templates(
     idle_add,
     interrupted,
     real_builder,
-    updatable_vms_list,
+    updateable_vms_list,
     mock_next_button,
     mock_cancel_button,
     mock_label,
     mock_text_view,
+    mock_settings,
 ):
     mock_log = Mock()
     mock_callback = Mock()
@@ -202,21 +148,21 @@ def test_update_templates(
         mock_callback,
     )
 
-    sut.do_update_templates = Mock()
+    sut.do_update_selected = Mock()
     total_progress = []
     sut.set_total_progress = lambda prog: total_progress.append(prog)
 
     sut.update_details.progress_textview = mock_text_view
     # chose vm to show details
-    sut.update_details.active_row = updatable_vms_list[0]
-    for i, row in enumerate(updatable_vms_list):
+    sut.update_details.active_row = updateable_vms_list[0]
+    for i, row in enumerate(updateable_vms_list):
         row.buffer = f"Details {i}"
 
     if interrupted:
         sut.interrupt_update()
-    sut.update_templates(updatable_vms_list, mock_settings)
+    sut.update_selected(updateable_vms_list, mock_settings)
 
-    sut.update_details.set_active_row(updatable_vms_list[2])
+    sut.update_details.set_active_row(updateable_vms_list[2])
 
     calls = [
         call(sut.set_total_progress, 100),
@@ -225,12 +171,12 @@ def test_update_templates(
     ]
     idle_add.assert_has_calls(calls, any_order=True)
     if not interrupted:
-        sut.do_update_templates.assert_called()
+        sut.do_update_selected.assert_called()
     mock_callback.assert_not_called()
 
 
 @patch("subprocess.Popen")
-def test_do_update_templates(
+def test_do_update_selected(
     mock_subprocess,
     real_builder,
     test_qapp,
@@ -274,12 +220,13 @@ def test_do_update_templates(
 
     to_update = ListWrapper(UpdateRowWrapper, mock_list_store)
     for vm in test_qapp.domains:
-        if vm.klass in ("TemplateVM", "StandaloneVM"):
+        if vm.klass in ("AdminVM", "TemplateVM", "StandaloneVM"):
+            expected_row(vm.name, test_qapp)
             to_update.append_vm(vm)
 
     rows = {row.name: row for row in to_update}
 
-    sut.do_update_templates(rows, mock_settings)
+    sut.do_update_selected(rows, mock_settings)
 
     calls = [
         call(
@@ -289,7 +236,7 @@ def test_do_update_templates(
                 "--just-print-progress",
                 "--force-update",
                 "--targets",
-                "fedora-35,fedora-36,test-standalone",
+                "dom0,fedora-35,fedora-36,test-standalone",
             ],
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE,
@@ -305,7 +252,7 @@ def test_get_update_summary(
     mock_next_button,
     mock_cancel_button,
     mock_label,
-    updatable_vms_list,
+    updateable_vms_list,
 ):
     mock_log = Mock()
     mock_callback = Mock()
@@ -318,12 +265,12 @@ def test_get_update_summary(
         mock_callback,
     )
 
-    updatable_vms_list[0].set_status(UpdateStatus.NoUpdatesFound)
-    updatable_vms_list[1].set_status(UpdateStatus.Error)
-    updatable_vms_list[2].set_status(UpdateStatus.Cancelled)
-    updatable_vms_list[3].set_status(UpdateStatus.Success)
+    updateable_vms_list[0].set_status(UpdateStatus.NoUpdatesFound)
+    updateable_vms_list[1].set_status(UpdateStatus.Error)
+    updateable_vms_list[2].set_status(UpdateStatus.Cancelled)
+    updateable_vms_list[3].set_status(UpdateStatus.Success)
 
-    sut.vms_to_update = updatable_vms_list
+    sut.vms_to_update = updateable_vms_list
 
     updated, no_updates, failed, cancelled = sut.get_update_summary()
 
@@ -334,9 +281,9 @@ def test_get_update_summary(
     mock_callback.assert_not_called()
 
 
-def test_set_active_row(real_builder, updatable_vms_list):
+def test_set_active_row(real_builder, updateable_vms_list):
     sut = QubeUpdateDetails(real_builder)
-    row = updatable_vms_list[0]
+    row = updateable_vms_list[0]
     sut.set_active_row(row)
 
     assert sut.details_label.get_text().strip() == "Details for"

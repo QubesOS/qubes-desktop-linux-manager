@@ -193,9 +193,7 @@ class QubesUpdater(Gtk.Application):
 
         if skip_intro_if_args(self.cliargs):
             self.log.info("Skipping intro page.")
-            self.intro_page.select_rows_ignoring_conditions(
-                cliargs=self.cliargs, dom0=self.qapp.domains["dom0"]
-            )
+            self.intro_page.select_rows_ignoring_conditions(cliargs=self.cliargs)
             if len(self.intro_page.get_vms_to_update()) == 0:
                 self.do_nothing = True
                 return
@@ -473,7 +471,7 @@ def parse_args(args, app):
     parser.add_argument(
         "--dom0",
         action="store_true",
-        help="Target dom0. If present, skip manual selection of qubes to update.",
+        help="Target dom0. Short version of --targets dom0.",
     )
 
     parser.add_argument(

@@ -24,7 +24,7 @@ import subprocess
 import threading
 import time
 import gi
-from typing import Dict, List
+from typing import Dict
 
 gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk, Gdk, GLib, GObject  # isort:skip
@@ -110,180 +110,18 @@ class ProgressPage:
         GLib.idle_add(self.header_label.set_text, l("Interrupting the update..."))
 
     def perform_update(self, settings):
-        """Updates dom0 and then other vms."""
-        admins = [row for row in self.vms_to_update if row.vm.klass == "AdminVM"]
-        templs = [row for row in self.vms_to_update if row.vm.klass != "AdminVM"]
+        """Uses qubes-vm-update to update dom0 and then other vms."""
         GLib.idle_add(self.set_total_progress, 0)
 
-        if admins:
-            self.update_admin_vm(admins)
-
-        if templs:
-            self.update_templates(templs, settings)
+        if self.vms_to_update:
+            self.update_selected(self.vms_to_update, settings)
 
         GLib.idle_add(self.header_label.set_text, l("Update finished"))
         GLib.idle_add(self.cancel_button.set_visible, False)
         GLib.idle_add(self.next_button.set_sensitive, True)
         self.after_update_callback()
 
-    def update_admin_vm(self, admins):
-        """Runs command to update dom0."""
-        admin = admins[0]
-        if self.exit_triggered:
-            self.log.info("Update canceled: skip adminVM updating")
-            GLib.idle_add(admin.set_status, UpdateStatus.Cancelled)
-            GLib.idle_add(
-                admin.append_text_view,
-                l("Canceled update for {}\n").format(admin.vm.name),
-            )
-            self.update_details.update_buffer()
-            return
-        self.log.debug("Start adminVM updating")
-
-        info = f"Checking for available updates for {admin.name}...\n"
-        GLib.idle_add(admin.append_text_view, l(info).format(admin.name))
-        GLib.idle_add(admin.set_status, UpdateStatus.ProgressUnknown)
-
-        self.update_details.update_buffer()
-
-        def qubes_dom0_update(*args):
-            with subprocess.Popen(
-                ["sudo", "qubes-dom0-update"] + list(args),
-                stderr=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-            ) as subproc:
-
-                read_err_thread = threading.Thread(
-                    target=self.dump_to_textview, args=(subproc.stderr, admin)
-                )
-                read_out_thread = threading.Thread(
-                    target=self.dump_to_textview, args=(subproc.stdout, admin)
-                )
-                read_err_thread.start()
-                read_out_thread.start()
-
-                while (
-                    subproc.poll() is None
-                    or read_out_thread.is_alive()
-                    or read_err_thread.is_alive()
-                ):
-                    time.sleep(1)
-                    if self.exit_triggered and subproc.poll() is None:
-                        subproc.send_signal(signal.SIGINT)
-                        subproc.wait()
-                        read_err_thread.join()
-                        read_out_thread.join()
-
-                return subproc.returncode
-
-        try:
-            with Ticker(admin):
-                curr_pkg = self._get_packages_admin()
-
-                returncode = qubes_dom0_update("--refresh", "--check-only")
-                if returncode != 100:
-                    if returncode != 0:
-                        GLib.idle_add(admin.set_status, UpdateStatus.Error)
-                    else:
-                        GLib.idle_add(admin.set_status, UpdateStatus.NoUpdatesFound)
-                    self.update_details.update_buffer()
-                    return
-
-                returncode = qubes_dom0_update("-y")
-                if returncode != 0:
-                    GLib.idle_add(admin.set_status, UpdateStatus.Error)
-                    self.update_details.update_buffer()
-                    return
-
-                new_pkg = self._get_packages_admin()
-                changes = self._compare_packages(curr_pkg, new_pkg)
-                changes_str = self._print_changes(changes)
-                GLib.idle_add(admin.append_text_view, changes_str)
-                GLib.idle_add(admin.set_status, UpdateStatus.Success)
-
-        except subprocess.CalledProcessError as ex:
-            GLib.idle_add(
-                admin.append_text_view,
-                l("Error on updating {}: {}\n{}").format(
-                    admin.vm.name, str(ex), ex.output.decode()
-                ),
-            )
-            GLib.idle_add(admin.set_status, UpdateStatus.Error)
-
-        self.update_details.update_buffer()
-
-    @staticmethod
-    def _get_packages_admin() -> Dict[str, List[str]]:
-        """
-        Use rpm to return the installed packages and their versions.
-        """
-
-        cmd = [
-            "rpm",
-            "-qa",
-            "--queryformat",
-            "%{NAME} %{VERSION}-%{RELEASE}\n",
-        ]
-        # EXAMPLE OUTPUT:
-        # qubes-core-agent 4.1.351.fc34
-        package_list = subprocess.check_output(cmd).decode().splitlines()
-
-        packages = {}
-        for line in package_list:
-            cols = line.split()
-            package, version = cols
-            packages.setdefault(package, []).append(version)
-
-        return packages
-
-    @staticmethod
-    def _compare_packages(
-        old: Dict[str, List[str]], new: Dict[str, List[str]]
-    ) -> Dict[str, Dict]:
-        """
-        Compare installed packages and return dictionary with differences.
-
-        :param old: Dict[package_name, version] packages before update
-        :param new: Dict[package_name, version] packages after update
-        """
-        return {
-            "installed": {pkg: new[pkg] for pkg in new if pkg not in old},
-            "updated": {
-                pkg: {"old": old[pkg], "new": new[pkg]}
-                for pkg in new
-                if pkg in old and old[pkg] != new[pkg]
-            },
-            "removed": {pkg: old[pkg] for pkg in old if pkg not in new},
-        }
-
-    @staticmethod
-    def _print_changes(changes: Dict[str, Dict]) -> str:
-        result = ""
-        result += "Installed packages:\n"
-        if changes["installed"]:
-            for pkg in changes["installed"]:
-                result += f'{pkg} {changes["installed"][pkg]}\n'
-        else:
-            result += "None\n"
-
-        result += "Updated packages:\n"
-        if changes["updated"]:
-            for pkg in changes["updated"]:
-                old_ver = str(changes["updated"][pkg]["old"])[2:-2]
-                new_ver = str(changes["updated"][pkg]["new"])[2:-2]
-                result += f"{pkg} {old_ver} -> {new_ver}\n"
-        else:
-            result += "None\n"
-
-        result += "Removed packages:\n"
-        if changes["removed"]:
-            for pkg in changes["removed"]:
-                result += f'{pkg} {changes["removed"][pkg]}\n'
-        else:
-            result += "None\n"
-        return result
-
-    def update_templates(self, to_update, settings):
+    def update_selected(self, to_update, settings):
         """Updates templates and standalones and then sets update statuses."""
         if self.exit_triggered:
             self.log.info("Update canceled: skip templateVM updating")
@@ -305,7 +143,7 @@ class ProgressPage:
 
         try:
             rows = {row.name: row for row in to_update}
-            self.do_update_templates(rows, settings)
+            self.do_update_selected(rows, settings)
             GLib.idle_add(self.set_total_progress, 100)
         except subprocess.CalledProcessError as ex:
             for row in to_update:
@@ -318,7 +156,7 @@ class ProgressPage:
                 GLib.idle_add(row.set_status, UpdateStatus.Error)
         self.update_details.update_buffer()
 
-    def do_update_templates(self, rows: Dict[str, RowWrapper], settings: Settings):
+    def do_update_selected(self, rows: Dict[str, RowWrapper], settings: Settings):
         """Runs `qubes-vm-update` command."""
         targets = ",".join((name for name in rows.keys()))
 
@@ -395,7 +233,10 @@ class ProgressPage:
         for untrusted_line in iter(proc.stdout.readline, ""):
             if untrusted_line:
                 line = self._sanitize_line(untrusted_line)
-                maybe_name, text = line.split(" ", 1)
+                try:
+                    maybe_name, text = line.split(" ", 1)
+                except ValueError:
+                    continue
                 suffix = len(":out:")
                 if maybe_name[:-suffix] in rows.keys():
                     curr_name_out = maybe_name[:-suffix]
@@ -410,23 +251,6 @@ class ProgressPage:
                 break
         self.update_details.update_buffer()
         proc.stdout.close()
-
-    def dump_to_textview(self, stream, row):
-        curr_name_out = row.name
-        for untrusted_line in iter(stream.readline, ""):
-            if untrusted_line:
-                text = self._sanitize_line(untrusted_line)
-                if curr_name_out:
-                    row.append_text_view(text)
-                if (
-                    self.update_details.active_row is not None
-                    and curr_name_out == self.update_details.active_row.name
-                ):
-                    self.update_details.update_buffer()
-            else:
-                break
-        self.update_details.update_buffer()
-        stream.close()
 
     @staticmethod
     def _sanitize_line(untrusted_line: bytes) -> str:
@@ -486,27 +310,6 @@ class ProgressPage:
             [row for row in self.vms_to_update if row.status == UpdateStatus.Cancelled]
         )
         return updated, no_updates, failed, cancelled
-
-
-class Ticker:
-    """Helper for dom0 progressbar."""
-
-    def __init__(self, *args):
-        self.ticker_done = False
-        self.args = args
-
-    def __enter__(self):
-        thread = threading.Thread(target=self.tick, args=self.args)
-        thread.start()
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.ticker_done = True
-
-    def tick(self, row):
-        while not self.ticker_done:
-            new_value = (row.get_update_progress()) % 96 + 1
-            GLib.idle_add(row.set_update_progress, new_value)
-            time.sleep(1 / 12)
 
 
 class QubeUpdateDetails:
