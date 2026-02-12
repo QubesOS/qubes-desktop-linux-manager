@@ -135,6 +135,7 @@ class PropertyHandler(AbstractTraitHolder):
         vm_filter: Optional[Callable] = None,
         readable_name: Optional[str] = None,
         additional_options: Dict[Any | str | None, str] | None = None,
+        show_internal: bool = False,
     ):
         self.qapp = qapp
         self.trait_holder = trait_holder
@@ -149,6 +150,7 @@ class PropertyHandler(AbstractTraitHolder):
             current_value=self.get_current_value(),
             style_changes=True,
             additional_options=additional_options,
+            show_internal=show_internal,
         )
 
     def get_readable_description(self) -> str:
