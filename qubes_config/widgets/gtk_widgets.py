@@ -35,6 +35,8 @@ from .gtk_utils import load_icon, is_theme_light
 
 import gettext
 
+from ..widgets.utils import get_boolean_feature
+
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
@@ -234,6 +236,7 @@ class VMListModeler(TraitSelector):
         current_value: qubesadmin.vm.QubesVM | str | None = None,
         style_changes: bool = False,
         additional_options: dict[qubesadmin.vm.QubesVM | str | None, str] | None = None,
+        show_internal: bool = False,
     ):
         """
         :param combobox: target ComboBox object
@@ -254,12 +257,14 @@ class VMListModeler(TraitSelector):
         applied when combobox value changes
         :param additional_options: Dictionary of token: readable name of
         additonal options to be added to the combobox
+        :param show_internal: if True, show qubes with internal feature enabled
         """
         self.qapp = qapp
         self.combo = combobox
         self.entry_box = self.combo.get_child()
         self.change_function = event_callback
         self.style_changes = style_changes
+        self.show_internal = show_internal
 
         self._entries: dict[str, dict[str, Any]] = {}
 
@@ -337,8 +342,22 @@ class VMListModeler(TraitSelector):
                     "vm": None,
                 }
 
+        found_current = False
+        if current_value and current_value in self.qapp.domains:
+            found_current = True
+            domain = self.qapp.domains[current_value]
+            icon = self._get_icon(domain.icon)
+            vm_name = domain.name
+            self._entries[vm_name] = {
+                "api_name": vm_name,
+                "icon": icon,
+                "vm": domain,
+            }
+
         for domain in self.qapp.domains:
             if filter_function and not filter_function(domain):
+                continue
+            if not self.show_internal and get_boolean_feature(domain, "internal"):
                 continue
             vm_name = domain.name
             icon = self._get_icon(domain.icon)
@@ -353,8 +372,7 @@ class VMListModeler(TraitSelector):
                 "vm": domain,
             }
 
-        if current_value:
-            found_current = False
+        if current_value and not found_current:
             for value in self._entries.values():
                 if value["api_name"] == current_value:
                     found_current = True
