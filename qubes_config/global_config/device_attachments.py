@@ -122,7 +122,8 @@ class AutoDeviceDialog(DevPolicyDialogHandler):
             self.qapp,
             "edit_device",
             [],
-            filter_function=lambda vm: vm.klass != "AdminVM",
+            filter_function=lambda vm: vm.klass not in ["AdminVM", "TemplateVM"]
+            and not getattr(vm, "template_for_dispvms", False),
         )
 
         self.backend_vm: Optional[qubesadmin.vm.QubesVM] = None
@@ -398,7 +399,8 @@ class RequiredDeviceDialog(DevPolicyDialogHandler):
             self.qapp,
             "required_device",
             [],
-            filter_function=lambda vm: vm.klass != "AdminVM",
+            filter_function=lambda vm: vm.klass not in ["AdminVM", "TemplateVM"]
+            and not getattr(vm, "template_for_dispvms", False),
         )
 
         self.dev_modeler = self.fill_combo_with_devices(

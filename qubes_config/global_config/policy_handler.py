@@ -44,7 +44,7 @@ import gi
 
 import qubesadmin
 import qubesadmin.vm
-from ..widgets.utils import compare_rule_lists
+from ..widgets.utils import compare_rule_lists, get_boolean_feature
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
@@ -562,6 +562,7 @@ class VMSubsetPolicyHandler(PolicyHandler):
         main_rule_class: Type[AbstractRuleWrapper],
         exception_verb_description: AbstractVerbDescription,
         exception_rule_class: Type[AbstractRuleWrapper],
+        filter_function: Callable[[qubesadmin.vm.QubesVM], bool] | None = None,
     ):
         """
         :param qapp: Qubes object
@@ -619,7 +620,22 @@ class VMSubsetPolicyHandler(PolicyHandler):
 
         # populate combo
         self.select_qube_model = VMListModeler(
-            combobox=self.select_qube_combo, qapp=self.qapp
+            combobox=self.select_qube_combo,
+            qapp=self.qapp,
+            filter_function=(
+                (
+                    lambda vm: filter_function(vm)
+                    and get_boolean_feature(
+                        vm, "supported-rpc." + service_name, recurse_template=True
+                    )
+                )
+                if filter_function
+                else (
+                    lambda vm: get_boolean_feature(
+                        vm, "supported-rpc." + service_name, recurse_template=True
+                    )
+                )
+            ),
         )
 
         # connect events
