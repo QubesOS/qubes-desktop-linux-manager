@@ -886,6 +886,11 @@ def test_subset_handler(test_builder, test_qapp, test_policy_manager: PolicyMana
     default_policy = """
 TestService * @anyvm test-blue allow"""
 
+    for qube in test_qapp.domains:
+        # pylint: disable=protected-access
+        test_qapp._qubes[qube].features["supported-rpc.TestService"] = "1"
+    test_qapp.update_vm_calls()
+
     handler = VMSubsetPolicyHandler(
         qapp=test_qapp,
         gtk_builder=test_builder,
@@ -972,6 +977,11 @@ def test_subset_handler_limited_choice(
     default_policy = """
 TestService * @anyvm test-blue allow
 TestService * @anyvm test-red allow"""
+
+    for qube in test_qapp.domains:
+        # pylint: disable=protected-access
+        test_qapp._qubes[qube].features["supported-rpc.TestService"] = "1"
+    test_qapp.update_vm_calls()
 
     handler = VMSubsetPolicyHandler(
         qapp=test_qapp,
@@ -1066,6 +1076,11 @@ TestService * test-vm test-blue deny
 TestService * @anyvm test-blue allow
 TestService * @anyvm vault ask"""
 
+    for qube in test_qapp.domains:
+        # pylint: disable=protected-access
+        test_qapp._qubes[qube].features["supported-rpc.TestService"] = "1"
+    test_qapp.update_vm_calls()
+
     handler = VMSubsetPolicyHandler(
         qapp=test_qapp,
         gtk_builder=test_builder,
@@ -1122,6 +1137,11 @@ def test_subset_handler_duplicates(
     default_policy = """
 TestService * @anyvm vault ask"""
 
+    for qube in test_qapp.domains:
+        # pylint: disable=protected-access
+        test_qapp._qubes[qube].features["supported-rpc.TestService"] = "1"
+    test_qapp.update_vm_calls()
+
     handler = VMSubsetPolicyHandler(
         qapp=test_qapp,
         gtk_builder=test_builder,
@@ -1161,6 +1181,11 @@ TestService * test-blue vault allow
 TestService * @anyvm vault ask
 """
 
+    for qube in test_qapp.domains:
+        # pylint: disable=protected-access
+        test_qapp._qubes[qube].features["supported-rpc.TestService"] = "1"
+    test_qapp.update_vm_calls()
+
     handler = VMSubsetPolicyHandler(
         qapp=test_qapp,
         gtk_builder=test_builder,
@@ -1190,6 +1215,11 @@ def test_subset_handler_unsupported(
 TestService * test-blue vault allow
 TestService * @anyvm vault allow target=test-blue
 """
+
+    for qube in test_qapp.domains:
+        # pylint: disable=protected-access
+        test_qapp._qubes[qube].features["supported-rpc.TestService"] = "1"
+    test_qapp.update_vm_calls()
 
     test_policy_manager.policy_client.policy_replace("c-test", current_policy, "any")
 
