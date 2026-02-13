@@ -350,7 +350,7 @@ def test_u2f_handler_init(test_qapp, test_policy_manager, real_builder):
     assert handler.enable_check.get_active()
     assert handler.enable_some_handler.selected_vms == [testvm]
     assert handler.enable_some_handler.add_qube_model.is_vm_available(testvm)
-    assert handler.enable_some_handler.add_qube_model.is_vm_available(fedora35)
+    assert not handler.enable_some_handler.add_qube_model.is_vm_available(fedora35)
     assert not handler.enable_some_handler.add_qube_model.is_vm_available(testred)
     assert not handler.enable_some_handler.add_qube_model.is_vm_available(sysusb)
 
@@ -856,7 +856,7 @@ def test_u2f_handler_save_complex(test_qapp, test_policy_manager, real_builder):
         )
         assert (
             call(test_qapp.domains["fedora-35"], handler.SERVICE_FEATURE, True)
-            in mock_apply.mock_calls
+            not in mock_apply.mock_calls
         )
         assert len(mock_apply.mock_calls) == 2
 
@@ -915,7 +915,7 @@ def test_u2f_handler_save_complex_2(test_qapp, test_policy_manager, real_builder
         )
         assert (
             call(test_qapp.domains["fedora-35"], handler.SERVICE_FEATURE, True)
-            in mock_apply.mock_calls
+            not in mock_apply.mock_calls
         )
         assert len(mock_apply.mock_calls) == 2
 
@@ -933,14 +933,14 @@ policy.RegisterArgument +u2f.Authenticate sys-usb @anyvm allow target=dom0
 
 def test_u2f_handler_add_without_service(test_qapp, test_policy_manager, real_builder):
     sys_usb = test_qapp.domains["sys-usb"]
-    fedora35 = test_qapp.domains["fedora-35"]
+    testblue = test_qapp.domains["test-blue"]
     testvm = test_qapp.domains["test-vm"]
     handler = U2FPolicyHandler(test_qapp, test_policy_manager, real_builder, {sys_usb})
 
     assert handler.get_unsaved() == ""
 
     # settings from conftest: only vms that have this available are 'test-vm'
-    # and 'fedora-35', only test-vm can use the service, policy is default
+    # and 'test-blue', only test-vm can use the service, policy is default
 
     handler.register_check.set_active(True)
     handler.register_some_radio.set_active(True)
@@ -948,7 +948,7 @@ def test_u2f_handler_add_without_service(test_qapp, test_policy_manager, real_bu
     assert not handler.register_some_handler.selected_vms
     assert handler.enable_some_handler.selected_vms == [testvm]
 
-    handler.register_some_handler.add_qube_model.select_value("fedora-35")
+    handler.register_some_handler.add_qube_model.select_value("test-blue")
     # refuse
     with patch("qubes_config.global_config.usb_devices.ask_question") as mock_question:
         mock_question.return_value = Gtk.ResponseType.NO
@@ -962,9 +962,9 @@ def test_u2f_handler_add_without_service(test_qapp, test_policy_manager, real_bu
         mock_question.return_value = Gtk.ResponseType.YES
         handler.register_some_handler.add_button.clicked()
         assert mock_question.mock_calls
-    assert handler.register_some_handler.selected_vms == [fedora35]
+    assert handler.register_some_handler.selected_vms == [testblue]
 
-    assert handler.enable_some_handler.selected_vms == [fedora35, testvm]
+    assert handler.enable_some_handler.selected_vms == [testblue, testvm]
 
 
 def test_devices_handler_unsaved(test_qapp, test_policy_manager, real_builder):
@@ -981,6 +981,12 @@ def test_devices_handler_unsaved(test_qapp, test_policy_manager, real_builder):
         b"_function='0' _bus='00' _libvirt_name='pci_0000_00_0d_0' "
         b"_device='0d'\n"
     )
+    test_qapp.expected_calls[
+        ("test-vm", "admin.vm.feature.Get", "service.audiovm", None)
+    ] = b"0\x00"
+    test_qapp.expected_calls[
+        ("test-vm", "admin.vm.feature.Get", "service.guivm", None)
+    ] = b"0\x00"
 
     handler = DevicesHandler(test_qapp, test_policy_manager, real_builder)
 
@@ -1023,6 +1029,12 @@ def test_devices_handler_detect_usbvms(test_qapp, test_policy_manager, real_buil
         b"_function='0' _bus='00' _libvirt_name='pci_0000_00_0d_0' "
         b"_device='0d'\n"
     )
+    test_qapp.expected_calls[
+        ("test-vm", "admin.vm.feature.Get", "service.audiovm", None)
+    ] = b"0\x00"
+    test_qapp.expected_calls[
+        ("test-vm", "admin.vm.feature.Get", "service.guivm", None)
+    ] = b"0\x00"
 
     handler = DevicesHandler(test_qapp, test_policy_manager, real_builder)
 
