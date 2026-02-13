@@ -135,6 +135,7 @@ class PropertyHandler(AbstractTraitHolder):
         vm_filter: Optional[Callable] = None,
         readable_name: Optional[str] = None,
         additional_options: Dict[Any | str | None, str] | None = None,
+        show_internal: bool = False,
     ):
         self.qapp = qapp
         self.trait_holder = trait_holder
@@ -149,6 +150,7 @@ class PropertyHandler(AbstractTraitHolder):
             current_value=self.get_current_value(),
             style_changes=True,
             additional_options=additional_options,
+            show_internal=show_internal,
         )
 
     def get_readable_description(self) -> str:
@@ -740,7 +742,11 @@ class BasicSettingsHandler(PageHandler):
 
     @staticmethod
     def _clock_vm_filter(vm) -> bool:
-        return vm.klass != "TemplateVM"
+        return (
+            vm.klass != "TemplateVM"
+            and not getattr(vm, "template_for_dispvms", False)
+            and (vm.klass == "AdminVM" or vm.is_networked())
+        )
 
     @staticmethod
     def _default_template_filter(vm) -> bool:
