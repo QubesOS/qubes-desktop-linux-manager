@@ -981,6 +981,12 @@ def test_devices_handler_unsaved(test_qapp, test_policy_manager, real_builder):
         b"_function='0' _bus='00' _libvirt_name='pci_0000_00_0d_0' "
         b"_device='0d'\n"
     )
+    test_qapp.expected_calls[
+        ("test-vm", "admin.vm.feature.Get", "service.audiovm", None)
+    ] = b"0\x00"
+    test_qapp.expected_calls[
+        ("test-vm", "admin.vm.feature.Get", "service.guivm", None)
+    ] = b"0\x00"
 
     handler = DevicesHandler(test_qapp, test_policy_manager, real_builder)
 
@@ -1023,6 +1029,12 @@ def test_devices_handler_detect_usbvms(test_qapp, test_policy_manager, real_buil
         b"_function='0' _bus='00' _libvirt_name='pci_0000_00_0d_0' "
         b"_device='0d'\n"
     )
+    test_qapp.expected_calls[
+        ("test-vm", "admin.vm.feature.Get", "service.audiovm", None)
+    ] = b"0\x00"
+    test_qapp.expected_calls[
+        ("test-vm", "admin.vm.feature.Get", "service.guivm", None)
+    ] = b"0\x00"
 
     handler = DevicesHandler(test_qapp, test_policy_manager, real_builder)
 
