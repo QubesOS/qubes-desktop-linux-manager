@@ -686,6 +686,10 @@ class UpdatesHandler(PageHandler):
                 lambda vm: vm.klass != "TemplateVM"
                 and vm.klass != "AdminVM"
                 and vm.is_networked()
+                and not getattr(vm, "template_for_dispvms", False)
+                and get_boolean_feature(
+                    vm, "supported-rpc.qubes.TemplateDownload", recurse_template=True
+                )
             ),
             current_value=self.qapp.updatevm,
             additional_options=NONE_CATEGORY,

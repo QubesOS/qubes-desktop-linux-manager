@@ -33,19 +33,25 @@ t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
 
-def get_feature(vm, feature_name, default_value=None):
+def get_feature(vm, feature_name, default_value=None, recurse_template=False):
     """Get feature, with a working default_value."""
+    if recurse_template:
+        feat = vm.features.check_with_template
+    else:
+        feat = vm.features.get
     try:
-        return vm.features.get(feature_name, default_value)
+        return feat(feature_name, default_value)
     except qubesadmin.exc.QubesDaemonAccessError:
         return default_value
 
 
-def get_boolean_feature(vm, feature_name, default=False):
+def get_boolean_feature(vm, feature_name, default=False, recurse_template=False):
     """helper function to get a feature converted to a Bool if it does exist.
     Necessary because of the true/false in features being coded as 1/empty
     string."""
-    result = get_feature(vm, feature_name, None)
+    result = get_feature(
+        vm, feature_name, default_value=None, recurse_template=recurse_template
+    )
     if result is not None:
         result = bool(result)
     else:

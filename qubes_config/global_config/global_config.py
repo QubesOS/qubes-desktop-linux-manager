@@ -434,6 +434,11 @@ class GlobalConfig(Gtk.Application):
             service_name="qubes.Gpg",
             policy_file_name="50-config-splitgpg",
             default_policy="",
+            filter_function=lambda vm: vm.klass not in ["AdminVM", "TemplateVM"]
+            and not getattr(vm, "template_for_dispvms", False)
+            and not vm.features.get("service.guivm")
+            and not vm.features.get("service.audiovm")
+            and not getattr(vm, "provides_network", False),
             main_rule_class=RuleSimpleNoAllow,
             main_verb_description=SimpleVerbDescription(
                 {

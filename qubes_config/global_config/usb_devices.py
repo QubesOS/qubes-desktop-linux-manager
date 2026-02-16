@@ -27,7 +27,7 @@ from qrexec.policy.parser import Allow
 from qubesadmin.device_protocol import DeviceCategory
 
 from ..widgets.gtk_widgets import TokenName, TextModeler, VMListModeler
-from ..widgets.utils import get_feature, apply_feature_change
+from ..widgets.utils import get_feature, get_boolean_feature, apply_feature_change
 from ..widgets.gtk_utils import ask_question, show_error
 from .page_handler import PageHandler
 from .policy_rules import RuleTargetedAdminVM, Rule
@@ -465,13 +465,17 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
         self.error_handler.clear_all_errors()
 
         for vm in self.qapp.domains:
-            if vm.features.check_with_template(self.SUPPORTED_SERVICE_FEATURE):
-                if vm == usb_qube:
-                    continue
+            if vm == usb_qube:
+                continue
+            if vm.features.check_with_template(self.SUPPORTED_SERVICE_FEATURE) and not (
+                vm.klass == "TemplateVM"
+                or getattr(vm, "template_for_dispvms", False)
+                or getattr(vm, "provides_network", False)
+                or get_boolean_feature(vm, "service.audiovm")
+                or get_boolean_feature(vm, "service.guivm")
+            ):
                 self.available_vms.append(vm)
             if get_feature(vm, self.SERVICE_FEATURE):
-                if vm == usb_qube:
-                    continue
                 self.initially_enabled_vms.append(vm)
 
         if not self.available_vms:
