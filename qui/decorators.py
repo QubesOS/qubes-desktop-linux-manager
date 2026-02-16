@@ -53,6 +53,7 @@ class DomainDecorator(PropertiesDecorator):
 
             self.updates_available = False
             self.outdated = False
+            self.is_preload = False
 
             self.label = Gtk.Label(xalign=0)
             if self.vm:
@@ -63,20 +64,37 @@ class DomainDecorator(PropertiesDecorator):
 
             self.outdated_icon = create_icon("outdated")
             self.updateable_icon = create_icon("software-update-available")
+            self.preload_icon = create_icon("qubes-preloaded")
 
             self.outdated_icon.set_no_show_all(True)
             self.updateable_icon.set_no_show_all(True)
+            self.preload_icon.set_no_show_all(True)
 
             self.updateable_icon.set_tooltip_text(_("Updates available"))
             self.outdated_icon.set_tooltip_text(
                 _("Qube must be restarted to reflect changes in template")
             )
+            self.preload_icon.set_tooltip_text(_("Preloaded disposable qube"))
 
             self.update_outdated(False)
             self.update_updateable()
+            self.update_preload()
 
             self.pack_start(self.outdated_icon, False, False, 3)
             self.pack_start(self.updateable_icon, False, True, 3)
+            self.pack_start(self.preload_icon, False, False, 3)
+
+        def update_preload(self):
+            if self.vm is None:
+                return
+            try:
+                is_preload = getattr(self.vm, "is_preload", False)
+            except exc.QubesException:
+                # no access to VM features
+                is_preload = False
+            self.preload_icon.set_visible(is_preload)
+            self.is_preload = is_preload
+            self.update_tooltip()
 
         def update_outdated(self, state):
             self.outdated_icon.set_visible(state)
