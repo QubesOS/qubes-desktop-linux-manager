@@ -96,7 +96,7 @@ def test_on_header_toggled(
     sut.head_checkbox._allowed[0] = AppVMType.SERVICEVM
     service_num = 3
     sut.head_checkbox._allowed[1] = AppVMType.NON_SERVICEVM
-    non_excluded_num = 10
+    non_excluded_num = 11
 
     sut.head_checkbox.state = HeaderCheckbox.NONE
 
@@ -176,9 +176,9 @@ def test_on_checkbox_toggled(
 
 
 # expected data based on test_qapp setup
-UP_VMS = 11
+UP_VMS = 12
 UP_SERVICE_VMS = 3
-UP_APP_VMS = 8
+UP_APP_VMS = 9
 
 
 @pytest.mark.parametrize(
@@ -379,6 +379,7 @@ def test_perform_restart(
         "sys-net",
         "sys-usb",
         "default-dvm",
+        "default-mgmt-dvm",
         "test-alt-dvm",
         "test-alt-dvm-running",
         "test-blue",

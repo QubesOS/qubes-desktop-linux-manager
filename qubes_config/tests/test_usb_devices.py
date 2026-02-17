@@ -858,7 +858,7 @@ def test_u2f_handler_save_complex(test_qapp, test_policy_manager, real_builder):
             call(test_qapp.domains["fedora-35"], handler.SERVICE_FEATURE, True)
             in mock_apply.mock_calls
         )
-        assert len(mock_apply.mock_calls) == 2
+        assert len(mock_apply.mock_calls) == 3
 
         expected_rules = handler.policy_manager.text_to_rules(
             """
@@ -917,7 +917,7 @@ def test_u2f_handler_save_complex_2(test_qapp, test_policy_manager, real_builder
             call(test_qapp.domains["fedora-35"], handler.SERVICE_FEATURE, True)
             in mock_apply.mock_calls
         )
-        assert len(mock_apply.mock_calls) == 2
+        assert len(mock_apply.mock_calls) == 3
 
         expected_rules = handler.policy_manager.text_to_rules(
             """

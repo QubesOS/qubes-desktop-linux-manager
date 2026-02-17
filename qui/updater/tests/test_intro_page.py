@@ -64,7 +64,7 @@ def test_populate_vm_list(
     assert len(sut.get_vms_to_update()) == 2
 
 
-N_QUBES = 17
+N_QUBES = 19
 
 
 # i-th expectations value is an expected number of selected VMs after clicking on the
