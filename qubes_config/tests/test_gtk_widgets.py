@@ -351,11 +351,31 @@ def test_vmmodeler_default_current(test_qapp):
 
 def test_vmmodeler_filter(test_qapp):
     combobox: Gtk.ComboBox = Gtk.ComboBox.new_with_entry()
-    vms = ["test-vm", "test-blue", "test-red"]
+    internal_vm = ["disp-mgmt"]
+    normal_vms = ["test-vm", "test-blue", "test-red"]
+    vms = internal_vm + normal_vms
     _ = gtk_widgets.VMListModeler(
         combobox=combobox,
         qapp=test_qapp,
         filter_function=lambda vm: str(vm) in vms,
+    )
+
+    selected_vms = []
+    model = combobox.get_model()
+    for item in model:
+        selected_vms.append(item[1])
+
+    assert sorted(selected_vms) == sorted(normal_vms)
+
+
+def test_vmmodeler_filter_include_internal(test_qapp):
+    combobox: Gtk.ComboBox = Gtk.ComboBox.new_with_entry()
+    vms = ["disp-mgmt", "test-vm", "test-blue", "test-red"]
+    _ = gtk_widgets.VMListModeler(
+        combobox=combobox,
+        qapp=test_qapp,
+        filter_function=lambda vm: str(vm) in vms,
+        show_internal=True,
     )
 
     selected_vms = []
