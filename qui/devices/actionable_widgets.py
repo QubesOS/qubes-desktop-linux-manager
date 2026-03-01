@@ -324,6 +324,11 @@ class AttachDisposableWidget(ActionableWidget, VMWithIcon):
 
         self.device.attach_to_vm(backend.VM(new_dispvm))
 
+        if self.device.device_class == 'block':
+            try:
+                new_dispvm.run_service("qubes.StartApp+qubes-open-file-manager")
+            except Exception:  # pylint: disable=broad-except
+                pass
 
 class DetachAndAttachDisposableWidget(ActionableWidget, VMWithIcon):
     """Detach from all current attachments and attach to new disposable"""
@@ -340,6 +345,11 @@ class DetachAndAttachDisposableWidget(ActionableWidget, VMWithIcon):
 
         self.device.attach_to_vm(backend.VM(new_dispvm))
 
+        if self.device.device_class == 'block':
+            try:
+                new_dispvm.run_service("qubes.StartApp+qubes-open-file-manager")
+            except Exception:  # pylint: disable=broad-except
+                pass
 
 class ToggleFeatureItem(ActionableWidget, SimpleActionWidget):
     def __init__(
