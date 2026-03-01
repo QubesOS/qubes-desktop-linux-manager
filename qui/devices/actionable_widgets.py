@@ -26,11 +26,13 @@ Use generate_wrapper_widget to get a wrapped widget.
 import asyncio
 import functools
 import pathlib
+import logging
 from typing import Iterable, Callable, Optional, List
 
 import qubesadmin
 import qubesadmin.devices
 import qubesadmin.vm
+from qubesadmin import exc
 
 import gi
 
@@ -39,6 +41,8 @@ from gi.repository import Gtk, GdkPixbuf, GLib  # isort:skip
 
 from . import backend
 import time
+
+logger = logging.getLogger(__name__)
 
 
 def load_icon(icon_name: str, backup_name: str, size: int = 24):
@@ -324,6 +328,18 @@ class AttachDisposableWidget(ActionableWidget, VMWithIcon):
 
         self.device.attach_to_vm(backend.VM(new_dispvm))
 
+        if self.device.device_class == "block":
+            try:
+                new_dispvm.run_service(
+                    "qubes.StartApp+qubes-open-file-manager",
+                    wait=False,
+                )
+            except exc.QubesException:
+                logger.exception(
+                    "Failed to open file manager in %s",
+                    new_dispvm.name,
+                )
+
 
 class DetachAndAttachDisposableWidget(ActionableWidget, VMWithIcon):
     """Detach from all current attachments and attach to new disposable"""
@@ -339,6 +355,18 @@ class DetachAndAttachDisposableWidget(ActionableWidget, VMWithIcon):
         new_dispvm.start()
 
         self.device.attach_to_vm(backend.VM(new_dispvm))
+
+        if self.device.device_class == "block":
+            try:
+                new_dispvm.run_service(
+                    "qubes.StartApp+qubes-open-file-manager",
+                    wait=False,
+                )
+            except exc.QubesException:
+                logger.exception(
+                    "Failed to open file manager in %s",
+                    new_dispvm.name,
+                )
 
 
 class ToggleFeatureItem(ActionableWidget, SimpleActionWidget):
