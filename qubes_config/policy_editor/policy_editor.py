@@ -31,6 +31,15 @@ from qrexec.policy.admin_client import PolicyClient
 from qrexec.policy.parser import StringPolicy
 from qrexec.exc import PolicySyntaxError
 
+try:
+    from qrexec.policy.admin import (
+        PolicyAdminException,
+        PolicyAdminFileNotFoundException,
+    )
+except ImportError:
+    PolicyAdminException = subprocess.CalledProcessError
+    PolicyAdminFileNotFoundException = subprocess.CalledProcessError
+
 from qubes_config.widgets.gtk_utils import (
     load_theme,
     show_error,
@@ -450,9 +459,9 @@ class PolicyEditor(Gtk.Application):
             self.policy_client.policy_replace(
                 self.filename, self.policy_text, self.token
             )
-        except subprocess.CalledProcessError as ex:
-            err_msg = "An error occurred while trying to save the policy file:\n"
-            if ex.stdout:
+        except (PolicyAdminException, subprocess.CalledProcessError) as ex:
+            err_msg = f"Failed to replace policy {self.filename!r}: "
+            if hasattr(ex, "stdout"):
                 err_msg += ex.stdout.decode()
             else:
                 err_msg += str(ex)
@@ -533,8 +542,11 @@ class PolicyEditor(Gtk.Application):
         else:
             try:
                 text, self.token = self.policy_client.policy_get(name)
-            except subprocess.CalledProcessError as ex:
-                if ex.returncode == 126:
+            except (
+                PolicyAdminFileNotFoundException,
+                subprocess.CalledProcessError,
+            ) as ex:
+                if getattr(ex, "returncode", None) == 126:
                     show_error(
                         self.main_window,
                         "Access denied",
