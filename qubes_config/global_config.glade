@@ -7272,24 +7272,6 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                                     <property name="position">0</property>
                                   </packing>
                                 </child>
-                                <child>
-                                  <object class="GtkLabel" id="copymove_info">
-                                    <property name="visible">True</property>
-                                    <property name="can-focus">False</property>
-                                    <property name="halign">start</property>
-                                    <property name="label" translatable="yes">You will always be asked for permission when copying and moving files between qubes, except for dom0, which is handled differently. &lt;a href="https://www.qubes-os.org/doc/how-to-copy-from-dom0/"&gt;Learn about copying to and from dom0.&lt;/a&gt;</property>
-                                    <property name="use-markup">True</property>
-                                    <property name="wrap">True</property>
-                                    <style>
-                                      <class name="explanation"/>
-                                    </style>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
                               </object>
                             </child>
                             <style>
@@ -7300,6 +7282,24 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">5</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="copymove_info">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">You will always be asked for permission when copying and moving files between qubes, except for dom0, which is handled differently. &lt;a href="https://www.qubes-os.org/doc/how-to-copy-from-dom0/"&gt;Learn about copying to and from dom0.&lt;/a&gt;</property>
+                            <property name="use-markup">True</property>
+                            <property name="wrap">True</property>
+                            <style>
+                              <class name="explanation"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">6</property>
                           </packing>
                         </child>
                         <child>
@@ -7356,7 +7356,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">6</property>
+                            <property name="position">7</property>
                           </packing>
                         </child>
                         <child>
