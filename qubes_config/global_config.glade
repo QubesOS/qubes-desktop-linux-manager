@@ -7147,7 +7147,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Control access for moving and copying files between qubes using &lt;tt&gt;qvm-copy&lt;/tt&gt;, &lt;tt&gt;qvm-move&lt;/tt&gt;, and file manager actions such as &lt;b&gt;Copy/Move to other qube&lt;/b&gt;.</property>
+                            <property name="label" translatable="yes">Control access for moving and copying files between qubes using &lt;tt&gt;qvm-copy&lt;/tt&gt;, &lt;tt&gt;qvm-move&lt;/tt&gt;, and file manager actions such as &lt;b&gt;Copy/Move to other qube&lt;/b&gt;. &lt;a href="https://www.qubes-os.org/doc/how-to-copy-from-dom0/"&gt;Copying to and from dom0 is handled differently&lt;/a&gt;.</property>
                             <property name="use-markup">True</property>
                             <property name="wrap">True</property>
                             <property name="xalign">0</property>
@@ -7277,7 +7277,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="halign">start</property>
-                                    <property name="label" translatable="yes">You will always be asked for permission when copying and moving files between qubes, except for dom0, which is handled differently. &lt;a href="https://www.qubes-os.org/doc/how-to-copy-from-dom0/"&gt;Learn about copying to and from dom0.&lt;/a&gt;</property>
+                                    <property name="label" translatable="yes">You will always be asked for permission when copying and moving files between qubes.</property>
                                     <property name="use-markup">True</property>
                                     <property name="wrap">True</property>
                                     <style>
@@ -7356,7 +7356,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">6</property>
+                            <property name="position">7</property>
                           </packing>
                         </child>
                         <child>
