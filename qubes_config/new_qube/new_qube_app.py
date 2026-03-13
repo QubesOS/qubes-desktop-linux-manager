@@ -145,18 +145,25 @@ class CreateNewQube(Gtk.Application):
         self.qube_type_disposable: Gtk.RadioButton = self.builder.get_object(
             "qube_type_disposable"
         )
+        self.qube_type_dvm_template: Gtk.RadioButton = self.builder.get_object(
+            "qube_type_dvm_template"
+        )
 
         self.tooltips = {
             "qube_type_app": self.builder.get_object("qube_type_app_q"),
             "qube_type_template": self.builder.get_object("qube_type_template_q"),
             "qube_type_standalone": self.builder.get_object("qube_type_standalone_q"),
             "qube_type_disposable": self.builder.get_object("qube_type_disposable_q"),
+            "qube_type_dvm_template": self.builder.get_object(
+                "qube_type_dvm_template_q"
+            ),
         }
 
         self.qube_type_app.connect("toggled", self._type_selected)
         self.qube_type_template.connect("toggled", self._type_selected)
         self.qube_type_standalone.connect("toggled", self._type_selected)
         self.qube_type_disposable.connect("toggled", self._type_selected)
+        self.qube_type_dvm_template.connect("toggled", self._type_selected)
 
         label_dict = {}
         for label in self.qapp.labels:
@@ -279,6 +286,9 @@ class CreateNewQube(Gtk.Application):
         if self.advanced_handler.get_init_ram():
             properties["memory"] = self.advanced_handler.get_init_ram()
 
+        if self.qube_type_dvm_template.get_active():
+            properties["template_for_dispvms"] = True
+
         vm = None
         err = None
 
@@ -305,6 +315,9 @@ class CreateNewQube(Gtk.Application):
             return
 
         apps = self.app_box_handler.get_selected_apps()
+
+        if self.qube_type_dvm_template.get_active():
+            vm.features["appmenus-dispvm"] = True
 
         if apps:
             with subprocess.Popen(

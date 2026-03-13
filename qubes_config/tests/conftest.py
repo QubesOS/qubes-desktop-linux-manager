@@ -52,6 +52,8 @@ def test_qapp():
     test_qapp = MockQubesComplete()
     test_qapp._qubes["dom0"].features["gui-default-secure-copy-sequence"] = None
     test_qapp._qubes["sys-usb"].features["supported-feature.keyboard-layout"] = "1"
+    test_qapp.set_global_property("default_dispvm", "default-dvm")
+    test_qapp.update_global_properties()
     test_qapp.update_vm_calls()
     return test_qapp
 

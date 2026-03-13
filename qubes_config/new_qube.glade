@@ -427,7 +427,7 @@
                             <property name="tooltip-markup" translatable="yes">Qube name can have up to 63 characters
 A-Z, a-z, numbers, hyphen, underscores and dot are accepted
 The first character must be a letter
-Qube name can not end in &quot;-dm&quot;</property>
+Qube name can not end in "-dm"</property>
                             <property name="max-length">64</property>
                             <property name="width-chars">32</property>
                             <property name="placeholder-text" translatable="yes">enter qube name (required)</property>
@@ -445,7 +445,7 @@ Qube name can not end in &quot;-dm&quot;</property>
                             <property name="tooltip-markup" translatable="yes">Qube name can have up to 63 characters
 A-Z, a-z, numbers, hyphen, underscores and dot are accepted
 The first character must be a letter
-Qube name can not end in &quot;-dm&quot;</property>
+Qube name can not end in "-dm"</property>
                             <property name="margin-right">30</property>
                             <property name="margin-end">30</property>
                             <property name="xalign">0.5</property>
@@ -911,6 +911,61 @@ Qube name can not end in &quot;-dm&quot;</property>
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkLabel" id="label_template_dvm_template">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Template</property>
+                        <property name="xalign">0</property>
+                        <style>
+                          <class name="group_title"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">17</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label_template_explanation_dvm_template">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Select template for your new disposable qube template. Applications available in the qube depend on the template.</property>
+                        <property name="wrap">True</property>
+                        <property name="xalign">0</property>
+                        <style>
+                          <class name="explanation"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">18</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="combo_template_dvm_template">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-end">300</property>
+                        <property name="hexpand">False</property>
+                        <property name="has-entry">True</property>
+                        <child internal-child="entry">
+                          <object class="GtkEntry">
+                            <property name="can-focus">True</property>
+                            <property name="width-chars">24</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">19</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
@@ -923,7 +978,7 @@ Qube name can not end in &quot;-dm&quot;</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">17</property>
+                        <property name="position">20</property>
                       </packing>
                     </child>
                     <child>
@@ -989,7 +1044,7 @@ Qube name can not end in &quot;-dm&quot;</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">18</property>
+                        <property name="position">21</property>
                       </packing>
                     </child>
                     <child>
@@ -1133,7 +1188,7 @@ Qube name can not end in &quot;-dm&quot;</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">19</property>
+                        <property name="position">22</property>
                       </packing>
                     </child>
                     <child>
@@ -1149,7 +1204,7 @@ Qube name can not end in &quot;-dm&quot;</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">20</property>
+                        <property name="position">23</property>
                       </packing>
                     </child>
                     <child>
@@ -1166,7 +1221,7 @@ Qube name can not end in &quot;-dm&quot;</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">21</property>
+                        <property name="position">24</property>
                       </packing>
                     </child>
                     <child>
@@ -1180,7 +1235,7 @@ Qube name can not end in &quot;-dm&quot;</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">22</property>
+                        <property name="position">25</property>
                       </packing>
                     </child>
                     <child>
@@ -1196,7 +1251,7 @@ Qube name can not end in &quot;-dm&quot;</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">23</property>
+                        <property name="position">26</property>
                       </packing>
                     </child>
                     <child>
@@ -1246,7 +1301,7 @@ Qube name can not end in &quot;-dm&quot;</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">24</property>
+                        <property name="position">27</property>
                       </packing>
                     </child>
                     <child>
@@ -1380,7 +1435,7 @@ Qube name can not end in &quot;-dm&quot;</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">25</property>
+                        <property name="position">28</property>
                       </packing>
                     </child>
                     <child>
@@ -1392,7 +1447,7 @@ Qube name can not end in &quot;-dm&quot;</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">26</property>
+                        <property name="position">29</property>
                       </packing>
                     </child>
                     <style>
@@ -1537,7 +1592,7 @@ Qube name can not end in &quot;-dm&quot;</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">4</property>
+                <property name="position">3</property>
               </packing>
             </child>
             <child>
@@ -1613,7 +1668,7 @@ Qube name can not end in &quot;-dm&quot;</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">5</property>
+                <property name="position">4</property>
               </packing>
             </child>
             <child>
@@ -1689,7 +1744,7 @@ Qube name can not end in &quot;-dm&quot;</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">6</property>
+                <property name="position">5</property>
               </packing>
             </child>
             <child>
@@ -1741,6 +1796,83 @@ Qube name can not end in &quot;-dm&quot;</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="tooltip-text" translatable="yes">Disposable qubes do not store any persistent information between restarts. There is rarely a need to create one manually - if you just want to use one to e.g. browser internet, use the menu to open application in new disposable qube.</property>
+                        <property name="xalign">0.5</property>
+                        <property name="yalign">0.6000000238418579</property>
+                        <property name="pixel-size">20</property>
+                        <property name="icon-name">qubes-question</property>
+                        <style>
+                          <class name="info-tooltip"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="padding">3</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+                <style>
+                  <class name="type_toggle"/>
+                  <class name="type_toggle_bottom"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">6</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkRadioButton" id="qube_type_dvm_template">
+                <property name="name">qube_type_dvm_template</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">False</property>
+                <property name="draw-indicator">False</property>
+                <property name="group">qube_type_app</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <child>
+                      <object class="GtkImage" id="qube_type_dvm_template_q1">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="xalign">0.5</property>
+                        <property name="yalign">0.6000000238418579</property>
+                        <property name="pixel-size">20</property>
+                        <property name="icon-name">dispvm-blue</property>
+                        <style>
+                          <class name="info-tooltip"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="padding">3</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Disposable template</property>
+                        <property name="use-markup">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkImage" id="qube_type_dvm_template_q">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="tooltip-text" translatable="yes">Disposable qubes do not store any persistent information between restarts. A disposable template represents the state a new disposable based on it will have on start.</property>
                         <property name="xalign">0.5</property>
                         <property name="yalign">0.6000000238418579</property>
                         <property name="pixel-size">20</property>

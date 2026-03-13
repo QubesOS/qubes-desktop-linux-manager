@@ -210,177 +210,6 @@ class FeatureHandler(AbstractTraitHolder):
         return self.model
 
 
-class PreloadDispvmHandler(AbstractTraitHolder):
-    """Handler for preloaded disposables. Requires SpinButton widgets:
-    'basics_preload_dispvm'"""
-
-    def __init__(
-        self,
-        qapp: qubesadmin.Qubes,
-        gtk_builder: Gtk.Builder,
-        defdispvm_model: VMListModeler,
-    ):
-        self.qapp = qapp
-        self.defdispvm_model = defdispvm_model
-        self.preload_dispvm_spin: Gtk.SpinButton = gtk_builder.get_object(
-            "basics_preload_dispvm"
-        )
-        self.preload_dispvm_threshold_spin: Gtk.SpinButton = gtk_builder.get_object(
-            "basics_preload_dispvm_threshold"
-        )
-        self.preload_dispvm_check: Gtk.CheckButton = gtk_builder.get_object(
-            "basics_preload_dispvm_check"
-        )
-
-        self.defdispvm_model.connect_change_callback(self.on_defdispvm_changed)
-        self.preload_dispvm_check.connect("toggled", self.on_check_changed)
-
-        self.default_max = 1
-        self.preload_dispvm_spin.props.numeric = True
-        self.preload_dispvm_spin_adjustment = Gtk.Adjustment()
-        self.preload_dispvm_spin_adjustment.configure(0, 0, 9999, 1, 5, 0)
-        self.preload_dispvm_spin.configure(self.preload_dispvm_spin_adjustment, 0.1, 0)
-
-        self.preload_dispvm_threshold_spin.props.numeric = True
-        self.preload_dispvm_threshold_spin_adjustment = Gtk.Adjustment()
-        self.preload_dispvm_threshold_spin_adjustment.configure(
-            0, 0, 999999, 100, 1000, 0
-        )
-        self.preload_dispvm_threshold_spin.configure(
-            self.preload_dispvm_threshold_spin_adjustment, 0.1, 0
-        )
-
-        self.on_defdispvm_changed()
-        self.on_check_changed()
-        self.initial_preload_dispvm_spin_sensitive = (
-            self.preload_dispvm_spin.is_sensitive()
-        )
-        self.preload_dispvm_threshold_spin.set_value(self.get_current_threshold_value())
-
-    def on_defdispvm_changed(self):
-        defdispvm = self.defdispvm_model.get_selected()
-        if defdispvm:
-            self.preload_dispvm_check.set_sensitive(True)
-            self.preload_dispvm_check.set_active(self.get_feat_value() is not None)
-        else:
-            self.preload_dispvm_check.set_sensitive(False)
-            self.preload_dispvm_check.set_active(False)
-
-    def on_check_changed(self, *args):  # pylint: disable=unused-argument
-        defdispvm = self.defdispvm_model.get_selected()
-        preloadcheck = self.preload_dispvm_check.get_active()
-        if defdispvm and preloadcheck:
-            if self.get_feat_value() is None:
-                value = self.default_max
-            else:
-                value = self.get_current_value()
-            self.preload_dispvm_spin.set_value(value)
-            self.preload_dispvm_spin.set_sensitive(True)
-        else:
-            self.preload_dispvm_spin.set_value(0)
-            self.preload_dispvm_spin.set_sensitive(False)
-
-    @staticmethod
-    def get_readable_description() -> str:  # pylint: disable=arguments-differ
-        """Get human-readable description of the widget"""
-        # the pylint: disable above is because pylint does not understand
-        # static methods
-        return _("Number of preloaded disposables from default dispvm")
-
-    def get_feat_value(self):
-        """Get current system value as is"""
-        return get_feature(self.qapp.domains["dom0"], "preload-dispvm-max")
-
-    def get_feat_threshold_value(self):
-        """Get current system threshold value as is"""
-        return get_feature(self.qapp.domains["dom0"], "preload-dispvm-threshold")
-
-    def get_current_value(self):
-        """Get current system value of the handled feature"""
-        return int(self.get_feat_value() or 0)
-
-    def get_current_threshold_value(self):
-        """Get current system value of the handled feature"""
-        return int(self.get_feat_threshold_value() or 0)
-
-    def is_max_changed(self) -> bool:
-        """Has the user selected something different from the initial value?"""
-        if (
-            self.initial_preload_dispvm_spin_sensitive
-            != self.preload_dispvm_spin.is_sensitive()
-        ):
-            return True
-        if self.preload_dispvm_spin.get_value_as_int() != self.get_current_value():
-            return True
-        return False
-
-    def is_threshold_changed(self) -> bool:
-        """Has the user selected something different from the initial value?"""
-        return (
-            self.preload_dispvm_threshold_spin.get_value_as_int()
-            != self.get_current_threshold_value()
-        )
-
-    def is_changed(self) -> bool:
-        """Has the user selected something different from the initial value?"""
-        if self.is_max_changed() or self.is_threshold_changed():
-            return True
-        return False
-
-    def get_unsaved(self):
-        """Get human-readable description of unsaved changes, or
-        empty string if none were found."""
-        if self.is_changed():
-            return self.get_readable_description()
-        return ""
-
-    def save(self):
-        """Save changes: update system value and mark it as new initial value"""
-        if not self.is_changed():
-            return
-
-        if self.is_threshold_changed():
-            threshold_value = str(self.preload_dispvm_threshold_spin.get_value_as_int())
-            apply_feature_change(
-                self.qapp.domains["dom0"],
-                "preload-dispvm-threshold",
-                threshold_value,
-            )
-
-        # Every other feature must be set before "max" (prior to preload routine).
-        if self.is_max_changed():
-            if self.preload_dispvm_spin.is_sensitive():
-                value = str(self.preload_dispvm_spin.get_value_as_int())
-            else:
-                value = None
-            apply_feature_change(
-                self.qapp.domains["dom0"],
-                "preload-dispvm-max",
-                value,
-            )
-            if value is None:
-                self.initial_preload_dispvm_spin_sensitive = False
-            else:
-                self.initial_preload_dispvm_spin_sensitive = True
-
-    def reset(self):
-        """Reset selection to the initial value."""
-        if self.preload_dispvm_spin.is_sensitive():
-            self.preload_dispvm_spin.set_value(self.get_current_value())
-        if self.preload_dispvm_threshold_spin.is_sensitive():
-            self.preload_dispvm_threshold_spin.set_value(
-                self.get_current_threshold_value()
-            )
-
-    def update_current_value(self):
-        """This should never be called."""
-        raise NotImplementedError
-
-    def get_model(self) -> TraitSelector:
-        """This should never be called."""
-        raise NotImplementedError
-
-
 class QMemManHelper:
     """Helper class to handle the ugliness of managing qmemman config."""
 
@@ -622,9 +451,6 @@ class BasicSettingsHandler(PageHandler):
         self.defnetvm_combo: Gtk.ComboBox = gtk_builder.get_object(
             "basics_defnetvm_combo"
         )
-        self.defdispvm_combo: Gtk.ComboBox = gtk_builder.get_object(
-            "basics_defdispvm_combo"
-        )
         self.fullscreen_combo: Gtk.ComboBoxText = gtk_builder.get_object(
             "basics_fullscreen_combo"
         )
@@ -671,25 +497,7 @@ class BasicSettingsHandler(PageHandler):
                 additional_options=NONE_CATEGORY,
             )
         )
-        self.handlers.append(
-            PropertyHandler(
-                qapp=self.qapp,
-                trait_holder=self.qapp,
-                trait_name="default_dispvm",
-                widget=self.defdispvm_combo,
-                vm_filter=self._default_dispvm_filter,
-                readable_name=_("Default disposable qube template"),
-                additional_options=NONE_CATEGORY,
-            )
-        )
-        defdispvm_model: VMListModeler = self.handlers[-1].get_model()  # type: ignore
-        self.handlers.append(
-            PreloadDispvmHandler(
-                qapp=self.qapp,
-                gtk_builder=gtk_builder,
-                defdispvm_model=defdispvm_model,
-            )
-        )
+
         self.handlers.append(
             FeatureHandler(
                 trait_holder=self.vm,
@@ -751,10 +559,6 @@ class BasicSettingsHandler(PageHandler):
     @staticmethod
     def _default_netvm_filter(vm) -> bool:
         return getattr(vm, "provides_network", False)
-
-    @staticmethod
-    def _default_dispvm_filter(vm) -> bool:
-        return getattr(vm, "template_for_dispvms", False)
 
     def save(self):
         for handler in self.handlers:

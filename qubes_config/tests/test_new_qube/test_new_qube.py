@@ -356,10 +356,10 @@ def test_new_disposable(mock_error, mock_subprocess, test_qapp, new_qube_builder
 
     new_qube_app.qube_type_disposable.clicked()
     assert new_qube_app.template_handler.selected_type == "qube_type_disposable"
-    assert new_qube_app.template_handler.get_selected_template() is None
+    assert new_qube_app.template_handler.get_selected_template().name == "default-dvm"
 
     # select something better
-    new_qube_app.template_handler.select_template("default-dvm")
+    new_qube_app.template_handler.select_template("test-alt-dvm")
 
     assert new_qube_app.create_button.get_sensitive()
 
@@ -369,7 +369,7 @@ def test_new_disposable(mock_error, mock_subprocess, test_qapp, new_qube_builder
         (
             "dom0",
             "admin.vm.Create.DispVM",
-            "default-dvm",
+            "test-alt-dvm",
             b"name=test label=red",
         )
     ] = b"0\x00"
@@ -407,8 +407,8 @@ def test_new_disposable(mock_error, mock_subprocess, test_qapp, new_qube_builder
 
     mock_error.assert_not_called()
     # 2 additional subprocess calls to get all apps and available apps for
-    # the new template
-    assert num_setup_calls + 2 == len(mock_subprocess.mock_calls)
+    # the default dvm template and another 2 for the test-alt-dvm
+    assert num_setup_calls + 4 == len(mock_subprocess.mock_calls)
 
 
 @patch("subprocess.check_output", side_effect=mock_output)
@@ -493,3 +493,72 @@ def test_advanced_new_qube(
     mock_error.assert_not_called()
     # no more subprocess calls
     assert num_setup_calls == len(mock_subprocess.mock_calls)
+
+
+# test for dvm template
+@patch("subprocess.check_output", side_effect=mock_output)
+@patch("qubes_config.new_qube.new_qube_app.show_error")
+def test_new_dvm_tpl(mock_error, _mock_subprocess, test_qapp, new_qube_builder):
+    assert new_qube_builder
+    new_qube_app = CreateNewQube(test_qapp)
+
+    new_qube_app.perform_setup()
+
+    assert not new_qube_app.create_button.get_sensitive()
+
+    # enter name
+    new_qube_app.qube_name.set_text("test")
+
+    new_qube_app.qube_type_dvm_template.clicked()
+    assert new_qube_app.template_handler.selected_type == "qube_type_dvm_template"
+
+    assert new_qube_app.template_handler.get_selected_template().name == "fedora-36"
+
+    assert new_qube_app.create_button.get_sensitive()
+
+    # the created qube should be empty, have red label, default
+    # networking, no apps and not provide network
+    test_qapp.expected_calls[
+        (
+            "dom0",
+            "admin.vm.Create.AppVM",
+            "fedora-36",
+            b"name=test label=red",
+        )
+    ] = b"0\x00"
+
+    test_qapp.expected_calls[
+        ("test", "admin.vm.property.Set", "template_for_dispvms", b"True")
+    ] = b"0\x00"
+    test_qapp.expected_calls[
+        ("test", "admin.vm.property.Set", "provides_network", b"False")
+    ] = b"0\x00"
+    # other stuff needed for a dispvm template
+    test_qapp.expected_calls[
+        ("test", "admin.vm.feature.Set", "appmenus-dispvm", b"1")
+    ] = b"0\x00"
+
+    # also add a call we do after adding the vm:
+    test_qapp.expected_calls[("dom0", "admin.vm.List", None, None)] = (
+        test_qapp.expected_calls[("dom0", "admin.vm.List", None, None)]
+        + "test class=AppVM state=Halted\n".encode()
+    )
+
+    with patch(
+        "qubes_config.new_qube.new_qube_app.Gtk.MessageDialog"
+    ) as mock_dialog, patch("subprocess.Popen") as mock_popen:
+        mock_popen().__enter__().returncode = 0
+        new_qube_app.create_button.clicked()
+        assert mock_dialog.mock_calls  # called to tell us about the success
+        assert (
+            call(
+                ["qvm-appmenus", "--set-whitelist", "-", "--update", "test"],
+                stdin=-1,
+            )
+            in mock_popen.mock_calls
+        )
+        assert (
+            call().__enter__().communicate(b"firefox.desktop") in mock_popen.mock_calls
+        )
+
+    mock_error.assert_not_called()

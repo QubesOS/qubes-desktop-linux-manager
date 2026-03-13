@@ -285,6 +285,13 @@ class TemplateHandler:
                 filter_function=lambda x: getattr(x, "template_for_dispvms", False),
                 default_value=self.qapp.default_dispvm,
             ),
+            "qube_type_dvm_template": TemplateSelectorCombo(
+                gtk_builder=gtk_builder,
+                qapp=self.qapp,
+                name_suffix="dvm_template",
+                filter_function=lambda x: x.klass == "TemplateVM",
+                default_value=self.qapp.default_template,
+            ),
         }
 
         self.selected_type: Optional[str] = None
