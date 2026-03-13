@@ -283,3 +283,23 @@ separator {
     font-style: italic;
     font-weight: bold;
 }
+
+spinbutton entry {
+    padding: 0 4px 0 4px;
+}
+
+spinbutton button {
+    padding: 0 2px 0 2px;
+}
+
+.prefs_button {
+    border: 0px;
+}
+
+.prefs_button:hover {
+    background: @dark-gray-2;
+}
+
+.default_dvm_row {
+    background: @blue-bg;
+}
