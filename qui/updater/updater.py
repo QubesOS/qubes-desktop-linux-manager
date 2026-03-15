@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position,import-error
 import argparse
+import asyncio
 import logging
 import sys
 import time
@@ -23,7 +24,18 @@ import qui.updater.utils
 
 gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk, Gdk, Gio  # isort:skip
+
+try:
+    from gi.events import GLibEventLoopPolicy
+
+    asyncio.set_event_loop_policy(GLibEventLoopPolicy())
+except ImportError:
+    import gbulb
+
+    gbulb.install()
+
 from qubesadmin import Qubes
+import qubesadmin.events
 import qubesadmin.exc
 
 # using locale.gettext is necessary for Gtk.Builder translation support to work
@@ -64,6 +76,8 @@ class QubesUpdater(Gtk.Application):
         self.log = logging.getLogger("vm-update.agent.PackageManager")
         self.log.addHandler(log_handler)
         self.log.setLevel(self.cliargs.log)
+        dispatcher = qubesadmin.events.EventsDispatcher(qapp)
+        asyncio.ensure_future(dispatcher.listen_for_events())
 
     def do_activate(self, *_args, **_kwargs):
         if not self.primary:
