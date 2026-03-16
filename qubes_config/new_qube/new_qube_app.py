@@ -45,7 +45,7 @@ from ..widgets.gtk_widgets import (
 import gi
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, GObject
+from gi.repository import Gtk, GObject, GLib, Gio
 
 import gettext
 
@@ -66,12 +66,26 @@ class CreateNewQube(Gtk.Application):
         """
         :param qapp: qubesadmin.Qubes object
         """
-        super().__init__(application_id="org.qubesos.newqube")
+        super().__init__(
+            application_id="org.qubesos.newqube",
+            flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE,
+        )
         self.qapp: qubesadmin.Qubes = qapp
+        self.open_at: str | None = None
 
         self.builder: Optional[Gtk.Builder] = None
         self.main_window: Optional[Gtk.Window] = None
         self.template_selector: Optional[TemplateSelector] = None
+
+        self.add_main_option(
+            "open-at",
+            ord("o"),
+            GLib.OptionFlags.NONE,
+            GLib.OptionArg.STRING,
+            "Open new qube tool at provided qube type (application, template, "
+            "standalone, named-disposable, disposable-template)",
+            "qube-type",
+        )
 
         self.progress_bar_dialog = ProgressBarDialog(
             self, _("Loading available applications...")
@@ -103,6 +117,20 @@ class CreateNewQube(Gtk.Application):
         else:
             height = self.main_window.get_allocated_height()
         self.main_window.resize(width, height)
+
+        match self.open_at:
+            case "application":
+                self.qube_type_app.set_active(True)
+            case "template":
+                self.qube_type_template.set_active(True)
+            case "standalone":
+                self.qube_type_standalone.set_active(True)
+            case "named-disposable":
+                self.qube_type_disposable.set_active(True)
+            case "disposable-template":
+                self.qube_type_dvm_template.set_active(True)
+            case _:
+                self.qube_type_app.set_active(True)
 
         self.hold()
 
@@ -371,6 +399,23 @@ class CreateNewQube(Gtk.Application):
                 setattr(vm, k, v)
 
         return vm
+
+    def do_command_line(self, command_line):
+        """
+        Handle CLI arguments. This method overrides default do_command_line
+        from Gtk.Application (and due to pygtk being dynamically generated
+        pylint is confused about its arguments).
+        """
+        # pylint: disable=arguments-differ
+        Gtk.Application.do_command_line(self, command_line)
+        options = command_line.get_options_dict()
+        options = options.end().unpack()
+        if "open-at" in options:
+            self.open_at = options["open-at"]
+        else:
+            self.open_at = None
+        self.activate()
+        return 0
 
 
 def main():

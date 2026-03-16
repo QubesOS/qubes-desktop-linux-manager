@@ -204,7 +204,7 @@ class DispVmListHandler(PageHandler):
 
     def _add_new_dvm_template(self, *_args):
         # this is blocking by design
-        subprocess.check_call(["qubes-new-qube"])
+        subprocess.check_call(["qubes-new-qube", "--open-at", "disposable-template"])
         # needed
         self.qapp.domains.clear_cache()
         self.load_data()
