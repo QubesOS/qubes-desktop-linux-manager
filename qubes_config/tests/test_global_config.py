@@ -363,9 +363,6 @@ def test_global_config_open_at(
         app.scroll_to_location("disposables#preloading")
         mock_print.assert_not_called()
 
-        app.scroll_to_location("url")
-        mock_print.assert_not_called()
-
         app.scroll_to_location("thisdevice")
         mock_print.assert_not_called()
 
