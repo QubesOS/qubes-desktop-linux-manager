@@ -362,6 +362,12 @@ class Device:
                 self.backend_domain, self._ident, self.device_class
             )
             vm.vm_object.devices[self.device_class].detach(assignment)
+            self.gtk_app.emit_notification(
+                _("Device detached"),
+                _("{} was detached from {}.").format(self.description, vm),
+                Gio.NotificationPriority.NORMAL,
+                notification_id=self.notification_id,
+            )
             if self.devices_to_attach_with_me and with_aux_devices:
                 for device in self.devices_to_attach_with_me:
                     if device is self:
