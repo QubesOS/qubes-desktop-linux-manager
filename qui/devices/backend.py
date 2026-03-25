@@ -47,9 +47,9 @@ class VM:
     """
 
     def __init__(self, vm: qubesadmin.vm.QubesVM):
-        self.__hash = hash(vm)
+        self.__hash = hash(str(vm))
         self._vm = vm
-        self.name = vm.name
+        self.name = str(vm)
         self.vm_class = vm.klass
         self._devices_denied = []
         self.is_running = True  # in most cases, this is just True, unless we're at
@@ -82,14 +82,20 @@ class VM:
         """
         Is this VM a dispvm template?
         """
-        return getattr(self._vm, "template_for_dispvms", False)
+        try:
+            return getattr(self._vm, "template_for_dispvms", False)
+        except qubesadmin.exc.QubesException:
+            return False
 
     @property
     def is_attachable(self) -> bool:
         """
         Should this VM be listed as possible attachment target in the GUI?
         """
-        return self.vm_class != "AdminVM" and self._vm.is_running()
+        try:
+            return self.vm_class != "AdminVM" and self._vm.is_running()
+        except qubesadmin.exc.QubesException:
+            return False
 
     @property
     def is_usbvm(self) -> bool:
@@ -98,11 +104,14 @@ class VM:
         We do not need to cache this since it is checked only at Qui Devices
         initialization as well a PCI assignment/un-assignment
         """
-        for dev in self._vm.devices["pci"].get_assigned_devices():
-            for interface in dev.device.interfaces:
-                if interface.category == DeviceCategory.PCI_USB:
-                    return True
-        return False
+        try:
+            for dev in self._vm.devices["pci"].get_assigned_devices():
+                for interface in dev.device.interfaces:
+                    if interface.category == DeviceCategory.PCI_USB:
+                        return True
+            return False
+        except qubesadmin.exc.QubesException:
+            return False
 
     @property
     def vm_object(self):
@@ -116,7 +125,10 @@ class VM:
         """
         VMs that should have the "shut me down when detaching device" option
         """
-        return getattr(self._vm, "auto_cleanup", False)
+        try:
+            return getattr(self._vm, "auto_cleanup", False)
+        except qubesadmin.exc.QubesException:
+            return False
 
     def toggle_feature_value(self, feature_name, value):
         """
