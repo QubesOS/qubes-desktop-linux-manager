@@ -28,7 +28,11 @@ from qrexec.policy.parser import Rule
 from qrexec.client import call as qrexec_call
 
 from ..widgets.gtk_widgets import VMListModeler, NONE_CATEGORY
-from ..widgets.utils import get_boolean_feature, apply_feature_change
+from ..widgets.utils import (
+    get_boolean_feature,
+    apply_feature_change,
+    inadvisable_selection,
+)
 from .page_handler import PageHandler
 from .policy_rules import RuleTargeted, SimpleVerbDescription
 from .policy_handler import PolicyHandler
@@ -681,15 +685,19 @@ class UpdatesHandler(PageHandler):
 
         self.dom0_updatevm_model = VMListModeler(
             combobox=self.dom0_updatevm_combo,
+            trait_name="dom0_updatevm",
+            gtk_builder=gtk_builder,
             qapp=self.qapp,
             filter_function=(
                 lambda vm: vm.klass != "TemplateVM"
                 and vm.klass != "AdminVM"
                 and vm.is_networked()
-                and not getattr(vm, "template_for_dispvms", False)
                 and get_boolean_feature(
                     vm, "supported-rpc.qubes.TemplateDownload", recurse_template=True
                 )
+            ),
+            vm_inadvisable=lambda vm: inadvisable_selection(
+                readable_name="dom0 updates proxy", vm=vm, warn_dispvm_template=True
             ),
             current_value=self.qapp.updatevm,
             additional_options=NONE_CATEGORY,

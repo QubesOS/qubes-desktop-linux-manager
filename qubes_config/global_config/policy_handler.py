@@ -563,6 +563,7 @@ class VMSubsetPolicyHandler(PolicyHandler):
         exception_verb_description: AbstractVerbDescription,
         exception_rule_class: Type[AbstractRuleWrapper],
         filter_function: Callable[[qubesadmin.vm.QubesVM], bool] | None = None,
+        vm_inadvisable: Callable[[qubesadmin.vm.QubesVM], bool] | None = None,
     ):
         """
         :param qapp: Qubes object
@@ -582,6 +583,7 @@ class VMSubsetPolicyHandler(PolicyHandler):
         the exception rules
         :param exception_rule_class: class to be used for exception Rules, must
          inherit from AbstractRuleWrapper
+        :param vm_inadvisable: warn if selection is not advisable
         """
         self.select_qubes: Set[str] = set()
         self.main_verb_description = main_verb_description
@@ -621,6 +623,8 @@ class VMSubsetPolicyHandler(PolicyHandler):
         # populate combo
         self.select_qube_model = VMListModeler(
             combobox=self.select_qube_combo,
+            trait_name=prefix,
+            gtk_builder=gtk_builder,
             qapp=self.qapp,
             filter_function=(
                 (
@@ -636,6 +640,7 @@ class VMSubsetPolicyHandler(PolicyHandler):
                     )
                 )
             ),
+            vm_inadvisable=vm_inadvisable,
         )
 
         # connect events

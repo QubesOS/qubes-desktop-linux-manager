@@ -43,6 +43,7 @@ from ..widgets.utils import (
     get_feature,
     get_boolean_feature,
     apply_feature_change,
+    inadvisable_selection,
 )
 
 import gi
@@ -130,9 +131,11 @@ class PropertyHandler(AbstractTraitHolder):
         self,
         qapp: qubesadmin.Qubes,
         trait_holder: Any,
-        trait_name: str,
         widget: Gtk.ComboBox,
+        trait_name: str,
+        gtk_builder: Gtk.Builder = None,
         vm_filter: Optional[Callable] = None,
+        vm_inadvisable: Optional[Callable] = None,
         readable_name: Optional[str] = None,
         additional_options: Dict[Any | str | None, str] | None = None,
         show_internal: bool = False,
@@ -146,7 +149,10 @@ class PropertyHandler(AbstractTraitHolder):
         self.model = VMListModeler(
             combobox=self.widget,
             qapp=qapp,
+            gtk_builder=gtk_builder,
+            trait_name=trait_name,
             filter_function=vm_filter,
+            vm_inadvisable=vm_inadvisable,
             current_value=self.get_current_value(),
             style_changes=True,
             additional_options=additional_options,
@@ -644,7 +650,9 @@ class BasicSettingsHandler(PageHandler):
                 trait_holder=self.qapp,
                 trait_name="clockvm",
                 widget=self.clockvm_combo,
+                gtk_builder=gtk_builder,
                 vm_filter=self._clock_vm_filter,
+                vm_inadvisable=self._clock_vm_inadvisable,
                 readable_name=_("Clock qube"),
                 additional_options=NONE_CATEGORY,
             )
@@ -742,10 +750,14 @@ class BasicSettingsHandler(PageHandler):
 
     @staticmethod
     def _clock_vm_filter(vm) -> bool:
+        return vm.klass != "TemplateVM" and (vm.klass == "AdminVM" or vm.is_networked())
+
+    @staticmethod
+    def _clock_vm_inadvisable(vm) -> str:
         return (
-            vm.klass != "TemplateVM"
-            and not getattr(vm, "template_for_dispvms", False)
-            and (vm.klass == "AdminVM" or vm.is_networked())
+            inadvisable_selection(
+                readable_name="clock qube", vm=vm, warn_dispvm_template=True
+            ),
         )
 
     @staticmethod

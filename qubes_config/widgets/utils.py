@@ -147,3 +147,21 @@ def open_url_in_disposable(url: str, qapp: qubesadmin.Qubes):
         group=None, target=_open_url_in_dvm, args=[url, default_dvm]
     )
     open_thread.start()
+
+
+def inadvisable_selection(
+    readable_name: str, vm: qubesadmin.vm.QubesVM, warn_dispvm_template: bool = False
+) -> str:
+    inadvisable = []
+    if warn_dispvm_template:
+        inadvisable.append(dispvm_template_inadvisable(vm))
+    pretty_inadvisable = " ".join(i for i in inadvisable if i)
+    if not pretty_inadvisable:
+        return ""
+    return f"Inadvisable {readable_name.lower()}: {pretty_inadvisable}"
+
+
+def dispvm_template_inadvisable(vm: qubesadmin.vm.QubesVM) -> str:
+    if getattr(vm, "template_for_dispvms", False):
+        return "It's a disposable template, normally not intended for such cases."
+    return ""
