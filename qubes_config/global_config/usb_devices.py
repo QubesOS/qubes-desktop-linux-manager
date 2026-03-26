@@ -27,7 +27,12 @@ from qrexec.policy.parser import Allow
 from qubesadmin.device_protocol import DeviceCategory
 
 from ..widgets.gtk_widgets import TokenName, TextModeler, VMListModeler
-from ..widgets.utils import get_feature, get_boolean_feature, apply_feature_change
+from ..widgets.utils import (
+    get_feature,
+    get_boolean_feature,
+    apply_feature_change,
+    dispvm_template_inadvisable,
+)
 from ..widgets.gtk_utils import ask_question, show_error
 from .page_handler import PageHandler
 from .policy_rules import RuleTargetedAdminVM, Rule
@@ -317,6 +322,7 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
             "usb_u2f_enable_some",
             self.initially_enabled_vms,
             lambda vm: vm in self.available_vms,
+            vm_inadvisable=lambda vm: dispvm_template_inadvisable(vm),
         )
 
         self.register_some_handler = VMFlowboxHandler(
@@ -326,6 +332,7 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
             self.initial_register_vms,
             lambda vm: vm in self.available_vms,
             verification_callback=self._verify_additional_vm,
+            vm_inadvisable=lambda vm: dispvm_template_inadvisable(vm),
         )
 
         self.blanket_handler = VMFlowboxHandler(
@@ -335,6 +342,7 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
             self.initial_blanket_vms,
             lambda vm: vm in self.available_vms,
             verification_callback=self._verify_additional_vm,
+            vm_inadvisable=lambda vm: dispvm_template_inadvisable(vm),
         )
 
         self.widget_to_box = {
@@ -469,7 +477,6 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
                 continue
             if vm.features.check_with_template(self.SUPPORTED_SERVICE_FEATURE) and not (
                 vm.klass == "TemplateVM"
-                or getattr(vm, "template_for_dispvms", False)
                 or getattr(vm, "provides_network", False)
                 or get_boolean_feature(vm, "service.audiovm")
                 or get_boolean_feature(vm, "service.guivm")
