@@ -1,3 +1,26 @@
+qubes-desktop-linux-manager (4.3.25-1) unstable; urgency=medium
+
+  [ Marek Marczykowski-Górecki ]
+  * Format with newer black
+  * tests: adjust for changed device id encoding
+
+  [ Rusty Bird ]
+  * Attach to new disposable: omit template on deletion, not shutdown
+  * VM update proxy selection: fix filter logic
+
+  [ Marta Marczykowska-Górecka ]
+  * Make icons bluer
+  * Do not detach and reattach a mic in some situations
+
+  [ Ben Grande ]
+  * Fix tests after increasing qube count on mock_app
+  * Hide internal qubes from list modeler by default
+
+  [ Marta Marczykowska-Górecka ]
+  * Fix a bug with dispvms and devices widget
+
+ -- Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>  Sat, 28 Mar 2026 02:55:01 +0100
+
 qubes-desktop-linux-manager (4.3.24-1) unstable; urgency=medium
 
   [ Ali Mirjamali ]
