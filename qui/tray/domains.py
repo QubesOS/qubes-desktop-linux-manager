@@ -226,32 +226,72 @@ class ShutdownItem(VMActionMenuItem):
                     ).format(self.vm.name, str(ex)),
                 )
                 return
+            if isinstance(ex, exc.QubesVMInUseError):
+                title = _("Qube {0} is in use").format(self.vm.name)
+                markup = _(
+                    "The qube <b>{0}</b> could not be shut down because it "
+                    "is in use by connected qubes.\n\n"
+                    "<b>Warning:</b> force shutdown may cause unexpected "
+                    "issues in connected qubes."
+                ).format(self.vm.name)
+                button_label = _("Force shutdown")
+                action = "force"
+            elif isinstance(ex, exc.QubesVMShutdownTimeoutError):
+                title = _("Qube {0} shutdown timed out").format(self.vm.name)
+                markup = _(
+                    "The qube <b>{0}</b> did not shut down within the "
+                    "expected time.\n\nYou can retry the shutdown or, "
+                    "if the problem persists, kill the qube."
+                ).format(self.vm.name)
+                button_label = None  # timeout uses custom buttons below
+                action = "timeout"
+            else:
+                title = _("Error shutting down qube {0}").format(self.vm.name)
+                markup = _(
+                    "The qube <b>{0}</b> could not be shut down. "
+                    "The following error occurred:\n"
+                    "<tt>{1}</tt>\n\n"
+                    "Would you like to kill the qube?"
+                ).format(self.vm.name, str(ex))
+                button_label = _("Kill")
+                action = "kill"
+
             dialog = Gtk.MessageDialog(
-                None, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.OK_CANCEL
+                None, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.NONE
             )
-            dialog.set_title("Error shutting down qube")
-            dialog.set_markup(
-                f"The qube {self.vm.name} couldn't be shut down "
-                "normally. The following error occurred: \n"
-                f"<tt>{str(ex)}</tt>\n\n"
-                "Do you want to force shutdown? \n\n<b>Warning:</b> "
-                "this may cause unexpected issues in connected qubes."
-            )
-            dialog.connect("response", self.react_to_question)
+            dialog.set_title(title)
+            dialog.set_markup(markup)
+            dialog.add_button(_("Cancel"), Gtk.ResponseType.CANCEL)
+            if action == "timeout":
+                dialog.add_button(_("Retry shutdown"), Gtk.ResponseType.OK)
+                dialog.add_button(_("Kill"), Gtk.ResponseType.YES)
+            else:
+                dialog.add_button(button_label, Gtk.ResponseType.OK)
+            dialog.connect("response", self.react_to_question, action)
             GLib.idle_add(dialog.show)
 
-    def react_to_question(self, widget, response):
-        if response == Gtk.ResponseType.OK:
-            try:
+    def react_to_question(self, widget, response, action):
+        if response not in (Gtk.ResponseType.OK, Gtk.ResponseType.YES):
+            widget.destroy()
+            return
+        try:
+            if action == "force":
                 self.vm.shutdown(force=True)
-            except exc.QubesException as ex:
-                show_error(
-                    _("Error shutting down qube"),
-                    _(
-                        "The following error occurred while attempting to "
-                        "shut down qube {0}:\n{1}"
-                    ).format(self.vm.name, str(ex)),
-                )
+            elif action == "timeout":
+                if response == Gtk.ResponseType.YES:
+                    self.vm.kill()
+                elif response == Gtk.ResponseType.OK:
+                    self.vm.shutdown(force=False)
+            elif action == "kill" and response == Gtk.ResponseType.OK:
+                self.vm.kill()
+        except exc.QubesException as ex:
+            show_error(
+                _("Error shutting down qube"),
+                _(
+                    "The following error occurred while attempting to "
+                    "shut down qube {0}:\n{1}"
+                ).format(self.vm.name, str(ex)),
+            )
         widget.destroy()
 
 
