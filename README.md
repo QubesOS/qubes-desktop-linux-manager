@@ -72,7 +72,7 @@ available locations are:
 
 ## Code formatting
 
-Code in this repository is formatted using `black`. Before commiting changes run:
+Code in this repository is formatted using `black`. Before committing changes run:
 
     black .
 
