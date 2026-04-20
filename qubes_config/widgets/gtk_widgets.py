@@ -230,7 +230,10 @@ class VMListModeler(TraitSelector):
         self,
         combobox: Gtk.ComboBox,
         qapp: qubesadmin.Qubes,
+        trait_name: str = "",
+        gtk_builder: Gtk.Builder = None,
         filter_function: Callable[[qubesadmin.vm.QubesVM], bool] | None = None,
+        vm_inadvisable: Callable[[qubesadmin.vm.QubesVM], bool] | None = None,
         event_callback: Callable[[], None] | None = None,
         default_value: qubesadmin.vm.QubesVM | str | None = None,
         current_value: qubesadmin.vm.QubesVM | str | None = None,
@@ -241,9 +244,13 @@ class VMListModeler(TraitSelector):
         """
         :param combobox: target ComboBox object
         :param qapp: Qubes object, necessary to retrieve VM info
+        :param trait_name: trait that is being considered
+        :param gtk_builder: builder passed from upstream
         :param filter_function: function used to filter VMs, must take as input
         QubesVM object and return bool; caution: remember not all properties
         are always available for all VMs, in particular dom0 can cause problems
+        :param vm_inadvisable: function used to return human-readable information if
+        selected qube is not recommended.
         :param event_callback: function to be called whenever combobox value
         changes
         :param default_value: default VM (will get a (default) decoration
@@ -262,6 +269,7 @@ class VMListModeler(TraitSelector):
         self.qapp = qapp
         self.combo = combobox
         self.entry_box = self.combo.get_child()
+        self.vm_inadvisable = vm_inadvisable
         self.change_function = event_callback
         self.style_changes = style_changes
         self.show_internal = show_internal
@@ -278,6 +286,15 @@ class VMListModeler(TraitSelector):
         self._apply_model()
 
         self._initial_id = None
+
+        if gtk_builder:
+            self.warn_box = gtk_builder.get_object(trait_name + "_warn_box")
+            self.warn_label: Gtk.Label = gtk_builder.get_object(
+                trait_name + "_warn_label"
+            )
+            self.warn_box.set_visible(False)
+        else:
+            self.warn_box = None
 
         if current_value:
             self.select_value(current_value)
@@ -397,16 +414,27 @@ class VMListModeler(TraitSelector):
 
     def _combo_change(self, _widget):
         name = self._get_valid_qube_name()
+        inadvisable = ""
 
         if name:
             entry = self._entries[name]
             self.entry_box.set_icon_from_pixbuf(
                 Gtk.EntryIconPosition.PRIMARY, entry["icon"]
             )
+            vm = entry["vm"]
+            if vm and self.vm_inadvisable and (inadvisable := self.vm_inadvisable(vm)):
+                self._warn(inadvisable)
         else:
             self.entry_box.set_icon_from_pixbuf(
                 Gtk.EntryIconPosition.PRIMARY, load_icon("gtk-find", 18, 18)
             )
+
+        if (
+            self.warn_box is not None
+            and not inadvisable
+            and self.warn_box.get_visible()
+        ):
+            self.warn_box.set_visible(False)
 
         if self.change_function:
             self.change_function()
@@ -499,6 +527,11 @@ class VMListModeler(TraitSelector):
         for display_name, entry in self._entries.items():
             if entry["api_name"] == vm_name:
                 self.combo.set_active_id(display_name)
+
+    def _warn(self, error_descr: str):
+        self.warn_label.set_text(error_descr)
+        if self.warn_box is not None:
+            self.warn_box.set_visible(True)
 
     def is_vm_available(self, vm: qubesadmin.vm.QubesVM) -> bool:
         """Check if given VM is available in the list."""

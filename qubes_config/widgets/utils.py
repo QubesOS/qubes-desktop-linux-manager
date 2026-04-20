@@ -33,19 +33,25 @@ t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
 
-def get_feature(vm, feature_name, default_value=None):
+def get_feature(vm, feature_name, default_value=None, recurse_template=False):
     """Get feature, with a working default_value."""
+    if recurse_template:
+        feat = vm.features.check_with_template
+    else:
+        feat = vm.features.get
     try:
-        return vm.features.get(feature_name, default_value)
+        return feat(feature_name, default_value)
     except qubesadmin.exc.QubesDaemonAccessError:
         return default_value
 
 
-def get_boolean_feature(vm, feature_name, default=False):
+def get_boolean_feature(vm, feature_name, default=False, recurse_template=False):
     """helper function to get a feature converted to a Bool if it does exist.
     Necessary because of the true/false in features being coded as 1/empty
     string."""
-    result = get_feature(vm, feature_name, None)
+    result = get_feature(
+        vm, feature_name, default_value=None, recurse_template=recurse_template
+    )
     if result is not None:
         result = bool(result)
     else:
@@ -141,3 +147,21 @@ def open_url_in_disposable(url: str, qapp: qubesadmin.Qubes):
         group=None, target=_open_url_in_dvm, args=[url, default_dvm]
     )
     open_thread.start()
+
+
+def inadvisable_selection(
+    readable_name: str, vm: qubesadmin.vm.QubesVM, warn_dispvm_template: bool = False
+) -> str:
+    inadvisable = []
+    if warn_dispvm_template:
+        inadvisable.append(dispvm_template_inadvisable(vm))
+    pretty_inadvisable = " ".join(i for i in inadvisable if i)
+    if not pretty_inadvisable:
+        return ""
+    return f"Inadvisable {readable_name.lower()}: {pretty_inadvisable}"
+
+
+def dispvm_template_inadvisable(vm: qubesadmin.vm.QubesVM) -> str:
+    if getattr(vm, "template_for_dispvms", False):
+        return "It's a disposable template, normally not intended for such cases."
+    return ""

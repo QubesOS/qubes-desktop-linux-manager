@@ -40,7 +40,7 @@ from ..widgets.gtk_utils import (
     show_dialog,
 )
 from ..widgets.gtk_widgets import ProgressBarDialog, ViewportHandler
-from ..widgets.utils import open_url_in_disposable
+from ..widgets.utils import open_url_in_disposable, inadvisable_selection
 from .page_handler import PageHandler
 from .policy_handler import PolicyHandler, VMSubsetPolicyHandler
 from .policy_rules import (
@@ -434,6 +434,13 @@ class GlobalConfig(Gtk.Application):
             service_name="qubes.Gpg",
             policy_file_name="50-config-splitgpg",
             default_policy="",
+            filter_function=lambda vm: vm.klass not in ["AdminVM", "TemplateVM"]
+            and not vm.features.get("service.guivm")
+            and not vm.features.get("service.audiovm")
+            and not getattr(vm, "provides_network", False),
+            vm_inadvisable=lambda vm: inadvisable_selection(
+                readable_name="key qube", vm=vm, warn_dispvm_template=True
+            ),
             main_rule_class=RuleSimpleNoAllow,
             main_verb_description=SimpleVerbDescription(
                 {

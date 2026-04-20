@@ -109,6 +109,7 @@ class VMFlowboxHandler:
         prefix: str,
         initial_vms: List[qubesadmin.vm.QubesVM],
         filter_function: Optional[Callable] = None,
+        vm_inadvisable: Optional[Callable] = None,
         verification_callback: Optional[Callable[[qubesadmin.vm.QubesVM], bool]] = None,
     ):
         """
@@ -117,6 +118,7 @@ class VMFlowboxHandler:
         :param prefix: widget name prefix (see above)
         :param initial_vms: list of initially selected vms
         :param filter_function: function to filter vms available in the dropdown
+        :param vm_inadvisable: function to warn if selection is inadvisable
         :param verification_callback: if provided, will be called before adding
         a vm; return True if verification was successful and false if it has
         failed
@@ -134,8 +136,11 @@ class VMFlowboxHandler:
 
         self.add_qube_model = VMListModeler(
             combobox=self.qube_combo,
+            trait_name=prefix,
+            gtk_builder=gtk_builder,
             qapp=self.qapp,
             filter_function=filter_function,
+            vm_inadvisable=vm_inadvisable,
         )
 
         self.add_qube_model.connect_change_callback(self._check_for_add_validity)

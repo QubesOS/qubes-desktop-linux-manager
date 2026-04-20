@@ -31,6 +31,7 @@ from qubesadmin.device_protocol import (
     ProtocolError,
 )
 
+from ..widgets.utils import inadvisable_selection
 from ..widgets.gtk_widgets import TokenName
 from ..widgets.gtk_utils import show_error
 from .device_widgets import (
@@ -122,7 +123,12 @@ class AutoDeviceDialog(DevPolicyDialogHandler):
             self.qapp,
             "edit_device",
             [],
-            filter_function=lambda vm: vm.klass != "AdminVM",
+            filter_function=lambda vm: vm.klass not in ["AdminVM", "TemplateVM"],
+            vm_inadvisable=lambda vm: inadvisable_selection(
+                readable_name="qube for having devices",
+                vm=vm,
+                warn_dispvm_template=True,
+            ),
         )
 
         self.backend_vm: Optional[qubesadmin.vm.QubesVM] = None
@@ -398,7 +404,12 @@ class RequiredDeviceDialog(DevPolicyDialogHandler):
             self.qapp,
             "required_device",
             [],
-            filter_function=lambda vm: vm.klass != "AdminVM",
+            filter_function=lambda vm: vm.klass not in ["AdminVM", "TemplateVM"],
+            vm_inadvisable=lambda vm: inadvisable_selection(
+                readable_name="qube for required device",
+                vm=vm,
+                warn_dispvm_template=True,
+            ),
         )
 
         self.dev_modeler = self.fill_combo_with_devices(
