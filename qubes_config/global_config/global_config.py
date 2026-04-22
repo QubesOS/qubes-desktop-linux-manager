@@ -54,9 +54,9 @@ from .policy_manager import PolicyManager
 from .updates_handler import UpdatesHandler
 from .usb_devices import DevicesHandler
 from .basics_handler import BasicSettingsHandler, FeatureHandler
-from .policy_exceptions_handler import DispvmExceptionHandler
 from .thisdevice_handler import ThisDeviceHandler
 from .device_attachments import DevAttachmentHandler
+from .disposables import DisposablesHandler
 
 import gi
 
@@ -86,10 +86,13 @@ LOCATIONS = [
     "clipboard_shortcut",
     "clipboard_policy",
     "filecopy_policy",
-    "open_in_vm",
+    "open_in_disposable",
     "attachment_policy",
     "auto_attachment",
     "required_devices",
+    "open_url_in_disposable",
+    "disposables",
+    "preloading",
 ]
 
 
@@ -174,64 +177,6 @@ qubes.ClipboardPaste * @anyvm @anyvm ask\n""",
     def get_unsaved(self) -> str:
         unsaved = []
         for handler in self.handlers:
-            unsaved_changes = handler.get_unsaved()
-            if unsaved_changes:
-                unsaved.append(unsaved_changes)
-        return "\n".join(unsaved)
-
-
-class FileAccessHandler(PageHandler):
-    """Handler for FileAccess page. Requires separate handler because
-    it combines two policies in itself."""
-
-    def __init__(
-        self,
-        qapp: qubesadmin.Qubes,
-        gtk_builder: Gtk.Builder,
-        policy_manager: PolicyManager,
-    ):
-        self.qapp = qapp
-        self.policy_manager = policy_manager
-
-        self.filecopy_handler = PolicyHandler(
-            qapp=self.qapp,
-            gtk_builder=gtk_builder,
-            prefix="filecopy",
-            policy_manager=self.policy_manager,
-            default_policy="""qubes.Filecopy * @anyvm @adminvm deny\n
-qubes.Filecopy * @anyvm @anyvm ask""",
-            service_name="qubes.Filecopy",
-            policy_file_name="50-config-filecopy",
-            verb_description=SimpleVerbDescription(
-                {
-                    "ask": _("to be allowed to copy files to"),
-                    "allow": _("allow files to be copied to"),
-                    "deny": _("be allowed to copy files to"),
-                }
-            ),
-            rule_class=RuleSimple,
-        )
-
-        self.openinvm_handler = DispvmExceptionHandler(
-            gtk_builder=gtk_builder,
-            qapp=self.qapp,
-            service_name="qubes.OpenInVM",
-            policy_file_name="50-config-openinvm",
-            prefix="openinvm",
-            policy_manager=self.policy_manager,
-        )
-
-    def reset(self):
-        self.filecopy_handler.reset()
-        self.openinvm_handler.reset()
-
-    def save(self):
-        self.filecopy_handler.save()
-        self.openinvm_handler.save()
-
-    def get_unsaved(self) -> str:
-        unsaved = []
-        for handler in [self.filecopy_handler, self.openinvm_handler]:
             unsaved_changes = handler.get_unsaved()
             if unsaved_changes:
                 unsaved.append(unsaved_changes)
@@ -459,19 +404,28 @@ class GlobalConfig(Gtk.Application):
         )
         self.progress_bar_dialog.update_progress(page_progress)
 
-        self.handlers["file"] = FileAccessHandler(
+        self.handlers["file"] = PolicyHandler(
             qapp=self.qapp,
             gtk_builder=self.builder,
+            prefix="filecopy",
             policy_manager=self.policy_manager,
+            default_policy="""qubes.Filecopy * @anyvm @adminvm deny\n
+qubes.Filecopy * @anyvm @anyvm ask""",
+            service_name="qubes.Filecopy",
+            policy_file_name="50-config-filecopy",
+            verb_description=SimpleVerbDescription(
+                {
+                    "ask": _("to be allowed to copy files to"),
+                    "allow": _("allow files to be copied to"),
+                    "deny": _("be allowed to copy files to"),
+                }
+            ),
+            rule_class=RuleSimple,
         )
+
         self.progress_bar_dialog.update_progress(page_progress)
-        self.handlers["url"] = DispvmExceptionHandler(
-            gtk_builder=self.builder,
-            qapp=self.qapp,
-            service_name="qubes.OpenURL",
-            policy_file_name="50-config-openurl",
-            prefix="url",
-            policy_manager=self.policy_manager,
+        self.handlers["disposable"] = DisposablesHandler(
+            qapp=self.qapp, policy_manager=self.policy_manager, gtk_builder=self.builder
         )
         self.progress_bar_dialog.update_progress(page_progress)
 
@@ -497,7 +451,7 @@ class GlobalConfig(Gtk.Application):
                 self.builder.get_object("splitgpg_scrolled_window"),
                 self.builder.get_object("clipboard_scrolled_window"),
                 self.builder.get_object("file_scrolled_window"),
-                self.builder.get_object("url_scrolled_window"),
+                self.builder.get_object("disp_scrolled_window"),
                 self.builder.get_object("thisdevice_scrolled_window"),
             ],
         )
@@ -541,7 +495,7 @@ class GlobalConfig(Gtk.Application):
             "splitgpg_tab_icon": "key-",
             "clipboard_tab_icon": "qui-clipboard-",
             "file_tab_icon": "harddrive-",
-            "url_tab_icon": "url-",
+            "disp_tab_icon": "disp-",
             "thisdevice_tab_icon": "laptop-",
         }
 

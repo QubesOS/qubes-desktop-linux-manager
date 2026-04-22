@@ -29,9 +29,9 @@ from qubesadmin.tests.mock_app import MockQube
 from ..global_config.global_config import (
     GlobalConfig,
     ClipboardHandler,
-    FileAccessHandler,
     VMCollection,
     Qubes,
+    PolicyHandler,
 )
 from ..global_config.basics_handler import BasicSettingsHandler
 from qubesadmin.tests import TestVMCollection, QubesTest
@@ -167,19 +167,19 @@ def test_global_config_page_change(
 
     file_page_num = app.main_notebook.get_current_page()
     handler = app.get_current_page()
-    assert isinstance(handler, FileAccessHandler)
+    assert isinstance(handler, PolicyHandler)
 
     # make a small change
-    handler.filecopy_handler.enable_radio.set_active(True)
-    handler.filecopy_handler.add_button.clicked()
+    handler.enable_radio.set_active(True)
+    handler.add_button.clicked()
 
-    for child in handler.filecopy_handler.current_rows:
+    for child in handler.current_rows:
         if child.editing:
             child.activate()
             child.source_widget.model.select_value("sys-net")
             child.validate_and_save()
 
-    for row in handler.filecopy_handler.current_rows:
+    for row in handler.current_rows:
         if row.rule.source == "sys-net":
             break
     else:
@@ -200,14 +200,14 @@ def test_global_config_page_change(
     app.main_notebook.prev_page()
 
     # changes should not be made
-    for row in handler.filecopy_handler.current_rows:
+    for row in handler.current_rows:
         assert row.rule.source != "sys-net"
 
     # make changes and try to stick to them
-    handler.filecopy_handler.enable_radio.set_active(True)
-    handler.filecopy_handler.add_button.clicked()
+    handler.enable_radio.set_active(True)
+    handler.add_button.clicked()
 
-    for child in handler.filecopy_handler.current_rows:
+    for child in handler.current_rows:
         if child.editing:
             child.activate()
             child.source_widget.model.select_value("sys-net")
@@ -217,10 +217,7 @@ def test_global_config_page_change(
         assert False
 
     # file should not yet exist
-    assert (
-        handler.filecopy_handler.policy_file_name
-        not in test_policy_manager.policy_client.files
-    )
+    assert handler.policy_file_name not in test_policy_manager.policy_client.files
 
     # save changes
     with patch(show_dialog_with_icon_path) as mock_ask:
@@ -234,10 +231,7 @@ def test_global_config_page_change(
 
     # changes should have been done
     assert (
-        "sys-net"
-        in test_policy_manager.policy_client.files[
-            handler.filecopy_handler.policy_file_name
-        ]
+        "sys-net" in test_policy_manager.policy_client.files[handler.policy_file_name]
     )
 
     mock_error.assert_not_called()
@@ -361,10 +355,12 @@ def test_global_config_open_at(
         mock_print.assert_not_called()
         app.scroll_to_location("file#filecopy_policy")
         mock_print.assert_not_called()
-        app.scroll_to_location("file#open_in_vm")
-        mock_print.assert_not_called()
 
-        app.scroll_to_location("url")
+        app.scroll_to_location("disposables#open_in_disposable")
+        mock_print.assert_not_called()
+        app.scroll_to_location("disposables#open_url_in_disposable")
+        mock_print.assert_not_called()
+        app.scroll_to_location("disposables#preloading")
         mock_print.assert_not_called()
 
         app.scroll_to_location("thisdevice")

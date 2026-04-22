@@ -262,7 +262,10 @@ class VMListModeler(TraitSelector):
         self.qapp = qapp
         self.combo = combobox
         self.entry_box = self.combo.get_child()
-        self.change_function = event_callback
+        if event_callback:
+            self.change_functions = [event_callback]
+        else:
+            self.change_functions = []
         self.style_changes = style_changes
         self.show_internal = show_internal
 
@@ -290,7 +293,7 @@ class VMListModeler(TraitSelector):
 
     def connect_change_callback(self, event_callback):
         """Add a function to be run after combobox value is changed."""
-        self.change_function = event_callback
+        self.change_functions.append(event_callback)
 
     def is_changed(self) -> bool:
         """Return True if the combobox selected value has changed from the
@@ -408,8 +411,8 @@ class VMListModeler(TraitSelector):
                 Gtk.EntryIconPosition.PRIMARY, load_icon("gtk-find", 18, 18)
             )
 
-        if self.change_function:
-            self.change_function()
+        for f in self.change_functions:
+            f()
 
         if self.style_changes:
             self.entry_box.get_style_context().remove_class("combo-changed")
@@ -470,8 +473,8 @@ class VMListModeler(TraitSelector):
         self.entry_box.connect("changed", self._event_callback)
 
     def _event_callback(self, *_args):
-        if self.change_function:
-            self.change_function()
+        for f in self.change_functions:
+            f()
 
     def __str__(self):
         return self.entry_box.get_text()
@@ -535,7 +538,10 @@ class ImageListModeler(TraitSelector):
         """
         self.combo = combobox
         self.entry_box = self.combo.get_child()
-        self.change_function = event_callback
+        if event_callback:
+            self.change_functions = [event_callback]
+        else:
+            self.change_functions = []
         self.style_changes = style_changes
 
         self.icon_size = 20
@@ -560,7 +566,7 @@ class ImageListModeler(TraitSelector):
 
     def connect_change_callback(self, event_callback):
         """Add a function to be run after combobox value is changed."""
-        self.change_function = event_callback
+        self.change_functions.append(event_callback)
 
     def is_changed(self) -> bool:
         """Return True if the combobox selected value has changed from the
@@ -582,8 +588,8 @@ class ImageListModeler(TraitSelector):
         self.combo.set_active_id(self._initial_id)
 
     def _combo_change(self, _widget):
-        if self.change_function:
-            self.change_function()
+        for f in self.change_functions:
+            f()
 
         if self.style_changes:
             self.entry_box.get_style_context().remove_class("combo-changed")
@@ -621,8 +627,8 @@ class ImageListModeler(TraitSelector):
         self.combo.connect("changed", self._combo_change)
 
     def _event_callback(self, *_args):
-        if self.change_function:
-            self.change_function()
+        for f in self.change_functions:
+            f()
 
     def __str__(self):
         return self.entry_box.get_text()
