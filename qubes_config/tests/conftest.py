@@ -46,6 +46,16 @@ from qubesadmin.tests.mock_app import (
     MockDevice,
 )
 
+try:
+    from qrexec.policy.admin import (
+        PolicyAdminFileNotFoundException,
+        PolicyAdminTokenException,
+    )
+
+    admin_exc = True
+except ImportError:
+    admin_exc = False
+
 
 @pytest.fixture
 def test_qapp():
@@ -293,6 +303,8 @@ Test * test-red test-blue deny""",
         """Get file contents; takes into account policy_replace."""
         if file_name in self.files:
             return self.files[file_name], self.file_tokens[file_name]
+        if admin_exc:
+            raise PolicyAdminFileNotFoundException
         raise subprocess.CalledProcessError(2, "test")
 
     def policy_include_get(self, file_name):
@@ -302,15 +314,21 @@ Test * test-red test-blue deny""",
                 self.include_files[file_name],
                 self.include_file_tokens[file_name],
             )
+        if admin_exc:
+            raise PolicyAdminFileNotFoundException
         raise subprocess.CalledProcessError(2, "test")
 
     def policy_replace(self, filename, policy_text, token="any"):
         """Replace file contents with provided contents."""
         if token == "new":
             if filename in self.file_tokens:
+                if admin_exc:
+                    raise PolicyAdminTokenException
                 raise subprocess.CalledProcessError(2, "test")
         elif token != "any":
             if token != self.file_tokens.get(filename, ""):
+                if admin_exc:
+                    raise PolicyAdminTokenException
                 raise subprocess.CalledProcessError(2, "test")
         self.files[filename] = policy_text
         self.file_tokens[filename] = str(len(policy_text))
@@ -319,6 +337,8 @@ Test * test-red test-blue deny""",
         """Replace file contents with provided contents."""
         if token != "any":
             if token != self.include_file_tokens.get(filename, ""):
+                if admin_exc:
+                    raise PolicyAdminTokenException
                 raise subprocess.CalledProcessError(2, "test")
         self.include_files[filename] = policy_text
         self.include_file_tokens[filename] = str(len(policy_text))
