@@ -522,15 +522,24 @@ class OpenFileManagerItem(VMActionMenuItem):
 class InternalInfoItem(Gtk.MenuItem):
     """Internal info label."""
 
-    def __init__(self):
+    def __init__(self, is_preload=False):
         super().__init__()
         self.label = Gtk.Label(xalign=0)
-        self.label.set_markup(_("<b>Internal qube</b>"))
-        self.set_tooltip_text(
-            "Internal qubes are used by the operating system. Do not modify"
-            " them or run programs in them unless you really "
-            "know what you are doing."
+        title = "Internal qube"
+        if is_preload:
+            title += "\n(preloaded)"
+        tooltip = (
+            "Internal qubes are used by the operating system. Do not modify "
+            "them or run programs in them unless you really know what you "
+            "are doing."
         )
+        if is_preload:
+            tooltip += (
+                "\n\nTo configure preloading, see Qubes Global Config and Qube "
+                "Settings"
+            )
+        self.label.set_markup(_("<b>" + title + "</b>"))
+        self.set_tooltip_text(tooltip)
         self.add(self.label)
         self.set_sensitive(False)
 
@@ -625,7 +634,7 @@ class DebugMenu(Gtk.Menu):
 class InternalMenu(Gtk.Menu):
     """Sub-menu for Internal qubes"""
 
-    def __init__(self, vm, icon_cache, working_correctly=True):
+    def __init__(self, vm, icon_cache, working_correctly=True, is_preload=False):
         """
         :param vm: relevant Internal qube
         :param icon_cache: IconCache object
@@ -635,7 +644,7 @@ class InternalMenu(Gtk.Menu):
         super().__init__()
         self.vm = vm
 
-        self.add(InternalInfoItem())
+        self.add(InternalInfoItem(is_preload=is_preload))
 
         logs = [
             (
@@ -749,8 +758,12 @@ class DomainMenuItem(Gtk.MenuItem):
 
     def _set_submenu(self, state):
         if self.vm.features.get("internal", False):
+            is_preload = getattr(self.vm, "is_preload", False)
             submenu = InternalMenu(
-                self.vm, self.icon_cache, working_correctly=(state == "Running")
+                self.vm,
+                self.icon_cache,
+                working_correctly=(state == "Running"),
+                is_preload=is_preload,
             )
         elif state == "Running":
             submenu = StartedMenu(self.vm, self.app, self.icon_cache)
@@ -919,6 +932,9 @@ class DomainTray(Gtk.Application):
             "domain-feature-delete:expert-mode", self.debug_change
         )
 
+        self.dispatcher.add_handler(
+            "property-reset:is_preload", self.update_domain_item
+        )
         self.dispatcher.add_handler(
             "domain-feature-set:internal", self.update_domain_item
         )
@@ -1167,6 +1183,9 @@ class DomainTray(Gtk.Application):
                 state = "Transient"
 
         item.update_state(state)
+
+        if event == "property-reset:is_preload":
+            item.name.update_preload()
 
         if event == "domain-shutdown":
             self.handle_domain_shutdown(vm)
