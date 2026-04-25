@@ -969,11 +969,10 @@ def test_u2f_handler_add_without_service(test_qapp, test_policy_manager, real_bu
 
 def test_devices_handler_unsaved(test_qapp, test_policy_manager, real_builder):
     test_qapp.expected_calls[
-        ("sys-usb", "admin.vm.device.pci.Attached", None, None)
+        ("sys-usb", "admin.vm.device.pci.Assigned", None, None)
     ] = (
-        b"0\x00dom0+00_0d.0 device_id='*' port_id='00_0d.0' devclass='pci' "
-        b"backend_domain='dom0' mode='required' "
-        b"_no-strict-reset='yes'\n"
+        b"0\0dom0+00_0d.0 backend_domain='dom0' devclass='pci' "
+        b"port_id='00_0d.0' mode='required' frontend_domain='sys-usb'\n"
     )
     test_qapp.expected_calls[("dom0", "admin.vm.device.pci.Available", None, None)] = (
         b"0\x0000_0d.0 device_id='0000:0000::p0c0300' port_id='00_0d.0' "
@@ -1000,18 +999,16 @@ def test_devices_handler_unsaved(test_qapp, test_policy_manager, real_builder):
 
 def test_devices_handler_detect_usbvms(test_qapp, test_policy_manager, real_builder):
     test_qapp.expected_calls[
-        ("sys-usb", "admin.vm.device.pci.Attached", None, None)
+        ("sys-usb", "admin.vm.device.pci.Assigned", None, None)
     ] = (
-        b"0\x00dom0+00_0d.0 device_id='*' port_id='00_0d.0' devclass='pci' "
-        b"backend_domain='dom0' mode='required' "
-        b"_no-strict-reset='yes'\n"
+        b"0\0dom0+00_0d.0 backend_domain='dom0' devclass='pci' "
+        b"port_id='00_0d.0' mode='required' frontend_domain='sys-usb'\n"
     )
     test_qapp.expected_calls[
-        ("test-standalone", "admin.vm.device.pci.Attached", None, None)
+        ("test-standalone", "admin.vm.device.pci.Assigned", None, None)
     ] = (
-        b"0\x00dom0+00_0f.0 device_id='*' port_id='00_0f.0' devclass='pci' "
-        b"backend_domain='dom0' mode='required' "
-        b"_no-strict-reset='yes'\n"
+        b"0\0dom0+00_0f.0 backend_domain='dom0' devclass='pci' "
+        b"port_id='00_0f.0' mode='required' frontend_domain='test-standalone'\n"
     )
     test_qapp.expected_calls[("dom0", "admin.vm.device.pci.Available", None, None)] = (
         b"0\x0000_0f.0 device_id='0000:0000::p0c0300' port_id='00_0f.0' "
