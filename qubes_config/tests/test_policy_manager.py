@@ -25,6 +25,13 @@ from unittest.mock import patch
 from ..global_config.policy_manager import PolicyManager
 from qrexec.policy.parser import Rule
 
+try:
+    from qrexec.policy.admin import PolicyAdminFileNotFoundException
+
+    admin_exc = True
+except ImportError:
+    admin_exc = False
+
 
 def test_conflict_files():
     def return_files(service_name):
@@ -58,9 +65,13 @@ def test_get_policy_from_file_new_no_default(mock_replace, mock_get):
     manager = PolicyManager()
 
     mock_get.side_effect = subprocess.CalledProcessError(2, "test")
-
     assert manager.get_rules_from_filename("test", "") == ([], None)
     assert not mock_replace.mock_calls
+
+    if admin_exc:
+        mock_get.side_effect = PolicyAdminFileNotFoundException
+        assert manager.get_rules_from_filename("test", "") == ([], None)
+        assert not mock_replace.mock_calls
 
 
 def test_get_policy_from_file_new():
@@ -71,6 +82,8 @@ def test_get_policy_from_file_new():
         def policy_get(self, filename):
             if filename in self.files:
                 return self.files[filename], filename
+            if admin_exc:
+                raise PolicyAdminFileNotFoundException
             raise subprocess.CalledProcessError(2, "test")
 
         def policy_replace(self, filename, text):

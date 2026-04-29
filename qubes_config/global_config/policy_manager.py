@@ -21,9 +21,18 @@
 import subprocess
 from typing import Optional, List, Tuple
 
+from qubes_config.widgets.utils import compare_rule_lists
 from qrexec.policy.admin_client import PolicyClient
 from qrexec.policy.parser import StringPolicy, Rule
-from qubes_config.widgets.utils import compare_rule_lists
+
+try:
+    from qrexec.policy.admin import (
+        PolicyAdminException,
+        PolicyAdminFileNotFoundException,
+    )
+except ImportError:
+    PolicyAdminException = subprocess.CalledProcessError
+    PolicyAdminFileNotFoundException = subprocess.CalledProcessError
 
 import gettext
 
@@ -51,7 +60,7 @@ class PolicyManager:
         """Just get a straightforward list of all relevant policy files."""
         try:
             return self.policy_client.policy_get_files(service)
-        except subprocess.CalledProcessError:
+        except (PolicyAdminException, subprocess.CalledProcessError):
             return []
 
     def get_conflicting_policy_files(self, service: str, own_file: str) -> List[str]:
@@ -83,7 +92,7 @@ class PolicyManager:
         for the file."""
         try:
             rules_text, token = self.policy_client.policy_get(filename)
-        except subprocess.CalledProcessError:
+        except (PolicyAdminFileNotFoundException, subprocess.CalledProcessError):
             if not default_policy:
                 return [], None
             rules_text, token = default_policy, None
