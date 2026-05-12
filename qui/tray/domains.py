@@ -164,7 +164,7 @@ class PauseItem(VMActionMenuItem):
 
     async def perform_action(self):
         try:
-            self.vm.pause()
+            await asyncio.to_thread(self.vm.pause)
         except exc.QubesException as ex:
             show_error(
                 _("Error pausing qube"),
@@ -185,7 +185,7 @@ class UnpauseItem(VMActionMenuItem):
 
     async def perform_action(self):
         try:
-            self.vm.unpause()
+            await asyncio.to_thread(self.vm.unpause)
         except exc.QubesException as ex:
             show_error(
                 _("Error unpausing qube"),
@@ -222,7 +222,7 @@ class ShutdownItem(VMActionMenuItem):
 
     async def perform_action(self):
         try:
-            self.vm.shutdown(force=self.force)
+            await asyncio.to_thread(self.vm.shutdown, force=self.force, wait=True)
         except exc.QubesException as ex:
             if self.force:
                 show_error(
@@ -278,19 +278,22 @@ class ShutdownItem(VMActionMenuItem):
             GLib.idle_add(dialog.show)
 
     def react_to_question(self, widget, response, action):
+        asyncio.create_task(self.react_to_question_async(widget, response, action))
+
+    async def react_to_question_async(self, widget, response, action):
         if response not in (Gtk.ResponseType.OK, Gtk.ResponseType.YES):
             widget.destroy()
             return
         try:
             if action == "force":
-                self.vm.shutdown(force=True)
+                await asyncio.to_thread(self.vm.shutdown, force=True, wait=True)
             elif action == "timeout":
                 if response == Gtk.ResponseType.YES:
-                    self.vm.kill()
+                    await asyncio.to_thread(self.vm.kill)
                 elif response == Gtk.ResponseType.OK:
-                    self.vm.shutdown(force=False)
+                    await asyncio.to_thread(self.vm.shutdown, force=False, wait=True)
             elif action == "kill" and response == Gtk.ResponseType.OK:
-                self.vm.kill()
+                await asyncio.to_thread(self.vm.kill)
         except exc.QubesException as ex:
             show_error(
                 _("Error shutting down qube"),
@@ -327,7 +330,7 @@ class RestartItem(VMActionMenuItem):
 
     async def perform_action(self, *_args, **_kwargs):
         try:
-            self.vm.shutdown(force=self.force)
+            await asyncio.to_thread(self.vm.shutdown, force=self.force, wait=True)
         except exc.QubesException as ex:
             if self.force:
                 # we already tried forcing it, let's just give up
@@ -358,12 +361,7 @@ class RestartItem(VMActionMenuItem):
                 if self.give_up:
                     return
                 await asyncio.sleep(1)
-            proc = await asyncio.create_subprocess_exec(
-                "qvm-start", self.vm.name, stderr=asyncio.subprocess.PIPE
-            )
-            _stdout, stderr = await proc.communicate()
-            if proc.returncode != 0:
-                raise exc.QubesException(stderr)
+            await asyncio.to_thread(self.vm.start)
         except exc.QubesException as ex:
             show_error(
                 _("Error restarting qube"),
@@ -374,9 +372,12 @@ class RestartItem(VMActionMenuItem):
             )
 
     def react_to_question(self, widget, response):
+        asyncio.create_task(self.react_to_question_async(widget, response))
+
+    async def react_to_question_async(self, widget, response):
         if response == Gtk.ResponseType.OK:
             try:
-                self.vm.shutdown(force=True)
+                await asyncio.to_thread(self.vm.shutdown, force=True, wait=True)
             except exc.QubesException as ex:
                 show_error(
                     _("Error shutting down qube"),
@@ -399,13 +400,13 @@ class KillItem(VMActionMenuItem):
 
     async def perform_action(self, *_args, **_kwargs):
         try:
-            self.vm.kill()
+            await asyncio.to_thread(self.vm.kill)
         except exc.QubesException as ex:
             show_error(
                 _("Error shutting down qube"),
                 _(
-                    "The following error occurred while attempting to shut"
-                    "down qube {0}:\n{1}"
+                    "The following error occurred while attempting to kill"
+                    "qube {0}:\n{1}"
                 ).format(self.vm.name, str(ex)),
             )
 
@@ -466,7 +467,11 @@ class RunTerminalItem(VMActionMenuItem):
         if self.as_root:
             service_args["user"] = "root"
         try:
-            self.vm.run_service("qubes.StartApp+qubes-run-terminal", **service_args)
+            await asyncio.to_thread(
+                self.vm.run_service_for_stdio,
+                "qubes.StartApp+qubes-run-terminal",
+                **service_args,
+            )
         except exc.QubesException as ex:
             show_error(
                 _("Error starting terminal"),
@@ -515,7 +520,9 @@ class OpenFileManagerItem(VMActionMenuItem):
 
     async def perform_action(self):
         try:
-            self.vm.run_service("qubes.StartApp+qubes-open-file-manager")
+            await asyncio.to_thread(
+                self.vm.run_service_for_stdio, "qubes.StartApp+qubes-open-file-manager"
+            )
         except exc.QubesException as ex:
             show_error(
                 _("Error opening file manager"),
