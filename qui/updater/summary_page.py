@@ -31,7 +31,6 @@ from gi.repository import Gtk  # isort:skip
 from typing import Optional, Any
 
 import qubesadmin
-from qubesadmin.events.utils import wait_for_domain_shutdown
 
 from qubes_config.widgets.gtk_utils import (
     load_icon,
@@ -308,25 +307,26 @@ class SummaryPage:
         """
         Try to shut down vms and wait to finish.
         """
-        wait_for = []
-        for vm in to_shutdown:
-            try:
-                vm.shutdown(force=True)
-                wait_for.append(vm)
-                self.log.info("Shutdown %s", vm.name)
-            except qubesadmin.exc.QubesVMError as err:
-                self.err += vm.name + " cannot shutdown: " + str(err) + "\n"
-                self.log.error("Cannot shutdown %s because %s", vm.name, str(err))
-                self.status = RestartStatus.ERROR_TMPL_DOWN
         try:
             loop = asyncio.get_event_loop()
         except RuntimeError:
             # changes between GLib versions and python versions mean that the above
             # can fail on some dom0/gui domain configurations
             loop = asyncio.new_event_loop()
-        loop.run_until_complete(wait_for_domain_shutdown(wait_for))
-
-        return wait_for
+        tasks = [asyncio.to_thread(vm.shutdown, force=True, wait=True) for vm in to_shutdown]
+        results = loop.run_until_complete(
+            asyncio.gather(*tasks, return_exceptions=True)
+        )
+        done = []
+        for vm, res in zip(to_shutdown, results):
+            if not isinstance(res, BaseException):
+                self.log.info("Shutdown %s", vm.name)
+                done.append(vm)
+                continue
+            self.err += vm.name + " cannot shutdown: " + str(res) + "\n"
+            self.log.error("Cannot shutdown %s because %s", vm.name, str(res))
+            self.status = RestartStatus.ERROR_TMPL_DOWN
+        return done
 
     def restart_vms(self, to_restart):
         """
@@ -335,14 +335,23 @@ class SummaryPage:
         shutdowns = self.shutdown_domains(to_restart)
 
         # restart shutdown qubes
-        for vm in shutdowns:
-            try:
-                vm.start()
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            # changes between GLib versions and python versions mean that the above
+            # can fail on some dom0/gui domain configurations
+            loop = asyncio.new_event_loop()
+        tasks = [asyncio.to_thread(vm.start) for vm in shutdowns]
+        results = loop.run_until_complete(
+            asyncio.gather(*tasks, return_exceptions=True)
+        )
+        for vm, res in zip(shutdowns, results):
+            if not isinstance(res, qubesadmin.exc.QubesVMError):
                 self.log.info("Restart %s", vm.name)
-            except qubesadmin.exc.QubesVMError as err:
-                self.err += vm.name + " cannot start: " + str(err) + "\n"
-                self.log.error("Cannot start %s because %s", vm.name, str(err))
-                self.status = RestartStatus.ERROR_APP_DOWN
+                continue
+            self.err += vm.name + " cannot start: " + str(res) + "\n"
+            self.log.error("Cannot start %s because %s", vm.name, str(res))
+            self.status = RestartStatus.ERROR_APP_DOWN
 
     def _show_status_dialog(self, show_only_error: bool):
         if self.status == RestartStatus.OK and not show_only_error:
