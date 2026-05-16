@@ -1,3 +1,49 @@
+qubes-desktop-linux-manager (4.4.0-1) unstable; urgency=medium
+
+  [ Chaimae ]
+  * qui/devices: add confirmation notification after successful detach
+
+  [ Jayant-Kernel ]
+  * qui-domains: adapt shutdown dialog to exception type
+
+  [ Demi Marie Obenour ]
+  * Updater: Enable qubesadmin caching
+
+  [ Bartłomiej Kida ]
+  * Fix typos in README.md and global_config.glade
+
+  [ Marta Marczykowska-Górecka ]
+  * Improve Disposable Config Tools + Add Create New DVM Template
+  * Add --open-at to New Qube
+
+  [ Ben Grande ]
+  * Use new policy admin exceptions
+  * Add preloaded disposable tooltip
+  * Add preloaded disposable icon to state column
+  * Allow passing pytest arguments
+  * List USB qubes independent of domain state
+
+  [ Marek Marczykowski-Górecki ]
+  * ci: install gobject-introspection-devel
+
+  [ Piotr Bartman-Szwarc ]
+  * updater: use qubes-vm-update to update dom0 non-interactively
+  * updater: update tests and code refformating
+  * updater:fix: handle ValueError in read_stdouts
+  * updater: remove sudo
+  * updater: improve refreshing
+  * updater: fix refreshing
+  * updater: hide prohibited
+  * updater: apply default option on starting
+  * updater: add more options
+  * updater: hide_updated hides skipped and prohibited
+  * updater: black
+
+  [ Marek Marczykowski-Górecki ]
+  * ci: switch to devel version
+
+ -- Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>  Sat, 16 May 2026 03:33:03 +0200
+
 qubes-desktop-linux-manager (4.3.25-1) unstable; urgency=medium
 
   [ Marek Marczykowski-Górecki ]
