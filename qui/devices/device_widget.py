@@ -317,7 +317,6 @@ class DevicesTray(Gtk.Application):
         else:
             # we never knew the device anyway
             return
-
         microphone = self.devices.get("mic:dom0:mic:dom0:mic::m000000", None)
 
         self.emit_notification(
@@ -337,6 +336,48 @@ class DevicesTray(Gtk.Application):
                     break
             self.cameras_to_hide.remove(dev.parent)
         del self.devices[dev_id]
+
+        # If the removed device has sub-devices, update their states
+        if not dev.has_children:
+            return
+
+        parent_dev = dev
+        to_delete: List[str] = []
+        to_update: Dict[
+                qubesadmin.device_protocol.DeviceInfo,
+                List[qui.devices.backend.VM],
+        ] = {}
+
+        vm.devices[parent_dev.device_class].clear_cache()
+        exposed_devices = list(
+                 vm.devices[parent_dev.device_class]
+                .get_exposed_devices()
+        )
+        for dev_id, dev in self.devices.items():
+            if dev.parent != parent_dev.port:
+                continue
+            for exposed_dev in exposed_devices:
+                if str(exposed_dev.port) != dev.port:
+                    continue
+                to_update[exposed_dev] = [
+                    attachment
+                    for attachment in dev.attachments
+                    if dev.attachments
+                ]
+                potential_new_dev_id = (
+                        backend.Device.id_from_device(exposed_dev)
+                )
+                if dev_id != potential_new_dev_id:
+                    to_delete.append(dev.id_string)
+
+        for dev, attachments in to_update.items():
+            dev_id = backend.Device.id_from_device(dev)
+            self.devices[dev_id] = backend.Device(dev, self)
+            if attachments:
+                for attachment in attachments:
+                    self.devices[dev_id].attachments.add(attachment)
+        for dev_id in to_delete:
+            del self.devices[dev_id]
 
     def initialize_dev_data(self):
         # list all devices
@@ -606,7 +647,20 @@ class DevicesTray(Gtk.Application):
             # we don't have access to VM state
             return
 
+        if not isinstance(
+                device, qubesadmin.device_protocol.DeviceInfo
+            ):
+            device.backend_domain.devices[device.devclass].clear_cache()
+            devices = (
+                     device.backend_domain
+                    .devices[device.devclass]
+                    .get_exposed_devices()
+            )
+            for dev in devices:
+                if dev.port_id == device.port_id:
+                    device = dev
         dev_id = backend.Device.id_from_device(device)
+
         if dev_id not in self.devices:
             self.devices[dev_id] = backend.Device(device, self)
 
