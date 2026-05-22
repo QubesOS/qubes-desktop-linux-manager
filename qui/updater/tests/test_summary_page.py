@@ -370,9 +370,7 @@ def test_restart_selected_vms(
         mock_show_dialog.assert_has_calls(calls)
 
 
-@patch("qui.updater.summary_page.wait_for_domain_shutdown")
 def test_perform_restart(
-    _mock_wait_for_domain_shutdown,
     test_qapp,
     real_builder,
     mock_next_button,
@@ -405,7 +403,7 @@ def test_perform_restart(
         "vault",
     )
     expected_shutdown_calls = [
-        (tmpl, "admin.vm.Shutdown", "force", None) for tmpl in to_shutdown
+        (tmpl, "admin.vm.Shutdown", "force+wait", None) for tmpl in to_shutdown
     ]
     for call_ in expected_shutdown_calls:
         test_qapp.expected_calls[call_] = b"0\x00"

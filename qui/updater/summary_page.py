@@ -31,6 +31,8 @@ from gi.repository import Gtk  # isort:skip
 from typing import Optional, Any
 
 import qubesadmin
+from qubesadmin.utils.shutdown import shutdown
+from qubesadmin.utils.start import start
 
 from qubes_config.widgets.gtk_utils import (
     load_icon,
@@ -296,61 +298,48 @@ class SummaryPage:
 
         # clear err and perform shutdown/start
         self.err = ""
-        self.shutdown_domains(tmpls_to_shutdown)
-        self.restart_vms(to_restart)
-        self.shutdown_domains(to_shutdown)
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            # changes between GLib versions and python versions mean that the above
+            # can fail on some dom0/gui domain configurations
+            loop = asyncio.new_event_loop()
+        loop.run_until_complete(self.shutdown_domains(tmpls_to_shutdown))
+        loop.run_until_complete(self.restart_vms(to_restart))
+        loop.run_until_complete(self.shutdown_domains(to_shutdown))
 
         if self.status is RestartStatus.NONE:
             self.status = RestartStatus.OK
 
-    def shutdown_domains(self, to_shutdown):
+    async def shutdown_domains(self, to_shutdown):
         """
         Try to shut down vms and wait to finish.
         """
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            # changes between GLib versions and python versions mean that the above
-            # can fail on some dom0/gui domain configurations
-            loop = asyncio.new_event_loop()
-        tasks = [asyncio.to_thread(vm.shutdown, force=True, wait=True) for vm in to_shutdown]
-        results = loop.run_until_complete(
-            asyncio.gather(*tasks, return_exceptions=True)
-        )
-        done = []
-        for vm, res in zip(to_shutdown, results):
-            if not isinstance(res, BaseException):
-                self.log.info("Shutdown %s", vm.name)
-                done.append(vm)
-                continue
-            self.err += vm.name + " cannot shutdown: " + str(res) + "\n"
-            self.log.error("Cannot shutdown %s because %s", vm.name, str(res))
-            self.status = RestartStatus.ERROR_TMPL_DOWN
+        failed = await shutdown(domains=to_shutdown, force=True, wait=True)
+        if not failed:
+            return to_shutdown
+        self.status = RestartStatus.ERROR_TMPL_DOWN
+        all_failed = []
+        for qube, exc in failed.items():
+            all_failed.append(qube)
+            self.err += qube.name + " cannot shutdown: unknown reason\n"
+            self.log.error("Cannot shutdown %s: %s", qube.name, str(exc))
+        done = [qube for qube in to_shutdown if qube not in all_failed]
         return done
 
-    def restart_vms(self, to_restart):
+    async def restart_vms(self, to_restart):
         """
         Try to restart vms.
         """
-        shutdowns = self.shutdown_domains(to_restart)
+        shutdowns = await self.shutdown_domains(to_restart)
 
         # restart shutdown qubes
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            # changes between GLib versions and python versions mean that the above
-            # can fail on some dom0/gui domain configurations
-            loop = asyncio.new_event_loop()
-        tasks = [asyncio.to_thread(vm.start) for vm in shutdowns]
-        results = loop.run_until_complete(
-            asyncio.gather(*tasks, return_exceptions=True)
-        )
-        for vm, res in zip(shutdowns, results):
-            if not isinstance(res, qubesadmin.exc.QubesVMError):
-                self.log.info("Restart %s", vm.name)
-                continue
-            self.err += vm.name + " cannot start: " + str(res) + "\n"
-            self.log.error("Cannot start %s because %s", vm.name, str(res))
+        failed = await start(domains=shutdowns)
+        if not failed:
+            return
+        for qube, exc in failed.items():
+            self.err += qube.name + " cannot start: " + str(exc) + "\n"
+            self.log.error("Cannot start %s: %s", qube.name, str(exc))
             self.status = RestartStatus.ERROR_APP_DOWN
 
     def _show_status_dialog(self, show_only_error: bool):
