@@ -333,11 +333,7 @@ class RestartItem(ShutdownItem):
         else:
             self.label.set_text(_("Restart"))
 
-    async def perform_action(self, *_args, **_kwargs):
-        try:
-            await asyncio.to_thread(self.vm.shutdown, force=self.force, wait=True)
-        except exc.QubesException as ex:
-            self.show_shutdown_dialog(ex)
+    async def start(self):
         if self.give_up:
             return
         try:
@@ -351,6 +347,14 @@ class RestartItem(ShutdownItem):
                 ).format(self.vm.name, str(ex)),
             )
 
+    async def perform_action(self, *_args, **_kwargs):
+        try:
+            await asyncio.to_thread(self.vm.shutdown, force=self.force, wait=True)
+        except exc.QubesException as ex:
+            self.show_shutdown_dialog(ex)
+        else:
+            await self.start()
+
     def react_to_question(self, widget, response, action):
         asyncio.create_task(self.react_to_question_async(widget, response, action))
 
@@ -363,7 +367,8 @@ class RestartItem(ShutdownItem):
             await self.shutdown_from_response(response, action)
         except exc.QubesException as ex:
             self.show_shutdown_dialog(ex)
-            self.give_up = True
+        else:
+            await self.start()
         widget.destroy()
 
 
