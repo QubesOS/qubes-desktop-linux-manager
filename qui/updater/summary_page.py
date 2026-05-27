@@ -31,8 +31,7 @@ from gi.repository import Gtk  # isort:skip
 from typing import Optional, Any
 
 import qubesadmin
-from qubesadmin.utils.shutdown import shutdown
-from qubesadmin.utils.start import start
+import qubesadmin.utils
 
 from qubes_config.widgets.gtk_utils import (
     load_icon,
@@ -315,7 +314,9 @@ class SummaryPage:
         """
         Try to shut down vms and wait to finish.
         """
-        failed = await shutdown(domains=to_shutdown, force=True, wait=True)
+        failed = await qubesadmin.utils.shutdown(
+            domains=to_shutdown, force=True, wait=True
+        )
         if not failed:
             return to_shutdown
         self.status = RestartStatus.ERROR_TMPL_DOWN
@@ -334,7 +335,7 @@ class SummaryPage:
         shutdowns = await self.shutdown_domains(to_restart)
 
         # restart shutdown qubes
-        failed = await start(domains=shutdowns)
+        failed = await qubesadmin.utils.start(domains=shutdowns)
         if not failed:
             return
         for qube, exc in failed.items():
