@@ -283,14 +283,11 @@ class ShutdownItem(VMActionMenuItem):
         asyncio.create_task(self.react_to_question_async(widget, response, action))
 
     async def react_to_question_async(self, widget, response, action):
-        if response not in (Gtk.ResponseType.OK, Gtk.ResponseType.YES):
-            widget.destroy()
-            return
+        widget.destroy()
         try:
             await self.shutdown_from_response(response, action)
         except exc.QubesException as ex:
             self.show_shutdown_dialog(ex)
-        widget.destroy()
 
     async def shutdown_from_response(self, response, action):
         if action == "force":
@@ -352,9 +349,9 @@ class RestartItem(ShutdownItem):
         asyncio.create_task(self.react_to_question_async(widget, response, action))
 
     async def react_to_question_async(self, widget, response, action):
+        widget.destroy()
         if response not in (Gtk.ResponseType.OK, Gtk.ResponseType.YES):
             self.give_up = True
-            widget.destroy()
             return
         try:
             await self.shutdown_from_response(response, action)
@@ -362,7 +359,6 @@ class RestartItem(ShutdownItem):
             self.show_shutdown_dialog(ex)
         else:
             await self.start()
-        widget.destroy()
 
 
 class KillItem(VMActionMenuItem):
