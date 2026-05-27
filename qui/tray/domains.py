@@ -272,7 +272,10 @@ class ShutdownItem(VMActionMenuItem):
         if action == "force":
             dialog.add_button(_("Force shutdown"), Gtk.ResponseType.OK)
         elif action == "timeout":
-            dialog.add_button(_("Retry shutdown"), Gtk.ResponseType.OK)
+            if self.force:
+                dialog.add_button(_("Retry force shutdown"), Gtk.ResponseType.OK)
+            else:
+                dialog.add_button(_("Retry shutdown"), Gtk.ResponseType.OK)
             dialog.add_button(_("Kill"), Gtk.ResponseType.YES)
         elif action == "kill":
             dialog.add_button(_("Kill"), Gtk.ResponseType.OK)
@@ -291,12 +294,13 @@ class ShutdownItem(VMActionMenuItem):
 
     async def shutdown_from_response(self, response, action):
         if action == "force":
+            self.set_force(True)
             await asyncio.to_thread(self.vm.shutdown, force=True, wait=True)
         elif action == "timeout":
             if response == Gtk.ResponseType.YES:
                 await asyncio.to_thread(self.vm.kill)
             elif response == Gtk.ResponseType.OK:
-                await asyncio.to_thread(self.vm.shutdown, force=False, wait=True)
+                await asyncio.to_thread(self.vm.shutdown, force=self.force, wait=True)
         elif action == "kill" and response == Gtk.ResponseType.OK:
             await asyncio.to_thread(self.vm.kill)
 
