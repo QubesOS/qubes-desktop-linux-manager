@@ -203,19 +203,15 @@ class ShutdownItem(VMActionMenuItem):
         icon_name="shutdown",
     ):
         if force:
-            super().__init__(
-                vm,
-                label=force_label or _("Force shutdown"),
-                icon_cache=icon_cache,
-                icon_name=icon_name,
-            )
+            init_label = force_label or _("Force shutdown")
         else:
-            super().__init__(
-                vm,
-                label=label or _("Shutdown"),
-                icon_cache=icon_cache,
-                icon_name=icon_name,
-            )
+            init_label = label or _("Shutdown")
+        super().__init__(
+            vm,
+            label=init_label,
+            icon_cache=icon_cache,
+            icon_name=icon_name,
+        )
         self.force = force
         self.follow_shift = follow_shift
 
