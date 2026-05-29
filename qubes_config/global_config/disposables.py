@@ -20,6 +20,7 @@
 """
 Disposables page handler
 """
+
 import subprocess
 from enum import Enum
 
@@ -442,6 +443,7 @@ class DisposablesHandler(PageHandler):
             policy_file_name="50-config-openinvm",
             prefix="openinvm",
             policy_manager=self.policy_manager,
+            filter_target=self._permanent_dispvm_and_dispvm_template_filter,
         )
         self.openurl_handler = DispvmExceptionHandler(
             gtk_builder=gtk_builder,
@@ -450,6 +452,7 @@ class DisposablesHandler(PageHandler):
             policy_file_name="50-config-openurl",
             prefix="url",
             policy_manager=self.policy_manager,
+            filter_target=self._permanent_dispvm_and_dispvm_template_filter,
         )
         self.handlers: list[PageHandler | PropertyHandler] = [
             self.defdispvm_handler,
@@ -462,6 +465,16 @@ class DisposablesHandler(PageHandler):
     @staticmethod
     def _default_dispvm_filter(vm) -> bool:
         return getattr(vm, "template_for_dispvms", False)
+
+    @staticmethod
+    def _permanent_dispvm_and_dispvm_template_filter(vm) -> bool:
+        if getattr(vm, "template_for_dispvms", False):
+            return True
+
+        return (
+            getattr(vm, "klass", None) == "DispVM"
+            and getattr(vm, "auto_cleanup", False) is not True
+        )
 
     def get_unsaved(self) -> str:
         """Get list of unsaved changes."""

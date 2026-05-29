@@ -20,6 +20,7 @@
 """
 Class for handling a list of exceptions, such as for updateProxy.
 """
+
 from copy import deepcopy
 from typing import Optional, List, Callable
 
@@ -218,6 +219,7 @@ class DispvmExceptionHandler(PageHandler):
         prefix: str,
         policy_manager,
         policy_file_name: str,
+        filter_target: Optional[Callable[[qubesadmin.vm.QubesVM], bool]] = None,
     ):
         """
         Handler for various dispvm-related exception lists
@@ -239,6 +241,7 @@ class DispvmExceptionHandler(PageHandler):
         self.service_name = service_name
         self.policy_manager = policy_manager
         self.policy_file_name = policy_file_name
+        self.filter_target = filter_target
 
         self.list_handler = PolicyExceptionsHandler(
             gtk_builder=gtk_builder,
@@ -282,6 +285,7 @@ class DispvmExceptionHandler(PageHandler):
                 }
             ),
             is_new_row=new,
+            filter_target=self.filter_target,
         )
 
     def _new_rule(self) -> Rule:

@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program; if not, see <http://www.gnu.org/licenses/>.
 """Widgets used by various list of policy rules."""
+
 from typing import Optional, Dict, Callable, Any
 
 from ..widgets.gtk_widgets import (
@@ -667,6 +668,7 @@ class DispvmRuleRow(FilteredListBoxRow):
         qapp: qubesadmin.Qubes,
         verb_description: Optional[AbstractVerbDescription] = None,
         is_new_row: bool = False,
+        filter_target: Optional[Callable] = None,
     ):
         super().__init__(
             parent_handler=parent_handler,
@@ -674,7 +676,7 @@ class DispvmRuleRow(FilteredListBoxRow):
             qapp=qapp,
             verb_description=verb_description,
             initial_verb=_("will"),
-            filter_target=self._dvm_template_filter,
+            filter_target=filter_target or self._dispvm_template_filter,
             is_new_row=is_new_row,
             source_categories=SOURCE_CATEGORIES,
             target_categories=DISPVM_CATEGORIES,
@@ -685,7 +687,7 @@ class DispvmRuleRow(FilteredListBoxRow):
             self.target_widget.hide_selectors()
 
     @staticmethod
-    def _dvm_template_filter(vm: qubesadmin.vm.QubesVM):
+    def _dispvm_template_filter(vm: qubesadmin.vm.QubesVM):
         return getattr(vm, "template_for_dispvms", False)
 
     def _hide_target_on_deny(self):
