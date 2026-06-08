@@ -34,6 +34,7 @@ from .policy_rules import RuleTargetedAdminVM, Rule
 from .policy_manager import PolicyManager
 from .policy_handler import ErrorHandler
 from .vm_flowbox import VMFlowboxHandler
+from .ansible_handler import AnsibleHandler
 from .conflict_handler import ConflictFileHandler
 
 import gi
@@ -244,8 +245,8 @@ qubes.InputTablet * {vm.name} @adminvm deny"""
 class U2FPolicyHandler:
     """Handler for u2f policy and services."""
 
-    SERVICE_FEATURE = "service.qubes-u2f-proxy"
-    SUPPORTED_SERVICE_FEATURE = "supported-service.qubes-u2f-proxy"
+    SERVICE_FEATURE = "service.qubes-ctap-proxy"
+    SUPPORTED_SERVICE_FEATURE = "supported-service.qubes-ctap-proxy"
     AUTH_POLICY = "u2f.Authenticate"
     REGISTER_POLICY = "u2f.Register"
     POLICY_REGISTER_POLICY = "policy.RegisterArgument"
@@ -297,6 +298,16 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
         )
 
         self.usb_qube_combo: Gtk.ComboBox = gtk_builder.get_object("u2f_usb_combo")
+        self.other_qube_combo: Gtk.ComboBox = gtk_builder.get_object(
+            "usb_u2f_install_other_combo"
+        )
+
+        self.install_u2f_button: Gtk.Button = gtk_builder.get_object(
+            "usb_install_u2f_button"
+        )
+        self._install_other_button: Gtk.Button = gtk_builder.get_object(
+            "usb_u2f_install_other_button"
+        )
 
         self.initially_enabled_vms: List[qubesadmin.vm.QubesVM] = []
         self.available_vms: List[qubesadmin.vm.QubesVM] = []
@@ -306,6 +317,7 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
         self.current_token: Optional[str] = None
         self.rules: List[Rule] = []
         self.usb_qube_model: Optional[VMListModeler] = None
+        self.usb_qubes_with_u2f = set()
 
         self.error_handler = ErrorHandler(gtk_builder, "usb_u2f")
 
@@ -368,6 +380,53 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
         if self.usb_qube_model:
             self.usb_qube_model.connect_change_callback(self.load_rules_for_usb_qube)
 
+        self.install_u2f_handler = AnsibleHandler(
+            "/usr/share/ansible/collections/ansible_collections/qubesos/core/playbooks/qubes_u2f.yml",
+            "Install qubes-ctap",
+            self.install_u2f_button.get_toplevel(),
+            self._initialize_data,
+        )
+        self.install_u2f_button.connect("clicked", self._install_u2f_clicked)
+        self._install_other_button.connect("clicked", self._install_u2f_other_clicked)
+
+    def _install_u2f_clicked(self, *_args):
+        """This button should be insensitive if there is no usb_qube selected"""
+        usb_qube = self.usb_qube_model.get_selected()
+        if usb_qube:
+            self.install_u2f_handler.run_playbook_for(
+                {
+                    "qubes_u2f_install_hosts": [str(usb_qube)],
+                    "qubes_u2f_reboot": "true",
+                },
+                _(
+                    "Are you sure you want to install qubes-ctap in the following qube: {"
+                    "qube}? \n CAUTION: this will cause the qube to be restarted."
+                    ""
+                ).format(qube=usb_qube),
+            )
+
+    def _install_u2f_other_clicked(self, *_args):
+        """This button should be insensitive if there is no usb_qube selected"""
+        selected_qube = self.other_qube_model.get_selected()
+        if selected_qube:
+            self.install_u2f_handler.run_playbook_for(
+                {
+                    "qubes_u2f_install_hosts": [str(selected_qube)],
+                    "qubes_u2f_reboot": "true",
+                },
+                _(
+                    "Are you sure you want to install qubes-ctap in the following qube: {"
+                    "qube}? \n CAUTION: this will cause the qube to be "
+                    "restarted."
+                    ""
+                ).format(qube=selected_qube),
+            )
+
+    def _install_u2f_other_changed(self, *_args):
+        self._install_other_button.set_sensitive(
+            self.other_qube_model.get_selected() is not None
+        )
+
     @staticmethod
     def _enable_clicked(
         related_box: Union[Gtk.Box, VMFlowboxHandler], widget: Gtk.CheckButton
@@ -389,6 +448,7 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
 
     def _initialize_data(self):
         self.problem_fatal_box.set_visible(False)
+        self.available_vms.clear()
 
         # guess at the current sys-usb
         self.rules, self.current_token = self.policy_manager.get_rules_from_filename(
@@ -398,32 +458,32 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
         if not self.usb_qubes:
             self.disable_u2f(
                 "No USB qubes found. To use U2F Proxy, you have to"
-                "connect your USB controller to a qube."
+                "connect your USB controller to a qube.",
+                hide_install_button=True,
+                disable_usb_select=True,
             )
             return
 
-        usb_qube_candidates = set()
         for qube in self.usb_qubes:
             if qube.features.check_with_template(self.SUPPORTED_SERVICE_FEATURE):
-                usb_qube_candidates.add(qube)
-
-        self.usb_qubes = usb_qube_candidates
+                self.usb_qubes_with_u2f.add(qube)
+        for qube in self.qapp.domains:
+            if qube.features.check_with_template(self.SUPPORTED_SERVICE_FEATURE):
+                self.available_vms.append(qube)
 
         self.usb_qube_model = VMListModeler(
             combobox=self.usb_qube_combo,
             qapp=self.qapp,
-            filter_function=lambda vm: vm in self.usb_qubes,
+            filter_function=lambda vm: vm in self.usb_qubes or vm.name == "testqube",
             style_changes=True,
         )
-
-        if not usb_qube_candidates:
-            self.disable_u2f(
-                "The Qubes U2F Proxy service is not installed in the USB qube. "
-                "If you wish to use this service, install the "
-                "<tt>qubes-u2f</tt> package in the template on which "
-                "the USB qube is based."
-            )
-            return
+        self.other_qube_model = VMListModeler(
+            combobox=self.other_qube_combo,
+            qapp=self.qapp,
+            filter_function=lambda vm: vm not in self.available_vms,
+            style_changes=False,
+        )
+        self.other_qube_model.connect_change_callback(self._install_u2f_other_changed)
 
         policy_candidates = set()
         for rule in self.rules:
@@ -432,19 +492,17 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
             except KeyError:
                 continue
 
-        sys_usb = None
-
         if not policy_candidates:
             sys_usb = next(iter(self.usb_qubes))
         else:
             # just grab one
             sys_usb = policy_candidates.pop()
 
-        while sys_usb not in usb_qube_candidates and policy_candidates:
+        while sys_usb not in self.usb_qubes and policy_candidates:
             sys_usb = policy_candidates.pop()
 
         if not sys_usb:
-            sys_usb = usb_qube_candidates.pop()
+            sys_usb = next(iter(self.usb_qubes))
 
         self.usb_qube_model.select_value(sys_usb)
         self.usb_qube_model.update_initial()
@@ -456,31 +514,29 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
         if not self.usb_qube_model:
             return
         usb_qube = self.usb_qube_model.get_selected()
+        self.install_u2f_button.set_sensitive(usb_qube is not None)
+
+        if usb_qube and usb_qube not in self.usb_qubes_with_u2f:
+            self.disable_u2f(
+                "The Qubes U2F Proxy service is not installed in selected USB qube {}. "
+                "If you wish to use this service, install the <tt>qubes-ctap</tt> "
+                "package in the template on which the USB qube is based.".format(
+                    usb_qube
+                )
+            )
+
         self.allow_all_register = False
         self.initially_enabled_vms.clear()
-        self.available_vms.clear()
         self.initial_register_vms.clear()
         self.initial_blanket_vms.clear()
 
         self.error_handler.clear_all_errors()
 
         for vm in self.qapp.domains:
-            if vm.features.check_with_template(self.SUPPORTED_SERVICE_FEATURE):
-                if vm == usb_qube:
-                    continue
-                self.available_vms.append(vm)
             if get_feature(vm, self.SERVICE_FEATURE):
                 if vm == usb_qube:
                     continue
                 self.initially_enabled_vms.append(vm)
-
-        if not self.available_vms:
-            self.disable_u2f(
-                "No qubes with the U2F Proxy service found. If you wish to "
-                "use this service, install the <tt>qubes-u2f</tt> package in "
-                "the template on which the USB qube is based."
-            )
-            return
 
         self.enable_check.set_active(bool(self.initially_enabled_vms))
         for rule in self.rules:
@@ -527,14 +583,21 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
 
         self.blanket_check.set_active(bool(self.initial_blanket_vms))
 
-    def disable_u2f(self, reason: str):
+    def disable_u2f(
+        self, reason: str, hide_install_button=False, disable_usb_select=False
+    ):
         self.problem_fatal_box.set_visible(True)
         self.problem_fatal_box.show_all()
         self.problem_fatal_label.set_markup(reason)
         self.enable_check.set_active(False)
         self.enable_check.set_sensitive(False)
+        if hide_install_button:
+            self.install_u2f_button.set_visible(False)
+        else:
+            self.install_u2f_button.set_visible(True)
+        if disable_usb_select:
+            self.usb_qube_combo.set_active(False)
         self.box.set_visible(False)
-        self.usb_qube_combo.set_active(False)
 
     def save(self):
         """Save user changes in policy."""

@@ -2046,7 +2046,7 @@
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">U2F devices</property>
+                            <property name="label" translatable="yes">Hardware Security Keys</property>
                             <property name="xalign">0</property>
                             <style>
                               <class name="group_title"/>
@@ -2063,7 +2063,7 @@
                           <object class="GtkLabel" id="u2fproxy_info">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Qubes U2F Proxy allows you to use Universal 2nd Factor (U2F) two-factor authentication (2FA) devices without exposing the whole device and all of its contents to every qube. &lt;a href="https://www.qubes-os.org/doc/u2f-proxy/"&gt;Learn more.&lt;/a&gt;
+                            <property name="label" translatable="yes">Qubes CTAP proxy allows you to use hardware security keys (compatible with U2F/CTAP) without exposing the whole device and all of its contents to every qube. &lt;a href="https://www.qubes-os.org/doc/ctap-proxy/"&gt;Learn more.&lt;/a&gt;
 
 &lt;b&gt;Note:&lt;/b&gt; In order to use the U2F proxy in a qube, its template must have the &lt;tt&gt;qubes-u2f&lt;/tt&gt; package installed. By default, a qube can use only keys that it has registered itself.</property>
                             <property name="use-markup">True</property>
@@ -2216,7 +2216,7 @@
                               <object class="GtkLabel" id="usb_u2f_fatal_problem_label">
                                 <property name="can-focus">False</property>
                                 <property name="halign">center</property>
-                                <property name="label" translatable="yes">The Qubes U2F Proxy service is not installed in the USB qube. If you wish to use this service, install the &lt;tt&gt;qubes-u2f&lt;/tt&gt; package in the template on which the USB qube is based.</property>
+                                <property name="label" translatable="yes">The Qubes CTAP Proxy service is not installed in the USB qube. If you wish to use this service, install the &lt;tt&gt;qubes-ctap&lt;/tt&gt; package in the template on which the USB qube is based.</property>
                                 <property name="use-markup">True</property>
                                 <property name="wrap">True</property>
                               </object>
@@ -2224,6 +2224,60 @@
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
                                 <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="usb_install_u2f_button">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="halign">center</property>
+                                <property name="relief">none</property>
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="spacing">10</property>
+                                    <child>
+                                      <object class="GtkImage">
+                                        <property name="visible">True</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="icon-name">qubes-icon-download</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="xpad">5</property>
+                                        <property name="label" translatable="yes">Install Proxy in USB qube</property>
+                                        <style>
+                                          <class name="add_label"/>
+                                        </style>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                </child>
+                                <style>
+                                  <class name="flat_button"/>
+                                  <class name="flat"/>
+                                  <class name="button_cancel"/>
+                                </style>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
                               </packing>
                             </child>
                             <style>
@@ -2234,6 +2288,130 @@
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">11</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkBox" id="usb_u2f_install_other_box">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">center</property>
+                            <property name="orientation">vertical</property>
+                            <child>
+                              <object class="GtkLabel" id="usb_u2f_install_other_label">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">center</property>
+                                <property name="label" translatable="yes">If you can't find a qube you want to use Qubes CTAP Proxy service in below, it does not have &lt;tt&gt;qubes-ctap&lt;/tt&gt; package installed. You can install this package in any qube or its template here.</property>
+                                <property name="use-markup">True</property>
+                                <property name="wrap">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <child>
+                                  <object class="GtkComboBox" id="usb_u2f_install_other_combo">
+                                    <property name="name">u2f_usb_combo</property>
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="valign">center</property>
+                                    <property name="margin-start">5</property>
+                                    <property name="margin-end">50</property>
+                                    <property name="margin-bottom">5</property>
+                                    <property name="hexpand">False</property>
+                                    <property name="has-entry">True</property>
+                                    <child internal-child="entry">
+                                      <object class="GtkEntry">
+                                        <property name="can-focus">True</property>
+                                        <property name="width-chars">24</property>
+                                      </object>
+                                    </child>
+                                    <style>
+                                      <class name="flat_combo"/>
+                                    </style>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkButton" id="usb_u2f_install_other_button">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">True</property>
+                                    <property name="receives-default">True</property>
+                                    <property name="halign">center</property>
+                                    <property name="relief">none</property>
+                                    <child>
+                                      <object class="GtkBox">
+                                        <property name="visible">True</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="spacing">10</property>
+                                        <child>
+                                          <object class="GtkImage">
+                                            <property name="visible">True</property>
+                                            <property name="can-focus">False</property>
+                                            <property name="icon-name">qubes-icon-download</property>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can-focus">False</property>
+                                            <property name="xpad">5</property>
+                                            <property name="label" translatable="yes">Install Proxy in qube</property>
+                                            <style>
+                                              <class name="add_label"/>
+                                            </style>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">1</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <style>
+                                      <class name="flat_button"/>
+                                      <class name="flat"/>
+                                      <class name="button_cancel"/>
+                                    </style>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <style>
+                              <class name="info_box"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">12</property>
                           </packing>
                         </child>
                         <child>
@@ -2274,7 +2452,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">12</property>
+                            <property name="position">13</property>
                           </packing>
                         </child>
                         <child>
@@ -2290,7 +2468,7 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="halign">start</property>
-                                <property name="label" translatable="yes">&lt;b&gt;Enable the Qubes U2F Proxy&lt;/b&gt; service</property>
+                                <property name="label" translatable="yes">&lt;b&gt;Enable the Qubes CTAP Proxy&lt;/b&gt; service</property>
                                 <property name="use-markup">True</property>
                               </object>
                             </child>
@@ -2298,7 +2476,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">14</property>
+                            <property name="position">15</property>
                           </packing>
                         </child>
                         <child>
@@ -2318,7 +2496,7 @@
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="halign">start</property>
-                                    <property name="label" translatable="yes">&lt;b&gt;List of qubes that can use the U2F Proxy:&lt;/b&gt;</property>
+                                    <property name="label" translatable="yes">&lt;b&gt;List of qubes that can use the Qubes CTAP Proxy:&lt;/b&gt;</property>
                                     <property name="use-markup">True</property>
                                   </object>
                                   <packing>
@@ -2433,7 +2611,7 @@
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="margin-start">10</property>
-                                    <property name="label" translatable="yes">If you don't see the desired qube here, install the &lt;tt&gt;qubes-u2f&lt;/tt&gt; package in the template on which it is based (or, if it's a standalone, in the qube itself).</property>
+                                    <property name="label" translatable="yes">If you don't see the desired qube here, install the &lt;tt&gt;qubes-ctap&lt;/tt&gt; package in the template on which it is based (or, if it's a standalone, in the qube itself).</property>
                                     <property name="use-markup">True</property>
                                     <property name="wrap">True</property>
                                     <property name="xalign">0</property>
@@ -2480,7 +2658,7 @@
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="halign">start</property>
-                                    <property name="label" translatable="yes">Enable &lt;b&gt;registering new keys&lt;/b&gt; with the U2F Proxy service</property>
+                                    <property name="label" translatable="yes">Enable &lt;b&gt;registering new keys&lt;/b&gt; with the Qubes CTAP Proxy service</property>
                                     <property name="use-markup">True</property>
                                     <property name="wrap">True</property>
                                   </object>
@@ -2714,7 +2892,7 @@
                                         <property name="visible">True</property>
                                         <property name="can-focus">False</property>
                                         <property name="margin-start">10</property>
-                                        <property name="label" translatable="yes">If you don't see the desired qube here, install the &lt;tt&gt;qubes-u2f&lt;/tt&gt; package in the template on which it is based (or, if it's a standalone, in the qube itself).</property>
+                                        <property name="label" translatable="yes">If you don't see the desired qube here, install the &lt;tt&gt;qubes-ctap&lt;/tt&gt; package in the template on which it is based (or, if it's a standalone, in the qube itself).</property>
                                         <property name="use-markup">True</property>
                                         <property name="wrap">True</property>
                                         <property name="xalign">0</property>
@@ -2771,7 +2949,7 @@
                                       <object class="GtkLabel">
                                         <property name="visible">True</property>
                                         <property name="can-focus">False</property>
-                                        <property name="label" translatable="yes">Allow some qubes to access &lt;b&gt;ALL&lt;/b&gt; keys stored on your U2F device</property>
+                                        <property name="label" translatable="yes">Allow some qubes to access &lt;b&gt;ALL&lt;/b&gt; keys stored on your hardware security device</property>
                                         <property name="use-markup">True</property>
                                         <property name="wrap">True</property>
                                       </object>
@@ -2949,7 +3127,8 @@
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="margin-start">10</property>
-                                    <property name="label" translatable="yes">If you don't see the desired qube here, install the &lt;tt&gt;qubes-u2f&lt;/tt&gt; package in the template on which it is based (or, if it's a standalone, in the qube itself).</property>
+                                    <property name="label" translatable="yes">If you don't see the desired qube here, install the &lt;tt&gt;qubes-ctap&lt;/tt&gt; package in the template on which it is based (or, if it's a standalone, in the qube itself).</property>
+                                    <property name="use-markup">True</property>
                                     <property name="wrap">True</property>
                                     <property name="xalign">0</property>
                                     <style>
@@ -2973,7 +3152,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">15</property>
+                            <property name="position">16</property>
                           </packing>
                         </child>
                         <style>
