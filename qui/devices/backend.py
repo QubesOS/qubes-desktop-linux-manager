@@ -39,6 +39,7 @@ _ = t.gettext
 FEATURE_HIDE_CHILDREN = "device-hide-children"
 FEATURE_ATTACH_WITH_MIC = "device-attach-with-mic"
 FEATURE_RESOLUTION = "device-qvc-resolution"  # dev_id=resolution, space delimited
+FEATURE_OPEN_FILE_MANAGER = "device-open-file-manager-on-attach"
 
 
 class VM:
