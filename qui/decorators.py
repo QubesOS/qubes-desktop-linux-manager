@@ -187,12 +187,12 @@ class DomainDecorator(PropertiesDecorator):
             self.cpu_label.set_width_chars(6)
             self.pack_start(self.cpu_label, True, True, 0)
 
-        def update_state(self, cpu=0, header=False):
+        def update_state(self, cpu=0.0, header=False):
             if header:
                 markup = _("<b>CPU</b>")
             elif cpu > 0:
                 # pylint: disable=consider-using-f-string
-                markup = "{:3d}%".format(cpu)
+                markup = "{:.1f}%".format(cpu)
             else:
                 color = (
                     self.cpu_label.get_style_context()

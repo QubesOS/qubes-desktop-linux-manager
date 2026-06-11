@@ -827,7 +827,7 @@ class DomainMenuItem(Gtk.MenuItem):
 
     def update_stats(self, memory_kb, cpu_usage):
         self.memory.update_state(int(memory_kb))
-        self.cpu.update_state(int(cpu_usage))
+        self.cpu.update_state(round(float(cpu_usage), 1))
 
     def set_label_icon(self):
         for child in self.iconbox.get_children():
