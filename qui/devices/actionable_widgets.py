@@ -26,6 +26,7 @@ Use generate_wrapper_widget to get a wrapped widget.
 import asyncio
 import functools
 import pathlib
+import time
 from typing import Iterable, Callable, Optional, List
 
 import qubesadmin
@@ -38,7 +39,6 @@ gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk, GdkPixbuf, GLib  # isort:skip
 
 from . import backend
-import time
 
 
 def load_icon(icon_name: str, backup_name: str, size: int = 24):
@@ -247,7 +247,7 @@ class AttachWidget(ActionableWidget, VMWithIcon):
             self.actionable = False
 
     async def widget_action(self, *_args):
-        self.device.attach_to_vm(self.vm)
+        await asyncio.to_thread(self.device.attach_to_vm, self.vm)
 
 
 class DetachWidget(ActionableWidget, SimpleActionWidget):
@@ -259,7 +259,7 @@ class DetachWidget(ActionableWidget, SimpleActionWidget):
         self.device = device
 
     async def widget_action(self, *_args):
-        self.device.detach_from_vm(self.vm, False)
+        await asyncio.to_thread(self.device.detach_from_vm, self.vm, False)
 
 
 class DetachWithWidget(ActionableWidget, SimpleActionWidget):
@@ -278,7 +278,7 @@ class DetachWithWidget(ActionableWidget, SimpleActionWidget):
         self.device = device
 
     async def widget_action(self, *_args):
-        self.device.detach_from_vm(self.vm, True)
+        await asyncio.to_thread(self.device.detach_from_vm, self.vm, True)
 
 
 class DetachAndShutdownWidget(ActionableWidget, SimpleActionWidget):
@@ -292,8 +292,8 @@ class DetachAndShutdownWidget(ActionableWidget, SimpleActionWidget):
         self.device = device
 
     async def widget_action(self, *_args):
-        self.device.detach_from_vm(self.vm, True)
-        self.vm.vm_object.shutdown()
+        await asyncio.to_thread(self.device.detach_from_vm, self.vm, True)
+        await asyncio.to_thread(self.vm.vm_object.shutdown)
 
 
 class DetachAndAttachWidget(ActionableWidget, VMWithIcon):
@@ -306,8 +306,8 @@ class DetachAndAttachWidget(ActionableWidget, VMWithIcon):
 
     async def widget_action(self, *_args):
         for vm in self.device.attachments:
-            self.device.detach_from_vm(vm, True)
-        self.device.attach_to_vm(self.vm)
+            await asyncio.to_thread(self.device.detach_from_vm, vm, True)
+        await asyncio.to_thread(self.device.attach_to_vm, self.vm)
 
 
 class AttachDisposableWidget(ActionableWidget, VMWithIcon):
@@ -320,9 +320,9 @@ class AttachDisposableWidget(ActionableWidget, VMWithIcon):
 
     async def widget_action(self, *_args):
         new_dispvm = qubesadmin.vm.DispVM.from_appvm(self.vm.vm_object.app, self.vm)
-        new_dispvm.start()
+        await asyncio.to_thread(new_dispvm.start)
 
-        self.device.attach_to_vm(backend.VM(new_dispvm))
+        await asyncio.to_thread(self.device.attach_to_vm, backend.VM(new_dispvm))
 
 
 class DetachAndAttachDisposableWidget(ActionableWidget, VMWithIcon):
@@ -334,11 +334,11 @@ class DetachAndAttachDisposableWidget(ActionableWidget, VMWithIcon):
         self.device = device
 
     async def widget_action(self, *_args):
-        self.device.detach_from_vm(self.vm)
+        await asyncio.to_thread(self.device.detach_from_vm, self.vm)
         new_dispvm = qubesadmin.vm.DispVM.from_appvm(self.vm.vm_object.app, self.vm)
-        new_dispvm.start()
+        await asyncio.to_thread(new_dispvm.start)
 
-        self.device.attach_to_vm(backend.VM(new_dispvm))
+        await asyncio.to_thread(self.device.attach_to_vm, backend.VM(new_dispvm))
 
 
 class ToggleFeatureItem(ActionableWidget, SimpleActionWidget):
@@ -379,7 +379,7 @@ class StartUSBVM(ActionableWidget, SimpleActionWidget):
         self.usbvm = usbvm
 
     async def widget_action(self, *_args):
-        self.usbvm.vm_object.start()
+        await asyncio.to_thread(self.usbvm.vm_object.start)
 
 
 #### Configuration-related actions
