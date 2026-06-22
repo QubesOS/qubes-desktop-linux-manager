@@ -248,6 +248,8 @@ class U2FPolicyHandler:
     SERVICE_FEATURE = "service.qubes-ctap-proxy"
     SUPPORTED_SERVICE_FEATURE = "supported-service.qubes-ctap-proxy"
     AUTH_POLICY = "u2f.Authenticate"
+    GETINFO_POLICY = "ctap.GetInfo"
+    PIN_POLICY = "ctap.ClientPin"
     REGISTER_POLICY = "u2f.Register"
     POLICY_REGISTER_POLICY = "policy.RegisterArgument"
 
@@ -260,6 +262,7 @@ class U2FPolicyHandler:
     ):
         self.qapp = qapp
         self.policy_manager = policy_manager
+        self.gtk_builder = gtk_builder
         self.policy_filename = "50-config-u2f"
         self.usb_qubes = usb_qubes
 
@@ -268,8 +271,9 @@ class U2FPolicyHandler:
 u2f.Authenticate * @anyvm @anyvm deny
 u2f.Register * @anyvm @anyvm deny
 policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
+ctap.GetInfo * @anyvm @anyvm deny
+ctap.ClientPin * @anyvm @anyvm deny
 """
-
         self.problem_fatal_box: Gtk.Box = gtk_builder.get_object(
             "usb_u2f_fatal_problem"
         )
@@ -313,41 +317,26 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
         self.available_vms: List[qubesadmin.vm.QubesVM] = []
         self.initial_register_vms: List[qubesadmin.vm.QubesVM] = []
         self.initial_blanket_vms: List[qubesadmin.vm.QubesVM] = []
+
+        self.initial_enable_state: bool = False
+        self.initial_register_state: bool = False
+        self.initial_register_all_state: bool = False
+        self.initial_blanket_check_state: bool = False
+
         self.allow_all_register: bool = False
         self.current_token: Optional[str] = None
         self.rules: List[Rule] = []
         self.usb_qube_model: Optional[VMListModeler] = None
+        self.other_qube_model: Optional[VMListModeler] = None
         self.usb_qubes_with_u2f = set()
 
         self.error_handler = ErrorHandler(gtk_builder, "usb_u2f")
 
+        self.enable_some_handler: VMFlowboxHandler | None = None
+        self.register_some_handler: VMFlowboxHandler | None = None
+        self.blanket_handler: VMFlowboxHandler | None = None
+
         self._initialize_data()
-
-        self.enable_some_handler = VMFlowboxHandler(
-            gtk_builder,
-            self.qapp,
-            "usb_u2f_enable_some",
-            self.initially_enabled_vms,
-            lambda vm: vm in self.available_vms,
-        )
-
-        self.register_some_handler = VMFlowboxHandler(
-            gtk_builder,
-            self.qapp,
-            "usb_u2f_register_some",
-            self.initial_register_vms,
-            lambda vm: vm in self.available_vms,
-            verification_callback=self._verify_additional_vm,
-        )
-
-        self.blanket_handler = VMFlowboxHandler(
-            gtk_builder,
-            self.qapp,
-            "usb_u2f_blanket",
-            self.initial_blanket_vms,
-            lambda vm: vm in self.available_vms,
-            verification_callback=self._verify_additional_vm,
-        )
 
         self.widget_to_box = {
             self.enable_check: self.box,
@@ -359,11 +348,6 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
         for widget, box in self.widget_to_box.items():
             widget.connect("toggled", partial(self._enable_clicked, box))
             self._enable_clicked(box, widget)
-
-        self.initial_enable_state: bool = self.enable_check.get_active()
-        self.initial_register_state: bool = self.register_check.get_active()
-        self.initial_register_all_state: bool = self.register_all_radio.get_active()
-        self.initial_blanket_check_state: bool = self.blanket_check.get_active()
 
         self.conflict_file_handler = ConflictFileHandler(
             gtk_builder=gtk_builder,
@@ -447,8 +431,12 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
         return False
 
     def _initialize_data(self):
+        self.qapp.domains.clear_cache()
+        self.qapp.clear_cache()
+
         self.problem_fatal_box.set_visible(False)
         self.available_vms.clear()
+        self.usb_qubes_with_u2f.clear()
 
         # guess at the current sys-usb
         self.rules, self.current_token = self.policy_manager.get_rules_from_filename(
@@ -462,6 +450,7 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
                 hide_install_button=True,
                 disable_usb_select=True,
             )
+            self.initial_enable_state = False
             return
 
         for qube in self.usb_qubes:
@@ -470,19 +459,29 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
         for qube in self.qapp.domains:
             if qube.features.check_with_template(self.SUPPORTED_SERVICE_FEATURE):
                 self.available_vms.append(qube)
-
-        self.usb_qube_model = VMListModeler(
-            combobox=self.usb_qube_combo,
-            qapp=self.qapp,
-            filter_function=lambda vm: vm in self.usb_qubes or vm.name == "testqube",
-            style_changes=True,
-        )
-        self.other_qube_model = VMListModeler(
-            combobox=self.other_qube_combo,
-            qapp=self.qapp,
-            filter_function=lambda vm: vm not in self.available_vms,
-            style_changes=False,
-        )
+        if self.usb_qube_model:
+            self.usb_qube_model.refresh_data(
+                filter_function=lambda vm: vm in self.usb_qubes or vm.name == "testqube"
+            )
+        else:
+            self.usb_qube_model = VMListModeler(
+                combobox=self.usb_qube_combo,
+                qapp=self.qapp,
+                filter_function=lambda vm: vm in self.usb_qubes
+                or vm.name == "testqube",
+                style_changes=True,
+            )
+        if self.other_qube_model:
+            self.other_qube_model.refresh_data(
+                filter_function=lambda vm: vm not in self.available_vms
+            )
+        else:
+            self.other_qube_model = VMListModeler(
+                combobox=self.other_qube_combo,
+                qapp=self.qapp,
+                filter_function=lambda vm: vm not in self.available_vms,
+                style_changes=False,
+            )
         self.other_qube_model.connect_change_callback(self._install_u2f_other_changed)
 
         policy_candidates = set()
@@ -507,6 +506,41 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
         self.usb_qube_model.select_value(sys_usb)
         self.usb_qube_model.update_initial()
 
+        if self.enable_some_handler:
+            self.enable_some_handler.change_vm_list(lambda vm: vm in self.available_vms)
+        else:
+            self.enable_some_handler = VMFlowboxHandler(
+                self.gtk_builder,
+                self.qapp,
+                "usb_u2f_enable_some",
+                [],
+                lambda vm: vm in self.available_vms,
+            )
+        if self.register_some_handler:
+            self.register_some_handler.change_vm_list(
+                lambda vm: vm in self.available_vms
+            )
+        else:
+            self.register_some_handler = VMFlowboxHandler(
+                self.gtk_builder,
+                self.qapp,
+                "usb_u2f_register_some",
+                [],
+                lambda vm: vm in self.available_vms,
+                verification_callback=self._verify_additional_vm,
+            )
+        if self.blanket_handler:
+            self.blanket_handler.change_vm_list(lambda vm: vm in self.available_vms)
+        else:
+            self.blanket_handler = VMFlowboxHandler(
+                self.gtk_builder,
+                self.qapp,
+                "usb_u2f_blanket",
+                [],
+                lambda vm: vm in self.available_vms,
+                verification_callback=self._verify_additional_vm,
+            )
+
         self.load_rules_for_usb_qube()
 
     def load_rules_for_usb_qube(self):
@@ -524,6 +558,7 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
                     usb_qube
                 )
             )
+            self.initial_enable_state = False
 
         self.allow_all_register = False
         self.initially_enabled_vms.clear()
@@ -539,6 +574,12 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
                 self.initially_enabled_vms.append(vm)
 
         self.enable_check.set_active(bool(self.initially_enabled_vms))
+
+        self.enable_some_handler.clear()
+        for vm in self.initially_enabled_vms:
+            self.enable_some_handler.add_selected_vm(vm)
+        self.enable_some_handler.save()
+
         for rule in self.rules:
             if rule.target not in [str(usb_qube), "@anyvm"]:
                 self.error_handler.add_error(rule)
@@ -567,6 +608,13 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
                     except KeyError:
                         self.error_handler.add_error(rule)
                         continue
+            elif rule.service in [self.GETINFO_POLICY, self.PIN_POLICY]:
+                try:
+                    vm = self.qapp.domains[rule.source]
+                    if vm not in self.initially_enabled_vms:
+                        self.error_handler.add_error(rule)
+                except KeyError:
+                    self.error_handler.add_error(rule)
             elif rule.service != self.POLICY_REGISTER_POLICY:
                 self.error_handler.add_error(rule)
                 continue
@@ -578,10 +626,23 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
             if self.initial_register_vms:
                 self.register_check.set_active(True)
                 self.register_some_radio.set_active(True)
+                self.register_some_handler.clear()
+                for vm in self.initial_register_vms:
+                    self.register_some_handler.add_selected_vm(vm)
+                self.register_some_handler.save()
             else:
                 self.register_check.set_active(False)
 
         self.blanket_check.set_active(bool(self.initial_blanket_vms))
+        self.blanket_handler.clear()
+        for vm in self.initial_blanket_vms:
+            self.blanket_handler.add_selected_vm(vm)
+        self.blanket_handler.save()
+
+        self.initial_enable_state = self.enable_check.get_active()
+        self.initial_register_state = self.register_check.get_active()
+        self.initial_register_all_state = self.register_all_radio.get_active()
+        self.initial_blanket_check_state = self.blanket_check.get_active()
 
     def disable_u2f(
         self, reason: str, hide_install_button=False, disable_usb_select=False
@@ -616,7 +677,6 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
                 self.policy_manager.text_to_rules(self.deny_all_policy),
                 self.current_token,
             )
-
             self._initialize_data()
             return
 
@@ -642,6 +702,25 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
             return
         sys_usb = self.usb_qube_model.get_selected()
         self.usb_qube_model.update_initial()
+
+        # Pin and GetInfo policies
+        for vm in enabled_vms:
+            rules.append(
+                self.policy_manager.new_rule(
+                    service=self.PIN_POLICY,
+                    source=str(vm),
+                    target=str(sys_usb),
+                    action="allow",
+                )
+            )
+            rules.append(
+                self.policy_manager.new_rule(
+                    service=self.GETINFO_POLICY,
+                    source=str(vm),
+                    target=str(sys_usb),
+                    action="allow",
+                )
+            )
 
         # register rules
         if not self.register_check.get_active():

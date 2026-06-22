@@ -261,6 +261,8 @@ class VMListModeler(TraitSelector):
         """
         self.qapp = qapp
         self.combo = combobox
+        self.list_store = Gtk.ListStore(int, str, GdkPixbuf.Pixbuf, str, str, str)
+        self.completion: Gtk.EntryCompletion | None = None
         self.entry_box = self.combo.get_child()
         if event_callback:
             self.change_functions = [event_callback]
@@ -270,24 +272,15 @@ class VMListModeler(TraitSelector):
         self.show_internal = show_internal
 
         self._entries: dict[str, dict[str, Any]] = {}
+        self._initial_id = None
 
         self._icons: dict[str, Gtk.Image] = {}
         self._icon_size = 20
 
-        self._create_entries(
+        self._setup_renderers()
+        self.refresh_data(
             filter_function, default_value, additional_options, current_value
         )
-
-        self._apply_model()
-
-        self._initial_id = None
-
-        if current_value:
-            self.select_value(current_value)
-        elif default_value:
-            self.select_value(default_value)
-        else:
-            self.combo.set_active(0)
 
         self._initial_id = self.combo.get_active_id()
 
@@ -419,13 +412,19 @@ class VMListModeler(TraitSelector):
             if self.is_changed():
                 self.entry_box.get_style_context().add_class("combo-changed")
 
-    def _apply_model(self):
-        assert isinstance(self.combo, Gtk.ComboBox)
-        list_store = Gtk.ListStore(int, str, GdkPixbuf.Pixbuf, str, str, str)
-
+    def refresh_data(
+        self,
+        filter_function: Callable[[qubesadmin.vm.QubesVM], bool] | None = None,
+        default_value: qubesadmin.vm.QubesVM | str | None = None,
+        additional_options: dict[qubesadmin.vm.QubesVM | str | None, str] | None = None,
+        current_value: str | None = None,
+    ):
+        self._create_entries(
+            filter_function, default_value, additional_options, current_value
+        )
         for entry_no, display_name in zip(itertools.count(), sorted(self._entries)):
             entry = self._entries[display_name]
-            list_store.append(
+            self.list_store.append(
                 [
                     entry_no,
                     display_name,
@@ -435,10 +434,20 @@ class VMListModeler(TraitSelector):
                     "#000000" if entry["vm"] is None else None,  # foreground
                 ]
             )
+        assert isinstance(self.combo, Gtk.ComboBox)
 
-        self.combo.set_model(list_store)
+        self.combo.set_model(self.list_store)
         self.combo.set_id_column(1)
+        self.completion.set_model(self.list_store)
 
+        if current_value:
+            self.select_value(current_value)
+        elif default_value:
+            self.select_value(default_value)
+        else:
+            self.combo.set_active(0)
+
+    def _setup_renderers(self):
         icon_column = Gtk.CellRendererPixbuf()
         self.combo.pack_start(icon_column, False)
         self.combo.add_attribute(icon_column, "pixbuf", 2)
@@ -450,16 +459,14 @@ class VMListModeler(TraitSelector):
         area.pack_start(icon_column, False, False, False)
         area.add_attribute(icon_column, "pixbuf", 2)
 
-        completion = Gtk.EntryCompletion.new_with_area(area)
-        completion.set_inline_selection(True)
-        completion.set_inline_completion(True)
-        completion.set_popup_completion(True)
-        completion.set_popup_single_match(False)
-        completion.set_model(list_store)
-        completion.set_text_column(1)
+        self.completion = Gtk.EntryCompletion.new_with_area(area)
+        self.completion.set_inline_selection(True)
+        self.completion.set_inline_completion(True)
+        self.completion.set_popup_completion(True)
+        self.completion.set_popup_single_match(False)
+        self.completion.set_text_column(1)
 
-        entry_box.set_completion(completion)
-
+        entry_box.set_completion(self.completion)
         # A Combo with an entry has a text column already
         text_column: Gtk.CellRenderer = self.combo.get_cells()[0]
         self.combo.reorder(text_column, 1)
