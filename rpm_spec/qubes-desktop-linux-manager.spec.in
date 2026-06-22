@@ -67,6 +67,7 @@ Requires:  qubes-artwork >= 4.1.5
 Requires:  xhost
 Requires:  gtksourceview4
 Requires:  gnome-icon-theme
+Requires:  python3-ansible-runner
 
 Provides:   qui = %{version}-%{release}
 Obsoletes:  qui < 4.0.0
