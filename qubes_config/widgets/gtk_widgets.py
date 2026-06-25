@@ -435,6 +435,7 @@ class VMListModeler(TraitSelector):
                 ]
             )
         assert isinstance(self.combo, Gtk.ComboBox)
+        assert isinstance(self.completion, Gtk.EntryCompletion)
 
         self.combo.set_model(self.list_store)
         self.combo.set_id_column(1)

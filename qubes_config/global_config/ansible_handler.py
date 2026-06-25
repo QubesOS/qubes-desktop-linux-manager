@@ -22,7 +22,7 @@ Use AnsibleHandler to execute ansible playbooks, and show progress.
 """
 import re
 import threading
-from typing import Callable
+from typing import Callable, Any
 
 import ansible_runner
 import gi
@@ -177,20 +177,23 @@ class AnsibleHandler:
         :param playbook_file: path to the playbook file
         :param operation_name: name of the operation to be performed; used in window
         titles
-        :param parent_window: Gtk.Window that should be the parent of modal dialogues displayed by this class
+        :param parent_window: Gtk.Window that should be the parent of modal
+         dialogues displayed by this class
         :param finalize_callback: function to call when the playbook is done and the
-        window is closed TODO: DOES THIS WORK
+        window is closed
         """
         self.playbook_file = playbook_file
         self.operation_name = operation_name
         self.parent_window = parent_window
-        self.params = {}
-        self.progress_dialog = None
+        self.params: dict[str, Any] = {}
+        self.progress_dialog: AnsibleProgressDialog | None = None
         self.runner = None
         self.finalize_callback = finalize_callback
 
     def _handle_playbook_events(self, data):
         """Update log, update status bar"""
+        if not self.progress_dialog:
+            return
         stdout_data = data.get("stdout", "")
         if stdout_data:
             stdout_data = ANSI_ESCAPE.sub("", stdout_data)  # strip color codes
@@ -232,7 +235,8 @@ class AnsibleHandler:
                 )
 
     def _on_playbook_finished(self):
-        self.progress_dialog.finish(self.runner.rc == 0)
+        if self.progress_dialog and self.runner:
+            self.progress_dialog.finish(self.runner.rc == 0)
         if self.finalize_callback:
             GLib.idle_add(self.finalize_callback)
 
@@ -246,11 +250,12 @@ class AnsibleHandler:
 
         GLib.idle_add(self._on_playbook_finished)
 
-    def run_playbook_for(self, params: dict, description: str):
+    def run_playbook_for(self, params: dict[str, Any], description: str):
         """
         Run the playbook for listed qubes.
         :param params: parameters to be passed through to the playbook
-        :param description: description of the action, used in asking the user "Are you sure???"
+        :param description: description of the action, used in asking
+         the user "Are you sure???"
         :return:
         """
         self.params = params
