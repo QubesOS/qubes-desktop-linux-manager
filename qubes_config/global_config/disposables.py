@@ -481,6 +481,5 @@ class DisposablesHandler(PageHandler):
     def save(self):
         """Save current rules, whatever they are - custom or default.
         Return True if successful, False otherwise"""
-
         for handler in self.handlers:
             handler.save()

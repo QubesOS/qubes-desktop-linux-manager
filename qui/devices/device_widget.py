@@ -258,7 +258,7 @@ class DevicesTray(Gtk.Application):
         for vm in self.qapp.domains:
             wrapped_vm = backend.VM(vm)
             try:
-                if not vm.features.get("internal"):
+                if not vm.features.get("internal", False):
                     if wrapped_vm.is_attachable:
                         self.vms.add(wrapped_vm)
                     if wrapped_vm.is_dispvm_template:
@@ -632,7 +632,7 @@ class DevicesTray(Gtk.Application):
     def vm_start(self, vm, _event, **_kwargs):
         wrapped_vm = backend.VM(vm)
         try:
-            internal = vm.features.get("internal")
+            internal = vm.features.get("internal", False)
             attachable = wrapped_vm.is_attachable
         except qubesadmin.exc.QubesException:
             internal, attachable = False, False

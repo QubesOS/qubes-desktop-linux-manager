@@ -93,7 +93,9 @@ class VM:
         Should this VM be listed as possible attachment target in the GUI?
         """
         try:
-            return self.vm_class != "AdminVM" and self._vm.is_running()
+            return (
+                self.vm_class not in ["AdminVM", "RemoteVM"] and self._vm.is_running()
+            )
         except qubesadmin.exc.QubesException:
             return False
 

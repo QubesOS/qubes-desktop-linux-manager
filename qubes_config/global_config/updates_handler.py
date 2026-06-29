@@ -683,8 +683,7 @@ class UpdatesHandler(PageHandler):
             combobox=self.dom0_updatevm_combo,
             qapp=self.qapp,
             filter_function=(
-                lambda vm: vm.klass != "TemplateVM"
-                and vm.klass != "AdminVM"
+                lambda vm: vm.klass not in ["TemplateVM", "AdminVM", "RemoteVM"]
                 and vm.is_networked()
             ),
             current_value=self.qapp.updatevm,

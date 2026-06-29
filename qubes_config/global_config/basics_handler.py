@@ -550,7 +550,7 @@ class BasicSettingsHandler(PageHandler):
 
     @staticmethod
     def _clock_vm_filter(vm) -> bool:
-        return vm.klass != "TemplateVM"
+        return vm.klass not in ["TemplateVM", "RemoteVM"]
 
     @staticmethod
     def _default_template_filter(vm) -> bool:
