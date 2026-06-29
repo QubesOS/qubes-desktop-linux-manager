@@ -424,7 +424,7 @@ qubes.Filecopy * @anyvm @anyvm ask""",
         )
 
         self.progress_bar_dialog.update_progress(page_progress)
-        self.handlers["disposable"] = DisposablesHandler(
+        self.handlers["disposables"] = DisposablesHandler(
             qapp=self.qapp, policy_manager=self.policy_manager, gtk_builder=self.builder
         )
         self.progress_bar_dialog.update_progress(page_progress)

@@ -122,7 +122,7 @@ class AutoDeviceDialog(DevPolicyDialogHandler):
             self.qapp,
             "edit_device",
             [],
-            filter_function=lambda vm: vm.klass != "AdminVM",
+            filter_function=lambda vm: vm.klass not in ["AdminVM", "RemoteVM"],
         )
 
         self.backend_vm: Optional[qubesadmin.vm.QubesVM] = None

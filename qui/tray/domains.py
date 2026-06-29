@@ -574,8 +574,8 @@ class StartedMenu(Gtk.Menu):
         # ... or with `expert-mode` feature per qube or per entire GUIVM.
         if (
             self.app.expert_mode
-            or getattr(self.vm, "debug")
-            or not getattr(self.vm, "guivm")
+            or getattr(self.vm, "debug", False)
+            or not getattr(self.vm, "guivm", None)
             or not self.vm.features.check_with_template("gui", False)
             or self.vm.features.get("expert-mode", False)
         ):
@@ -1068,6 +1068,8 @@ class DomainTray(Gtk.Application):
             # event was fully handled
             return
         if vm in self.menu_items:
+            return
+        if vm.klass == "RemoteVM":
             return
 
         state = STATE_DICTIONARY.get(event)
