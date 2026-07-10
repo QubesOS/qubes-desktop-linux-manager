@@ -1,3 +1,24 @@
+qubes-desktop-linux-manager (4.3.26-1) unstable; urgency=medium
+
+  [ Demi Marie Obenour ]
+  * Updater: Enable qubesadmin caching
+
+  [ Bartłomiej Kida ]
+  * Fix typos in README.md and global_config.glade
+
+  [ Marek Marczykowski-Górecki ]
+  * ci: install gobject-introspection-devel
+
+  [ Corey Ford ]
+  * Change RAM adjustment increments
+
+  [ Marta Marczykowska-Górecka ]
+  * Improve Disposable Config Tools + Add Create New DVM Template
+  * Add --open-at to New Qube
+  * Fixes with regards to RemoteVMs
+
+ -- Marek Marczykowski-Górecki <marmarek@invisiblethingslab.com>  Fri, 10 Jul 2026 20:24:50 +0200
+
 qubes-desktop-linux-manager (4.3.25-1) unstable; urgency=medium
 
   [ Marek Marczykowski-Górecki ]
