@@ -39,17 +39,6 @@ import gettext
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
-STATE_DICTIONARY = {
-    "domain-pre-start": "Transient",
-    "domain-start": "Running",
-    "domain-start-failed": "Halted",
-    "domain-paused": "Paused",
-    "domain-unpaused": "Running",
-    "domain-shutdown": "Halted",
-    "domain-pre-shutdown": "Transient",
-    "domain-shutdown-failed": "Running",
-}
-
 
 class IconCache:
     def __init__(self):
@@ -1072,16 +1061,14 @@ class DomainTray(Gtk.Application):
         if vm.klass == "RemoteVM":
             return
 
-        state = STATE_DICTIONARY.get(event)
-        if not state:
-            try:
-                state = vm.get_power_state()
-            except exc.QubesException:
-                # VM might have been already destroyed
-                if vm not in self.qapp.domains:
-                    return
-                # or we might not have permission to access its power state
-                state = "Halted"
+        try:
+            state = vm.get_power_state()
+        except exc.QubesException:
+            # VM might have been already destroyed
+            if vm not in self.qapp.domains:
+                return
+            # or we might not have permission to access its power state
+            state = "NA"
 
         domain_item = DomainMenuItem(vm, self, self.icon_cache, state=state)
         if not event:  # menu item creation at widget start; we can assume
@@ -1175,14 +1162,11 @@ class DomainTray(Gtk.Application):
                 return
             item = self.menu_items[vm]
 
-        if event in STATE_DICTIONARY:
-            state = STATE_DICTIONARY[event]
-        else:
-            try:
-                state = vm.get_power_state()
-            except Exception:  # pylint: disable=broad-except
-                # it's a fragile DispVM
-                state = "Transient"
+        try:
+            state = vm.get_power_state()
+        except Exception:  # pylint: disable=broad-except
+            # it's a fragile DispVM
+            state = "NA"
 
         item.update_state(state)
 
