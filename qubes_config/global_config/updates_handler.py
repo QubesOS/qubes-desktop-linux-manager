@@ -83,23 +83,19 @@ class RepoHandler:
         self.problems_repo_box: Gtk.Box = gtk_builder.get_object("updates_problem_repo")
         self.problems_label: Gtk.Label = gtk_builder.get_object("updates_problem_label")
 
-        # the code below relies on dicts in Python 3.6+ keeping the
-        # order of items
-        self.repo_to_widget_mapping = [
-            {
-                "qubes-dom0-current": self.dom0_stable_radio,
-                "qubes-dom0-security-testing": self.dom0_testing_sec_radio,
-                "qubes-dom0-current-testing": self.dom0_testing_radio,
-            },
-            {
-                "qubes-templates-itl": self.template_official,
-                "qubes-templates-itl-testing": self.template_official_testing,
-            },
-            {
-                "qubes-templates-community": self.template_community,
-                "qubes-templates-community-testing": self.template_community_testing,  # pylint: disable=line-too-long
-            },
+        self.dom0_update_repo_mapping = [
+            ("qubes-dom0-current", self.dom0_stable_radio),
+            ("qubes-dom0-security-testing", self.dom0_testing_sec_radio),
+            ("qubes-dom0-current-testing", self.dom0_testing_radio),
         ]
+
+        self.repo_to_widget_mapping = {
+            "qubes-templates-itl": self.template_official,
+            "qubes-templates-itl-testing": self.template_official_testing,
+            "qubes-templates-community": self.template_community,
+            "qubes-templates-community-testing": self.template_community_testing,  # pylint: disable=line-too-long
+        }
+
         self.initial_state: Dict[str, bool] = {}
 
         self.template_community.connect("toggled", self._community_toggled)
@@ -140,16 +136,26 @@ class RepoHandler:
             )
 
     def _load_state(self):
-        for repo_dict in self.repo_to_widget_mapping:
-            for repo, widget in repo_dict.items():
-                if repo not in self.repos:
-                    continue
-                if self.repos[repo]["enabled"]:
-                    widget.set_active(self.repos[repo]["enabled"])
+        found_dom0_widget = None
+        for repo, widget in self.dom0_update_repo_mapping:
+            if repo not in self.repos:
+                continue
+            if self.repos[repo]["enabled"]:
+                found_dom0_widget = widget
+            else:
+                break
+        if found_dom0_widget:
+            found_dom0_widget.set_active(True)
 
-        for repo_dict in self.repo_to_widget_mapping:
-            for repo, widget in repo_dict.items():
-                self.initial_state[repo] = widget.get_active()
+        for repo, widget in self.dom0_update_repo_mapping:
+            self.initial_state[repo] = widget.get_active()
+
+        for repo, widget in self.repo_to_widget_mapping.items():
+            if repo not in self.repos:
+                continue
+            if self.repos[repo]["enabled"]:
+                widget.set_active(self.repos[repo]["enabled"])
+            self.initial_state[repo] = widget.get_active()
 
     @staticmethod
     def _run_qrexec_repo(service, arg=""):
@@ -176,15 +182,17 @@ class RepoHandler:
         itl_changed = False
         community_changed = False
 
-        for repo_dict in self.repo_to_widget_mapping:
-            for repo, widget in repo_dict.items():
-                if self.initial_state[repo] != widget.get_active():
-                    if "dom0" in repo:
-                        dom0_changed = True
-                    elif "community" in repo:
-                        community_changed = True
-                    elif "itl" in repo:
-                        itl_changed = True
+        for repo, widget in self.dom0_update_repo_mapping:
+            if self.initial_state[repo] != widget.get_active():
+                dom0_changed = True
+                break
+
+        for repo, widget in self.repo_to_widget_mapping.items():
+            if self.initial_state[repo] != widget.get_active():
+                if "community" in repo:
+                    community_changed = True
+                elif "itl" in repo:
+                    itl_changed = True
         unsaved = []
         if dom0_changed:
             unsaved.append(_("dom0 update source"))
@@ -199,27 +207,37 @@ class RepoHandler:
         """Save all changes."""
         if not self.repos:
             return
-        for repo_dict in self.repo_to_widget_mapping:
-            found = False
-            for repo, widget in repo_dict.items():
-                try:
-                    if widget.get_active():
-                        found = True
-                        self._set_repository(repo, True)
-                    else:
-                        self._set_repository(repo, not found)
-                except RuntimeError as ex:
-                    raise qubesadmin.exc.QubesException(
-                        "Failed to set repository data: " f"{escape(str(ex))}"
-                    ) from ex
+
+        dom0_cutoff_found = False
+        for repo, widget in self.dom0_update_repo_mapping:
+            state = not dom0_cutoff_found  # before cutoff, everything is True, after it
+            # it is false
+            try:
+                self._set_repository(repo, state)
+            except RuntimeError as ex:
+                raise qubesadmin.exc.QubesException(
+                    "Failed to set repository data: " f"{escape(str(ex))}"
+                ) from ex
+            if widget.get_active():
+                dom0_cutoff_found = True
+
+        for repo, widget in self.repo_to_widget_mapping.items():
+            try:
+                self._set_repository(repo, widget.get_active())
+            except RuntimeError as ex:
+                raise qubesadmin.exc.QubesException(
+                    "Failed to set repository data: " f"{escape(str(ex))}"
+                ) from ex
         self._load_data()
         self._load_state()
 
     def reset(self):
         """Reset any user changes."""
-        for repo_dict in self.repo_to_widget_mapping:
-            for repo, widget in repo_dict.items():
-                widget.set_active(self.initial_state[repo])
+        for repo, widget in self.dom0_update_repo_mapping:
+            widget.set_active(self.initial_state[repo])
+
+        for repo, widget in self.repo_to_widget_mapping.items():
+            widget.set_active(self.initial_state[repo])
 
 
 class UpdateCheckerHandler:
