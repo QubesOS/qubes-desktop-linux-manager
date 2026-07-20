@@ -19,8 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 # USA.
 import asyncio
-import threading
-import time
+import functools
 from enum import Enum
 from gettext import ngettext
 
@@ -36,8 +35,7 @@ from qubesadmin.events.utils import wait_for_domain_shutdown
 from qubes_config.widgets.gtk_utils import (
     load_icon,
     show_dialog,
-    show_dialog_with_icon,
-    show_error,
+    show_dialog_with_icon_async,
     RESPONSES_OK,
 )
 from qubes_config.widgets.utils import get_boolean_feature
@@ -67,7 +65,7 @@ class SummaryPage:
         self.log = log
         self.next_button = next_button
         self.cancel_button = cancel_button
-        self.restart_thread = None
+        self.restart_task = None
         self.disable_checkboxes = False
         self.status = RestartStatus.NONE
         self.err = ""
@@ -236,18 +234,16 @@ class SummaryPage:
                 or AppVMType.EXCLUDED in self.head_checkbox.allowed
             )
 
-    def restart_selected_vms(self, show_only_error: bool):
+    async def restart_selected_vms(self, show_only_error: bool):
         self.log.debug("Start restarting")
-        self.restart_thread = threading.Thread(target=self.perform_restart)
-
-        self.restart_thread.start()
+        loop = asyncio.get_running_loop()
+        self.restart_task = loop.create_task(self.perform_restart())
 
         spinner = None
         dialog = None
         # wait a little to check if waiting dialog is needed at all
-        time.sleep(0.01)
-
-        if self.restart_thread.is_alive():
+        done, _pending = await asyncio.wait({self.restart_task}, timeout=0.1)
+        if not done:
             # show waiting dialog
             spinner = Gtk.Spinner()
             spinner.start()
@@ -262,20 +258,17 @@ class SummaryPage:
             dialog.show()
             self.log.debug("Show restart dialog")
 
-        # wait for thread and spin spinner
-        while self.restart_thread.is_alive():
-            while Gtk.events_pending():
-                Gtk.main_iteration()
-            time.sleep(0.1)
+        # wait for the restart to finish
+        await self.restart_task
 
         # cleanup
         if dialog:
             spinner.stop()
             dialog.destroy()
             self.log.debug("Hide restart dialog")
-        self._show_status_dialog(show_only_error)
+        await self._show_status_dialog(show_only_error)
 
-    def perform_restart(self):
+    async def perform_restart(self):
 
         tmpls_to_shutdown = [
             row.vm for row in self.updated_tmpls if row.vm.is_running()
@@ -297,67 +290,69 @@ class SummaryPage:
 
         # clear err and perform shutdown/start
         self.err = ""
-        self.shutdown_domains(tmpls_to_shutdown)
-        self.restart_vms(to_restart)
-        self.shutdown_domains(to_shutdown)
+        await self.shutdown_domains(tmpls_to_shutdown)
+        await self.restart_vms(to_restart)
+        await self.shutdown_domains(to_shutdown)
 
         if self.status is RestartStatus.NONE:
             self.status = RestartStatus.OK
 
-    def shutdown_domains(self, to_shutdown):
+    async def shutdown_domains(self, to_shutdown):
         """
         Try to shut down vms and wait to finish.
         """
+        loop = asyncio.get_running_loop()
         wait_for = []
         for vm in to_shutdown:
             try:
-                vm.shutdown(force=True)
+                # vm.shutdown() is a blocking Admin API call
+                await loop.run_in_executor(
+                    None, functools.partial(vm.shutdown, force=True)
+                )
                 wait_for.append(vm)
                 self.log.info("Shutdown %s", vm.name)
             except qubesadmin.exc.QubesVMError as err:
                 self.err += vm.name + " cannot shutdown: " + str(err) + "\n"
                 self.log.error("Cannot shutdown %s because %s", vm.name, str(err))
                 self.status = RestartStatus.ERROR_TMPL_DOWN
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            # changes between GLib versions and python versions mean that the above
-            # can fail on some dom0/gui domain configurations
-            loop = asyncio.new_event_loop()
-        loop.run_until_complete(wait_for_domain_shutdown(wait_for))
+        await wait_for_domain_shutdown(wait_for)
 
         return wait_for
 
-    def restart_vms(self, to_restart):
+    async def restart_vms(self, to_restart):
         """
         Try to restart vms.
         """
-        shutdowns = self.shutdown_domains(to_restart)
+        shutdowns = await self.shutdown_domains(to_restart)
 
+        loop = asyncio.get_running_loop()
         # restart shutdown qubes
         for vm in shutdowns:
             try:
-                vm.start()
+                # vm.start() blocks until the qube is up
+                await loop.run_in_executor(None, vm.start)
                 self.log.info("Restart %s", vm.name)
             except qubesadmin.exc.QubesVMError as err:
                 self.err += vm.name + " cannot start: " + str(err) + "\n"
                 self.log.error("Cannot start %s because %s", vm.name, str(err))
                 self.status = RestartStatus.ERROR_APP_DOWN
 
-    def _show_status_dialog(self, show_only_error: bool):
+    async def _show_status_dialog(self, show_only_error: bool):
         if self.status == RestartStatus.OK and not show_only_error:
-            show_dialog_with_icon(
+            await show_dialog_with_icon_async(
                 None,
                 l("Success"),
                 l("All qubes were restarted/shutdown successfully."),
-                buttons=RESPONSES_OK,
-                icon_name="qubes-check-yes",
+                RESPONSES_OK,
+                "qubes-check-yes",
             )
         elif self.status.is_error():
-            show_error(
+            await show_dialog_with_icon_async(
                 None,
-                "Failure",
+                l("Failure"),
                 l("During restarting following errors occurs: ") + self.err,
+                RESPONSES_OK,
+                "qubes-info",
             )
             self.log.error("Restart error: %s", self.err)
             self.status = RestartStatus.ERROR_APP_START

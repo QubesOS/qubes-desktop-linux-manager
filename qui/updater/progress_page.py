@@ -18,11 +18,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 # USA.
+import asyncio
 import re
 import signal
 import subprocess
-import threading
-import time
 import gi
 from typing import Dict
 
@@ -50,7 +49,7 @@ class ProgressPage:
         self.cancel_button = cancel_button
         self.vms_to_update = None
         self.exit_triggered = False
-        self.update_thread = None
+        self.update_task = None
         self.after_update_callback = callback
         self.retcode = None
 
@@ -84,7 +83,7 @@ class ProgressPage:
         return self.stack.get_visible_child() == self.page
 
     def init_update(self, vms_to_update, settings):
-        """Starts `perform_update` in new thread."""
+        """Schedules `perform_update` as an asyncio task on the main loop."""
         self.log.info("Prepare updating")
         self.vms_to_update = vms_to_update
         self.progress_list.set_model(vms_to_update.list_store_raw)
@@ -96,10 +95,8 @@ class ProgressPage:
         self.header_label.set_text(l("Update in progress..."))
         self.header_label.set_halign(Gtk.Align.CENTER)
 
-        self.update_thread = threading.Thread(
-            target=self.perform_update, args=(settings,)
-        )
-        self.update_thread.start()
+        loop = asyncio.get_running_loop()
+        self.update_task = loop.create_task(self.perform_update(settings))
 
     def interrupt_update(self):
         """
@@ -109,19 +106,19 @@ class ProgressPage:
         self.exit_triggered = True
         GLib.idle_add(self.header_label.set_text, l("Interrupting the update..."))
 
-    def perform_update(self, settings):
+    async def perform_update(self, settings):
         """Uses qubes-vm-update to update dom0 and then other vms."""
         GLib.idle_add(self.set_total_progress, 0)
 
         if self.vms_to_update:
-            self.update_selected(self.vms_to_update, settings)
+            await self.update_selected(self.vms_to_update, settings)
 
         GLib.idle_add(self.header_label.set_text, l("Update finished"))
         GLib.idle_add(self.cancel_button.set_visible, False)
         GLib.idle_add(self.next_button.set_sensitive, True)
         self.after_update_callback()
 
-    def update_selected(self, to_update, settings):
+    async def update_selected(self, to_update, settings):
         """Updates templates and standalones and then sets update statuses."""
         if self.exit_triggered:
             self.log.info("Update canceled: skip templateVM updating")
@@ -143,7 +140,7 @@ class ProgressPage:
 
         try:
             rows = {row.name: row for row in to_update}
-            self.do_update_selected(rows, settings)
+            await self.do_update_selected(rows, settings)
             GLib.idle_add(self.set_total_progress, 100)
         except subprocess.CalledProcessError as ex:
             for row in to_update:
@@ -156,7 +153,9 @@ class ProgressPage:
                 GLib.idle_add(row.set_status, UpdateStatus.Error)
         self.update_details.update_buffer()
 
-    def do_update_selected(self, rows: Dict[str, RowWrapper], settings: Settings):
+    async def do_update_selected(
+        self, rows: Dict[str, RowWrapper], settings: Settings
+    ):
         """Runs `qubes-vm-update` command."""
         targets = ",".join((name for name in rows.keys()))
 
@@ -164,46 +163,40 @@ class ProgressPage:
         if settings.max_concurrency is not None:
             args.extend(("--max-concurrency", str(settings.max_concurrency)))
 
-        # pylint: disable=consider-using-with
-        proc = subprocess.Popen(
-            [
-                "qubes-vm-update",
-                "--show-output",
-                "--just-print-progress",
-                "--force-update",
-                *args,
-                "--targets",
-                targets,
-            ],
-            stderr=subprocess.PIPE,
-            stdout=subprocess.PIPE,
+        proc = await asyncio.create_subprocess_exec(
+            "qubes-vm-update",
+            "--show-output",
+            "--just-print-progress",
+            "--force-update",
+            *args,
+            "--targets",
+            targets,
+            stderr=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
         )
 
-        read_err_thread = threading.Thread(target=self.read_stderrs, args=(proc, rows))
-        read_out_thread = threading.Thread(target=self.read_stdouts, args=(proc, rows))
-        read_err_thread.start()
-        read_out_thread.start()
+        reading = asyncio.gather(
+            self.read_stderrs(proc, rows),
+            self.read_stdouts(proc, rows),
+        )
 
-        while (
-            proc.poll() is None
-            or read_out_thread.is_alive()
-            or read_err_thread.is_alive()
-        ):
-            time.sleep(1)
-            if self.exit_triggered and proc.poll() is None:
-                proc.send_signal(signal.SIGINT)
-                proc.wait()
-                read_err_thread.join()
-                read_out_thread.join()
+        while proc.returncode is None:
+            try:
+                await asyncio.wait_for(proc.wait(), timeout=1)
+            except asyncio.TimeoutError:
+                if self.exit_triggered:
+                    proc.send_signal(signal.SIGINT)
+                    await proc.wait()
+
+        await reading
         self.retcode = proc.returncode
 
-    def read_stderrs(self, proc, rows):
-        for untrusted_line in iter(proc.stderr.readline, ""):
-            if untrusted_line:
-                self.handle_err_line(untrusted_line, rows)
-            else:
+    async def read_stderrs(self, proc, rows):
+        while True:
+            untrusted_line = await proc.stderr.readline()
+            if not untrusted_line:
                 break
-        proc.stderr.close()
+            self.handle_err_line(untrusted_line, rows)
 
     def handle_err_line(self, untrusted_line, rows):
         line = self._sanitize_line(untrusted_line)
@@ -228,29 +221,28 @@ class ProgressPage:
         except KeyError:
             return
 
-    def read_stdouts(self, proc, rows):
+    async def read_stdouts(self, proc, rows):
         curr_name_out = ""
-        for untrusted_line in iter(proc.stdout.readline, ""):
-            if untrusted_line:
-                line = self._sanitize_line(untrusted_line)
-                try:
-                    maybe_name, text = line.split(" ", 1)
-                except ValueError:
-                    continue
-                suffix = len(":out:")
-                if maybe_name[:-suffix] in rows.keys():
-                    curr_name_out = maybe_name[:-suffix]
-                if curr_name_out:
-                    rows[curr_name_out].append_text_view(text)
-                if (
-                    self.update_details.active_row is not None
-                    and curr_name_out == self.update_details.active_row.name
-                ):
-                    self.update_details.update_buffer()
-            else:
+        while True:
+            untrusted_line = await proc.stdout.readline()
+            if not untrusted_line:
                 break
+            line = self._sanitize_line(untrusted_line)
+            try:
+                maybe_name, text = line.split(" ", 1)
+            except ValueError:
+                continue
+            suffix = len(":out:")
+            if maybe_name[:-suffix] in rows.keys():
+                curr_name_out = maybe_name[:-suffix]
+            if curr_name_out:
+                rows[curr_name_out].append_text_view(text)
+            if (
+                self.update_details.active_row is not None
+                and curr_name_out == self.update_details.active_row.name
+            ):
+                self.update_details.update_buffer()
         self.update_details.update_buffer()
-        proc.stdout.close()
 
     @staticmethod
     def _sanitize_line(untrusted_line: bytes) -> str:

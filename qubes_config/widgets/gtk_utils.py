@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program; if not, see <http://www.gnu.org/licenses/>.
 """Utility functions using Gtk"""
+import asyncio
 import contextlib
 import importlib.resources
 import os
@@ -114,20 +115,21 @@ def ask_question(parent, title: str, text: str):
     )
 
 
-def show_dialog_with_icon(
+def _setup_dialog(
     parent: Optional[Gtk.Widget],
     title: str,
     text: Union[str, Gtk.Widget],
     buttons: Dict[str, Gtk.ResponseType],
     icon_name: str,
-) -> Gtk.ResponseType:
-    """
-    Helper function to show a dialog with icon given by name.
-    """
+) -> Gtk.Dialog:
     icon = Gtk.Image.new_from_pixbuf(load_icon(icon_name, 48, 48))
-    dialog = show_dialog(parent, title, text, buttons, icon)
-    response = dialog.run()
-    dialog.destroy()
+    return show_dialog(parent, title, text, buttons, icon)
+
+
+def _process_response(
+    response: Gtk.ResponseType,
+    buttons: Dict[str, Gtk.ResponseType],
+) -> Gtk.ResponseType:
     if response == Gtk.ResponseType.DELETE_EVENT:
         if Gtk.ResponseType.CANCEL in buttons.values():
             # treat exiting from the window as cancel if it's one of the
@@ -137,6 +139,55 @@ def show_dialog_with_icon(
         if Gtk.ResponseType.NO in buttons.values():
             return Gtk.ResponseType.NO
     return response
+
+
+def show_dialog_with_icon(
+    parent: Optional[Gtk.Widget],
+    title: str,
+    text: Union[str, Gtk.Widget],
+    buttons: Dict[str, Gtk.ResponseType],
+    icon_name: str,
+) -> Gtk.ResponseType:
+    """Helper function to show a dialog with icon given by name."""
+    dialog = _setup_dialog(parent, title, text, buttons, icon_name)
+
+    response = dialog.run()
+    dialog.destroy()
+
+    return _process_response(response, buttons)
+
+
+async def show_dialog_with_icon_async(
+    parent: Optional[Gtk.Widget],
+    title: str,
+    text: Union[str, Gtk.Widget],
+    buttons: Dict[str, Gtk.ResponseType],
+    icon_name: str,
+) -> Gtk.ResponseType:
+    """Async, non-blocking variant of :py:func:`show_dialog_with_icon`."""
+    dialog = _setup_dialog(parent, title, text, buttons, icon_name)
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        # To be solved during migration to newer asyncio versions.
+        # May be awaited before the loop is "running", e.g.
+        # the updater's "nothing to do" dialog runs during GApplication.run(),
+        # where there is not set the running loop yet.
+        loop = asyncio.get_event_loop()
+    future: asyncio.Future = loop.create_future()
+
+    def _on_response(_dialog, response_):
+        if not future.done():
+            future.set_result(response_)
+
+    dialog.connect("response", _on_response)
+
+    try:
+        response = await future
+    finally:
+        dialog.destroy()
+
+    return _process_response(response, buttons)
 
 
 def show_dialog(

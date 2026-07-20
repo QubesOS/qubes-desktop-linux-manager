@@ -18,10 +18,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 # USA.
+import asyncio
 import gi
-import subprocess
 
-from unittest.mock import patch, call, Mock
+from unittest.mock import patch, call, Mock, AsyncMock
 
 import pytest
 
@@ -31,14 +31,13 @@ from gi.repository import Gtk
 
 from qui.updater.intro_page import UpdateRowWrapper
 from qui.updater.progress_page import ProgressPage, QubeUpdateDetails
-from qui.updater.tests.conftest import mock_settings, expected_row
+from qui.updater.tests.conftest import mock_settings, expected_row, run_coroutine
 from qui.updater.utils import ListWrapper, UpdateStatus
 
 
-@patch("threading.Thread")
+@patch("asyncio.get_running_loop")
 def test_init_update(
-    mock_threading,
-    mock_thread,
+    mock_get_running_loop,
     real_builder,
     test_qapp,
     mock_next_button,
@@ -47,8 +46,10 @@ def test_init_update(
     mock_tree_view,
     all_vms_list,
 ):
-
-    mock_threading.return_value = mock_thread
+    sentinel = object()
+    mock_loop = Mock()
+    mock_loop.create_task.return_value = sentinel
+    mock_get_running_loop.return_value = mock_loop
     mock_log = Mock()
     mock_callback = Mock()
     sut = ProgressPage(
@@ -61,6 +62,8 @@ def test_init_update(
     )
 
     sut.progress_list = mock_tree_view
+    # avoid creating a real (never-awaited) coroutine object
+    sut.perform_update = Mock()
 
     sut.init_update(all_vms_list, mock_settings)
 
@@ -68,7 +71,8 @@ def test_init_update(
     assert mock_cancel_button.sensitive
     assert mock_cancel_button.visible
     assert mock_cancel_button.label == "_Cancel updates"
-    assert mock_thread.started
+    mock_loop.create_task.assert_called_once()
+    assert sut.update_task is sentinel
 
     assert mock_label.text == "Update in progress..."
     assert mock_label.halign == Gtk.Align.CENTER
@@ -100,12 +104,12 @@ def test_perform_update(
     sut.vms_to_update = updateable_vms_list
 
     class VMConsumer:
-        def __call__(self, vm_rows, *args, **kwargs):
+        async def __call__(self, vm_rows, *args, **kwargs):
             self.vm_rows = vm_rows
 
     sut.update_selected = VMConsumer()
 
-    sut.perform_update(mock_settings)
+    run_coroutine(sut.perform_update(mock_settings))
 
     assert len(sut.update_selected.vm_rows) == 4
 
@@ -148,7 +152,7 @@ def test_update_templates(
         mock_callback,
     )
 
-    sut.do_update_selected = Mock()
+    sut.do_update_selected = AsyncMock()
     total_progress = []
     sut.set_total_progress = lambda prog: total_progress.append(prog)
 
@@ -160,7 +164,7 @@ def test_update_templates(
 
     if interrupted:
         sut.interrupt_update()
-    sut.update_selected(updateable_vms_list, mock_settings)
+    run_coroutine(sut.update_selected(updateable_vms_list, mock_settings))
 
     sut.update_details.set_active_row(updateable_vms_list[2])
 
@@ -175,9 +179,7 @@ def test_update_templates(
     mock_callback.assert_not_called()
 
 
-@patch("subprocess.Popen")
 def test_do_update_selected(
-    mock_subprocess,
     real_builder,
     test_qapp,
     mock_next_button,
@@ -186,24 +188,16 @@ def test_do_update_selected(
     mock_list_store,
     mock_settings,
 ):
-    class MockPorc:
-        def __init__(self, finish_after_n_polls=2):
-            self.polls = 0
+    class MockProc:
+        def __init__(self):
+            self.returncode = None
+
+        async def wait(self):
             self.returncode = 40
-            self.finish_after_n_polls = finish_after_n_polls
-
-        def wait(self):
-            """Mock waiting."""
-            pass
-
-        def poll(self):
-            """After several polls return 0 (process finished)."""
-            self.polls += 1
-            if self.polls < self.finish_after_n_polls:
-                return None
             return self.returncode
 
-    mock_subprocess.return_value = MockPorc()
+    mock_proc = MockProc()
+    mock_create = AsyncMock(return_value=mock_proc)
 
     mock_log = Mock()
     mock_callback = Mock()
@@ -215,8 +209,8 @@ def test_do_update_selected(
         mock_cancel_button,
         mock_callback,
     )
-    sut.read_stderrs = lambda *_args, **_kwargs: None
-    sut.read_stdouts = lambda *_args, **_kwargs: None
+    sut.read_stderrs = AsyncMock()
+    sut.read_stdouts = AsyncMock()
 
     to_update = ListWrapper(UpdateRowWrapper, mock_list_store)
     for vm in test_qapp.domains:
@@ -226,23 +220,21 @@ def test_do_update_selected(
 
     rows = {row.name: row for row in to_update}
 
-    sut.do_update_selected(rows, mock_settings)
+    with patch("asyncio.create_subprocess_exec", mock_create):
+        run_coroutine(sut.do_update_selected(rows, mock_settings))
 
-    calls = [
-        call(
-            [
-                "qubes-vm-update",
-                "--show-output",
-                "--just-print-progress",
-                "--force-update",
-                "--targets",
-                "dom0,fedora-35,fedora-36,test-standalone",
-            ],
-            stderr=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-        )
-    ]
-    mock_subprocess.assert_has_calls(calls)
+    mock_create.assert_called_once_with(
+        "qubes-vm-update",
+        "--show-output",
+        "--just-print-progress",
+        "--force-update",
+        "--targets",
+        "dom0,fedora-35,fedora-36,test-standalone",
+        stderr=asyncio.subprocess.PIPE,
+        stdout=asyncio.subprocess.PIPE,
+    )
+    sut.read_stderrs.assert_called_once_with(mock_proc, rows)
+    sut.read_stdouts.assert_called_once_with(mock_proc, rows)
     mock_callback.assert_not_called()
     assert sut.retcode == 40
 

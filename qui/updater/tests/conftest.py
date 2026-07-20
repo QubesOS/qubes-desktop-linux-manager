@@ -19,10 +19,25 @@
 # with this program; if not, see <http://www.gnu.org/licenses/>.
 """Conftest helper pytest file: fixtures container here are
 reachable by all tests"""
+import asyncio
 import pytest
 import importlib.resources
 
 import gi
+
+
+def run_coroutine(coroutine):
+    """Run a coroutine to completion on a private event loop.
+
+    The updater installs GLibEventLoopPolicy at import time, under which
+    ``asyncio.run()`` fails (it tries to set a new loop on the main thread's
+    context).
+    """
+    loop = asyncio.SelectorEventLoop()
+    try:
+        return loop.run_until_complete(coroutine)
+    finally:
+        loop.close()
 
 from qubesadmin.tests.mock_app import MockQube, MockQubesComplete
 from qui.updater.intro_page import UpdateRowWrapper

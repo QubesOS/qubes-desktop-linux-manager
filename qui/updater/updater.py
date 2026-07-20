@@ -5,15 +5,16 @@ import argparse
 import asyncio
 import logging
 import sys
-import time
 
 import importlib.resources
 import gi  # isort:skip
 
 from qubes_config.widgets.gtk_utils import (
+    load_icon,
     load_icon_at_gtk_size,
     load_theme,
-    show_dialog_with_icon,
+    show_dialog,
+    show_dialog_with_icon_async,
     RESPONSES_OK,
 )
 from qui.updater.progress_page import ProgressPage
@@ -57,17 +58,25 @@ class QubesUpdater(Gtk.Application):
     LOGPATH = "/var/log/qubes/qui.updater.log"
     LOG_FORMAT = "%(asctime)s %(message)s"
 
-    def __init__(self, qapp, cliargs):
+    def __init__(self, qapp, cliargs, loop):
         super().__init__(
             application_id="org.gnome.example",
             flags=Gio.ApplicationFlags.FLAGS_NONE,
         )
+        # the single asyncio loop bound to the GLib context
+        self.loop = loop
         self.qapp = qapp
         self.primary = False
         self.do_nothing = False
+        self.start_update = False
+        self.finishing = False
         self.connect("activate", self.do_activate)
         self.cliargs = cliargs
         self.retcode = 0
+        # user close the window (not just Cancel) quit just after updates (ASAP)
+        self._exit_after_update = False
+        # awaited by main() -> loop keeps running as long as the window is open
+        self.exit_future = self.loop.create_future()
 
         log_handler = logging.FileHandler(QubesUpdater.LOGPATH, encoding="utf-8")
         log_formatter = logging.Formatter(QubesUpdater.LOG_FORMAT)
@@ -76,22 +85,33 @@ class QubesUpdater(Gtk.Application):
         self.log = logging.getLogger("vm-update.agent.PackageManager")
         self.log.addHandler(log_handler)
         self.log.setLevel(self.cliargs.log)
-        dispatcher = qubesadmin.events.EventsDispatcher(qapp)
-        asyncio.ensure_future(dispatcher.listen_for_events())
+        self.dispatcher = qubesadmin.events.EventsDispatcher(qapp)
+        self.listen_events_task = self.loop.create_task(
+            self.dispatcher.listen_for_events()
+        )
 
     def do_activate(self, *_args, **_kwargs):
         if not self.primary:
             self.log.debug("Primary activation")
             self.perform_setup()
             self.primary = True
-            self.hold()
+            self.finish_if_nothing_to_do()
         else:
             self.log.debug("Secondary activation")
             if self.do_nothing:
-                self._show_success_dialog()
-                self.window_close()
+                self.finish_if_nothing_to_do()
             else:
                 self.main_window.present()
+
+    def finish_if_nothing_to_do(self):
+        """Schedule the do-nothing dialog *once*."""
+        if self.do_nothing and not self.finishing:
+            self.finishing = True
+            self.loop.create_task(self._finish_do_nothing())
+
+    async def _finish_do_nothing(self):
+        await self._show_success_dialog()
+        self.exit_updater()
 
     def perform_setup(self, *_args, **_kwargs):
         self.log.debug("Setup")
@@ -211,7 +231,7 @@ class QubesUpdater(Gtk.Application):
             if len(self.intro_page.get_vms_to_update()) == 0:
                 self.do_nothing = True
                 return
-            self.next_clicked(None, skip_intro=True)
+            self.start_update = True
         else:
             # default update_if_stale -> do nothing
             if self.cliargs.update_if_available:
@@ -268,27 +288,30 @@ class QubesUpdater(Gtk.Application):
             if failed or cancelled or not self.cliargs.non_interactive:
                 self.summary_page.show(updated, no_updates, failed + cancelled)
             else:
-                # at this point retcode is in (0, 100)
-                self._restart_phase(show_only_error=self.cliargs.non_interactive)
-                # at thi point retcode is in (0, 100)
-                # or an error message have been already shown
-                if self.cliargs.non_interactive and self.retcode in (0, 100):
-                    self._show_success_dialog()
+                #  at this point retcode is in (0, 100)
+                self.loop.create_task(
+                    self._restart_phase(
+                        show_only_error=self.cliargs.non_interactive,
+                        show_success=self.cliargs.non_interactive,
+                    )
+                )
         elif self.summary_page.is_visible:
-            self._restart_phase()
+            self.loop.create_task(self._restart_phase())
 
-    def _restart_phase(self, show_only_error: bool = True):
+    async def _restart_phase(
+        self, show_only_error: bool = True, show_success: bool = False
+    ):
         self.main_window.hide()
         self.log.debug("Hide main window")
-        # ensuring that main_window will be hidden
-        while Gtk.events_pending():
-            Gtk.main_iteration()
-        self.summary_page.restart_selected_vms(show_only_error)
+        await self.summary_page.restart_selected_vms(show_only_error)
         if self.summary_page.status.is_error():
             self.retcode = self.summary_page.status.value
+        # at this point retcode is in (0, 100) or an error was already shown
+        if show_success and self.retcode in (0, 100):
+            await self._show_success_dialog()
         self.exit_updater()
 
-    def _show_success_dialog(self):
+    async def _show_success_dialog(self):
         """
         We should show the user a success confirmation.
 
@@ -311,7 +334,7 @@ class QubesUpdater(Gtk.Application):
             msg = "All selected qubes have been updated."
         elif self.retcode == 100:
             msg = "There are no updates available for the selected Qubes."
-        show_dialog_with_icon(
+        await show_dialog_with_icon_async(
             None,
             l("Success"),
             l(msg),
@@ -330,28 +353,49 @@ class QubesUpdater(Gtk.Application):
 
     def cancel_updates(self, *_args, **_kwargs):
         self.log.info("User initialize interruption")
-        if (
-            self.progress_page.update_thread
-            and self.progress_page.update_thread.is_alive()
-        ):
-            self.progress_page.interrupt_update()
-            self.log.info("Update interrupted")
-            show_dialog_with_icon(
-                self.main_window,
-                l("Updating cancelled"),
-                l(
-                    "Waiting for current qube to finish updating."
-                    " Updates for remaining qubes have been cancelled."
-                ),
-                buttons=RESPONSES_OK,
-                icon_name="qubes-info",
-            )
+        self._interrupt(exit_after=False)
 
-            self.log.debug("Waiting to finish ongoing updates")
-            while self.progress_page.update_thread.is_alive():
-                while Gtk.events_pending():
-                    Gtk.main_iteration()
-                time.sleep(0.1)
+    def _interrupt(self, exit_after: bool):
+        """Interrupt the running update at most once.
+
+        `exit_after` means that the window will be closed
+        """
+        task = self.progress_page.update_task
+        if task is None or task.done():
+            if exit_after:
+                self.exit_updater()
+            return
+        if exit_after:
+            self._exit_after_update = True
+        if not self.progress_page.exit_triggered:
+            # synchronously so a second event cannot schedule a second notice
+            self.progress_page.interrupt_update()
+            self.loop.create_task(self._interrupt_and_wait())
+
+    async def _interrupt_and_wait(self):
+        self.log.info("Update interrupted")
+        # We don't use `show_dialog_with_icon()` which uses a nested GLib loop
+        # and re-enters the running update task.
+        # Show buttonless, non-modal notice instead until the update is finished
+        icon = Gtk.Image.new_from_pixbuf(load_icon("qubes-info", 48, 48))
+        notice = show_dialog(
+            self.main_window,
+            l("Updating cancelled"),
+            l(
+                "Waiting for current qube to finish updating."
+                " Updates for remaining qubes have been cancelled."
+            ),
+            {},
+            icon,
+        )
+        notice.set_modal(False)
+        notice.set_deletable(False)
+
+        self.log.debug("Waiting to finish ongoing updates")
+        await self.progress_page.update_task
+        notice.destroy()
+        if self._exit_after_update:
+            self.exit_updater()
 
     def check_escape(self, _widget, event, _data=None):
         if event.keyval == Gdk.KEY_Escape:
@@ -360,16 +404,21 @@ class QubesUpdater(Gtk.Application):
 
     def window_close(self, *_args, **_kwargs):
         self.log.debug("Close window")
-        if self.progress_page.exit_triggered:
-            self.cancel_updates()
-        else:
-            self.cancel_updates()
-            self.exit_updater()
+        task = self.progress_page.update_task
+        if task is not None and not task.done():
+            # update is going: keep the window until current update finish
+            self._interrupt(exit_after=True)
+            return True
+        self.exit_updater()
+        return False
 
     def exit_updater(self, _emitter=None):
         if self.primary:
             self.log.debug("Exit")
-            self.release()
+            if getattr(self, "listen_events_task", None) is not None:
+                self.listen_events_task.cancel()
+            if not self.exit_future.done():
+                self.exit_future.set_result(None)
 
 
 def parse_args(args, app):
@@ -526,8 +575,14 @@ def skip_intro_if_args(args):
 def main(args=None):
     qapp = Qubes()
     cliargs = parse_args(args, qapp)
-    app = QubesUpdater(qapp, cliargs)
+    loop = asyncio.get_event_loop()
+    app = QubesUpdater(qapp, cliargs, loop)
     app.run()
+    if app.start_update:
+        # Start the non-interactive update.
+        loop.call_soon(app.next_clicked, None, True)
+    if not app.exit_future.done():
+        loop.run_until_complete(app.exit_future)
     if app.retcode == 100 and not app.cliargs.signal_no_updates:
         app.retcode = 0
     sys.exit(app.retcode)

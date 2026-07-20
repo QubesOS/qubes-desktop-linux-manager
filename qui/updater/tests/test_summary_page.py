@@ -19,11 +19,11 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 # USA.
 import pytest
-from unittest.mock import patch, call, Mock
+from unittest.mock import patch, Mock, AsyncMock
 
 import gi
 
-from qui.updater.tests.conftest import expected_row
+from qui.updater.tests.conftest import expected_row, run_coroutine
 
 gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk  # isort:skip
@@ -255,27 +255,26 @@ def test_populate_restart_list(
     assert sum(row.selected for row in sut.list_store) == expected
 
 
-@patch("qubes_config.widgets.gtk_utils.show_dialog")
+@patch("qui.updater.summary_page.show_dialog_with_icon_async")
 @patch("qui.updater.summary_page.show_dialog")
 @patch("gi.repository.Gtk.Image.new_from_pixbuf")
-@patch("threading.Thread")
+@patch("asyncio.wait")
 @pytest.mark.parametrize(
-    "alive_requests_max, status",
+    "show_waiting_dialog, status",
     (
-        pytest.param(3, RestartStatus.OK),
-        pytest.param(0, RestartStatus.OK),
-        pytest.param(1, RestartStatus.ERROR_TMPL_DOWN),
-        pytest.param(1, RestartStatus.NOTHING_TO_DO),
+        pytest.param(True, RestartStatus.OK),
+        pytest.param(False, RestartStatus.OK),
+        pytest.param(True, RestartStatus.ERROR_TMPL_DOWN),
+        pytest.param(True, RestartStatus.NOTHING_TO_DO),
     ),
 )
 def test_restart_selected_vms(
-    mock_threading,
+    mock_wait,
     mock_new_from_pixbuf,
     mock_show_dialog_qui,
-    mock_show_dialog,
-    alive_requests_max,
+    mock_status_dialog_async,
+    show_waiting_dialog,
     status,
-    mock_thread,
     test_qapp,
     real_builder,
     mock_next_button,
@@ -290,21 +289,21 @@ def test_restart_selected_vms(
         mock_cancel_button,
         back_by_row_selection=lambda *args: None,  # callback
     )
-    mock_thread.alive_requests_max = alive_requests_max
-    mock_threading.return_value = mock_thread
+    sut.perform_restart = AsyncMock()
+    # asyncio.wait decides if the waiting dialog is shown: an empty "done"
+    # set means the restart did not finish within expected time
+    if show_waiting_dialog:
+        mock_wait.return_value = (set(), {object()})
+    else:
+        mock_wait.return_value = ({object()}, set())
     icon = "icon"
     mock_new_from_pixbuf.return_value = icon
 
     class MockDialog:
         def __init__(self):
-            self.run_calls = 0
             self.destroy_calls = 0
             self.show_calls = 0
             self.deletable = True
-
-        def run(self):
-            self.run_calls += 1
-            return Gtk.ResponseType.DELETE_EVENT
 
         def destroy(self):
             self.destroy_calls += 1
@@ -315,59 +314,40 @@ def test_restart_selected_vms(
         def set_deletable(self, deletable):
             self.deletable = deletable
 
-    mock_final_dialog = MockDialog()
     mock_waiting_dialog = MockDialog()
-    mock_show_dialog.return_value = mock_final_dialog
     mock_show_dialog_qui.return_value = mock_waiting_dialog
     sut.status = status
 
     # ACT
-    sut.restart_selected_vms(show_only_error=False)
+    run_coroutine(sut.restart_selected_vms(show_only_error=False))
 
     # ASSERT
 
     # waiting dialog cannot be closed
-    if alive_requests_max:
-        assert mock_waiting_dialog.run_calls == 0
+    if show_waiting_dialog:
         assert mock_waiting_dialog.show_calls == 1
         assert mock_waiting_dialog.destroy_calls == 1
         assert not mock_waiting_dialog.deletable
     else:
-        assert mock_waiting_dialog.run_calls == 0
         assert mock_waiting_dialog.show_calls == 0
         assert mock_waiting_dialog.destroy_calls == 0
 
+    # the status dialog is now shown as non-blocking
     if status == RestartStatus.NOTHING_TO_DO:
-        mock_show_dialog.assert_not_called()
-    else:
-        # final dialog is blocking (run)
-        assert mock_final_dialog.run_calls == 1
-        assert mock_final_dialog.show_calls == 0
-        assert mock_final_dialog.destroy_calls == 1
-        assert mock_final_dialog.deletable
-
-        calls = []
-        if status == RestartStatus.OK:
-            calls = [
-                call(
-                    None,
-                    "Success",
-                    "All qubes were restarted/shutdown successfully.",
-                    RESPONSES_OK,
-                    icon,
-                )
-            ]
-        if status.is_error():
-            calls = [
-                call(
-                    None,
-                    "Failure",
-                    "During restarting following errors occurs: " + sut.err,
-                    RESPONSES_OK,
-                    icon,
-                )
-            ]
-        mock_show_dialog.assert_has_calls(calls)
+        mock_status_dialog_async.assert_not_awaited()
+    elif status == RestartStatus.OK:
+        mock_status_dialog_async.assert_awaited_once_with(
+            None,
+            "Success",
+            "All qubes were restarted/shutdown successfully.",
+            RESPONSES_OK,
+            "qubes-check-yes",
+        )
+    else:  # error status
+        mock_status_dialog_async.assert_awaited_once()
+        await_args = mock_status_dialog_async.await_args.args
+        assert await_args[1] == "Failure"
+        assert await_args[4] == "qubes-info"
 
 
 @patch("qui.updater.summary_page.wait_for_domain_shutdown")
@@ -443,7 +423,7 @@ def test_perform_restart(
             sut.list_store[-1].selected = True
 
     # ACT
-    sut.perform_restart()
+    run_coroutine(sut.perform_restart())
 
     # ASSERT
     expected = set(

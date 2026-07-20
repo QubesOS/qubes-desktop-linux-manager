@@ -18,7 +18,8 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program; if not, see <http://www.gnu.org/licenses/>.
 """Tests for gtk utils"""
-from unittest.mock import patch, call
+import asyncio
+from unittest.mock import patch, call, Mock
 
 import gi
 
@@ -32,6 +33,8 @@ from ..widgets.gtk_utils import (
     ask_question,
     show_error,
     is_theme_light,
+    show_dialog_with_icon_async,
+    RESPONSES_OK,
 )
 
 
@@ -72,6 +75,43 @@ def test_ask_question():
         show_error(window, "Text", "Text")
         assert call.new().run() in mock_dialog.mock_calls
         assert call.new().destroy() in mock_dialog.mock_calls
+
+
+def test_show_dialog_with_icon_async_without_running_loop():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        captured = {}
+        mock_dialog = Mock()
+        mock_dialog.connect.side_effect = lambda signal, handler: captured.setdefault(
+            signal, handler
+        )
+
+        with patch(
+            "qubes_config.widgets.gtk_utils._setup_dialog",
+            return_value=mock_dialog,
+        ):
+            coro = show_dialog_with_icon_async(
+                None, "Title", "Text", RESPONSES_OK, "qubes-info"
+            )
+
+            pending = coro.send(None)
+            assert asyncio.isfuture(pending)
+
+            captured["response"](mock_dialog, Gtk.ResponseType.OK) # click
+
+            try:
+                coro.send(None)
+            except StopIteration as stop:
+                result = stop.value
+            else:
+                raise AssertionError("coroutine did not finish after response")
+
+        assert result == Gtk.ResponseType.OK
+        mock_dialog.destroy.assert_called_once()
+    finally:
+        asyncio.set_event_loop(None)
+        loop.close()
 
 
 def test_get_theme():
