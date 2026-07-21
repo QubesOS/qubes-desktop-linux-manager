@@ -276,6 +276,8 @@ def test_setup_non_interactive_nothing_to_do(
     sut.perform_setup()
     select.assert_called_once()
     get_vms.assert_called_once()
+    assert sut.do_nothing is True
+    assert sut.retcode == 100
 
 
 @patch("logging.FileHandler")

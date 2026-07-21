@@ -230,6 +230,8 @@ class QubesUpdater(Gtk.Application):
             self.intro_page.select_rows_ignoring_conditions(cliargs=self.cliargs)
             if len(self.intro_page.get_vms_to_update()) == 0:
                 self.do_nothing = True
+                # `main()` change it to 0 unless `--signal-no-updates` is set
+                self.retcode = 100
                 return
             self.start_update = True
         else:
