@@ -34,9 +34,7 @@ def _make_updater(test_qapp, cliargs):
     real_loop = asyncio.get_event_loop()
     loop = Mock()
     loop.scheduled = []
-    loop.create_task.side_effect = (
-        lambda coro: loop.scheduled.append(coro) or Mock()
-    )
+    loop.create_task.side_effect = lambda coro: loop.scheduled.append(coro) or Mock()
     loop.create_future.side_effect = real_loop.create_future
     return QubesUpdater(test_qapp, cliargs, loop)
 
@@ -209,9 +207,9 @@ def test_cancel_twice_schedules_single_notice(
     sut.progress_page.interrupt_update.assert_called_once()
     # ignore the coroutine scheduled at construction
     notices = [
-        c for c in sut.loop.scheduled
-        if asyncio.iscoroutine(c)
-           and c.__qualname__.endswith("_interrupt_and_wait")
+        c
+        for c in sut.loop.scheduled
+        if asyncio.iscoroutine(c) and c.__qualname__.endswith("_interrupt_and_wait")
     ]
     assert len(notices) == 1
     for coro in sut.loop.scheduled:
@@ -251,9 +249,9 @@ def test_close_after_cancel_still_exits(
     assert sut._exit_after_update is True
     # and no second notice (ignore the coroutine scheduled at construction)
     notices = [
-        c for c in sut.loop.scheduled
-        if asyncio.iscoroutine(c)
-           and c.__qualname__.endswith("_interrupt_and_wait")
+        c
+        for c in sut.loop.scheduled
+        if asyncio.iscoroutine(c) and c.__qualname__.endswith("_interrupt_and_wait")
     ]
     assert len(notices) == 1
     for coro in sut.loop.scheduled:

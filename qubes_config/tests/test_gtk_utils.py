@@ -78,40 +78,32 @@ def test_ask_question():
 
 
 def test_show_dialog_with_icon_async_without_running_loop():
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    try:
-        captured = {}
-        mock_dialog = Mock()
-        mock_dialog.connect.side_effect = lambda signal, handler: captured.setdefault(
-            signal, handler
+    captured = {}
+    mock_dialog = Mock()
+    mock_dialog.connect.side_effect = captured.setdefault
+
+    with patch(
+        "qubes_config.widgets.gtk_utils._setup_dialog",
+        return_value=mock_dialog,
+    ):
+        coro = show_dialog_with_icon_async(
+            None, "Title", "Text", RESPONSES_OK, "qubes-info"
         )
 
-        with patch(
-            "qubes_config.widgets.gtk_utils._setup_dialog",
-            return_value=mock_dialog,
-        ):
-            coro = show_dialog_with_icon_async(
-                None, "Title", "Text", RESPONSES_OK, "qubes-info"
-            )
+        # step to `await future`: must reach it (fallback loop) instead of
+        # raising RuntimeError('no running event loop')
+        pending = coro.send(None)
+        assert asyncio.isfuture(pending)
 
-            pending = coro.send(None)
-            assert asyncio.isfuture(pending)
+        captured["response"](mock_dialog, Gtk.ResponseType.OK)  # click
 
-            captured["response"](mock_dialog, Gtk.ResponseType.OK) # click
-
-            try:
-                coro.send(None)
-            except StopIteration as stop:
-                result = stop.value
-            else:
-                raise AssertionError("coroutine did not finish after response")
-
-        assert result == Gtk.ResponseType.OK
-        mock_dialog.destroy.assert_called_once()
-    finally:
-        asyncio.set_event_loop(None)
-        loop.close()
+        try:
+            coro.send(None)
+        except StopIteration as stop:
+            assert stop.value == Gtk.ResponseType.OK
+            mock_dialog.destroy.assert_called_once()
+        else:
+            raise AssertionError("coroutine did not finish after response")
 
 
 def test_get_theme():

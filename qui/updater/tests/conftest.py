@@ -39,6 +39,7 @@ def run_coroutine(coroutine):
     finally:
         loop.close()
 
+
 from qubesadmin.tests.mock_app import MockQube, MockQubesComplete
 from qui.updater.intro_page import UpdateRowWrapper
 from qui.updater.summary_page import RestartRowWrapper

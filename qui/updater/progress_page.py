@@ -189,9 +189,7 @@ class ProgressPage:
                 GLib.idle_add(row.set_status, UpdateStatus.Error)
         self.update_details.update_buffer()
 
-    async def do_update_selected(
-        self, rows: Dict[str, RowWrapper], settings: Settings
-    ):
+    async def do_update_selected(self, rows: Dict[str, RowWrapper], settings: Settings):
         """Runs `qubes-vm-update` command."""
         targets = ",".join((name for name in rows.keys()))
 
