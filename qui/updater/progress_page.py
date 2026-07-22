@@ -19,9 +19,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 # USA.
 import asyncio
+import contextlib
+import errno
+import gc
+import io
 import re
 import signal
 import subprocess
+import sys
 import gi
 from typing import Dict
 
@@ -35,6 +40,37 @@ from qubes_config.widgets.gtk_utils import (
 )
 from qui.updater.updater_settings import Settings
 from qui.updater.utils import UpdateStatus, RowWrapper
+
+
+@contextlib.contextmanager
+def pipe_ebadf_silencer():
+    """Workaround: Silence "Exception ignored ... Bad file descriptor".
+
+    To be fixed in newer versions of asyncio and GTK.
+
+    asyncio.create_subprocess_exec's stdout/stderr pipe fds are double-closed
+    at GC under gi.events GLibEventLoop (by loop and by FileIO finalizer).
+    Drop exactly that case and let others unraisable exception through.
+    """
+    previous_hook = sys.unraisablehook
+
+    def hook(unraisable):
+        exc = unraisable.exc_value
+        obj = unraisable.object
+        if (
+            isinstance(exc, OSError)
+            and exc.errno == errno.EBADF
+            and isinstance(obj, io.FileIO)
+        ):
+            return
+        previous_hook(unraisable)
+
+    sys.unraisablehook = hook
+    try:
+        yield
+    finally:
+        gc.collect()
+        sys.unraisablehook = previous_hook
 
 
 class ProgressPage:
@@ -163,33 +199,37 @@ class ProgressPage:
         if settings.max_concurrency is not None:
             args.extend(("--max-concurrency", str(settings.max_concurrency)))
 
-        proc = await asyncio.create_subprocess_exec(
-            "qubes-vm-update",
-            "--show-output",
-            "--just-print-progress",
-            "--force-update",
-            *args,
-            "--targets",
-            targets,
-            stderr=asyncio.subprocess.PIPE,
-            stdout=asyncio.subprocess.PIPE,
-        )
+        with pipe_ebadf_silencer():
+            proc = await asyncio.create_subprocess_exec(
+                "qubes-vm-update",
+                "--show-output",
+                "--just-print-progress",
+                "--force-update",
+                *args,
+                "--targets",
+                targets,
+                stderr=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE,
+            )
 
-        reading = asyncio.gather(
-            self.read_stderrs(proc, rows),
-            self.read_stdouts(proc, rows),
-        )
+            reading = asyncio.gather(
+                self.read_stderrs(proc, rows),
+                self.read_stdouts(proc, rows),
+            )
 
-        while proc.returncode is None:
-            try:
-                await asyncio.wait_for(proc.wait(), timeout=1)
-            except asyncio.TimeoutError:
-                if self.exit_triggered:
-                    proc.send_signal(signal.SIGINT)
-                    await proc.wait()
+            while proc.returncode is None:
+                try:
+                    await asyncio.wait_for(proc.wait(), timeout=1)
+                except asyncio.TimeoutError:
+                    if self.exit_triggered:
+                        proc.send_signal(signal.SIGINT)
+                        await proc.wait()
 
-        await reading
-        self.retcode = proc.returncode
+            await reading
+            self.retcode = proc.returncode
+            # allow gc.collect() finalize the pipe transports
+            del proc
+            del reading
 
     async def read_stderrs(self, proc, rows):
         while True:
