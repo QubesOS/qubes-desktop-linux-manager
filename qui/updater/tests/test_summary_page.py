@@ -350,9 +350,7 @@ def test_restart_selected_vms(
         assert await_args[4] == "qubes-info"
 
 
-@patch("qui.updater.summary_page.wait_for_domain_shutdown")
 def test_perform_restart(
-    _mock_wait_for_domain_shutdown,
     test_qapp,
     real_builder,
     mock_next_button,
@@ -385,7 +383,7 @@ def test_perform_restart(
         "vault",
     )
     expected_shutdown_calls = [
-        (tmpl, "admin.vm.Shutdown", "force", None) for tmpl in to_shutdown
+        (tmpl, "admin.vm.Shutdown", "force+wait", None) for tmpl in to_shutdown
     ]
     for call_ in expected_shutdown_calls:
         test_qapp.expected_calls[call_] = b"0\x00"

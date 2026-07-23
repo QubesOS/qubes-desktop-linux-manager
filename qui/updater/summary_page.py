@@ -19,7 +19,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 # USA.
 import asyncio
-import functools
 from enum import Enum
 from gettext import ngettext
 
@@ -30,7 +29,7 @@ from gi.repository import Gtk  # isort:skip
 from typing import Optional, Any
 
 import qubesadmin
-from qubesadmin.events.utils import wait_for_domain_shutdown
+import qubesadmin.utils
 
 from qubes_config.widgets.gtk_utils import (
     load_icon,
@@ -301,23 +300,18 @@ class SummaryPage:
         """
         Try to shut down vms and wait to finish.
         """
-        loop = asyncio.get_running_loop()
-        wait_for = []
-        for vm in to_shutdown:
-            try:
-                # vm.shutdown() is a blocking Admin API call
-                await loop.run_in_executor(
-                    None, functools.partial(vm.shutdown, force=True)
-                )
-                wait_for.append(vm)
-                self.log.info("Shutdown %s", vm.name)
-            except qubesadmin.exc.QubesVMError as err:
-                self.err += vm.name + " cannot shutdown: " + str(err) + "\n"
-                self.log.error("Cannot shutdown %s because %s", vm.name, str(err))
-                self.status = RestartStatus.ERROR_TMPL_DOWN
-        await wait_for_domain_shutdown(wait_for)
+        failed = await qubesadmin.utils.shutdown(
+            domains=to_shutdown, force=True, wait=True
+        )
 
-        return wait_for
+        if not failed:
+            return to_shutdown
+
+        self.status = RestartStatus.ERROR_TMPL_DOWN
+        for qube, exc in failed.items():
+            self.err += f"{qube.name} cannot shutdown: {exc}\n"
+            self.log.error("Cannot shutdown %s: %s", qube.name, str(exc))
+        return [qube for qube in to_shutdown if qube not in failed]
 
     async def restart_vms(self, to_restart):
         """
@@ -325,17 +319,12 @@ class SummaryPage:
         """
         shutdowns = await self.shutdown_domains(to_restart)
 
-        loop = asyncio.get_running_loop()
-        # restart shutdown qubes
-        for vm in shutdowns:
-            try:
-                # vm.start() blocks until the qube is up
-                await loop.run_in_executor(None, vm.start)
-                self.log.info("Restart %s", vm.name)
-            except qubesadmin.exc.QubesVMError as err:
-                self.err += vm.name + " cannot start: " + str(err) + "\n"
-                self.log.error("Cannot start %s because %s", vm.name, str(err))
-                self.status = RestartStatus.ERROR_APP_DOWN
+        # restart the qubes that were successfully shut down
+        failed = await qubesadmin.utils.start(domains=shutdowns)
+        for qube, exc in failed.items():
+            self.err += qube.name + " cannot start: " + str(exc) + "\n"
+            self.log.error("Cannot start %s: %s", qube.name, str(exc))
+            self.status = RestartStatus.ERROR_APP_DOWN
 
     async def _show_status_dialog(self, show_only_error: bool):
         if self.status == RestartStatus.OK and not show_only_error:
