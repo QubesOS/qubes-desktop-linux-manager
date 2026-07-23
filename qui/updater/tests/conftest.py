@@ -27,17 +27,14 @@ import gi
 
 
 def run_coroutine(coroutine):
-    """Run a coroutine to completion on a private event loop.
-
-    The updater installs GLibEventLoopPolicy at import time, under which
-    ``asyncio.run()`` fails (it tries to set a new loop on the main thread's
-    context).
-    """
-    loop = asyncio.SelectorEventLoop()
+    """Run a coroutine to completion on an event loop."""
     try:
-        return loop.run_until_complete(coroutine)
-    finally:
-        loop.close()
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+    return loop.run_until_complete(coroutine)
 
 
 from qubesadmin.tests.mock_app import MockQube, MockQubesComplete
