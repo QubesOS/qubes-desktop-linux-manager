@@ -109,7 +109,7 @@ def test_perform_update(
     sut.perform_update(mock_settings)
 
     assert len(sut.update_admin_vm.vm_rows) == 1
-    assert len(sut.update_templates.vm_rows) == 3
+    assert len(sut.update_templates.vm_rows) == len(sut.vms_to_update)
 
     calls = [
         call(mock_next_button.set_sensitive, True),
@@ -289,7 +289,7 @@ def test_do_update_templates(
                 "--just-print-progress",
                 "--force-update",
                 "--targets",
-                "fedora-35,fedora-36,test-standalone",
+                ",".join(list(rows.keys())),
             ],
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE,
