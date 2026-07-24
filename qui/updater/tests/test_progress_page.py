@@ -111,7 +111,7 @@ def test_perform_update(
 
     run_coroutine(sut.perform_update(mock_settings))
 
-    assert len(sut.update_selected.vm_rows) == 4
+    assert len(sut.update_selected.vm_rows) == len(sut.vms_to_update)
 
     calls = [
         call(mock_next_button.set_sensitive, True),
@@ -229,7 +229,7 @@ def test_do_update_selected(
         "--just-print-progress",
         "--force-update",
         "--targets",
-        "dom0,fedora-35,fedora-36,test-standalone",
+        ",".join(list(rows.keys())),
         stderr=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
     )

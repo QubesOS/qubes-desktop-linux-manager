@@ -360,6 +360,17 @@ def test_dvm_settings(mock_check_call, real_builder, test_qapp, test_policy_mana
     test_qapp.update_vm_calls()
 
     for row in disposables_handler.dispvm_list_handler.vm_list.get_children():
+        if row.dispvm.klass == "StandaloneVM":
+            assert row.based_on.token_name == "None"
+            assert row.preload_spin.get_value_as_int() == 0
+            assert row.settings_button.get_sensitive()
+            row.settings_button.clicked()
+            break
+
+    assert mock_check_call.call_count == 1
+    mock_check_call.reset_mock()
+
+    for row in disposables_handler.dispvm_list_handler.vm_list.get_children():
         if row.dispvm.name == "default-dvm":
             assert row.netqube.token_name == "sys-firewall"
             assert row.preload_spin.get_value_as_int() == 0
