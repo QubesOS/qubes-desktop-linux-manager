@@ -255,3 +255,8 @@ class VMFlowboxHandler:
 
     def connect_change_callback(self, func: Callable):
         self._change_callback = func
+
+    def change_vm_list(self, filter_function, additional_options=None):
+        self.add_qube_model.refresh_data(
+            filter_function=filter_function, additional_options=additional_options
+        )
