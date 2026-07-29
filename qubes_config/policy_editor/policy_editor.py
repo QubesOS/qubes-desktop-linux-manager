@@ -43,7 +43,6 @@ gi.require_version("Gtk", "3.0")
 gi.require_version("GtkSource", "4")
 from gi.repository import Gtk, GtkSource, Gio, Gdk
 
-
 HEADER_NORMAL = (
     " service_name\targument\tsource_qube\ttarget_qube\taction [parameter=value]    "
 )

@@ -20,6 +20,7 @@
 """
 USB Devices-related functionality.
 """
+
 from functools import partial
 from typing import List, Union, Optional, Dict, Tuple, Set
 

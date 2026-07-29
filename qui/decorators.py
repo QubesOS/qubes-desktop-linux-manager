@@ -2,6 +2,7 @@
 """Decorators wrap a `qui.models.PropertiesModel` in a class
 containing helpful representation methods.
 """
+
 # pylint: disable=wrong-import-position,import-error
 
 import gi  # isort:skip

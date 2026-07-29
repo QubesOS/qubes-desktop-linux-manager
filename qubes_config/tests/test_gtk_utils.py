@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program; if not, see <http://www.gnu.org/licenses/>.
 """Tests for gtk utils"""
+
 from unittest.mock import patch, call
 
 import gi
@@ -79,14 +80,12 @@ def test_get_theme():
     # first test dark theme
     screen = Gdk.Screen.get_default()
     provider = Gtk.CssProvider()
-    provider.load_from_data(
-        b"""
+    provider.load_from_data(b"""
 label {
     background: black;
     color: red;
 }
-"""
-    )
+""")
     Gtk.StyleContext.add_provider_for_screen(
         screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
     )
@@ -99,13 +98,11 @@ label {
 
     screen = Gdk.Screen.get_default()
     provider = Gtk.CssProvider()
-    provider.load_from_data(
-        b"""
+    provider.load_from_data(b"""
 label {
     background: white;
     color: blue;
-}"""
-    )
+}""")
     Gtk.StyleContext.add_provider_for_screen(
         screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
     )

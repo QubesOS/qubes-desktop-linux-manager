@@ -20,6 +20,7 @@
 """
 Widget that's a flow box with vms.
 """
+
 from typing import Optional, List, Callable
 
 from ..widgets.gtk_widgets import VMListModeler, QubeName

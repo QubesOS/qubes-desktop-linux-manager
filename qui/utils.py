@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program; if not, see <http://www.gnu.org/licenses/>.
 """helper functions for various qui tools"""
+
 # pylint: disable=wrong-import-position,import-error
 import asyncio
 import json

@@ -34,7 +34,6 @@ from qubes_config.widgets.utils import (
     get_feature,
 )
 
-
 GObject.signal_new(
     "child-removed",
     Gtk.FlowBox,

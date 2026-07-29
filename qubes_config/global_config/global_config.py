@@ -20,6 +20,7 @@
 
 # pylint: disable=import-error
 """Global Qubes Config tool."""
+
 import sys
 import threading
 import time

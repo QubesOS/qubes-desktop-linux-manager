@@ -28,7 +28,6 @@ from qui.updater.updater import parse_args
 from qui.updater.utils import ListWrapper, HeaderCheckbox
 
 
-
 @patch("subprocess.check_output")
 def test_populate_vm_list(
     mock_subprocess, real_builder, test_qapp, mock_next_button, mock_settings
@@ -447,13 +446,14 @@ def test_select_rows_ignoring_conditions(
     mock_subprocess.return_value = result
 
     if expected_args == ("--update-if-stale", "10") and expected_selection == {
-        "fedora-36", "dom0"
+        "fedora-36",
+        "dom0",
     }:
         test_qapp.expected_calls[
             ("dom0", "admin.vm.feature.Get", "last-updates-check", None)
         ] = (b"0\x00" + b"2020-01-01 00:00:00")
     test_qapp.expected_calls[
-        ('dom0', 'admin.vm.feature.Get', 'qubes-vm-update-update-if-stale', None)
+        ("dom0", "admin.vm.feature.Get", "qubes-vm-update-update-if-stale", None)
     ] = (b"0\x00" + str(7).encode())
     cliargs = parse_args(args, test_qapp)
     sut.select_rows_ignoring_conditions(cliargs, test_qapp.domains["dom0"])

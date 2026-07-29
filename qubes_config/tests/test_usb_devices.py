@@ -40,9 +40,7 @@ from gi.repository import Gtk
 
 def test_input_devices_simple_policy(test_qapp, test_policy_manager, real_builder):
     sys_usb = test_qapp.domains["sys-usb"]
-    test_policy_manager.policy_client.files[
-        "50-config-input"
-    ] = """
+    test_policy_manager.policy_client.files["50-config-input"] = """
 qubes.InputMouse * sys-usb @adminvm ask default_target=@adminvm
 qubes.InputKeyboard * sys-usb @adminvm deny
 qubes.InputTablet * sys-usb @adminvm allow
@@ -75,13 +73,11 @@ qubes.InputTablet * sys-usb @adminvm allow
     with patch.object(handler.policy_manager, "save_rules") as mock_save:
         handler.save()
 
-        expected_rules = handler.policy_manager.text_to_rules(
-            """
+        expected_rules = handler.policy_manager.text_to_rules("""
 qubes.InputMouse * sys-usb @adminvm ask default_target=@adminvm
 qubes.InputKeyboard * sys-usb @adminvm deny
 qubes.InputTablet * sys-usb @adminvm deny
-"""
-        )
+""")
         assert len(mock_save.mock_calls) == 1
         _, rules, _ = mock_save.mock_calls[0].args
         assert [str(rule) for rule in expected_rules] == [str(rule) for rule in rules]
@@ -90,9 +86,7 @@ qubes.InputTablet * sys-usb @adminvm deny
 def test_input_devices_complex_policy(test_qapp, test_policy_manager, real_builder):
     sys_usb = test_qapp.domains["sys-usb"]
     sys_net = test_qapp.domains["sys-net"]
-    test_policy_manager.policy_client.files[
-        "50-config-input"
-    ] = """
+    test_policy_manager.policy_client.files["50-config-input"] = """
 qubes.InputMouse * sys-usb @adminvm ask default_target=@adminvm
 qubes.InputKeyboard * sys-usb @adminvm deny
 qubes.InputTablet * sys-usb @adminvm allow
@@ -145,16 +139,14 @@ qubes.InputTablet * sys-net @adminvm allow
     with patch.object(handler.policy_manager, "save_rules") as mock_save:
         handler.save()
 
-        expected_rules = handler.policy_manager.text_to_rules(
-            """
+        expected_rules = handler.policy_manager.text_to_rules("""
 qubes.InputMouse * sys-usb @adminvm ask default_target=@adminvm
 qubes.InputKeyboard * sys-usb @adminvm deny
 qubes.InputTablet * sys-usb @adminvm allow
 qubes.InputMouse * sys-net @adminvm deny
 qubes.InputKeyboard * sys-net @adminvm allow
 qubes.InputTablet * sys-net @adminvm allow
-"""
-        )
+""")
         assert len(mock_save.mock_calls) == 1
         _, rules, _ = mock_save.mock_calls[0].args
         assert sorted([str(rule) for rule in expected_rules]) == sorted(
@@ -209,9 +201,7 @@ qubes.InputTablet * sys-usb @adminvm deny
 def test_input_devices_faulty_policy_lines(
     test_qapp, test_policy_manager, real_builder
 ):
-    test_policy_manager.policy_client.files[
-        "50-config-input"
-    ] = """
+    test_policy_manager.policy_client.files["50-config-input"] = """
 qubes.InputMouse * sys-usb @adminvm deny
 qubes.InputKeyboard * sys-usb @adminvm ask default_target=@adminvm
 """
@@ -242,9 +232,7 @@ qubes.InputKeyboard * sys-usb @adminvm ask default_target=@adminvm
 def test_input_devices_faulty_policy_lines_2(
     test_qapp, test_policy_manager, real_builder
 ):
-    test_policy_manager.policy_client.files[
-        "50-config-input"
-    ] = """
+    test_policy_manager.policy_client.files["50-config-input"] = """
 qubes.InputMouse * sys-net @adminvm deny
 qubes.InputKeyboard * sys-usb @adminvm ask default_target=@adminvm
 """
@@ -273,23 +261,19 @@ qubes.InputKeyboard * sys-usb @adminvm ask default_target=@adminvm
     with patch.object(handler.policy_manager, "save_rules") as mock_save:
         handler.save()
 
-        expected_rules = handler.policy_manager.text_to_rules(
-            """
+        expected_rules = handler.policy_manager.text_to_rules("""
 qubes.InputMouse * sys-net @adminvm deny
 qubes.InputKeyboard * sys-usb @adminvm ask default_target=@adminvm
 qubes.InputMouse * sys-usb @adminvm deny
 qubes.InputTablet * sys-usb @adminvm allow
-"""
-        )
+""")
         assert len(mock_save.mock_calls) == 1
         _, rules, _ = mock_save.mock_calls[0].args
         assert [str(rule) for rule in expected_rules] == [str(rule) for rule in rules]
 
 
 def test_input_devices_no_usbvm(test_qapp, test_policy_manager, real_builder):
-    test_policy_manager.policy_client.files[
-        "50-config-input"
-    ] = """
+    test_policy_manager.policy_client.files["50-config-input"] = """
 qubes.InputMouse * sys-usb @adminvm ask default_target=@adminvm
 qubes.InputKeyboard * sys-usb @adminvm deny
 qubes.InputTablet * sys-usb @adminvm deny
@@ -312,9 +296,7 @@ qubes.InputTablet * sys-usb @adminvm deny
 
 
 def test_input_devices_faulty_policy_err(test_qapp, test_policy_manager, real_builder):
-    test_policy_manager.policy_client.files[
-        "50-config-input"
-    ] = """
+    test_policy_manager.policy_client.files["50-config-input"] = """
 qubes.InputMouse * sys-usb @adminvm allow target=test-red
 qubes.InputTablet * sys-usb test-red deny
 qubes.InputKeyboard * sys-usb @adminvm ask default_target=sys-net
@@ -425,9 +407,7 @@ def test_u2f_handler_init_policy(test_qapp, test_policy_manager, real_builder):
         )
     ] = b"0\x001"
 
-    test_policy_manager.policy_client.files[
-        "50-config-u2f"
-    ] = """
+    test_policy_manager.policy_client.files["50-config-u2f"] = """
 policy.RegisterArgument +u2f.Register sys-usb @anyvm allow target=dom0
 u2f.Register * fedora-35 sys-usb allow
 u2f.Register * test-vm sys-usb allow
@@ -489,9 +469,7 @@ def test_u2f_handler_init_policy_2(test_qapp, test_policy_manager, real_builder)
         )
     ] = b"0\x001"
 
-    test_policy_manager.policy_client.files[
-        "50-config-u2f"
-    ] = """
+    test_policy_manager.policy_client.files["50-config-u2f"] = """
 policy.RegisterArgument +u2f.Register sys-usb @anyvm allow target=dom0
 u2f.Register * @anyvm sys-usb allow
 """
@@ -534,9 +512,7 @@ def test_u2f_handler_init_policy_mismatch(test_qapp, test_policy_manager, real_b
         + b"\x00"
     )
 
-    test_policy_manager.policy_client.files[
-        "50-config-u2f"
-    ] = """
+    test_policy_manager.policy_client.files["50-config-u2f"] = """
 policy.RegisterArgument +u2f.Register test-standalone @anyvm allow target=dom0
 u2f.Register * @anyvm test-standalone allow
 """
@@ -576,9 +552,7 @@ def test_u2f_handler_2_usbvms(test_qapp, test_policy_manager, real_builder):
         )
     ] = b"0\x001"
 
-    test_policy_manager.policy_client.files[
-        "50-config-u2f"
-    ] = """
+    test_policy_manager.policy_client.files["50-config-u2f"] = """
 policy.RegisterArgument +u2f.Register test-standalone @anyvm allow target=dom0
 u2f.Register * @anyvm test-standalone allow
 """
@@ -621,9 +595,7 @@ def test_u2f_handler_2_usbvms_switch(test_qapp, test_policy_manager, real_builde
         )
     ] = b"0\x001"
 
-    test_policy_manager.policy_client.files[
-        "50-config-u2f"
-    ] = """
+    test_policy_manager.policy_client.files["50-config-u2f"] = """
 policy.RegisterArgument +u2f.Register test-standalone @anyvm allow target=dom0
 u2f.Register * @anyvm test-standalone allow
 """
@@ -684,9 +656,7 @@ def test_u2f_handler_2_usbvms_broken(test_qapp, test_policy_manager, real_builde
         + b"\x00"
     )
 
-    test_policy_manager.policy_client.files[
-        "50-config-u2f"
-    ] = """
+    test_policy_manager.policy_client.files["50-config-u2f"] = """
 policy.RegisterArgument +u2f.Register test-standalone @anyvm allow target=dom0
 u2f.Register * @anyvm test-standalone allow
 """
@@ -773,13 +743,11 @@ def test_u2f_save_disable(test_qapp, test_policy_manager, real_builder):
         )
         assert len(mock_apply.mock_calls) == 1
 
-        expected_rules = handler.policy_manager.text_to_rules(
-            """
+        expected_rules = handler.policy_manager.text_to_rules("""
 u2f.Authenticate * @anyvm @anyvm deny
 u2f.Register * @anyvm @anyvm deny
 policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
-"""
-        )
+""")
         assert len(mock_save.mock_calls) == 1
         _, rules, _ = mock_save.mock_calls[0].args
         assert [str(rule) for rule in expected_rules] == [str(rule) for rule in rules]
@@ -803,12 +771,10 @@ def test_u2f_save_service(test_qapp, test_policy_manager, real_builder):
     with patch.object(handler.policy_manager, "save_rules") as mock_save:
         handler.save()
 
-        expected_rules = handler.policy_manager.text_to_rules(
-            """
+        expected_rules = handler.policy_manager.text_to_rules("""
 u2f.Register * @anyvm @anyvm deny
 policy.RegisterArgument +u2f.Authenticate @anyvm @anyvm deny
-"""
-        )
+""")
         assert len(mock_save.mock_calls) == 1
         _, rules, _ = mock_save.mock_calls[0].args
         assert [str(rule) for rule in expected_rules] == [str(rule) for rule in rules]
@@ -860,13 +826,11 @@ def test_u2f_handler_save_complex(test_qapp, test_policy_manager, real_builder):
         )
         assert len(mock_apply.mock_calls) == 3
 
-        expected_rules = handler.policy_manager.text_to_rules(
-            """
+        expected_rules = handler.policy_manager.text_to_rules("""
 policy.RegisterArgument +u2f.Authenticate sys-usb @anyvm allow target=dom0
 u2f.Register * @anyvm sys-usb allow
 u2f.Authenticate * test-vm sys-usb allow
-"""
-        )
+""")
         assert len(mock_save.mock_calls) == 1
         _, rules, _ = mock_save.mock_calls[0].args
         assert [str(rule) for rule in expected_rules] == [str(rule) for rule in rules]
@@ -919,13 +883,11 @@ def test_u2f_handler_save_complex_2(test_qapp, test_policy_manager, real_builder
         )
         assert len(mock_apply.mock_calls) == 3
 
-        expected_rules = handler.policy_manager.text_to_rules(
-            """
+        expected_rules = handler.policy_manager.text_to_rules("""
 u2f.Register * fedora-35 sys-usb allow
 u2f.Register * test-vm sys-usb allow
 policy.RegisterArgument +u2f.Authenticate sys-usb @anyvm allow target=dom0
-"""
-        )
+""")
         assert len(mock_save.mock_calls) == 1
         _, rules, _ = mock_save.mock_calls[0].args
         assert [str(rule) for rule in expected_rules] == [str(rule) for rule in rules]

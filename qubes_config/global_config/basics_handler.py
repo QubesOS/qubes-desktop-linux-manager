@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program; if not, see <http://www.gnu.org/licenses/>.
 """Handler for the general settings page"""
+
 # pylint: disable=unspecified-encoding
 import re
 from typing import Optional, Dict, Any, Callable, List
