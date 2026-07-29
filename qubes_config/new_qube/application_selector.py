@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program; if not, see <http://www.gnu.org/licenses/>.
 """Handling application selection"""
+
 # pylint: disable=import-error
 import os
 from typing import Optional, List

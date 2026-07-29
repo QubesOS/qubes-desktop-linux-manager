@@ -23,6 +23,7 @@ other widgets, e.g. MenuItems and ListRows.
 
 Use generate_wrapper_widget to get a wrapped widget.
 """
+
 import asyncio
 import functools
 import pathlib

@@ -19,6 +19,7 @@
 # with this program; if not, see <http://www.gnu.org/licenses/>.
 """Conftest helper pytest file: fixtures container here are
 reachable by all tests"""
+
 import pytest
 import importlib.resources
 

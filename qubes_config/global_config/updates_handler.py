@@ -20,6 +20,7 @@
 """
 Updates page handler
 """
+
 import subprocess
 from html import escape
 from typing import Optional, List, Dict

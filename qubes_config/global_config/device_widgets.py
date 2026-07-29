@@ -20,6 +20,7 @@
 """
 Widgets relevant to Device Attachments page.
 """
+
 import abc
 from typing import List, Any, Callable
 
