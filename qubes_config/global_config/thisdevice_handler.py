@@ -129,8 +129,7 @@ class ThisDeviceHandler(PageHandler):
             label_text += _("Failed to load system data.\n")
             self.data_label.get_style_context().add_class("red_code")
 
-        label_text += _(
-            """<b>Brand:</b> {brand}
+        label_text += _("""<b>Brand:</b> {brand}
 <b>Model:</b> {model}
 
 <b>CPU:</b> {cpu}
@@ -143,8 +142,7 @@ class ThisDeviceHandler(PageHandler):
 <b>BIOS:</b> {bios}
 <b>Kernel:</b> {kernel_ver}
 <b>Xen:</b> {xen_ver}
-"""
-        ).format(
+""").format(
             brand=self._get_data("brand"),
             model=self._get_data("model"),
             cpu=self._get_data("cpu"),

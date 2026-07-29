@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Setup.py file"""
+
 import os
 import subprocess
 import setuptools.command.install
@@ -46,16 +47,12 @@ class InstallWithLocale(setuptools.command.install.install):
         for file, pkg in get_console_scripts():
             path = os.path.join(bin, file)
             with open(path, "w") as f:
-                f.write(
-                    """#!/usr/bin/python3
+                f.write("""#!/usr/bin/python3
 from {} import main
 import sys
 if __name__ == '__main__':
 	sys.exit(main())
-""".format(
-                        pkg
-                    )
-                )
+""".format(pkg))
 
             os.chmod(path, 0o755)
 
