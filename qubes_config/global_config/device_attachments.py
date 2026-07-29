@@ -20,6 +20,7 @@
 """
 Device attachment functionality.
 """
+
 from typing import List, Optional, Tuple, Iterator, Callable
 
 from qubesadmin.device_protocol import (

@@ -20,6 +20,7 @@
 """
 Disposables page handler
 """
+
 import subprocess
 from enum import Enum
 

@@ -20,6 +20,7 @@
 """
 Class for handling a list of exceptions, such as for updateProxy.
 """
+
 from copy import deepcopy
 from typing import Optional, List, Callable
 

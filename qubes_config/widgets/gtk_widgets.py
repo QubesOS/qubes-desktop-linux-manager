@@ -20,6 +20,7 @@
 """
 Various Gtk widgets for use in Qubes tools.
 """
+
 import gi
 
 import abc

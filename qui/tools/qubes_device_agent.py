@@ -55,7 +55,6 @@ from qrexec.tools.qrexec_policy_agent import (
 )
 from qubesadmin.device_protocol import DeviceSerializer
 
-
 DEVICE_AGENT_SOCKET_PATH = "/var/run/qubes/device-agent.GUI"
 
 
