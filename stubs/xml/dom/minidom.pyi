@@ -16,6 +16,6 @@ class Element(Node): ...
 NodeList = list[Element]
 
 class Document(Node, DocumentLS):
-    childNodes = ...  # type:  NodeList
+    childNodes = ...  # type: NodeList
 
 def parseString(string: str, parser: Optional[Any] = ...) -> Document: ...

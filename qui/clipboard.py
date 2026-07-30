@@ -24,6 +24,7 @@
 
 """Sends notifications via Gio.Notification when something is Copy-Pasted
 via Qubes RPC"""
+
 # pylint: disable=invalid-name,wrong-import-position
 
 # Must be imported before creating threads

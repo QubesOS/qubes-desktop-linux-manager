@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program; if not, see <http://www.gnu.org/licenses/>.
 """Class used to manage PolicyClient and do some convenience processing."""
+
 import subprocess
 from typing import Optional, List, Tuple
 
@@ -48,13 +49,11 @@ class PolicyManager:
 
     def __init__(self):
         self.policy_client = PolicyClient()
-        self.policy_disclaimer = _(
-            """
+        self.policy_disclaimer = _("""
 # THIS IS AN AUTOMATICALLY GENERATED POLICY FILE.
 # Any changes made manually may be overwritten by Qubes Configuration Tools.
 
-"""
-        )
+""")
 
     def get_all_policy_files(self, service: str) -> List[str]:
         """Just get a straightforward list of all relevant policy files."""

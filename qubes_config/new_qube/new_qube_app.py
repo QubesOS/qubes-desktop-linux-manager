@@ -20,6 +20,7 @@
 """
 New Qube program.
 """
+
 # pylint: disable=import-error
 import subprocess
 import sys
