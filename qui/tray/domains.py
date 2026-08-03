@@ -15,12 +15,6 @@ import traceback
 import abc
 
 import gi  # isort:skip
-import qubesadmin
-import qubesadmin.events
-from qubesadmin import exc
-
-import qui.decorators
-import qui.utils
 
 gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gdk, Gio, Gtk, GLib, GdkPixbuf  # isort:skip
@@ -33,6 +27,13 @@ except ImportError:
     import gbulb
 
     gbulb.install()
+
+import qubesadmin
+import qubesadmin.events
+from qubesadmin import exc
+
+import qui.decorators
+import qui.utils
 
 import gettext
 
