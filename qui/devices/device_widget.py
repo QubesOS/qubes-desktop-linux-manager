@@ -64,10 +64,6 @@ t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
 
-# FUTURE: this should be moved to backend with new API changes
-DEV_TYPES = ["block", "usb", "mic", "webcam"]
-
-
 class DeviceMenu(Gtk.Menu):
     """Menu for handling a single device"""
 
@@ -117,6 +113,7 @@ class DevicesTray(Gtk.Application):
         self.dormant_usbvms: Set[backend.VM] = set()
         self.dev_update_queue: Set = set()
         self.vm_update_queue: Set = set()
+        self.dev_types: List[str] = []
 
         self.dispatcher: qubesadmin.events.EventsDispatcher = dispatcher
         self.qapp: qubesadmin.Qubes = qapp
@@ -128,7 +125,7 @@ class DevicesTray(Gtk.Application):
         self.initialize_dev_data()
         self.initialize_features()
 
-        for devclass in DEV_TYPES:
+        for devclass in self.dev_types:
             self.dispatcher.add_handler(
                 "device-attach:" + devclass, self.device_attached
             )
@@ -339,9 +336,14 @@ class DevicesTray(Gtk.Application):
         del self.devices[dev_id]
 
     def initialize_dev_data(self):
+        self.dev_types = self.qapp.list_deviceclass()
+        # Exclude PCI devices, as those can't be dynamically attached
+        if "pci" in self.dev_types:
+            self.dev_types.remove("pci")
+
         # list all devices
         for domain in self.qapp.domains:
-            for devclass in DEV_TYPES:
+            for devclass in self.dev_types:
                 try:
                     for device in domain.devices[devclass]:
                         dev_id = backend.Device.id_from_device(device)
@@ -359,7 +361,7 @@ class DevicesTray(Gtk.Application):
 
         # list existing device attachments and assignments
         for domain in self.qapp.domains:
-            for devclass in DEV_TYPES:
+            for devclass in self.dev_types:
                 try:
                     for device in domain.devices[devclass].get_attached_devices():
                         dev = backend.Device.id_from_device(device)
@@ -600,7 +602,7 @@ class DevicesTray(Gtk.Application):
 
     def device_attached(self, vm, _event, device, **_kwargs):
         try:
-            if not vm.is_running() or device.devclass not in DEV_TYPES:
+            if not vm.is_running() or device.devclass not in self.dev_types:
                 return
         except qubesadmin.exc.QubesPropertyAccessError:
             # we don't have access to VM state
@@ -642,7 +644,7 @@ class DevicesTray(Gtk.Application):
             self.dormant_usbvms.discard(wrapped_vm)
             self.active_usbvms.add(wrapped_vm)
 
-        for devclass in DEV_TYPES:
+        for devclass in self.dev_types:
             try:
                 for device in vm.devices[devclass].get_attached_devices():
                     dev_id = backend.Device.id_from_device(device)
