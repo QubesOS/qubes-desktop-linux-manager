@@ -189,7 +189,7 @@ class VMWidget(Gtk.Box):
         """Get currently selected value."""
         typed_value = self.model.entry_box.get_text()
         if self.allow_target_tokens and (
-            typed_value.startswith("@") or typed_value in ("dom0", "*")
+            typed_value.startswith("@") or typed_value == "*"
         ):
             try:
                 return Target(typed_value)

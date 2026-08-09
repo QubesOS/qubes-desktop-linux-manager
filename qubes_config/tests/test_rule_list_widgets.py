@@ -213,7 +213,6 @@ def test_rule_row(test_qapp):
     (
         "@default",
         "@adminvm",
-        "dom0",
         "*",
         "@tag:work",
         "@dispvm:test-vm",
