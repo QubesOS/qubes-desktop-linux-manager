@@ -206,6 +206,28 @@ def test_rule_row(test_qapp):
         )
 
 
+def test_rule_row_accepts_special_targets(test_qapp):
+    mock_handler = Mock(spec=PolicyHandler)
+    mock_handler.verify_new_rule.return_value = None
+
+    for target in ("@default", "@adminvm"):
+        rule = make_rule("test-blue", "test-red", "ask")
+        rule_row = RuleListBoxRow(
+            parent_handler=mock_handler, rule=rule, qapp=test_qapp
+        )
+
+        rule_row.set_edit_mode(True)
+        rule_row.target_widget.model.select_value(target)
+        assert rule_row.target_widget.get_selected() == target
+
+        with patch.object(rule_row, "get_parent"):
+            assert rule_row.validate_and_save()
+
+        assert str(rule_row.rule.raw_rule) == str(
+            make_rule("test-blue", target, "ask").raw_rule
+        )
+
+
 def test_rule_delete_new(test_qapp):
     mock_handler = Mock(spec=PolicyHandler)
     mock_handler.verify_new_rule.return_value = None

@@ -61,6 +61,8 @@ SOURCE_CATEGORIES_ADMIN: dict[Any | str | None, str] | None = {
 
 TARGET_CATEGORIES: dict[Any | str | None, str] | None = {
     "@anyvm": _("ALL QUBES"),
+    "@adminvm": _("TYPE: ADMINVM"),
+    "@default": _("DEFAULT QUBE"),
     "@dispvm": _("Default Disposable Qube"),
     "@type:AppVM": _("TYPE: APP"),
     "@type:TemplateVM": _("TYPE: TEMPLATES"),
