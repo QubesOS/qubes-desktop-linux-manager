@@ -21,6 +21,8 @@
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-class-docstring
 from unittest.mock import Mock, patch
+
+import pytest
 from qrexec.policy.parser import Rule
 from ..global_config.policy_handler import PolicyHandler
 from ..global_config.policy_rules import RuleSimple, SimpleVerbDescription
@@ -206,26 +208,52 @@ def test_rule_row(test_qapp):
         )
 
 
-def test_rule_row_accepts_special_targets(test_qapp):
+@pytest.mark.parametrize(
+    "target",
+    (
+        "@default",
+        "@adminvm",
+        "@tag:work",
+        "@dispvm:test-vm",
+        "@dispvm:@tag:work",
+    ),
+)
+def test_rule_row_accepts_special_targets(test_qapp, target):
     mock_handler = Mock(spec=PolicyHandler)
     mock_handler.verify_new_rule.return_value = None
 
-    for target in ("@default", "@adminvm"):
-        rule = make_rule("test-blue", "test-red", "ask")
-        rule_row = RuleListBoxRow(
-            parent_handler=mock_handler, rule=rule, qapp=test_qapp
-        )
+    rule = make_rule("test-blue", "test-red", "ask")
+    rule_row = RuleListBoxRow(parent_handler=mock_handler, rule=rule, qapp=test_qapp)
 
-        rule_row.set_edit_mode(True)
-        rule_row.target_widget.model.select_value(target)
-        assert rule_row.target_widget.get_selected() == target
+    rule_row.set_edit_mode(True)
+    rule_row.target_widget.model.entry_box.set_text(target)
+    assert rule_row.target_widget.get_selected() == target
 
-        with patch.object(rule_row, "get_parent"):
-            assert rule_row.validate_and_save()
+    with patch.object(rule_row, "get_parent"):
+        assert rule_row.validate_and_save()
 
-        assert str(rule_row.rule.raw_rule) == str(
-            make_rule("test-blue", target, "ask").raw_rule
-        )
+    assert str(rule_row.rule.raw_rule) == str(
+        make_rule("test-blue", target, "ask").raw_rule
+    )
+
+    rule_row.set_edit_mode(True)
+    rule_row.target_widget.model.entry_box.set_text("@invalid")
+    rule_row.revert()
+    assert rule_row.target_widget.get_selected() == target
+
+
+def test_rule_row_rejects_invalid_target_token(test_qapp):
+    mock_handler = Mock(spec=PolicyHandler)
+    mock_handler.verify_new_rule.return_value = None
+    rule = make_rule("test-blue", "test-red", "ask")
+    rule_row = RuleListBoxRow(parent_handler=mock_handler, rule=rule, qapp=test_qapp)
+
+    rule_row.set_edit_mode(True)
+    rule_row.target_widget.model.entry_box.set_text("@invalid")
+
+    with patch("qubes_config.global_config.rule_list_widgets.show_error") as mock_error:
+        assert not rule_row.validate_and_save()
+        assert mock_error.called
 
 
 def test_rule_delete_new(test_qapp):

@@ -35,6 +35,8 @@ import gi
 
 import qubesadmin
 import qubesadmin.vm
+from qrexec.exc import PolicySyntaxError
+from qrexec.policy.parser import Target
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
@@ -92,6 +94,7 @@ class VMWidget(Gtk.Box):
         additional_widget: Gtk.Widget | None = None,
         filter_function: Callable[[qubesadmin.vm.QubesVM], bool] | None = None,
         change_callback: Callable | None = None,
+        allow_target_tokens: bool = False,
     ):
         """
         :param qapp: Qubes object
@@ -103,11 +106,14 @@ class VMWidget(Gtk.Box):
         :param additional_widget: additional widget to be packed after selector
         widget
         :param filter_function: function used to filter available vms
+        :param allow_target_tokens: accept valid qrexec target tokens entered
+         manually
         """
 
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL)
         self.qapp = qapp
         self.selected_value = initial_value
+        self.allow_target_tokens = allow_target_tokens
         self.filter_function = (
             filter_function if filter_function else lambda x: str(x) != "dom0"
         )
@@ -162,30 +168,39 @@ class VMWidget(Gtk.Box):
 
     def is_changed(self) -> bool:
         """Return True if widget was changed from its initial state."""
-        new_value = self.model.get_selected()
+        new_value = self.get_selected()
         return str(self.selected_value) != str(new_value)
 
     def save(self):
         """Store changes in model; must be used before set_editable(False) if
         it's desired to see changes reflected in non-editable state"""
         # cannot set a VM to none
-        if not self.model.get_selected():
+        new_value = self.get_selected()
+        if not new_value:
             raise ValueError(
                 _("{name} is not a valid qube name.").format(
                     name=self.model.entry_box.get_text()
                 )
             )
-        new_value = str(self.model.get_selected())
-        self.selected_value = new_value
-        self.name_widget.set_token(new_value)
+        self.selected_value = str(new_value)
+        self.name_widget.set_token(self.selected_value)
 
     def get_selected(self):
         """Get currently selected value."""
+        typed_value = self.model.entry_box.get_text()
+        if self.allow_target_tokens and typed_value.startswith("@"):
+            try:
+                return Target(typed_value)
+            except PolicySyntaxError:
+                pass
         return self.model.get_selected()
 
     def revert_changes(self):
         """Roll back to last saved state."""
         self.model.select_value(self.selected_value)
+        if str(self.model.get_selected()) != str(self.selected_value):
+            self.combobox.set_active_id(None)
+            self.model.entry_box.set_text(self.selected_value)
 
     def hide_selectors(self):
         self.selectors_hidden = True
@@ -408,6 +423,7 @@ class RuleListBoxRow(Gtk.ListBoxRow):
             TARGET_CATEGORIES,
             self.rule.target,
             additional_widget=self._get_delete_button(),
+            allow_target_tokens=True,
         )
 
     def get_action_widget(self) -> ActionWidget:
