@@ -64,7 +64,7 @@ SOURCE_CATEGORIES_ADMIN: dict[Any | str | None, str] | None = {
 TARGET_CATEGORIES: dict[Any | str | None, str] | None = {
     "@anyvm": _("ALL QUBES"),
     "@adminvm": _("TYPE: ADMINVM"),
-    "@default": _("DEFAULT QUBE"),
+    "@default": _("Default Qube"),
     "@dispvm": _("Default Disposable Qube"),
     "@type:AppVM": _("TYPE: APP"),
     "@type:TemplateVM": _("TYPE: TEMPLATES"),
@@ -188,7 +188,9 @@ class VMWidget(Gtk.Box):
     def get_selected(self):
         """Get currently selected value."""
         typed_value = self.model.entry_box.get_text()
-        if self.allow_target_tokens and typed_value.startswith("@"):
+        if self.allow_target_tokens and (
+            typed_value.startswith("@") or typed_value in ("dom0", "*")
+        ):
             try:
                 return Target(typed_value)
             except PolicySyntaxError:
