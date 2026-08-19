@@ -13,12 +13,6 @@ import asyncio
 import sys
 import subprocess
 
-import qubesadmin
-import qubesadmin.events
-import qui.utils
-from qubesadmin import exc
-from qubes_config.widgets.utils import open_url_in_disposable
-
 import gi  # isort:skip
 
 gi.require_version("Gtk", "3.0")  # isort:skip
@@ -32,6 +26,12 @@ except ImportError:
     import gbulb
 
     gbulb.install()
+
+import qubesadmin
+import qubesadmin.events
+import qui.utils
+from qubesadmin import exc
+from qubes_config.widgets.utils import open_url_in_disposable
 
 import gettext
 
