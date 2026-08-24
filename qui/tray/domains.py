@@ -51,6 +51,13 @@ STATE_DICTIONARY = {
 }
 
 
+def vm_has_gui(vm):
+    """Return whether GUI applications can be started in *vm*."""
+    return bool(
+        getattr(vm, "guivm", None) and vm.features.check_with_template("gui", True)
+    )
+
+
 class IconCache:
     def __init__(self):
         self.icon_files = {
@@ -503,8 +510,12 @@ class StartedMenu(Gtk.Menu):
         self.vm = vm
         self.app = app
 
-        self.add(OpenFileManagerItem(self.vm, icon_cache))
-        self.add(RunTerminalItem(self.vm, icon_cache, as_root=app.shift_pressed))
+        self.open_file_manager = OpenFileManagerItem(self.vm, icon_cache)
+        self.add(self.open_file_manager)
+        self.run_terminal = RunTerminalItem(
+            self.vm, icon_cache, as_root=app.shift_pressed
+        )
+        self.add(self.run_terminal)
 
         # Debug console for developers, troubleshooting, headless qubes
         self.debug_console = RunDebugConsoleItem(self.vm, icon_cache)
@@ -519,6 +530,20 @@ class StartedMenu(Gtk.Menu):
         self.set_reserve_toggle_size(False)
         self.debug_console_update()
         self.show_all()
+        # Keep later show_all() calls on parent menus from overriding visibility.
+        # Initialize the action contents above before managing visibility here.
+        self.open_file_manager.set_no_show_all(True)
+        self.run_terminal.set_no_show_all(True)
+        self.gui_actions_update()
+
+    def gui_actions_update(self, *_args, **_kwargs):
+        """Show GUI actions only when the qube has a usable GUI."""
+        if vm_has_gui(self.vm):
+            self.open_file_manager.show()
+            self.run_terminal.show()
+        else:
+            self.open_file_manager.hide()
+            self.run_terminal.hide()
 
     def debug_console_update(self, *_args, **_kwargs):
         # Debug console is shown only if debug property is set, no GUIVM is set
@@ -872,6 +897,7 @@ class DomainTray(Gtk.Application):
 
         self.dispatcher.add_handler("property-set:debug", self.debug_change)
         self.dispatcher.add_handler("property-set:guivm", self.debug_change)
+        self.dispatcher.add_handler("property-reset:guivm", self.debug_change)
         self.dispatcher.add_handler("domain-feature-set:gui", self.debug_change)
         self.dispatcher.add_handler("domain-feature-delete:gui", self.debug_change)
         self.dispatcher.add_handler("domain-feature-set:expert-mode", self.debug_change)
@@ -900,6 +926,7 @@ class DomainTray(Gtk.Application):
             submenu = self.menu_items[menu].get_submenu()
             if isinstance(submenu, StartedMenu):
                 submenu.debug_console_update()
+                submenu.gui_actions_update()
 
     def show_menu(self, _unused, event):
         self.shift_pressed = False
@@ -1233,6 +1260,7 @@ class DomainTray(Gtk.Application):
 
         self.dispatcher.remove_handler("property-set:debug", self.debug_change)
         self.dispatcher.remove_handler("property-set:guivm", self.debug_change)
+        self.dispatcher.remove_handler("property-reset:guivm", self.debug_change)
         self.dispatcher.remove_handler("domain-feature-set:gui", self.debug_change)
         self.dispatcher.remove_handler("domain-feature-delete:gui", self.debug_change)
         self.dispatcher.remove_handler(
