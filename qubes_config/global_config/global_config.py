@@ -612,7 +612,37 @@ qubes.Filecopy * @anyvm @anyvm ask""",
                 1, lambda: self.main_notebook.set_current_page(old_page_num)
             )
             return
-        self.get_or_create_handler(page.get_name())
+        page_name = page.get_name()
+        if page_name in self.handlers:
+            return
+        self._construct_page_with_feedback(page_name)
+
+    def _construct_page_with_feedback(self, page_name: str):
+        """Construct a page handler, with a spinner dialog shown while the
+        (potentially slow) construction is running."""
+        if page_name not in self.handler_factories:
+            return
+        spinner = Gtk.Spinner()
+        spinner.start()
+        dialog = show_dialog(
+            self.main_window,
+            _("Loading"),
+            _("Loading system settings..."),
+            {},
+            spinner,
+        )
+        dialog.set_deletable(False)
+        # block interaction and render the dialog before the synchronous
+        # construction below freezes the main loop
+        self.main_window.set_sensitive(False)
+        while Gtk.events_pending():
+            Gtk.main_iteration()
+        try:
+            self.get_or_create_handler(page_name)
+        finally:
+            self.main_window.set_sensitive(True)
+            spinner.stop()
+            dialog.destroy()
 
     def _ask_unsaved(self, description: str) -> Gtk.ResponseType:
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
