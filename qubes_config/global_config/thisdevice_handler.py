@@ -17,6 +17,9 @@
 #
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program; if not, see <http://www.gnu.org/licenses/>.
+import threading
+from typing import Optional
+
 import yaml
 import subprocess
 import logging
@@ -29,7 +32,7 @@ from .policy_manager import PolicyManager
 import gi
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 import gettext
 
@@ -107,27 +110,74 @@ class ThisDeviceHandler(PageHandler):
             "thisdevice_copy_hcl_button"
         )
 
+        self.hcl_check = ""
+        self.hcl_yaml: dict = {}
+
+        self.set_policy_state()
+
+        pv_vms = [
+            vm for vm in self.qapp.domains if getattr(vm, "virt_mode", None) == "pv"
+        ]
+
+        self.set_state(self.compat_pv_image, "no" if pv_vms else "yes")
+        self.compat_pv_label.set_markup(
+            _("<b>PV qubes:</b> {num_pvs} found").format(num_pvs=len(pv_vms))
+        )
+        self.compat_pv_tooltip.set_tooltip_markup(
+            _("<b>The following qubes have PV virtualization mode:</b>\n - ")
+            + "\n - ".join([vm.name for vm in pv_vms])
+        )
+        self.compat_pv_tooltip.set_visible(bool(pv_vms))
+
+        self.copy_button.connect("clicked", self._copy_to_clipboard)
+        self.copy_hcl_button.connect("clicked", self._copy_to_clipboard)
+
+        self.data_label.get_toplevel().connect("page-changed", self._page_saved)
+
+        self._load_hcl_data()
+
+    def _load_hcl_data(self):
+        """Load hardware data from qubes-hcl-report, in a background thread:
+        the report collects data with lspci, dmidecode and xl, which takes
+        long enough to freeze the page if done in the main thread."""
+        self.data_label.get_style_context().remove_class("red_code")
+        self.data_label.set_markup(_("Loading hardware information..."))
+        threading.Thread(target=self._fetch_hcl_report, daemon=True).start()
+
+    def _fetch_hcl_report(self):
+        """Run qubes-hcl-report; runs in a worker thread, must not touch
+        any Gtk widgets."""
+        error = None
+        try:
+            hcl_report = subprocess.check_output(["qubes-hcl-report", "-y"]).decode()
+        except (subprocess.CalledProcessError, OSError) as ex:
+            hcl_report = ""
+            error = str(ex)
+        GLib.idle_add(self._hcl_report_ready, hcl_report, error)
+
+    def _hcl_report_ready(self, hcl_report: str, error: Optional[str]) -> bool:
+        """Process a freshly obtained report; runs in the main thread."""
+        self._apply_hcl_data(hcl_report, error)
+        return False
+
+    def _apply_hcl_data(self, hcl_report: str, error: Optional[str] = None):
+        """Fill widgets with data from the provided hcl report."""
+        self.hcl_check = hcl_report
         label_text = ""
-        self.hcl_yaml = {}
+        if error:
+            label_text += _("Failed to load system data: {ex}\n").format(ex=error)
 
+        style = self.data_label.get_style_context()
         try:
-            self.hcl_check = subprocess.check_output(
-                ["qubes-hcl-report", "-y"]
-            ).decode()
-        except subprocess.CalledProcessError as ex:
-            label_text += _("Failed to load system data: {ex}\n").format(ex=str(ex))
-            self.hcl_check = ""
-
-        try:
-            if self.hcl_check:
-                self.hcl_yaml = yaml.safe_load(self.hcl_check)
+            self.hcl_yaml = yaml.safe_load(hcl_report) if hcl_report else {}
             if not self.hcl_yaml:
                 raise ValueError
             label_text = ""
+            style.remove_class("red_code")
         except (yaml.YAMLError, ValueError):
             self.hcl_yaml = {}
             label_text += _("Failed to load system data.\n")
-            self.data_label.get_style_context().add_class("red_code")
+            style.add_class("red_code")
 
         label_text += _("""<b>Brand:</b> {brand}
 <b>Model:</b> {model}
@@ -163,10 +213,6 @@ class ThisDeviceHandler(PageHandler):
         self.set_state(self.compat_hap_image, self._get_data("slat"))
         self.compat_hap_label.set_markup(f"<b>HAP/SLAT:</b> {self._get_data('slat')}")
 
-        self.set_state(
-            self.compat_tpm_image,
-            "yes" if self._get_data("tpm") == "1.2" else "maybe",
-        )
         if self._get_data("tpm") == "2.0":
             self.set_state(self.compat_tpm_image, "maybe")
             self.compat_tpm_label.set_markup(
@@ -184,30 +230,9 @@ class ThisDeviceHandler(PageHandler):
             f"<b>Remapping:</b> {self._get_data('remap')}"
         )
 
-        self.set_policy_state()
-
-        pv_vms = [
-            vm for vm in self.qapp.domains if getattr(vm, "virt_mode", None) == "pv"
-        ]
-
-        self.set_state(self.compat_pv_image, "no" if pv_vms else "yes")
-        self.compat_pv_label.set_markup(
-            _("<b>PV qubes:</b> {num_pvs} found").format(num_pvs=len(pv_vms))
-        )
-        self.compat_pv_tooltip.set_tooltip_markup(
-            _("<b>The following qubes have PV virtualization mode:</b>\n - ")
-            + "\n - ".join([vm.name for vm in pv_vms])
-        )
-        self.compat_pv_tooltip.set_visible(bool(pv_vms))
-
         self.data_label.set_markup(label_text)
 
         self.certified_box_yes.set_visible(self.is_certified())
-
-        self.copy_button.connect("clicked", self._copy_to_clipboard)
-        self.copy_hcl_button.connect("clicked", self._copy_to_clipboard)
-
-        self.data_label.get_toplevel().connect("page-changed", self._page_saved)
 
     def _get_data(self, name) -> str:
         data = self.hcl_yaml.get(name, _("unknown")).strip()
