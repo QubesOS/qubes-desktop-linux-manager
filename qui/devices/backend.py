@@ -157,7 +157,7 @@ class VM:
             self._devices_denied = DeviceInterface.from_str_bulk(
                 self._vm.devices_denied
             )
-        except AttributeError:
+        except (AttributeError, qubesadmin.exc.QubesException):
             self._devices_denied = []
 
 
