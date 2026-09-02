@@ -46,6 +46,11 @@ RESPONSES_YES_NO_CANCEL = {
     _("_Cancel"): Gtk.ResponseType.CANCEL,
 }
 
+RESPONSES_YES_NO = {
+    _("_Yes"): Gtk.ResponseType.YES,
+    _("_No"): Gtk.ResponseType.NO,
+}
+
 APPVIEWER_LOCK = "/var/run/qubes/appviewer.lock"
 DATA = "/var/run/qubes/qubes-clipboard.bin"
 FROM = "/var/run/qubes/qubes-clipboard.bin.source"
@@ -103,15 +108,16 @@ def show_error(parent, title, text):
     )
 
 
-def ask_question(parent, title: str, text: str):
+def ask_question(parent, title: str, text: str, enable_cancel: bool = True):
     """
     Helper function to show question dialogs.
     """
+    buttons = RESPONSES_YES_NO_CANCEL if enable_cancel else RESPONSES_YES_NO
     return show_dialog_with_icon(
         parent=parent,
         title=title,
         text=text,
-        buttons=RESPONSES_YES_NO_CANCEL,
+        buttons=buttons,
         icon_name="qubes-ask",
     )
 
