@@ -48,6 +48,7 @@ class DomainDecorator(PropertiesDecorator):
             self.vm = vm
 
             self.template_name = None
+            self.next_template = None
             self.netvm_name = None
             self.cur_storage = None
             self.max_storage = None
@@ -80,10 +81,14 @@ class DomainDecorator(PropertiesDecorator):
             self.update_outdated(False)
             self.update_updateable()
             self.update_preload()
+            self.update_template()
 
             self.pack_start(self.outdated_icon, False, False, 3)
             self.pack_start(self.updateable_icon, False, True, 3)
             self.pack_start(self.preload_icon, False, False, 3)
+
+        def update_template(self):
+            self.update_tooltip(template_changed=True)
 
         def update_preload(self):
             if self.vm is None:
@@ -114,7 +119,12 @@ class DomainDecorator(PropertiesDecorator):
             self.updates_available = updates_state
             self.update_tooltip()
 
-        def update_tooltip(self, netvm_changed=False, storage_changed=False):
+        def update_tooltip(
+            self,
+            netvm_changed=False,
+            storage_changed=False,
+            template_changed=False,
+        ):
 
             if self.vm is None:
                 return
@@ -126,8 +136,17 @@ class DomainDecorator(PropertiesDecorator):
                 tooltip += _("\nAdministrative domain")
 
             else:
-                if not self.template_name:
-                    self.template_name = getattr(self.vm, "template", None)
+                if template_changed:
+                    self.template_name = self.vm.get_active_template()
+                    template_prop = getattr(self.vm, "template", None)
+                    if (
+                        hasattr(self.vm, "active_template")
+                        and self.template_name != template_prop
+                    ):
+                        self.next_template = template_prop
+                        self.update_outdated(True)
+                    else:
+                        self.next_template = None
                     self.template_name = (
                         _("None") if not self.template_name else str(self.template_name)
                     )
@@ -155,13 +174,23 @@ class DomainDecorator(PropertiesDecorator):
                 else:
                     perc_storage = self.cur_storage / self.max_storage
 
+                if self.next_template:
+                    tooltip += _(
+                        "\nNext Template: <b>{next_template}</b>"
+                        "\nActive Template: <b>{active_template}</b>"
+                    ).format(
+                        next_template=self.next_template,
+                        active_template=self.template_name,
+                    )
+                else:
+                    tooltip += _("\nTemplate: <b>{template}</b>").format(
+                        template=self.template_name
+                    )
                 tooltip += _(
-                    "\nTemplate: <b>{template}</b>"
                     "\nNetworking: <b>{netvm}</b>"
                     "\nPrivate storage: <b>{current_storage:.2f}GB/"
                     "{max_storage:.2f}GB ({perc_storage:.1%})</b>"
                 ).format(
-                    template=self.template_name,
                     netvm=self.netvm_name,
                     current_storage=self.cur_storage,
                     max_storage=self.max_storage,
@@ -169,7 +198,7 @@ class DomainDecorator(PropertiesDecorator):
                 )
 
                 if self.outdated:
-                    tooltip += _("\n\nRestart qube to apply changes in template.")
+                    tooltip += _("\n\nRestart qube to apply changes from template.")
 
                 if self.updates_available:
                     tooltip += _("\n\nUpdates available.")
