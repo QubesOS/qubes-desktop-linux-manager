@@ -9,6 +9,18 @@ import sys
 import importlib.resources
 import gi  # isort:skip
 
+gi.require_version("Gtk", "3.0")  # isort:skip
+from gi.repository import Gtk, Gdk, Gio  # isort:skip
+
+try:
+    from gi.events import GLibEventLoopPolicy
+
+    asyncio.set_event_loop_policy(GLibEventLoopPolicy())
+except ImportError:
+    import gbulb
+
+    gbulb.install()
+
 from qubes_config.widgets.gtk_utils import (
     load_icon,
     load_icon_at_gtk_size,
@@ -22,18 +34,6 @@ from qui.updater.updater_settings import Settings, OverriddenSettings
 from qui.updater.summary_page import SummaryPage
 from qui.updater.intro_page import IntroPage
 import qui.updater.utils
-
-gi.require_version("Gtk", "3.0")  # isort:skip
-from gi.repository import Gtk, Gdk, Gio  # isort:skip
-
-try:
-    from gi.events import GLibEventLoopPolicy
-
-    asyncio.set_event_loop_policy(GLibEventLoopPolicy())
-except ImportError:
-    import gbulb
-
-    gbulb.install()
 
 from qubesadmin import Qubes
 import qubesadmin.events
