@@ -18,8 +18,8 @@ checks:tests:
       python3-coverage xorg-x11-server-Xvfb python3-pip cairo-devel python3-devel
       cairo-gobject-devel gobject-introspection-devel
     - pip3 install --quiet -r ci/requirements.txt
-    - git clone https://github.com/QubesOS/qubes-core-admin-client ~/core-admin-client
-    - git clone https://github.com/QubesOS/qubes-core-qrexec ~/core-qrexec
+    - git clone -b release4.3 https://github.com/QubesOS/qubes-core-admin-client ~/core-admin-client
+    - git clone -b release4.3 https://github.com/QubesOS/qubes-core-qrexec ~/core-qrexec
   script:
     - PYTHONPATH=~/core-admin-client:~/core-qrexec xvfb-run ./run-tests.sh
   after_script:
@@ -38,8 +38,8 @@ checks:pylint:
     patch_url=https://github.com/QubesOS/qubes-continuous-integration/raw/main/scripts/pylint-astroid-workaround-2190.patch &&
     if grep -q 'from_node, global_names' "$file_to_patch"; then patch_url=${patch_url/.patch/-4.0.1.patch}; fi &&
     curl -sSL "$patch_url" | sudo patch "$file_to_patch"
-  - git clone https://github.com/QubesOS/qubes-core-admin-client ~/core-admin-client
-  - git clone https://github.com/QubesOS/qubes-core-qrexec ~/core-qrexec
+  - git clone -b release4.3 https://github.com/QubesOS/qubes-core-admin-client ~/core-admin-client
+  - git clone -b release4.3 https://github.com/QubesOS/qubes-core-qrexec ~/core-qrexec
   script:
   - PYTHONPATH=~/core-admin-client:~/core-qrexec python3 -m pylint --rcfile=.pylintrc qui qubes_config
   - mypy
