@@ -182,6 +182,7 @@ class Device:
         self._ident: str = getattr(dev, "port_id", "unknown")
         self._description: str = getattr(dev, "description", "unknown")
         self._devclass: str = getattr(dev, "devclass", "unknown")
+        self._busy_cached: bool = bool(getattr(dev, "busy", False))
 
         for interface in dev.interfaces:
             if interface.category.name != "Other":
@@ -264,6 +265,20 @@ class Device:
     def device_class(self) -> str:
         """Device class"""
         return self._devclass
+
+    @property
+    def busy(self) -> bool:
+        """
+        Is the device (or a subdevice of it) currently in use
+        somewhere, so that attaching it here would be refused?
+        """
+        return self._busy_cached
+
+    def refresh_busy(self, fresh_dev) -> None:
+        """
+        Update the cached busy state.
+        """
+        self._busy_cached = bool(getattr(fresh_dev, "busy", False))
 
     @property
     def device_icon(self) -> str:
@@ -360,10 +375,12 @@ class Device:
                 notification_id=self.notification_id,
             )
 
-    def detach_from_vm(self, vm: VM, with_aux_devices: bool = True):
+    def detach_from_vm(self, vm: VM, with_aux_devices: bool = True) -> bool:
         """
         Detach device from listed VM. If with_aux_devices is False,
         ignore devices_to_attach_with_me.
+
+        Returns True on success.
         """
         self.gtk_app.emit_notification(
             _("Detaching device"),
@@ -388,6 +405,7 @@ class Device:
                         # this should never happen, but....
                         continue
                     device.detach_from_all(with_aux_devices=False)
+            return True
         except qubesadmin.exc.QubesException as ex:
             self.gtk_app.emit_notification(
                 _("Error"),
@@ -398,6 +416,35 @@ class Device:
                 error=True,
                 notification_id=self.notification_id,
             )
+            return False
+
+    def _get_frontend(self) -> Optional[VM]:
+        """
+        The qube holding this device right now, asked fresh, or None.
+        """
+        if not self._backend_domain:
+            return None
+        try:
+            collection = self._backend_domain.vm_object.devices[self.device_class]
+            for dev in collection.get_exposed_devices():
+                if str(dev.port) != self.port:
+                    continue
+                holder = getattr(dev, "attachment", None)
+                return VM(holder) if holder is not None else None
+        except qubesadmin.exc.QubesException:
+            pass
+        return None
+
+    def move_to_vm(self, vm: VM):
+        """
+        Move this device to *vm*: detach it from whatever holds it, then
+        attach it there.
+        """
+        front = self._get_frontend()
+        if front is not None and front != vm:
+            if not self.detach_from_vm(front):
+                return
+        self.attach_to_vm(vm)
 
     def detach_from_all(
         self, with_aux_devices: bool = True, exceptions: List[VM] | None = None

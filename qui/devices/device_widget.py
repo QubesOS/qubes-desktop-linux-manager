@@ -145,6 +145,9 @@ class DevicesTray(Gtk.Application):
             self.dispatcher.add_handler(
                 "device-unassign:" + devclass, self.device_unassigned
             )
+            self.dispatcher.add_handler(
+                "device-list-change:" + devclass, self.device_list_changed
+            )
 
         self.dispatcher.add_handler("device-assign:pci", self.pci_action)
         self.dispatcher.add_handler("device-unassign:pci", self.pci_action)
@@ -628,6 +631,39 @@ class DevicesTray(Gtk.Application):
         for device in self.devices.values():
             if device.port == port:
                 device.attachments.discard(vm_wrapped)
+
+    def device_list_changed(self, vm, event, **_kwargs):
+        """
+        `vm`'s exposed device list for this class changed: a device was
+        added/removed, or a device's local "used" marker flipped, e.g.
+        a mount inside the backend. There is no per-device event for that.
+        """
+        try:
+            if not vm.is_running():
+                return
+        except qubesadmin.exc.QubesPropertyAccessError:
+            return
+
+        devclass = event.split(":", 1)[1]
+        affected = [
+            dev
+            for dev in self.devices.values()
+            if dev.device_class == devclass and dev.backend_domain == backend.VM(vm)
+        ]
+        if not affected:
+            return
+
+        try:
+            dev_by_port = {
+                str(dev.port): dev for dev in vm.devices[devclass].get_exposed_devices()
+            }
+        except qubesadmin.exc.QubesException:
+            return
+
+        for device in affected:
+            fresh = dev_by_port.get(device.port)
+            if fresh is not None:
+                device.refresh_busy(fresh)
 
     def vm_start(self, vm, _event, **_kwargs):
         wrapped_vm = backend.VM(vm)
