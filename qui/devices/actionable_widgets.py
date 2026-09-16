@@ -234,6 +234,16 @@ class SimpleActionWidget(Gtk.Box):
         self.pack_start(self.text_label, True, True, 0)
 
 
+def mark_busy(widget: "VMWithIcon"):
+    """
+    Grey out a VMWithIcon-based attach widget and explain why.
+    """
+    widget.backend_label.set_markup(
+        widget.backend_label.get_text() + " <i>(device in use)</i>"
+    )
+    widget.actionable = False
+
+
 class AttachWidget(ActionableWidget, VMWithIcon):
     """Attach device to qube action"""
 
@@ -246,6 +256,8 @@ class AttachWidget(ActionableWidget, VMWithIcon):
                 self.backend_label.get_text() + " <i>(blocked by policy)</i>"
             )
             self.actionable = False
+        elif self.device.busy:
+            mark_busy(self)
 
     async def widget_action(self, *_args):
         self.device.attach_to_vm(self.vm)
@@ -306,9 +318,7 @@ class DetachAndAttachWidget(ActionableWidget, VMWithIcon):
         self.device = device
 
     async def widget_action(self, *_args):
-        for vm in self.device.attachments:
-            self.device.detach_from_vm(vm, True)
-        self.device.attach_to_vm(self.vm)
+        self.device.move_to_vm(self.vm)
 
 
 class AttachDisposableWidget(ActionableWidget, VMWithIcon):
@@ -318,6 +328,8 @@ class AttachDisposableWidget(ActionableWidget, VMWithIcon):
         super().__init__(vm, variant=variant)
         self.vm = vm
         self.device = device
+        if self.device.busy:
+            mark_busy(self)
 
     async def widget_action(self, *_args):
         new_dispvm = qubesadmin.vm.DispVM.from_appvm(self.vm.vm_object.app, self.vm)
@@ -335,11 +347,10 @@ class DetachAndAttachDisposableWidget(ActionableWidget, VMWithIcon):
         self.device = device
 
     async def widget_action(self, *_args):
-        self.device.detach_from_vm(self.vm)
         new_dispvm = qubesadmin.vm.DispVM.from_appvm(self.vm.vm_object.app, self.vm)
         new_dispvm.start()
 
-        self.device.attach_to_vm(backend.VM(new_dispvm))
+        self.device.move_to_vm(backend.VM(new_dispvm))
 
 
 class ToggleFeatureItem(ActionableWidget, SimpleActionWidget):
