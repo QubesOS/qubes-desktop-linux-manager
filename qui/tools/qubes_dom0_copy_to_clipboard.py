@@ -142,8 +142,8 @@ def _validate_text(raw: bytes) -> str:
         text = raw.decode("utf-8")
     except UnicodeDecodeError:
         print(
-            "Error: Binary data detected (invalid UTF-8 sequence). "
-            "The Qubes clipboard only supports text. "
+            "Error: Binary data or invalid UTF-8 detected. "
+            "The Qubes clipboard only supports utf-8 text. "
             "Use 'qvm-copy' to transfer binary files between qubes.",
             file=sys.stderr,
         )
