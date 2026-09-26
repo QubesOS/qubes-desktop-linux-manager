@@ -168,18 +168,16 @@ def main() -> int:
 
     raw = _read_input(args.file, args.quiet)
     text = _validate_text(raw)
-    encoded = text.encode("utf-8")
-    size = len(encoded)
+    size = len(raw)
 
     if size > args.max_size:
         if args.truncate:
-            # Truncate cleanly at a UTF-8 character boundary.
-            encoded = encoded[: args.max_size]
-            text = encoded.decode("utf-8", errors="ignore")
-            size = len(encoded)
+            # Truncate raw bytes cleanly at UTF-8 boundary using errors="ignore".
+            # Note: actual size may be 1-3 bytes below max_size if a codepoint was split.
+            text = raw[: args.max_size].decode("utf-8", errors="ignore")
             if not args.quiet:
                 print(
-                    f"Warning: input truncated to {size} bytes "
+                    f"Warning: input truncated to fit global clipboard "
                     f"(limit: {args.max_size} bytes).",
                     file=sys.stderr,
                 )

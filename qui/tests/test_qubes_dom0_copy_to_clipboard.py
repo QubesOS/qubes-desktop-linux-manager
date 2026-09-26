@@ -255,7 +255,7 @@ class TestCLI:
         """Exit 2 on invalid UTF-8; copy_to_global_clipboard must not be called."""
         exit_code, _, stderr = self._run([], stdin_bytes=b"\xff\xfe invalid utf8")
         assert exit_code == 2
-        assert "Binary data detected" in stderr
+        assert "invalid UTF-8" in stderr
         _patch_copy.assert_not_called()
 
     def test_reject_oversized_without_truncate(
