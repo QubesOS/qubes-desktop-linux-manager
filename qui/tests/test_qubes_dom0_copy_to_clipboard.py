@@ -208,7 +208,14 @@ class TestCLI:
             _patch("sys.stdout", stdout_buf),
             _patch("sys.stderr", stderr_buf),
         ):
-            exit_code = main()
+            try:
+                exit_code = main()
+            except SystemExit as exc:
+                exit_code = (
+                    exc.code
+                    if isinstance(exc.code, int)
+                    else (0 if exc.code is None else 1)
+                )
 
         return exit_code, stdout_buf.getvalue(), stderr_buf.getvalue()
 

@@ -173,7 +173,8 @@ def main() -> int:
     if size > args.max_size:
         if args.truncate:
             # Truncate raw bytes cleanly at UTF-8 boundary using errors="ignore".
-            # Note: actual size may be 1-3 bytes below max_size if a codepoint was split.
+            # Note: actual size may be 1-3 bytes below max_size if a
+            # codepoint was split.
             text = raw[: args.max_size].decode("utf-8", errors="ignore")
             if not args.quiet:
                 print(
