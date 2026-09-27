@@ -198,15 +198,28 @@ class ProgressPage:
 
     def restart_qube_update(self, row: RowWrapper):
         """Restarts the update process for a specific qube."""
+        if row.status == UpdateStatus.InProgress:
+            return None
         self.log.info("Restarting update for %s", row.name)
         row.set_status(UpdateStatus.InProgress)
         row.set_update_progress(0)
+        if self.vms_to_update:
+            total_progress = sum(
+                r.get_update_progress() for r in self.vms_to_update
+            ) / len(self.vms_to_update)
+            GLib.idle_add(self.set_total_progress, total_progress)
+
         row.append_text_view(
             l("\n--- Restarting update for {} ---\n").format(row.name)
         )
         self.update_details.update_buffer()
         if self.update_details.restart_button:
             self.update_details.restart_button.set_visible(False)
+
+        self.exit_triggered = False
+        GLib.idle_add(self.cancel_button.set_label, l("_Cancel updates"))
+        GLib.idle_add(self.cancel_button.set_sensitive, True)
+        GLib.idle_add(self.cancel_button.show)
 
         self.header_label.set_text(l("Update in progress..."))
         self.next_button.set_sensitive(False)
@@ -215,7 +228,20 @@ class ProgressPage:
             loop = asyncio.get_running_loop()
         except RuntimeError:
             loop = asyncio.get_event_loop()
-        return loop.create_task(self._do_restart_update(row))
+
+        new_task = loop.create_task(self._do_restart_update(row))
+        if self.update_task is None or self.update_task.done():
+            self.update_task = new_task
+        else:
+            prev_task = self.update_task
+
+            async def _gather_tasks():
+                await asyncio.gather(
+                    prev_task, new_task, return_exceptions=True
+                )
+
+            self.update_task = loop.create_task(_gather_tasks())
+        return new_task
 
     async def _do_restart_update(self, row: RowWrapper):
         rows = {row.name: row}
@@ -231,6 +257,18 @@ class ProgressPage:
                 ),
             )
             GLib.idle_add(row.set_status, UpdateStatus.Error)
+
+        if row.status == UpdateStatus.InProgress:
+            GLib.idle_add(row.set_update_progress, 100)
+            if self.exit_triggered:
+                GLib.idle_add(row.set_status, UpdateStatus.Cancelled)
+                GLib.idle_add(
+                    row.append_text_view,
+                    l("Canceled update for {}\n").format(row.name),
+                )
+            elif self.retcode not in (0, None):
+                GLib.idle_add(row.set_status, UpdateStatus.Error)
+
         self.update_details.update_buffer()
 
         if self.vms_to_update and not any(

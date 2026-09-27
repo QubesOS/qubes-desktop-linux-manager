@@ -375,3 +375,178 @@ def test_restart_qube_update(
     run_coroutine(task)
     sut.do_update_selected.assert_called_once()
     assert sut.do_update_selected.call_args[0][0] == {row.name: row}
+
+
+def test_restart_qube_update_while_already_in_progress(
+    real_builder,
+    updateable_vms_list,
+    mock_next_button,
+    mock_cancel_button,
+    mock_label,
+    mock_settings,
+):
+    mock_log = Mock()
+    sut = ProgressPage(
+        real_builder,
+        mock_log,
+        mock_label,
+        mock_next_button,
+        mock_cancel_button,
+        Mock(),
+    )
+    sut.vms_to_update = updateable_vms_list
+    sut.settings = mock_settings
+
+    row = updateable_vms_list[0]
+    row.set_status(UpdateStatus.InProgress)
+
+    res = sut.restart_qube_update(row)
+    assert res is None
+
+
+@patch("gi.repository.GLib.idle_add")
+def test_restart_resets_exit_triggered_and_reshows_cancel(
+    idle_add,
+    real_builder,
+    updateable_vms_list,
+    mock_next_button,
+    mock_cancel_button,
+    mock_label,
+    mock_settings,
+):
+    sut = ProgressPage(
+        real_builder,
+        Mock(),
+        mock_label,
+        mock_next_button,
+        mock_cancel_button,
+        Mock(),
+    )
+    sut.vms_to_update = updateable_vms_list
+    sut.settings = mock_settings
+    sut.exit_triggered = True
+
+    row = updateable_vms_list[0]
+    row.set_status(UpdateStatus.Error)
+    sut.do_update_selected = AsyncMock()
+
+    task = sut.restart_qube_update(row)
+    assert not sut.exit_triggered
+    idle_add.assert_has_calls(
+        [
+            call(mock_cancel_button.set_label, "_Cancel updates"),
+            call(mock_cancel_button.set_sensitive, True),
+            call(mock_cancel_button.show),
+        ],
+        any_order=True,
+    )
+    run_coroutine(task)
+
+
+def test_restart_updates_task_and_gathers_tasks(
+    real_builder,
+    updateable_vms_list,
+    mock_next_button,
+    mock_cancel_button,
+    mock_label,
+    mock_settings,
+):
+    sut = ProgressPage(
+        real_builder,
+        Mock(),
+        mock_label,
+        mock_next_button,
+        mock_cancel_button,
+        Mock(),
+    )
+    sut.vms_to_update = updateable_vms_list
+    sut.settings = mock_settings
+
+    row1 = updateable_vms_list[0]
+    row2 = updateable_vms_list[1]
+    row1.set_status(UpdateStatus.Error)
+    row2.set_status(UpdateStatus.Error)
+
+    sut.do_update_selected = AsyncMock()
+
+    task1 = sut.restart_qube_update(row1)
+    assert sut.update_task is task1
+
+    task2 = sut.restart_qube_update(row2)
+    assert sut.update_task is not task2
+    assert not sut.update_task.done()
+
+    run_coroutine(sut.update_task)
+    assert task1.done()
+    assert task2.done()
+
+
+@patch("gi.repository.GLib.idle_add")
+def test_restart_recovers_in_progress_row_on_cancel(
+    idle_add,
+    real_builder,
+    updateable_vms_list,
+    mock_next_button,
+    mock_cancel_button,
+    mock_label,
+    mock_settings,
+):
+    sut = ProgressPage(
+        real_builder,
+        Mock(),
+        mock_label,
+        mock_next_button,
+        mock_cancel_button,
+        Mock(),
+    )
+    sut.vms_to_update = updateable_vms_list
+    sut.settings = mock_settings
+
+    row = updateable_vms_list[0]
+    row.set_status(UpdateStatus.Error)
+
+    async def fake_update(_rows, _settings):
+        sut.exit_triggered = True
+
+    sut.do_update_selected = fake_update
+
+    task = sut.restart_qube_update(row)
+    run_coroutine(task)
+
+    idle_add.assert_any_call(row.set_status, UpdateStatus.Cancelled)
+
+
+@patch("gi.repository.GLib.idle_add")
+def test_restart_recovers_in_progress_row_on_error_retcode(
+    idle_add,
+    real_builder,
+    updateable_vms_list,
+    mock_next_button,
+    mock_cancel_button,
+    mock_label,
+    mock_settings,
+):
+    sut = ProgressPage(
+        real_builder,
+        Mock(),
+        mock_label,
+        mock_next_button,
+        mock_cancel_button,
+        Mock(),
+    )
+    sut.vms_to_update = updateable_vms_list
+    sut.settings = mock_settings
+
+    row = updateable_vms_list[0]
+    row.set_status(UpdateStatus.Error)
+
+    async def fake_update(_rows, _settings):
+        sut.retcode = 1
+
+    sut.do_update_selected = fake_update
+
+    task = sut.restart_qube_update(row)
+    run_coroutine(task)
+
+    idle_add.assert_any_call(row.set_status, UpdateStatus.Error)
+
