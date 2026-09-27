@@ -28,7 +28,7 @@ import signal
 import subprocess
 import sys
 import gi
-from typing import Dict
+from typing import Dict, Optional
 
 gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk, Gdk, GLib, GObject  # isort:skip
@@ -88,8 +88,11 @@ class ProgressPage:
         self.update_task = None
         self.after_update_callback = callback
         self.retcode = None
+        self.settings = None
 
-        self.update_details = QubeUpdateDetails(self.builder)
+        self.update_details = QubeUpdateDetails(
+            self.builder, restart_callback=self.restart_qube_update
+        )
 
         self.stack: Gtk.Stack = self.builder.get_object("main_stack")
         self.page: Gtk.Box = self.builder.get_object("progress_page")
@@ -122,6 +125,7 @@ class ProgressPage:
         """Schedules `perform_update` as an asyncio task on the main loop."""
         self.log.info("Prepare updating")
         self.vms_to_update = vms_to_update
+        self.settings = settings
         self.progress_list.set_model(vms_to_update.list_store_raw)
         self.next_button.set_sensitive(False)
         self.cancel_button.set_sensitive(True)
@@ -149,10 +153,13 @@ class ProgressPage:
         if self.vms_to_update:
             await self.update_selected(self.vms_to_update, settings)
 
-        GLib.idle_add(self.header_label.set_text, l("Update finished"))
-        GLib.idle_add(self.cancel_button.set_visible, False)
-        GLib.idle_add(self.next_button.set_sensitive, True)
-        self.after_update_callback()
+        if not any(
+            r.status == UpdateStatus.InProgress for r in (self.vms_to_update or [])
+        ):
+            GLib.idle_add(self.header_label.set_text, l("Update finished"))
+            GLib.idle_add(self.cancel_button.set_visible, False)
+            GLib.idle_add(self.next_button.set_sensitive, True)
+            self.after_update_callback()
 
     async def update_selected(self, to_update, settings):
         """Updates templates and standalones and then sets update statuses."""
@@ -189,12 +196,60 @@ class ProgressPage:
                 GLib.idle_add(row.set_status, UpdateStatus.Error)
         self.update_details.update_buffer()
 
-    async def do_update_selected(self, rows: Dict[str, RowWrapper], settings: Settings):
+    def restart_qube_update(self, row: RowWrapper):
+        """Restarts the update process for a specific qube."""
+        self.log.info("Restarting update for %s", row.name)
+        row.set_status(UpdateStatus.InProgress)
+        row.set_update_progress(0)
+        row.append_text_view(
+            l("\n--- Restarting update for {} ---\n").format(row.name)
+        )
+        self.update_details.update_buffer()
+        if self.update_details.restart_button:
+            self.update_details.restart_button.set_visible(False)
+
+        self.header_label.set_text(l("Update in progress..."))
+        self.next_button.set_sensitive(False)
+
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.get_event_loop()
+        return loop.create_task(self._do_restart_update(row))
+
+    async def _do_restart_update(self, row: RowWrapper):
+        rows = {row.name: row}
+        try:
+            await self.do_update_selected(rows, self.settings)
+        except subprocess.CalledProcessError as ex:
+            GLib.idle_add(
+                row.append_text_view,
+                l("Error on updating {}: {}\n{}").format(
+                    row.name,
+                    str(ex),
+                    ex.output.decode() if getattr(ex, "output", None) else "",
+                ),
+            )
+            GLib.idle_add(row.set_status, UpdateStatus.Error)
+        self.update_details.update_buffer()
+
+        if self.vms_to_update and not any(
+            r.status == UpdateStatus.InProgress for r in self.vms_to_update
+        ):
+            GLib.idle_add(self.header_label.set_text, l("Update finished"))
+            GLib.idle_add(self.cancel_button.set_visible, False)
+            GLib.idle_add(self.next_button.set_sensitive, True)
+            if self.after_update_callback:
+                self.after_update_callback()
+
+    async def do_update_selected(
+        self, rows: Dict[str, RowWrapper], settings: Optional[Settings]
+    ):
         """Runs `qubes-vm-update` command."""
         targets = ",".join((name for name in rows.keys()))
 
         args = []
-        if settings.max_concurrency is not None:
+        if settings and settings.max_concurrency is not None:
             args.extend(("--max-concurrency", str(settings.max_concurrency)))
 
         with pipe_ebadf_silencer():
@@ -243,9 +298,14 @@ class ProgressPage:
             if status == "updating":
                 progress = int(float(info))
                 GLib.idle_add(rows[name].set_update_progress, progress)
-                total_progress = sum(
-                    row.get_update_progress() for row in rows.values()
-                ) / len(rows)
+                if self.vms_to_update:
+                    total_progress = sum(
+                        r.get_update_progress() for r in self.vms_to_update
+                    ) / len(self.vms_to_update)
+                else:
+                    total_progress = sum(
+                        row.get_update_progress() for row in rows.values()
+                    ) / len(rows)
                 GLib.idle_add(self.set_total_progress, total_progress)
 
         except ValueError:
@@ -256,6 +316,11 @@ class ProgressPage:
                 update_status = UpdateStatus.from_name(info)
                 GLib.idle_add(rows[name].set_update_progress, 100)
                 GLib.idle_add(rows[name].set_status, update_status)
+                if (
+                    self.update_details.active_row is not None
+                    and name == self.update_details.active_row.name
+                ):
+                    GLib.idle_add(self.update_details.update_restart_visibility)
         except KeyError:
             return
 
@@ -344,9 +409,10 @@ class ProgressPage:
 
 class QubeUpdateDetails:
 
-    def __init__(self, builder):
+    def __init__(self, builder, restart_callback=None):
         self.active_row = None
         self.builder = builder
+        self.restart_callback = restart_callback
 
         self.qube_details: Gtk.Box = self.builder.get_object("qube_details")
         self.details_label: Gtk.Label = self.builder.get_object("details_label")
@@ -357,12 +423,26 @@ class QubeUpdateDetails:
         self.copy_button: Gtk.Button = self.builder.get_object("copy_button")
         self.copy_button.connect("clicked", self.copy_content)
 
+        self.restart_button: Optional[Gtk.Button] = self.builder.get_object(
+            "restart_button"
+        )
+        if self.restart_button:
+            self.restart_button.connect("clicked", self.on_restart_clicked)
+
         self.progress_textview: Gtk.TextView = self.builder.get_object(
             "progress_textview"
         )
         self.progress_scrolled_window: Gtk.ScrolledWindow = self.builder.get_object(
             "progress_scrolled_window"
         )
+
+    def on_restart_clicked(self, _emitter):
+        if self.active_row is None:
+            return
+        if self.restart_button:
+            self.restart_button.set_visible(False)
+        if self.restart_callback:
+            self.restart_callback(self.active_row)
 
     def copy_content(self, _emitter):
         if self.active_row is None:
@@ -391,12 +471,22 @@ class QubeUpdateDetails:
         self.progress_scrolled_window.set_visible(row_activated)
         self.progress_textview.set_visible(row_activated)
         self.copy_button.set_visible(row_activated)
+        self.update_restart_visibility()
+
+    def update_restart_visibility(self):
+        if self.restart_button:
+            can_restart = self.active_row is not None and (
+                self.active_row.status
+                in (UpdateStatus.Error, UpdateStatus.Cancelled)
+            )
+            self.restart_button.set_visible(can_restart)
 
     def update_buffer(self):
         if self.active_row is not None:
             buffer_ = self.progress_textview.get_buffer()
             GLib.idle_add(buffer_.set_text, self.active_row.buffer)
             GLib.idle_add(self._autoscroll)
+            GLib.idle_add(self.update_restart_visibility)
 
     def _autoscroll(self):
         adjustment = self.progress_scrolled_window.get_vadjustment()

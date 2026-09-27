@@ -286,6 +286,7 @@ def test_set_active_row(real_builder, updateable_vms_list):
     assert sut.progress_scrolled_window.get_visible()
     assert sut.progress_textview.get_visible()
     assert sut.copy_button.get_visible()
+    assert not sut.restart_button.get_visible()
 
 
 def test_set_active_row_none(real_builder):
@@ -300,3 +301,77 @@ def test_set_active_row_none(real_builder):
     assert not sut.progress_scrolled_window.get_visible()
     assert not sut.progress_textview.get_visible()
     assert not sut.copy_button.get_visible()
+    assert not sut.restart_button.get_visible()
+
+
+def test_set_active_row_error_state(real_builder, updateable_vms_list):
+    sut = QubeUpdateDetails(real_builder)
+    row = updateable_vms_list[0]
+    row.set_status(UpdateStatus.Error)
+    sut.set_active_row(row)
+
+    assert sut.copy_button.get_visible()
+    assert sut.restart_button.get_visible()
+
+
+def test_set_active_row_cancelled_state(real_builder, updateable_vms_list):
+    sut = QubeUpdateDetails(real_builder)
+    row = updateable_vms_list[0]
+    row.set_status(UpdateStatus.Cancelled)
+    sut.set_active_row(row)
+
+    assert sut.copy_button.get_visible()
+    assert sut.restart_button.get_visible()
+
+
+def test_on_restart_clicked(real_builder, updateable_vms_list):
+    mock_restart = Mock()
+    sut = QubeUpdateDetails(real_builder, restart_callback=mock_restart)
+    row = updateable_vms_list[0]
+    row.set_status(UpdateStatus.Error)
+    sut.set_active_row(row)
+    assert sut.restart_button.get_visible()
+
+    sut.on_restart_clicked(sut.restart_button)
+
+    assert not sut.restart_button.get_visible()
+    mock_restart.assert_called_once_with(row)
+
+
+def test_restart_qube_update(
+    real_builder,
+    updateable_vms_list,
+    mock_next_button,
+    mock_cancel_button,
+    mock_label,
+    mock_settings,  # pylint: disable=redefined-outer-name
+):
+    mock_log = Mock()
+    mock_callback = Mock()
+    sut = ProgressPage(
+        real_builder,
+        mock_log,
+        mock_label,
+        mock_next_button,
+        mock_cancel_button,
+        mock_callback,
+    )
+    sut.vms_to_update = updateable_vms_list
+    sut.settings = mock_settings
+
+    row = updateable_vms_list[0]
+    row.set_status(UpdateStatus.Error)
+    sut.update_details.set_active_row(row)
+    assert sut.update_details.restart_button.get_visible()
+
+    sut.do_update_selected = AsyncMock()
+
+    task = sut.restart_qube_update(row)
+    assert not sut.update_details.restart_button.get_visible()
+    assert row.status == UpdateStatus.InProgress
+    assert mock_label.text == "Update in progress..."
+    assert not mock_next_button.sensitive
+
+    run_coroutine(task)
+    sut.do_update_selected.assert_called_once()
+    assert sut.do_update_selected.call_args[0][0] == {row.name: row}
