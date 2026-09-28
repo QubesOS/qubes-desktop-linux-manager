@@ -21,10 +21,11 @@
 """Tests for qui.tools.qubes_dom0_copy_to_clipboard and the
 copy_to_global_clipboard() helper in qui.clipboard."""
 
+# pylint: disable=protected-access,redefined-outer-name,unused-argument
+
+import io
 import json
 import os
-import sys
-from io import BytesIO
 from pathlib import Path
 from typing import Generator
 from unittest.mock import MagicMock, patch
@@ -60,7 +61,8 @@ def clipboard_dir(tmp_path: Path) -> Generator[Path, None, None]:
 # ---------------------------------------------------------------------------
 
 # Import here so the module-level patch applies cleanly in the fixture above.
-from qui.clipboard import copy_to_global_clipboard  # noqa: E402
+from qui.clipboard import NotificationApp, copy_to_global_clipboard  # noqa: E402
+from qui.tools.qubes_dom0_copy_to_clipboard import main  # noqa: E402
 
 
 class TestCopyToGlobalClipboard:
@@ -133,7 +135,7 @@ class TestCopyToGlobalClipboard:
         original_open = open  # noqa: A001
 
         def tracking_open(path: str, *args, **kwargs):  # type: ignore[override]
-            fh = original_open(path, *args, **kwargs)
+            fh = original_open(path, *args, **kwargs)  # pylint: disable=consider-using-with
             if str(clipboard_dir) in str(path):
                 write_order.append(os.path.basename(str(path)))
             return fh
@@ -188,25 +190,25 @@ class TestCLI:
         self,
         argv: list[str],
         stdin_bytes: bytes = b"",
+        isatty: bool = False,
+        stdin_side_effect: object = None,
     ) -> tuple[int, str, str]:
         """Run main() with mocked argv and stdin; return (exit_code, stdout, stderr)."""
-        import io
-        from unittest.mock import patch as _patch
-
-        from qui.tools.qubes_dom0_copy_to_clipboard import main
-
         mock_stdin = MagicMock()
-        mock_stdin.buffer.read.return_value = stdin_bytes
-        mock_stdin.isatty.return_value = False
+        if stdin_side_effect is not None:
+            mock_stdin.buffer.read.side_effect = stdin_side_effect
+        else:
+            mock_stdin.buffer.read.return_value = stdin_bytes
+        mock_stdin.isatty.return_value = isatty
 
         stdout_buf = io.StringIO()
         stderr_buf = io.StringIO()
 
         with (
-            _patch("sys.argv", ["qubes-dom0-copy-to-clipboard"] + argv),
-            _patch("sys.stdin", mock_stdin),
-            _patch("sys.stdout", stdout_buf),
-            _patch("sys.stderr", stderr_buf),
+            patch("sys.argv", ["qubes-dom0-copy-to-clipboard"] + argv),
+            patch("sys.stdin", mock_stdin),
+            patch("sys.stdout", stdout_buf),
+            patch("sys.stderr", stderr_buf),
         ):
             try:
                 exit_code = main()
@@ -310,6 +312,41 @@ class TestCLI:
         call_kwargs = _patch_copy.call_args
         assert call_kwargs.kwargs.get("cleared") is True
 
+    def test_clear_flag_oserror_returns_1(
+        self,
+        clipboard_dir: Path,
+        _patch_copy: MagicMock,
+    ) -> None:
+        """--clear should return 1 when copy_to_global_clipboard raises OSError."""
+        _patch_copy.side_effect = OSError("wipe failure")
+        exit_code, _, stderr = self._run(["--clear"])
+        assert exit_code == 1
+        assert "cannot wipe global clipboard" in stderr
+
+    def test_interactive_tty_prints_prompt(
+        self,
+        clipboard_dir: Path,
+        _patch_copy: MagicMock,
+    ) -> None:
+        """Interactive stdin prints a prompt message on stderr when quiet=False."""
+        exit_code, _, stderr = self._run(
+            [], stdin_bytes=b"tty test", isatty=True
+        )
+        assert exit_code == 0
+        assert "Reading from stdin" in stderr
+
+    def test_keyboard_interrupt_exits_1(
+        self,
+        clipboard_dir: Path,
+        _patch_copy: MagicMock,
+    ) -> None:
+        """Ctrl+C raises KeyboardInterrupt and exits 1 cleanly without traceback."""
+        exit_code, _, stderr = self._run(
+            [], stdin_side_effect=KeyboardInterrupt
+        )
+        assert exit_code == 1
+        assert "Cancelled." in stderr
+
     def test_exit_code_1_on_io_error(
         self,
         clipboard_dir: Path,
@@ -331,3 +368,92 @@ class TestCLI:
         assert exit_code == 1
         assert "cannot read" in stderr
         _patch_copy.assert_not_called()
+
+
+class TestNotificationAppClipboard:
+    """Tests for NotificationApp clipboard integration methods."""
+
+    def test_copy_dom0_clipboard_success(self, clipboard_dir: Path) -> None:
+        """Test NotificationApp.copy_dom0_clipboard successfully copying text."""
+        mock_app = MagicMock(spec=NotificationApp)
+        mock_clipboard = MagicMock()
+        mock_clipboard.wait_for_text.return_value = "dom0 test content"
+
+        with (
+            patch("qui.clipboard.Gtk.Clipboard.get", return_value=mock_clipboard),
+            patch("qui.clipboard.Gtk.get_current_event_time", return_value=99999),
+        ):
+            NotificationApp.copy_dom0_clipboard(mock_app)
+
+        data_bytes = (clipboard_dir / "qubes-clipboard.bin").read_bytes()
+        assert data_bytes == b"dom0 test content"
+        mock_app.update_clipboard_contents.assert_called_once_with(
+            "dom0", "17 bytes"
+        )
+
+    def test_copy_dom0_clipboard_empty(self) -> None:
+        """Test NotificationApp.copy_dom0_clipboard notifying when empty."""
+        mock_app = MagicMock(spec=NotificationApp)
+        mock_clipboard = MagicMock()
+        mock_clipboard.wait_for_text.return_value = ""
+
+        with patch("qui.clipboard.Gtk.Clipboard.get", return_value=mock_clipboard):
+            NotificationApp.copy_dom0_clipboard(mock_app)
+
+        mock_app.send_notify.assert_called_once_with(
+            "Dom0 clipboard is empty!", icon="dialog-information"
+        )
+        mock_app.update_clipboard_contents.assert_not_called()
+
+    def test_copy_dom0_clipboard_exception(self) -> None:
+        """Test NotificationApp.copy_dom0_clipboard error notification on exception."""
+        mock_app = MagicMock(spec=NotificationApp)
+        mock_clipboard = MagicMock()
+        mock_clipboard.wait_for_text.return_value = "fail content"
+
+        with (
+            patch("qui.clipboard.Gtk.Clipboard.get", return_value=mock_clipboard),
+            patch("qui.clipboard.Gtk.get_current_event_time", return_value=99999),
+            patch(
+                "qui.clipboard.copy_to_global_clipboard",
+                side_effect=OSError("write failure"),
+            ),
+        ):
+            NotificationApp.copy_dom0_clipboard(mock_app)
+
+        mock_app.send_notify.assert_called_once_with(
+            "Error while accessing global clipboard!", icon="dialog-error"
+        )
+
+    def test_clear_clipboard_success(self, clipboard_dir: Path) -> None:
+        """Test NotificationApp.clear_clipboard wiping clipboard."""
+        mock_app = MagicMock(spec=NotificationApp)
+
+        with patch("qui.clipboard.Gtk.get_current_event_time", return_value=88888):
+            NotificationApp.clear_clipboard(mock_app)
+
+        raw = (clipboard_dir / "qubes-clipboard.bin.metadata").read_text(
+            encoding="ascii"
+        )
+        parsed = json.loads(raw)
+        assert parsed["cleared"] == 1
+        mock_app.update_clipboard_contents.assert_called_once_with(
+            vm=None, size=0, message="Global clipboard cleared"
+        )
+
+    def test_clear_clipboard_exception(self) -> None:
+        """Test NotificationApp.clear_clipboard error notification on exception."""
+        mock_app = MagicMock(spec=NotificationApp)
+
+        with (
+            patch("qui.clipboard.Gtk.get_current_event_time", return_value=88888),
+            patch(
+                "qui.clipboard.copy_to_global_clipboard",
+                side_effect=OSError("clear failure"),
+            ),
+        ):
+            NotificationApp.clear_clipboard(mock_app)
+
+        mock_app.send_notify.assert_called_once_with(
+            "Error while clearing global clipboard!"
+        )
