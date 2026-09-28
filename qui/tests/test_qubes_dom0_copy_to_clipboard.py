@@ -135,7 +135,8 @@ class TestCopyToGlobalClipboard:
         original_open = open  # noqa: A001
 
         def tracking_open(path: str, *args, **kwargs):  # type: ignore[override]
-            fh = original_open(path, *args, **kwargs)  # pylint: disable=consider-using-with
+            # pylint: disable=consider-using-with
+            fh = original_open(path, *args, **kwargs)
             if str(clipboard_dir) in str(path):
                 write_order.append(os.path.basename(str(path)))
             return fh
@@ -329,9 +330,7 @@ class TestCLI:
         _patch_copy: MagicMock,
     ) -> None:
         """Interactive stdin prints a prompt message on stderr when quiet=False."""
-        exit_code, _, stderr = self._run(
-            [], stdin_bytes=b"tty test", isatty=True
-        )
+        exit_code, _, stderr = self._run([], stdin_bytes=b"tty test", isatty=True)
         assert exit_code == 0
         assert "Reading from stdin" in stderr
 
@@ -341,9 +340,7 @@ class TestCLI:
         _patch_copy: MagicMock,
     ) -> None:
         """Ctrl+C raises KeyboardInterrupt and exits 1 cleanly without traceback."""
-        exit_code, _, stderr = self._run(
-            [], stdin_side_effect=KeyboardInterrupt
-        )
+        exit_code, _, stderr = self._run([], stdin_side_effect=KeyboardInterrupt)
         assert exit_code == 1
         assert "Cancelled." in stderr
 
@@ -387,9 +384,7 @@ class TestNotificationAppClipboard:
 
         data_bytes = (clipboard_dir / "qubes-clipboard.bin").read_bytes()
         assert data_bytes == b"dom0 test content"
-        mock_app.update_clipboard_contents.assert_called_once_with(
-            "dom0", "17 bytes"
-        )
+        mock_app.update_clipboard_contents.assert_called_once_with("dom0", "17 bytes")
 
     def test_copy_dom0_clipboard_empty(self) -> None:
         """Test NotificationApp.copy_dom0_clipboard notifying when empty."""
