@@ -209,9 +209,7 @@ class ProgressPage:
             ) / len(self.vms_to_update)
             GLib.idle_add(self.set_total_progress, total_progress)
 
-        row.append_text_view(
-            l("\n--- Restarting update for {} ---\n").format(row.name)
-        )
+        row.append_text_view(l("\n--- Restarting update for {} ---\n").format(row.name))
         self.update_details.update_buffer()
         if self.update_details.restart_button:
             self.update_details.restart_button.set_visible(False)
@@ -236,9 +234,7 @@ class ProgressPage:
             prev_task = self.update_task
 
             async def _gather_tasks():
-                await asyncio.gather(
-                    prev_task, new_task, return_exceptions=True
-                )
+                await asyncio.gather(prev_task, new_task, return_exceptions=True)
 
             self.update_task = loop.create_task(_gather_tasks())
         return new_task
@@ -514,8 +510,7 @@ class QubeUpdateDetails:
     def update_restart_visibility(self):
         if self.restart_button:
             can_restart = self.active_row is not None and (
-                self.active_row.status
-                in (UpdateStatus.Error, UpdateStatus.Cancelled)
+                self.active_row.status in (UpdateStatus.Error, UpdateStatus.Cancelled)
             )
             self.restart_button.set_visible(can_restart)
 

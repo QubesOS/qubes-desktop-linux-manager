@@ -58,6 +58,21 @@ except ImportError:
     admin_exc = False
 
 
+@pytest.fixture(autouse=True)
+def mock_deviceclass_properties():
+    original_init = QubesTestWrapper.__init__
+
+    def patched_init(self, *args, **kwargs):
+        original_init(self, *args, **kwargs)
+        self.expected_calls[("dom0", "admin.deviceclass.List", "details", None)] = (
+            b"0\x00"
+        )
+
+    QubesTestWrapper.__init__ = patched_init
+    yield
+    QubesTestWrapper.__init__ = original_init
+
+
 @pytest.fixture
 def test_qapp():
     test_qapp = MockQubesComplete()

@@ -549,4 +549,3 @@ def test_restart_recovers_in_progress_row_on_error_retcode(
     run_coroutine(task)
 
     idle_add.assert_any_call(row.set_status, UpdateStatus.Error)
-
