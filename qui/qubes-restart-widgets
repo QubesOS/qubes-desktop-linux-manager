@@ -1,0 +1,90 @@
+#!/bin/sh
+# Restart Qubes system tray widgets for active desktop user sessions upon package upgrade.
+
+set -e
+
+# Only run in dom0 or GuiVM
+if ! test -f /var/run/qubes-service/guivm && \
+        ! test -f /etc/qubes-release; then
+    exit 0
+fi
+
+# Only run if systemd is active as PID 1
+if [ ! -d /run/systemd/system ]; then
+    exit 0
+fi
+
+restart_for_user() {
+    user_uid="$1"
+    user_name="$2"
+    user_runtime="/run/user/$user_uid"
+
+    # Verify that the systemd user manager socket exists and is active
+    if [ ! -e "$user_runtime/systemd/private" ]; then
+        return 0
+    fi
+
+    # Core widgets to restart
+    widget_services="qubes-widget@qui-domains.service qubes-widget@qui-devices.service qubes-widget@qui-disk-space.service qubes-widget@qui-clipboard.service"
+
+    # Avoid restarting qui-updates if an upgrade/template window is currently active
+    if ! pgrep -f '[q]ubes-update-gui' >/dev/null 2>&1 && \
+       ! pgrep -f '[q]vm-template-gui' >/dev/null 2>&1; then
+        widget_services="$widget_services qubes-widget@qui-updates.service"
+    fi
+
+    # Issue daemon-reload and try-restart.
+    # Try systemctl --user -M first; if that fails or machined is not available,
+    # fallback to runuser or su with XDG_RUNTIME_DIR.
+    if ! systemctl --user -M "$user_name@" daemon-reload >/dev/null 2>&1 || \
+       ! systemctl --user -M "$user_name@" try-restart $widget_services >/dev/null 2>&1; then
+        if command -v runuser >/dev/null 2>&1; then
+            runuser -u "$user_name" -- env XDG_RUNTIME_DIR="$user_runtime" systemctl --user daemon-reload >/dev/null 2>&1 || :
+            runuser -u "$user_name" -- env XDG_RUNTIME_DIR="$user_runtime" systemctl --user try-restart $widget_services >/dev/null 2>&1 || :
+        elif command -v su >/dev/null 2>&1; then
+            su -s /bin/sh "$user_name" -c "XDG_RUNTIME_DIR='$user_runtime' systemctl --user daemon-reload" >/dev/null 2>&1 || :
+            su -s /bin/sh "$user_name" -c "XDG_RUNTIME_DIR='$user_runtime' systemctl --user try-restart $widget_services" >/dev/null 2>&1 || :
+        fi
+    fi
+}
+
+current_uid="$(id -u 2>/dev/null || echo 0)"
+
+if [ "$current_uid" -ne 0 ]; then
+    # Invoked directly by a non-root user
+    current_user="$(id -un 2>/dev/null || :)"
+    if [ -n "$current_user" ]; then
+        user_runtime="/run/user/$current_uid"
+        if [ -e "$user_runtime/systemd/private" ]; then
+            widget_services="qubes-widget@qui-domains.service qubes-widget@qui-devices.service qubes-widget@qui-disk-space.service qubes-widget@qui-clipboard.service"
+            if ! pgrep -f '[q]ubes-update-gui' >/dev/null 2>&1 && \
+               ! pgrep -f '[q]vm-template-gui' >/dev/null 2>&1; then
+                widget_services="$widget_services qubes-widget@qui-updates.service"
+            fi
+            systemctl --user daemon-reload >/dev/null 2>&1 || :
+            systemctl --user try-restart $widget_services >/dev/null 2>&1 || :
+        fi
+    fi
+    exit 0
+fi
+
+# Invoked as root (e.g. from package manager %posttrans / postinst)
+# Iterate over active user sessions in /run/user
+if [ -d /run/user ]; then
+    for runtime_path in /run/user/*; do
+        if [ -d "$runtime_path" ]; then
+            session_uid="${runtime_path##*/}"
+            case "$session_uid" in
+                ''|*[!0-9]*) continue ;;
+            esac
+            if [ "$session_uid" -ge 1000 ]; then
+                session_user="$(id -nu "$session_uid" 2>/dev/null || :)"
+                if [ -n "$session_user" ]; then
+                    restart_for_user "$session_uid" "$session_user"
+                fi
+            fi
+        fi
+    done
+fi
+
+exit 0
