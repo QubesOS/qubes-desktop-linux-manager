@@ -202,6 +202,43 @@ def test_dvm_list(real_builder, test_qapp, test_policy_manager):
     assert found_default
 
 
+def test_disposables_exception_rows_include_named_disposables(
+    real_builder, test_qapp, test_policy_manager
+):
+    test_qapp._qubes["volatile-disp"] = MockQube(
+        name="volatile-disp",
+        qapp=test_qapp,
+        klass="DispVM",
+        template="default-dvm",
+    )
+    test_qapp._qubes["volatile-disp"].properties["auto_cleanup"].value = True
+    test_qapp.update_vm_calls()
+
+    disposables_handler = DisposablesHandler(
+        test_qapp, test_policy_manager, real_builder
+    )
+
+    default_dvm = test_qapp.domains["default-dvm"]
+    named_dispvm = test_qapp.domains["test-disp"]
+    volatile_dispvm = test_qapp.domains["volatile-disp"]
+    regular_appvm = test_qapp.domains["test-vm"]
+
+    assert disposables_handler.defdispvm_handler.model.is_vm_available(default_dvm)
+    assert not disposables_handler.defdispvm_handler.model.is_vm_available(named_dispvm)
+
+    for handler in (
+        disposables_handler.open_in_dvm_handler,
+        disposables_handler.openurl_handler,
+    ):
+        handler.list_handler.add_button.clicked()
+        row = next(row for row in handler.list_handler.current_rows if row.editing)
+
+        assert row.target_widget.model.is_vm_available(default_dvm)
+        assert row.target_widget.model.is_vm_available(named_dispvm)
+        assert not row.target_widget.model.is_vm_available(volatile_dispvm)
+        assert not row.target_widget.model.is_vm_available(regular_appvm)
+
+
 def test_dispvm_change(real_builder, test_qapp, test_policy_manager):
     disposables_handler = DisposablesHandler(
         test_qapp, test_policy_manager, real_builder

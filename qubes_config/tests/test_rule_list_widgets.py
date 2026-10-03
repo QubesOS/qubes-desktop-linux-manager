@@ -20,16 +20,23 @@
 # pylint: disable=missing-module-docstring
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-class-docstring
+# pylint: disable=protected-access
 from unittest.mock import Mock, patch
+from qubesadmin.tests.mock_app import MockQube
 from qrexec.policy.parser import Rule
 from ..global_config.policy_handler import PolicyHandler
-from ..global_config.policy_rules import RuleSimple, SimpleVerbDescription
+from ..global_config.policy_rules import (
+    RuleDispVM,
+    RuleSimple,
+    SimpleVerbDescription,
+)
 from ..global_config.rule_list_widgets import (
     VMWidget,
     ActionWidget,
     RuleListBoxRow,
     NoActionListBoxRow,
     FilteredListBoxRow,
+    DispvmRuleRow,
 )
 
 import gi
@@ -296,6 +303,73 @@ def test_limited_selection_row(test_qapp):
     assert rule_row.target_widget.model.is_vm_available(vm_red)
     assert rule_row.target_widget.model.is_vm_available(vm_test)
     assert not rule_row.target_widget.model.is_vm_available(vm_vault)
+
+
+def test_dispvm_rule_row_uses_dispvm_template_filter(test_qapp):
+    mock_handler = Mock(spec=PolicyHandler)
+    mock_handler.verify_new_rule.return_value = None
+    rule = RuleDispVM(
+        Rule.from_line(
+            None,
+            "Service * test-blue @dispvm allow target=@dispvm",
+            filepath=None,
+            lineno=0,
+        )
+    )
+
+    rule_row = DispvmRuleRow(parent_handler=mock_handler, rule=rule, qapp=test_qapp)
+
+    default_dvm = test_qapp.domains["default-dvm"]
+    named_dispvm = test_qapp.domains["test-disp"]
+    regular_appvm = test_qapp.domains["test-vm"]
+
+    assert rule_row.target_widget.model.is_vm_available(default_dvm)
+    assert not rule_row.target_widget.model.is_vm_available(named_dispvm)
+    assert not rule_row.target_widget.model.is_vm_available(regular_appvm)
+
+
+def test_dispvm_rule_row_can_use_custom_target_filter(test_qapp):
+    mock_handler = Mock(spec=PolicyHandler)
+    mock_handler.verify_new_rule.return_value = None
+    test_qapp._qubes["volatile-disp"] = MockQube(
+        name="volatile-disp",
+        qapp=test_qapp,
+        klass="DispVM",
+        template="default-dvm",
+        auto_cleanup=True,
+    )
+    test_qapp.update_vm_calls()
+    rule = RuleDispVM(
+        Rule.from_line(
+            None,
+            "Service * test-blue @dispvm allow target=@dispvm",
+            filepath=None,
+            lineno=0,
+        )
+    )
+
+    def filter_target(vm):
+        if getattr(vm, "template_for_dispvms", False):
+            return True
+        return (
+            getattr(vm, "klass", None) == "DispVM"
+            and getattr(vm, "auto_cleanup", False) is not True
+        )
+
+    rule_row = DispvmRuleRow(
+        parent_handler=mock_handler,
+        rule=rule,
+        qapp=test_qapp,
+        filter_target=filter_target,
+    )
+
+    assert rule_row.target_widget.model.is_vm_available(
+        test_qapp.domains["default-dvm"]
+    )
+    assert rule_row.target_widget.model.is_vm_available(test_qapp.domains["test-disp"])
+    assert not rule_row.target_widget.model.is_vm_available(
+        test_qapp.domains["volatile-disp"]
+    )
 
 
 def test_rule_row_init_delete(test_qapp):
