@@ -10,8 +10,9 @@ from .gtk3_xwayland_menu_dismisser import (
 )  # isort:skip
 
 import asyncio
-import sys
+import shutil
 import subprocess
+import sys
 
 import qubesadmin
 import qubesadmin.events
@@ -67,6 +68,18 @@ class RunItem(Gtk.MenuItem):
         self.add(title_label)
         self.show_all()
         self.connect("activate", command)
+
+
+def _spawn_detached(cmd):
+    # pylint: disable=consider-using-with
+    if shutil.which("systemd-run"):
+        try:
+            return subprocess.Popen(
+                ["systemd-run", "--user", "--scope", "--quiet"] + cmd
+            )
+        except OSError:
+            pass
+    return subprocess.Popen(cmd, start_new_session=True)
 
 
 class UpdatesTray(Gtk.Application):
@@ -164,13 +177,11 @@ class UpdatesTray(Gtk.Application):
 
     @staticmethod
     def launch_updater(*_args, **_kwargs):
-        # pylint: disable=consider-using-with
-        subprocess.Popen(["qubes-update-gui"])
+        _spawn_detached(["qubes-update-gui"])
 
     @staticmethod
     def launch_template_manager(*_args, **_kwargs):
-        # pylint: disable=consider-using-with
-        subprocess.Popen(["qvm-template-gui"])
+        _spawn_detached(["qvm-template-gui"])
 
     def check_vms_needing_update(self):
         self.vms_needing_update.clear()

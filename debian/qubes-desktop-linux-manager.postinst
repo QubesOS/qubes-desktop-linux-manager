@@ -2,9 +2,7 @@
 set -e
 
 if [ "$1" = "configure" ]; then
-    if [ -x /usr/lib/qubes/qubes-restart-widgets ]; then
-        /usr/lib/qubes/qubes-restart-widgets >/dev/null 2>&1 || :
-    fi
+    /usr/lib/qubes/qubes-restart-widgets
 fi
 
 #DEBHELPER#

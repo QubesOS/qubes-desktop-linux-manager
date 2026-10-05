@@ -1,8 +1,9 @@
-# pylint: disable=missing-docstring
+# pylint: disable=missing-docstring,redefined-outer-name,protected-access,import-error
 import os
 import stat
 import subprocess
 from pathlib import Path
+from qui.tray import updates
 
 SCRIPT_PATH = Path(__file__).resolve().parent.parent / "qubes-restart-widgets"
 
@@ -14,27 +15,31 @@ def make_executable(path: Path, content: str):
 
 def test_script_exists_and_is_executable():
     assert SCRIPT_PATH.exists()
+    assert os.access(SCRIPT_PATH, os.X_OK)
 
 
-def test_exit_cleanly_when_not_dom0_or_guivm(tmp_path):
-    # Fake root with no qubes-release or guivm
-    env = os.environ.copy()
+def test_exit_cleanly_when_not_systemd(tmp_path):
+    test_wrapper = tmp_path / "run_test.sh"
+    make_executable(
+        test_wrapper,
+        f"""#!/bin/sh
+sed -e 's|/run/systemd/system|{tmp_path}/nonexistent|g' \\
+  "{SCRIPT_PATH}" > "{tmp_path}/instrumented_script.sh"
+chmod +x "{tmp_path}/instrumented_script.sh"
+"{tmp_path}/instrumented_script.sh"
+""",
+    )
+
     res = subprocess.run(
-        ["/bin/sh", str(SCRIPT_PATH)],
-        env=env,
+        ["/bin/sh", str(test_wrapper)],
         capture_output=True,
         text=True,
         check=False,
     )
-    # On systems where /etc/qubes-release doesn't exist, it should exit 0
-    if not os.path.exists("/etc/qubes-release") and not os.path.exists(
-        "/var/run/qubes-service/guivm"
-    ):
-        assert res.returncode == 0
+    assert res.returncode == 0
 
 
-def test_restart_script_unit_logic(tmp_path):
-    # Create an isolated mock environment
+def test_root_restarts_widgets_for_active_users(tmp_path):
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
 
@@ -52,48 +57,40 @@ exit 0
     make_executable(
         mock_id,
         """#!/bin/sh
-case "$1" in
-    -u) echo "0" ;;
-    -un) echo "root" ;;
-    -nu) echo "user" ;;
-    *) echo "0" ;;
-esac
+echo 0
 """,
     )
 
-    mock_pgrep = bin_dir / "pgrep"
+    mock_loginctl = bin_dir / "loginctl"
     make_executable(
-        mock_pgrep,
+        mock_loginctl,
         """#!/bin/sh
-# By default, updater is not running (return 1)
-exit 1
+echo " 999 sysuser"
+echo " 1000 user1000"
+echo " 1001 user1001"
+echo " badline"
+exit 0
 """,
     )
 
-    # Mock runtime directory with /run/user/1000/systemd/private
     run_dir = tmp_path / "run"
-    run_user = run_dir / "user" / "1000" / "systemd"
-    run_user.mkdir(parents=True)
-    (run_user / "private").write_text("")
+    # user 1000 has active systemd socket
+    user_1000_sock = run_dir / "user" / "1000" / "systemd"
+    user_1000_sock.mkdir(parents=True)
+    (user_1000_sock / "private").write_text("")
+
+    # user 1001 has no active systemd socket (dir doesn't exist)
 
     systemd_system = run_dir / "systemd" / "system"
     systemd_system.mkdir(parents=True)
 
-    etc_dir = tmp_path / "etc"
-    etc_dir.mkdir()
-    (etc_dir / "qubes-release").write_text("Qubes release 4.2 (R4.2)")
-
-    # Run script with mocked paths
     test_wrapper = tmp_path / "run_test.sh"
     make_executable(
         test_wrapper,
         f"""#!/bin/sh
 export PATH="{bin_dir}:$PATH"
 
-# Override test checks by redefining filesystem lookups in a subshell
 sed \\
-  -e 's|/var/run/qubes-service/guivm|{tmp_path}/nonexistent|g' \\
-  -e 's|/etc/qubes-release|{etc_dir}/qubes-release|g' \\
   -e 's|/run/systemd/system|{systemd_system}|g' \\
   -e 's|/run/user|{run_dir}/user|g' \\
   "{SCRIPT_PATH}" > "{tmp_path}/instrumented_script.sh"
@@ -113,96 +110,17 @@ chmod +x "{tmp_path}/instrumented_script.sh"
 
     assert systemctl_log.exists(), "systemctl was not called"
     calls = systemctl_log.read_text()
-    assert "daemon-reload" in calls
-    assert "try-restart" in calls
+    assert "--user -M 1000@ daemon-reload" in calls
+    assert "--user -M 1000@ try-restart" in calls
     assert "qubes-widget@qui-domains.service" in calls
     assert "qubes-widget@qui-devices.service" in calls
     assert "qubes-widget@qui-disk-space.service" in calls
     assert "qubes-widget@qui-clipboard.service" in calls
     assert "qubes-widget@qui-updates.service" in calls
 
-
-def test_excludes_qui_updates_when_updater_active(tmp_path):
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-
-    systemctl_log = tmp_path / "systemctl.log"
-    mock_systemctl = bin_dir / "systemctl"
-    make_executable(
-        mock_systemctl,
-        f"""#!/bin/sh
-echo "$@" >> "{systemctl_log}"
-exit 0
-""",
-    )
-
-    mock_id = bin_dir / "id"
-    make_executable(
-        mock_id,
-        """#!/bin/sh
-case "$1" in
-    -u) echo "0" ;;
-    -un) echo "root" ;;
-    -nu) echo "user" ;;
-    *) echo "0" ;;
-esac
-""",
-    )
-
-    mock_pgrep = bin_dir / "pgrep"
-    make_executable(
-        mock_pgrep,
-        """#!/bin/sh
-# Return 0 (updater is active)
-exit 0
-""",
-    )
-
-    run_dir = tmp_path / "run"
-    run_user = run_dir / "user" / "1000" / "systemd"
-    run_user.mkdir(parents=True)
-    (run_user / "private").write_text("")
-
-    systemd_system = run_dir / "systemd" / "system"
-    systemd_system.mkdir(parents=True)
-
-    etc_dir = tmp_path / "etc"
-    etc_dir.mkdir()
-    (etc_dir / "qubes-release").write_text("Qubes release 4.2 (R4.2)")
-
-    test_wrapper = tmp_path / "run_test.sh"
-    make_executable(
-        test_wrapper,
-        f"""#!/bin/sh
-export PATH="{bin_dir}:$PATH"
-
-sed \\
-  -e 's|/var/run/qubes-service/guivm|{tmp_path}/nonexistent|g' \\
-  -e 's|/etc/qubes-release|{etc_dir}/qubes-release|g' \\
-  -e 's|/run/systemd/system|{systemd_system}|g' \\
-  -e 's|/run/user|{run_dir}/user|g' \\
-  "{SCRIPT_PATH}" > "{tmp_path}/instrumented_script.sh"
-
-chmod +x "{tmp_path}/instrumented_script.sh"
-"{tmp_path}/instrumented_script.sh"
-""",
-    )
-
-    res = subprocess.run(
-        ["/bin/sh", str(test_wrapper)],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    assert res.returncode == 0, f"Script failed: {res.stderr}"
-
-    assert systemctl_log.exists(), "systemctl was not called"
-    calls = systemctl_log.read_text()
-    assert "qubes-widget@qui-domains.service" in calls
-    assert "qubes-widget@qui-devices.service" in calls
-    assert "qubes-widget@qui-disk-space.service" in calls
-    assert "qubes-widget@qui-clipboard.service" in calls
-    assert "qubes-widget@qui-updates.service" not in calls
+    # Ensure system user (999) and user without private socket (1001) were skipped
+    assert "999@" not in calls
+    assert "1001@" not in calls
 
 
 def test_user_mode_restarts_own_widgets(tmp_path):
@@ -223,33 +141,13 @@ exit 0
     make_executable(
         mock_id,
         """#!/bin/sh
-case "$1" in
-    -u) echo "1000" ;;
-    -un) echo "user" ;;
-    *) echo "1000" ;;
-esac
-""",
-    )
-
-    mock_pgrep = bin_dir / "pgrep"
-    make_executable(
-        mock_pgrep,
-        """#!/bin/sh
-exit 1
+echo 1000
 """,
     )
 
     run_dir = tmp_path / "run"
-    run_user = run_dir / "user" / "1000" / "systemd"
-    run_user.mkdir(parents=True)
-    (run_user / "private").write_text("")
-
     systemd_system = run_dir / "systemd" / "system"
     systemd_system.mkdir(parents=True)
-
-    etc_dir = tmp_path / "etc"
-    etc_dir.mkdir()
-    (etc_dir / "qubes-release").write_text("Qubes release 4.2 (R4.2)")
 
     test_wrapper = tmp_path / "run_test.sh"
     make_executable(
@@ -258,10 +156,7 @@ exit 1
 export PATH="{bin_dir}:$PATH"
 
 sed \\
-  -e 's|/var/run/qubes-service/guivm|{tmp_path}/nonexistent|g' \\
-  -e 's|/etc/qubes-release|{etc_dir}/qubes-release|g' \\
   -e 's|/run/systemd/system|{systemd_system}|g' \\
-  -e 's|/run/user|{run_dir}/user|g' \\
   "{SCRIPT_PATH}" > "{tmp_path}/instrumented_script.sh"
 
 chmod +x "{tmp_path}/instrumented_script.sh"
@@ -281,33 +176,26 @@ chmod +x "{tmp_path}/instrumented_script.sh"
     calls = systemctl_log.read_text()
     assert "--user daemon-reload" in calls
     assert "--user try-restart" in calls
+    assert "-M" not in calls
     assert "qubes-widget@qui-domains.service" in calls
+    assert "qubes-widget@qui-updates.service" in calls
 
 
-def test_fallback_to_runuser_when_machine_fails(tmp_path):
+def test_root_continues_if_one_user_fails(tmp_path):
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
 
-    runuser_log = tmp_path / "runuser.log"
+    systemctl_log = tmp_path / "systemctl.log"
     mock_systemctl = bin_dir / "systemctl"
     make_executable(
         mock_systemctl,
-        """#!/bin/sh
-# Fails when -M is passed, simulating machined absent
+        f"""#!/bin/sh
+echo "$@" >> "{systemctl_log}"
 for arg in "$@"; do
-    if [ "$arg" = "-M" ]; then
+    if [ "$arg" = "1000@" ]; then
         exit 1
     fi
 done
-exit 0
-""",
-    )
-
-    mock_runuser = bin_dir / "runuser"
-    make_executable(
-        mock_runuser,
-        f"""#!/bin/sh
-echo "$@" >> "{runuser_log}"
 exit 0
 """,
     )
@@ -316,34 +204,28 @@ exit 0
     make_executable(
         mock_id,
         """#!/bin/sh
-case "$1" in
-    -u) echo "0" ;;
-    -un) echo "root" ;;
-    -nu) echo "user" ;;
-    *) echo "0" ;;
-esac
+echo 0
 """,
     )
 
-    mock_pgrep = bin_dir / "pgrep"
+    mock_loginctl = bin_dir / "loginctl"
     make_executable(
-        mock_pgrep,
+        mock_loginctl,
         """#!/bin/sh
-exit 1
+echo " 1000 user1000"
+echo " 1002 user1002"
+exit 0
 """,
     )
 
     run_dir = tmp_path / "run"
-    run_user = run_dir / "user" / "1000" / "systemd"
-    run_user.mkdir(parents=True)
-    (run_user / "private").write_text("")
+    for uid in ["1000", "1002"]:
+        user_sock = run_dir / "user" / uid / "systemd"
+        user_sock.mkdir(parents=True)
+        (user_sock / "private").write_text("")
 
     systemd_system = run_dir / "systemd" / "system"
     systemd_system.mkdir(parents=True)
-
-    etc_dir = tmp_path / "etc"
-    etc_dir.mkdir()
-    (etc_dir / "qubes-release").write_text("Qubes release 4.2 (R4.2)")
 
     test_wrapper = tmp_path / "run_test.sh"
     make_executable(
@@ -352,8 +234,6 @@ exit 1
 export PATH="{bin_dir}:$PATH"
 
 sed \\
-  -e 's|/var/run/qubes-service/guivm|{tmp_path}/nonexistent|g' \\
-  -e 's|/etc/qubes-release|{etc_dir}/qubes-release|g' \\
   -e 's|/run/systemd/system|{systemd_system}|g' \\
   -e 's|/run/user|{run_dir}/user|g' \\
   "{SCRIPT_PATH}" > "{tmp_path}/instrumented_script.sh"
@@ -371,7 +251,61 @@ chmod +x "{tmp_path}/instrumented_script.sh"
     )
     assert res.returncode == 0, f"Script failed: {res.stderr}"
 
-    assert runuser_log.exists(), "runuser was not called"
-    calls = runuser_log.read_text()
-    assert "-u user" in calls
-    assert "qubes-widget@qui-domains.service" in calls
+    assert systemctl_log.exists()
+    calls = systemctl_log.read_text()
+    assert "--user -M 1000@ daemon-reload" in calls
+    assert "--user -M 1000@ try-restart" not in calls
+    assert "--user -M 1002@ daemon-reload" in calls
+    assert "--user -M 1002@ try-restart" in calls
+
+
+def test_spawn_detached_uses_systemd_run(monkeypatch):
+    called = []
+
+    def mock_which(cmd):
+        if cmd == "systemd-run":
+            return "/bin/systemd-run"
+        return None
+
+    def mock_popen(args, **kwargs):
+        called.append((args, kwargs))
+
+    monkeypatch.setattr(updates.shutil, "which", mock_which)
+    monkeypatch.setattr(updates.subprocess, "Popen", mock_popen)
+
+    updates._spawn_detached(["qubes-update-gui"])
+    assert len(called) == 1
+    args, _kwargs = called[0]
+    assert args == ["systemd-run", "--user", "--scope", "--quiet", "qubes-update-gui"]
+
+
+def test_spawn_detached_fallback_when_systemd_run_absent(monkeypatch):
+    called = []
+
+    monkeypatch.setattr(updates.shutil, "which", lambda cmd: None)
+
+    def mock_popen(args, **kwargs):
+        called.append((args, kwargs))
+
+    monkeypatch.setattr(updates.subprocess, "Popen", mock_popen)
+
+    updates._spawn_detached(["qvm-template-gui"])
+    assert len(called) == 1
+    args, kwargs = called[0]
+    assert args == ["qvm-template-gui"]
+    assert kwargs.get("start_new_session") is True
+
+
+def test_launch_updater_and_template_manager(monkeypatch):
+    called = []
+
+    def mock_spawn(cmd):
+        called.append(cmd)
+
+    monkeypatch.setattr(updates, "_spawn_detached", mock_spawn)
+
+    updates.UpdatesTray.launch_updater()
+    assert called == [["qubes-update-gui"]]
+
+    updates.UpdatesTray.launch_template_manager()
+    assert called == [["qubes-update-gui"], ["qvm-template-gui"]]

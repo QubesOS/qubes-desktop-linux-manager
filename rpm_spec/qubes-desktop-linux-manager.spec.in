@@ -94,9 +94,7 @@ fi
 
 %posttrans
 gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
-if [ -x /usr/lib/qubes/qubes-restart-widgets ]; then
-    /usr/lib/qubes/qubes-restart-widgets &>/dev/null || :
-fi
+/usr/lib/qubes/qubes-restart-widgets
 
 %files
 /usr/bin/qubes-device-agent
