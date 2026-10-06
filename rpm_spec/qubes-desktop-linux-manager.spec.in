@@ -97,6 +97,7 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 
 %files
 /usr/bin/qubes-device-agent
+/usr/bin/qubes-dom0-copy-to-clipboard
 %defattr(-,root,root,-)
 
 %dir %{python3_sitelib}/qui-*.egg-info
@@ -150,6 +151,7 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 %{python3_sitelib}/qui/tools/__pycache__/*
 %{python3_sitelib}/qui/tools/__init__.py
 %{python3_sitelib}/qui/tools/qubes_device_agent.py
+%{python3_sitelib}/qui/tools/qubes_dom0_copy_to_clipboard.py
 
 %dir %{python3_sitelib}/qui/tray/
 %dir %{python3_sitelib}/qui/tray/__pycache__

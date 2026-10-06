@@ -38,6 +38,8 @@ import json
 import math
 import os
 import fcntl
+import time
+from typing import Optional
 import qubesadmin
 import qubesadmin.events
 
@@ -121,6 +123,71 @@ def appviewer_lock():
     finally:
         fcntl.flock(fd, fcntl.LOCK_UN)
         os.close(fd)
+
+
+def copy_to_global_clipboard(
+    text: str,
+    source: str = "dom0",
+    timestamp: Optional[int] = None,
+    buffer_size: int = 256_000,
+    cleared: bool = False,
+) -> int:
+    """Copy *text* to the Qubes global clipboard using GUI Protocol 1.8.
+
+    Acquires appviewer.lock and writes the four clipboard files in the order
+    required by the inotify protocol: DATA, XEVENT, METADATA, then SOURCE.
+    Writing SOURCE last guarantees qui-clipboard's IN_CLOSE_WRITE event only
+    fires after all other files are already fully flushed.
+
+    Args:
+        text: The UTF-8 text to place on the global clipboard.
+        source: The qube name reported as the clipboard source ("dom0").
+        timestamp: X event timestamp in milliseconds.  Defaults to wall-clock
+            time when not provided (safe for headless use without GTK).
+        buffer_size: Global clipboard buffer size in bytes (default 256 000).
+        cleared: Set True when wiping the clipboard rather than copying data.
+
+    Returns:
+        Number of UTF-8 bytes written to the clipboard.
+    """
+    if timestamp is None:
+        timestamp = int(time.time() * 1000)
+
+    raw_bytes = text.encode("utf-8")
+    sent_size = len(raw_bytes)
+
+    # Build valid JSON without a trailing comma before the closing brace.
+    metadata_content = (
+        "{\n"
+        f'  "vmname": "{source}",\n'
+        f'  "xevent_timestamp": {timestamp},\n'
+        f'  "successful": 1,\n'
+        f'  "copy_action": {0 if cleared else 1},\n'
+        '  "paste_action": 0,\n'
+        '  "malformed_request": 0,\n'
+        f'  "cleared": {1 if cleared else 0},\n'
+        '  "qrexec_clipboard": 0,\n'
+        f'  "sent_size": {sent_size},\n'
+        f'  "buffer_size": {buffer_size},\n'
+        '  "protocol_version_xside": 65544,\n'
+        '  "protocol_version_vmside": 65544\n'
+        "}\n"
+    )
+
+    with appviewer_lock():
+        # Write DATA first so the content is ready before the inotify event.
+        with open(DATA, "wb") as f_data:
+            f_data.write(raw_bytes)
+        with open(XEVENT, "w", encoding="ascii") as f_xevent:
+            f_xevent.write(str(timestamp))
+        with open(METADATA, "w", encoding="ascii") as f_meta:
+            f_meta.write(metadata_content)
+        # Writing SOURCE last triggers IN_CLOSE_WRITE on the inotify watch
+        # only after DATA and METADATA are guaranteed to be on disk.
+        with open(FROM, "w", encoding="ascii") as f_source:
+            f_source.write(f"{source}\n")
+
+    return sent_size
 
 
 class EventHandler(pyinotify.ProcessEvent):
@@ -426,37 +493,12 @@ class NotificationApp(Gtk.Application):
             return
 
         try:
-            with appviewer_lock():
-                with open(DATA, "w", encoding="utf-8") as contents:
-                    contents.write(text)
-                with open(FROM, "w", encoding="ascii") as source:
-                    source.write("dom0")
-                with open(XEVENT, "w", encoding="ascii") as timestamp:
-                    timestamp.write(str(Gtk.get_current_event_time()))
-                with open(METADATA, "w", encoding="ascii") as metadata:
-                    metadata.write(
-                        "{{\n"
-                        '"vmname":"dom0",\n'
-                        '"xevent_timestamp":{xevent_timestamp},\n'
-                        '"successful":1,\n'
-                        '"copy_action":1,\n'
-                        '"paste_action":0,\n'
-                        '"malformed_request":0,\n'
-                        '"cleared":0,\n'
-                        '"qrexec_clipboard":0,\n'
-                        '"sent_size":{sent_size},\n'
-                        '"buffer_size":{buffer_size},\n'
-                        '"protocol_version_xside":65544,\n'
-                        '"protocol_version_vmside":65544,\n'
-                        "}}\n".format(
-                            xevent_timestamp=str(Gtk.get_current_event_time()),
-                            sent_size=os.path.getsize(DATA),
-                            buffer_size="256000",
-                        )
-                    )
-            self.update_clipboard_contents(
-                "dom0", "{} bytes".format(os.path.getsize(DATA))
+            sent = copy_to_global_clipboard(
+                text,
+                source="dom0",
+                timestamp=Gtk.get_current_event_time(),
             )
+            self.update_clipboard_contents("dom0", "{} bytes".format(sent))
         except Exception:  # pylint: disable=broad-except
             self.send_notify(
                 _("Error while accessing global clipboard!"),
@@ -490,36 +532,17 @@ class NotificationApp(Gtk.Application):
 
     def clear_clipboard(self, *_args, **_kwargs):
         try:
-            with appviewer_lock():
-                with open(DATA, "w", encoding="utf-8") as contents:
-                    contents.truncate(0)
-                with open(FROM, "w", encoding="ascii") as source:
-                    source.write("dom0")
-                with open(XEVENT, "w", encoding="ascii") as timestamp:
-                    timestamp.write(str(Gtk.get_current_event_time()))
-                with open(METADATA, "w", encoding="ascii") as metadata:
-                    metadata.write(
-                        "{{\n"
-                        '"vmname":"dom0",\n'
-                        '"xevent_timestamp":{xevent_timestamp},\n'
-                        '"successful":1,\n'
-                        '"cleared":1,\n'
-                        '"copy_action":0,\n'
-                        '"paste_action":0,\n'
-                        '"malformed_request":0,\n'
-                        '"qrexec_clipboard":0,\n'
-                        '"sent_size":0,\n'
-                        '"buffer_size":{buffer_size},\n'
-                        '"protocol_version_xside":65544,\n'
-                        '"protocol_version_vmside":65544,\n'
-                        "}}\n".format(
-                            xevent_timestamp=str(Gtk.get_current_event_time()),
-                            buffer_size="256000",
-                        )
-                    )
-                self.update_clipboard_contents(
-                    vm=None, size=0, message=("Global clipboard cleared")
-                )
+            copy_to_global_clipboard(
+                "",
+                source="dom0",
+                timestamp=Gtk.get_current_event_time(),
+                cleared=True,
+            )
+            self.update_clipboard_contents(
+                vm=None,
+                size=0,
+                message="Global clipboard cleared",
+            )
         except Exception:  # pylint: disable=broad-except
             self.send_notify(_("Error while clearing global clipboard!"))
 
