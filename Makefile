@@ -51,6 +51,7 @@ install-autostart:
 	cp desktop/qubes-policy-editor-gui.desktop $(DESTDIR)/usr/share/applications/
 	install -d $(DESTDIR)/usr/lib/qubes -m 0755
 	install -m 0755 qui/devices/qubes-device-agent-autostart $(DESTDIR)/usr/lib/qubes/qubes-device-agent-autostart
+	install -m 0755 qui/qubes-restart-widgets $(DESTDIR)/usr/lib/qubes/qubes-restart-widgets
 
 install-lang:
 	mkdir -p $(DESTDIR)/usr/share/gtksourceview-4/language-specs/

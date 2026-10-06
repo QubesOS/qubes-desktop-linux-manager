@@ -1,0 +1,30 @@
+#!/bin/sh
+# Restart Qubes system tray widgets for active desktop user sessions upon package upgrade.
+
+set -e
+
+[ -d /run/systemd/system ] || exit 0
+
+widget_services="qubes-widget@qui-domains.service qubes-widget@qui-devices.service qubes-widget@qui-disk-space.service qubes-widget@qui-clipboard.service qubes-widget@qui-updates.service"
+
+if [ "$(id -u 2>/dev/null || echo 0)" -ne 0 ]; then
+    systemctl --user daemon-reload || :
+    systemctl --user try-restart $widget_services || :
+    exit 0
+fi
+
+command -v loginctl >/dev/null 2>&1 || exit 0
+
+loginctl list-users --no-legend | while read -r uid _unused; do
+    [ -n "$uid" ] || continue
+    case "$uid" in
+        ''|*[!0-9]*) continue ;;
+    esac
+    [ "$uid" -ge 1000 ] || continue
+    [ -e "/run/user/$uid/systemd/private" ] || continue
+
+    systemctl --user -M "$uid@" daemon-reload || continue
+    systemctl --user -M "$uid@" try-restart $widget_services || :
+done
+
+exit 0

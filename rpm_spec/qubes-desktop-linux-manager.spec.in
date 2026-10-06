@@ -94,6 +94,7 @@ fi
 
 %posttrans
 gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
+/usr/lib/qubes/qubes-restart-widgets
 
 %files
 /usr/bin/qubes-device-agent
@@ -103,6 +104,7 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 %{python3_sitelib}/qui-*.egg-info/*
 
 /usr/lib/qubes/qubes-device-agent-autostart
+/usr/lib/qubes/qubes-restart-widgets
 
 %dir %{python3_sitelib}/qui
 %dir %{python3_sitelib}/qui/__pycache__
