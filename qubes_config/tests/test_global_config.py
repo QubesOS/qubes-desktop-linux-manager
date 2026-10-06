@@ -371,3 +371,129 @@ def test_global_config_open_at(
         mock_print.assert_called()
 
     mock_error.assert_not_called()
+
+
+def click_spin_button(spin_button: Gtk.SpinButton, direction: Gtk.SpinType):
+    # GTK parses the text before each step
+    spin_button.update()
+    spin_button.spin(direction, 0)
+
+
+@patch("subprocess.check_output")
+@patch("qubes_config.global_config.global_config.show_error")
+def test_global_config_clipboard_size_plus(
+    mock_error, mock_subprocess, test_qapp, test_policy_manager, test_builder
+):
+    mock_subprocess.return_value = b""
+    app = GlobalConfig(test_qapp, test_policy_manager)
+    app.perform_setup()
+    assert test_builder
+
+    handler = app.handlers["clipboard"]
+    assert isinstance(handler, ClipboardHandler)
+    text_spin = handler.text_size_spin
+    image_spin = handler.image_size_spin
+    assert "64 kB" in text_spin.get_text()
+    assert "4 MiB" in image_spin.get_text()
+
+    # PyGObject reports handler exceptions to sys.excepthook
+    with patch("sys.excepthook") as mock_hook:
+        click_spin_button(text_spin, Gtk.SpinType.STEP_FORWARD)
+        image_spin.update()
+        image_text = image_spin.get_text()
+        click_spin_button(image_spin, Gtk.SpinType.STEP_FORWARD)
+
+    mock_hook.assert_not_called()
+    assert text_spin.get_text() == "65 kB"
+    assert "4 MiB" in image_text
+    assert image_spin.get_text() == "5 MiB"
+
+    with patch(
+        "qubes_config.global_config.basics_handler.apply_feature_change"
+    ) as mock_apply:
+        handler.save()
+    mock_apply.assert_any_call(
+        test_qapp.domains["dom0"], "gui-default-max-clipboard-size", 65000
+    )
+    mock_apply.assert_any_call(
+        test_qapp.domains["dom0"],
+        "gui-default-max-clipboard-image-size",
+        5 * 1024 * 1024,
+    )
+
+    mock_error.assert_not_called()
+
+
+@patch("subprocess.check_output")
+@patch("qubes_config.global_config.global_config.show_error")
+def test_global_config_clipboard_size_minus(
+    mock_error, mock_subprocess, test_qapp, test_policy_manager, test_builder
+):
+    mock_subprocess.return_value = b""
+    app = GlobalConfig(test_qapp, test_policy_manager)
+    app.perform_setup()
+    assert test_builder
+
+    handler = app.handlers["clipboard"]
+    assert isinstance(handler, ClipboardHandler)
+
+    for spin_button, decreased in (
+        (handler.text_size_spin, "63 kB"),
+        (handler.image_size_spin, "3 MiB"),
+    ):
+        adjustment = spin_button.get_adjustment()
+        assert adjustment.get_value() > adjustment.get_lower()
+        click_spin_button(spin_button, Gtk.SpinType.STEP_BACKWARD)
+        assert spin_button.get_text() == decreased
+
+    with patch(
+        "qubes_config.global_config.basics_handler.apply_feature_change"
+    ) as mock_apply:
+        handler.save()
+    mock_apply.assert_any_call(
+        test_qapp.domains["dom0"], "gui-default-max-clipboard-size", 63000
+    )
+    mock_apply.assert_any_call(
+        test_qapp.domains["dom0"],
+        "gui-default-max-clipboard-image-size",
+        3 * 1024 * 1024,
+    )
+
+    mock_error.assert_not_called()
+
+
+@patch("subprocess.check_output")
+@patch("qubes_config.global_config.global_config.show_error")
+def test_global_config_clipboard_alignment(
+    mock_error, mock_subprocess, test_qapp, test_policy_manager, test_builder
+):
+    mock_subprocess.return_value = b""
+    app = GlobalConfig(test_qapp, test_policy_manager)
+    app.perform_setup()
+    assert test_builder
+
+    handler = app.handlers["clipboard"]
+    notebook = app.main_notebook
+    for page_num in range(notebook.get_n_pages()):
+        if notebook.get_nth_page(page_num).get_name() == "clipboard":
+            notebook.set_current_page(page_num)
+    app.main_window.show()
+
+    widgets = (
+        handler.copy_combo,
+        handler.paste_combo,
+        handler.text_size_spin,
+        handler.image_size_spin,
+    )
+    minimum = app.main_window.get_preferred_width().minimum_width
+    # 921 px is the width on a 1024 px screen
+    for width in (minimum, 921, 1000, 1100, 1280):
+        allocation = app.main_window.get_allocation()
+        allocation.width = max(width, minimum)
+        app.main_window.size_allocate(allocation)
+        starts = {
+            widget.translate_coordinates(app.main_window, 0, 0)[0] for widget in widgets
+        }
+        assert len(starts) == 1, (width, starts)
+
+    mock_error.assert_not_called()
