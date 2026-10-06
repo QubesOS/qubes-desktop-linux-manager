@@ -54,7 +54,11 @@ from .policy_rules import (
 from .policy_manager import PolicyManager
 from .updates_handler import UpdatesHandler
 from .usb_devices import DevicesHandler
-from .basics_handler import BasicSettingsHandler, FeatureHandler
+from .basics_handler import (
+    BasicSettingsHandler,
+    FeatureHandler,
+    SizeFeatureHandler,
+)
 from .thisdevice_handler import ThisDeviceHandler
 from .device_attachments import DevAttachmentHandler
 from .disposables import DisposablesHandler
@@ -103,6 +107,14 @@ class ClipboardHandler(PageHandler):
 
     COPY_FEATURE = "gui-default-secure-copy-sequence"
     PASTE_FEATURE = "gui-default-secure-paste-sequence"
+    TEXT_SIZE_FEATURE = "gui-default-max-clipboard-size"
+    IMAGE_SIZE_FEATURE = "gui-default-max-clipboard-image-size"
+
+    # bounds and defaults of the GUI protocol, see qubes-gui-protocol.h
+    TEXT_SIZE_MAX = 256000
+    TEXT_SIZE_DEFAULT = 64000
+    IMAGE_SIZE_MAX = 16 * 1024 * 1024
+    IMAGE_SIZE_DEFAULT = 4 * 1024 * 1024
 
     def __init__(
         self,
@@ -119,6 +131,18 @@ class ClipboardHandler(PageHandler):
         )
         self.paste_combo: Gtk.ComboBoxText = gtk_builder.get_object(
             "clipboard_paste_combo"
+        )
+        self.text_size_spin: Gtk.SpinButton = gtk_builder.get_object(
+            "clipboard_text_size_spin"
+        )
+        self.text_size_reset: Gtk.Button = gtk_builder.get_object(
+            "clipboard_text_size_reset"
+        )
+        self.image_size_spin: Gtk.SpinButton = gtk_builder.get_object(
+            "clipboard_image_size_spin"
+        )
+        self.image_size_reset: Gtk.Button = gtk_builder.get_object(
+            "clipboard_image_size_reset"
         )
 
         self.handlers: List[Union[PolicyHandler, FeatureHandler]] = [
@@ -164,6 +188,28 @@ qubes.ClipboardPaste * @anyvm @anyvm ask\n""",
                     _("Win+V"): "Mod4-v",
                 },
                 readable_name=_("Global Clipboard paste shortcut"),
+            ),
+            SizeFeatureHandler(
+                trait_holder=self.vm,
+                trait_name=self.TEXT_SIZE_FEATURE,
+                spin_button=self.text_size_spin,
+                reset_button=self.text_size_reset,
+                unit_name="kB",
+                unit_factor=1000,
+                maximum=self.TEXT_SIZE_MAX,
+                default=self.TEXT_SIZE_DEFAULT,
+                readable_name=_("Global Clipboard text size limit"),
+            ),
+            SizeFeatureHandler(
+                trait_holder=self.vm,
+                trait_name=self.IMAGE_SIZE_FEATURE,
+                spin_button=self.image_size_spin,
+                reset_button=self.image_size_reset,
+                unit_name="MiB",
+                unit_factor=1024 * 1024,
+                maximum=self.IMAGE_SIZE_MAX,
+                default=self.IMAGE_SIZE_DEFAULT,
+                readable_name=_("Global Clipboard image size limit"),
             ),
         ]
 

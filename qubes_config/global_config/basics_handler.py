@@ -211,6 +211,123 @@ class FeatureHandler(AbstractTraitHolder):
         return self.model
 
 
+class SizeFeatureHandler(AbstractTraitHolder, TraitSelector):
+    """
+    A size feature as one spin button in a fixed unit, plus a reset button.
+    """
+
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    def __init__(
+        self,
+        trait_holder: Any,
+        trait_name: str,
+        spin_button: Gtk.SpinButton,
+        reset_button: Gtk.Button,
+        unit_name: str,
+        unit_factor: int,
+        maximum: int,
+        default: int,
+        readable_name: str,
+    ):
+        self.trait_holder = trait_holder
+        self.trait_name = trait_name
+        self.spin_button = spin_button
+        self.reset_button = reset_button
+        self.unit_name = unit_name
+        self.unit_factor = unit_factor
+        self.maximum = maximum
+        self.readable_name = readable_name
+        self.default_text = _("default ({})").format(self._format(default))
+
+        reset_button.set_tooltip_text(
+            _("Restore the default limit ({})").format(self._format(default))
+        )
+
+        adjustment = Gtk.Adjustment()
+        adjustment.configure(0, 0, maximum // unit_factor, 1, 10, 0)
+        spin_button.configure(adjustment, 1, 0)
+        spin_button.set_numeric(False)
+
+        spin_button.connect("output", self._on_output)
+        spin_button.connect("input", self._on_input)
+        spin_button.connect("value-changed", self._update_reset)
+        reset_button.connect("clicked", self.reset_to_default)
+
+        self.initial_value = self.get_current_value()
+        self._show(self.initial_value)
+        self.initial_shown = self.get_selected()
+
+    def _format(self, value: int) -> str:
+        if value < self.unit_factor:
+            return "{} B".format(value)
+        amount = "{:.1f}".format(value / self.unit_factor)
+        return "{} {}".format(amount.rstrip("0").rstrip("."), self.unit_name)
+
+    def _on_output(self, spin_button: Gtk.SpinButton) -> bool:
+        value = int(spin_button.get_adjustment().get_value())
+        if value == 0:
+            spin_button.set_text(self.default_text)
+        else:
+            spin_button.set_text("{} {}".format(value, self.unit_name))
+        return True
+
+    def _on_input(self, spin_button: Gtk.SpinButton, *_args):
+        text = spin_button.get_text().strip()
+        if not text or text == self.default_text:
+            return True, 0.0
+        try:
+            return True, float(text.split()[0].replace(",", "."))
+        except ValueError:
+            return Gtk.INPUT_ERROR, 0.0
+
+    def _show(self, value: Optional[int]):
+        if value is None:
+            self.spin_button.set_value(0)
+        else:
+            self.spin_button.set_value(max(1, round(value / self.unit_factor)))
+        self._update_reset()
+
+    def _update_reset(self, *_args):
+        self.reset_button.set_sensitive(self.spin_button.get_value() != 0)
+
+    def reset_to_default(self, *_args):
+        self.spin_button.set_value(0)
+
+    def get_readable_description(self) -> str:
+        return self.readable_name
+
+    def get_current_value(self) -> Optional[int]:
+        value = get_feature(self.trait_holder, self.trait_name, None)
+        try:
+            return int(value) if value is not None else None
+        except ValueError:
+            return None
+
+    def get_selected(self) -> Optional[int]:
+        amount = int(self.spin_button.get_value())
+        if amount == 0:
+            return None
+        return min(self.maximum, amount * self.unit_factor)
+
+    def is_changed(self) -> bool:
+        return self.get_selected() != self.initial_shown
+
+    def reset(self):
+        self._show(self.initial_value)
+
+    def update_initial(self):
+        self.initial_shown = self.get_selected()
+
+    def update_current_value(self):
+        if self.is_changed():
+            apply_feature_change(
+                self.trait_holder, self.trait_name, self.get_selected()
+            )
+
+    def get_model(self) -> TraitSelector:
+        return self
+
+
 class QMemManHelper:
     """Helper class to handle the ugliness of managing qmemman config."""
 
@@ -241,7 +358,9 @@ class QMemManHelper:
         """Wants a dict of 'vm-min-mem': value in MiB and
         'dom0-mem-boost': value in MiB"""
         # qmemman settings
-        text_dict = {key: str(int(value)) + "MiB" for key, value in values_dict.items()}
+        text_dict = {
+            key: str(int(value)) + "MiB" for key, value in values_dict.items()
+        }
 
         assert (
             len(text_dict) == 2
@@ -410,7 +529,9 @@ class KernelHolder(AbstractTraitHolder):
         )
 
     def _get_kernel_options(self) -> Dict[str, str]:
-        kernels = [kernel.vid for kernel in self.qapp.pools["linux-kernel"].volumes]
+        kernels = [
+            kernel.vid for kernel in self.qapp.pools["linux-kernel"].volumes
+        ]
         kernels = sorted(kernels, key=KernelVersion)
         kernels_dict = {kernel: kernel for kernel in kernels}
         kernels_dict["(none)"] = None
@@ -545,7 +666,9 @@ class BasicSettingsHandler(PageHandler):
                 is_bool=False,
             )
         )
-        self.handlers.append(KernelHolder(qapp=self.qapp, widget=self.kernel_combo))
+        self.handlers.append(
+            KernelHolder(qapp=self.qapp, widget=self.kernel_combo)
+        )
 
         self.handlers.append(MemoryHandler(gtk_builder))
 
