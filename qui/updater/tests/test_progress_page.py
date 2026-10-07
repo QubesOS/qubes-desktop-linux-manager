@@ -34,32 +34,49 @@ from qui.updater.progress_page import ProgressPage, QubeUpdateDetails
 from qui.updater.tests.conftest import mock_settings, expected_row, run_coroutine
 from qui.updater.utils import ListWrapper, UpdateStatus
 
+# pylint: disable=redefined-outer-name
 
-@patch("asyncio.get_running_loop")
-def test_init_update(
-    mock_get_running_loop,
+
+@pytest.fixture
+def mock_callback():
+    return Mock()
+
+
+@pytest.fixture
+def progress_page(
     real_builder,
-    test_qapp,
+    mock_label,
     mock_next_button,
     mock_cancel_button,
-    mock_label,
-    mock_tree_view,
-    all_vms_list,
+    mock_callback,
 ):
-    sentinel = object()
-    mock_loop = Mock()
-    mock_loop.create_task.return_value = sentinel
-    mock_get_running_loop.return_value = mock_loop
-    mock_log = Mock()
-    mock_callback = Mock()
-    sut = ProgressPage(
+    """Fixture providing an instantiated ProgressPage with standard mocks."""
+    return ProgressPage(
         real_builder,
-        mock_log,
+        Mock(),
         mock_label,
         mock_next_button,
         mock_cancel_button,
         mock_callback,
     )
+
+
+@patch("asyncio.get_running_loop")
+def test_init_update(
+    mock_get_running_loop,
+    progress_page,
+    mock_next_button,
+    mock_cancel_button,
+    mock_label,
+    mock_tree_view,
+    all_vms_list,
+    mock_callback,
+):
+    sentinel = object()
+    mock_loop = Mock()
+    mock_loop.create_task.return_value = sentinel
+    mock_get_running_loop.return_value = mock_loop
+    sut = progress_page
 
     sut.progress_list = mock_tree_view
     # avoid creating a real (never-awaited) coroutine object
@@ -84,23 +101,14 @@ def test_init_update(
 @patch("gi.repository.GLib.idle_add")
 def test_perform_update(
     idle_add,
-    real_builder,
+    progress_page,
     mock_next_button,
     mock_cancel_button,
     mock_label,
     updateable_vms_list,
+    mock_callback,
 ):
-    mock_log = Mock()
-    mock_callback = Mock()
-    sut = ProgressPage(
-        real_builder,
-        mock_log,
-        mock_label,
-        mock_next_button,
-        mock_cancel_button,
-        mock_callback,
-    )
-
+    sut = progress_page
     sut.vms_to_update = updateable_vms_list
 
     class VMConsumer:
@@ -133,24 +141,13 @@ def test_perform_update(
 def test_update_templates(
     idle_add,
     interrupted,
-    real_builder,
+    progress_page,
     updateable_vms_list,
-    mock_next_button,
-    mock_cancel_button,
-    mock_label,
     mock_text_view,
     mock_settings,
+    mock_callback,
 ):
-    mock_log = Mock()
-    mock_callback = Mock()
-    sut = ProgressPage(
-        real_builder,
-        mock_log,
-        mock_label,
-        mock_next_button,
-        mock_cancel_button,
-        mock_callback,
-    )
+    sut = progress_page
 
     sut.do_update_selected = AsyncMock()
     total_progress = []
@@ -180,13 +177,11 @@ def test_update_templates(
 
 
 def test_do_update_selected(
-    real_builder,
+    progress_page,
     test_qapp,
-    mock_next_button,
-    mock_cancel_button,
-    mock_label,
     mock_list_store,
     mock_settings,
+    mock_callback,
 ):
     class MockProc:
         def __init__(self):
@@ -199,16 +194,7 @@ def test_do_update_selected(
     mock_proc = MockProc()
     mock_create = AsyncMock(return_value=mock_proc)
 
-    mock_log = Mock()
-    mock_callback = Mock()
-    sut = ProgressPage(
-        real_builder,
-        mock_log,
-        mock_label,
-        mock_next_button,
-        mock_cancel_button,
-        mock_callback,
-    )
+    sut = progress_page
     sut.read_stderrs = AsyncMock()
     sut.read_stdouts = AsyncMock()
 
@@ -240,22 +226,11 @@ def test_do_update_selected(
 
 
 def test_get_update_summary(
-    real_builder,
-    mock_next_button,
-    mock_cancel_button,
-    mock_label,
+    progress_page,
     updateable_vms_list,
+    mock_callback,
 ):
-    mock_log = Mock()
-    mock_callback = Mock()
-    sut = ProgressPage(
-        real_builder,
-        mock_log,
-        mock_label,
-        mock_next_button,
-        mock_cancel_button,
-        mock_callback,
-    )
+    sut = progress_page
 
     updateable_vms_list[0].set_status(UpdateStatus.NoUpdatesFound)
     updateable_vms_list[1].set_status(UpdateStatus.Error)
@@ -286,6 +261,7 @@ def test_set_active_row(real_builder, updateable_vms_list):
     assert sut.progress_scrolled_window.get_visible()
     assert sut.progress_textview.get_visible()
     assert sut.copy_button.get_visible()
+    assert not sut.restart_button.get_visible()
 
 
 def test_set_active_row_none(real_builder):
@@ -300,3 +276,191 @@ def test_set_active_row_none(real_builder):
     assert not sut.progress_scrolled_window.get_visible()
     assert not sut.progress_textview.get_visible()
     assert not sut.copy_button.get_visible()
+    assert not sut.restart_button.get_visible()
+
+
+def test_set_active_row_error_state(real_builder, updateable_vms_list):
+    sut = QubeUpdateDetails(real_builder)
+    row = updateable_vms_list[0]
+    row.set_status(UpdateStatus.Error)
+    sut.set_active_row(row)
+
+    assert sut.copy_button.get_visible()
+    assert sut.restart_button.get_visible()
+
+
+def test_set_active_row_cancelled_state(real_builder, updateable_vms_list):
+    sut = QubeUpdateDetails(real_builder)
+    row = updateable_vms_list[0]
+    row.set_status(UpdateStatus.Cancelled)
+    sut.set_active_row(row)
+
+    assert sut.copy_button.get_visible()
+    assert sut.restart_button.get_visible()
+
+
+def test_on_restart_clicked(real_builder, updateable_vms_list):
+    mock_restart = Mock()
+    sut = QubeUpdateDetails(real_builder, restart_callback=mock_restart)
+    row = updateable_vms_list[0]
+    row.set_status(UpdateStatus.Error)
+    sut.set_active_row(row)
+    assert sut.restart_button.get_visible()
+
+    sut.on_restart_clicked(sut.restart_button)
+
+    assert not sut.restart_button.get_visible()
+    mock_restart.assert_called_once_with(row)
+
+
+def test_restart_qube_update(
+    progress_page,
+    updateable_vms_list,
+    mock_next_button,
+    mock_label,
+    mock_settings,
+):
+    sut = progress_page
+    sut.vms_to_update = updateable_vms_list
+    sut.settings = mock_settings
+
+    row = updateable_vms_list[0]
+    row.set_status(UpdateStatus.Error)
+    sut.update_details.set_active_row(row)
+    assert sut.update_details.restart_button.get_visible()
+
+    sut.do_update_selected = AsyncMock()
+
+    task = sut.restart_qube_update(row)
+    assert not sut.update_details.restart_button.get_visible()
+    assert row.status == UpdateStatus.InProgress
+    assert mock_label.text == "Update in progress..."
+    assert not mock_next_button.sensitive
+
+    run_coroutine(task)
+    sut.do_update_selected.assert_called_once()
+    assert sut.do_update_selected.call_args[0][0] == {row.name: row}
+
+
+def test_restart_qube_update_while_already_in_progress(
+    progress_page,
+    updateable_vms_list,
+    mock_settings,
+):
+    sut = progress_page
+    sut.vms_to_update = updateable_vms_list
+    sut.settings = mock_settings
+
+    row = updateable_vms_list[0]
+    row.set_status(UpdateStatus.InProgress)
+
+    res = sut.restart_qube_update(row)
+    assert res is None
+
+
+@patch("gi.repository.GLib.idle_add")
+def test_restart_resets_exit_triggered_and_reshows_cancel(
+    idle_add,
+    progress_page,
+    updateable_vms_list,
+    mock_cancel_button,
+    mock_settings,
+):
+    sut = progress_page
+    sut.vms_to_update = updateable_vms_list
+    sut.settings = mock_settings
+    sut.exit_triggered = True
+
+    row = updateable_vms_list[0]
+    row.set_status(UpdateStatus.Error)
+    sut.do_update_selected = AsyncMock()
+
+    task = sut.restart_qube_update(row)
+    assert not sut.exit_triggered
+    idle_add.assert_has_calls(
+        [
+            call(mock_cancel_button.set_label, "_Cancel updates"),
+            call(mock_cancel_button.set_sensitive, True),
+            call(mock_cancel_button.show),
+        ],
+        any_order=True,
+    )
+    run_coroutine(task)
+
+
+def test_restart_updates_task_and_gathers_tasks(
+    progress_page,
+    updateable_vms_list,
+    mock_settings,
+):
+    sut = progress_page
+    sut.vms_to_update = updateable_vms_list
+    sut.settings = mock_settings
+
+    row1 = updateable_vms_list[0]
+    row2 = updateable_vms_list[1]
+    row1.set_status(UpdateStatus.Error)
+    row2.set_status(UpdateStatus.Error)
+
+    sut.do_update_selected = AsyncMock()
+
+    task1 = sut.restart_qube_update(row1)
+    assert sut.update_task is task1
+
+    task2 = sut.restart_qube_update(row2)
+    assert sut.update_task is not task2
+    assert not sut.update_task.done()
+
+    run_coroutine(sut.update_task)
+    assert task1.done()
+    assert task2.done()
+
+
+@patch("gi.repository.GLib.idle_add")
+def test_restart_recovers_in_progress_row_on_cancel(
+    idle_add,
+    progress_page,
+    updateable_vms_list,
+    mock_settings,
+):
+    sut = progress_page
+    sut.vms_to_update = updateable_vms_list
+    sut.settings = mock_settings
+
+    row = updateable_vms_list[0]
+    row.set_status(UpdateStatus.Error)
+
+    async def fake_update(_rows, _settings):
+        sut.exit_triggered = True
+
+    sut.do_update_selected = fake_update
+
+    task = sut.restart_qube_update(row)
+    run_coroutine(task)
+
+    idle_add.assert_any_call(row.set_status, UpdateStatus.Cancelled)
+
+
+@patch("gi.repository.GLib.idle_add")
+def test_restart_recovers_in_progress_row_on_error_retcode(
+    idle_add,
+    progress_page,
+    updateable_vms_list,
+    mock_settings,
+):
+    sut = progress_page
+    sut.vms_to_update = updateable_vms_list
+    sut.settings = mock_settings
+
+    row = updateable_vms_list[0]
+    row.set_status(UpdateStatus.Error)
+
+    async def fake_update(_rows, _settings):
+        sut.retcode = 1
+
+    sut.do_update_selected = fake_update
+
+    task = sut.restart_qube_update(row)
+    run_coroutine(task)
+
+    idle_add.assert_any_call(row.set_status, UpdateStatus.Error)
