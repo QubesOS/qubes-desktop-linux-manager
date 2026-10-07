@@ -317,13 +317,10 @@ class SummaryPage:
         """
         Try to restart vms.
         """
-        shutdowns = await self.shutdown_domains(to_restart)
-
-        # restart the qubes that were successfully shut down
-        failed = await qubesadmin.utils.start(domains=shutdowns)
+        failed = await qubesadmin.utils.restart(domains=to_restart, force=True)
         for qube, exc in failed.items():
-            self.err += qube.name + " cannot start: " + str(exc) + "\n"
-            self.log.error("Cannot start %s: %s", qube.name, str(exc))
+            self.err += qube.name + " cannot restart: " + str(exc) + "\n"
+            self.log.error("Cannot restart %s: %s", qube.name, str(exc))
             self.status = RestartStatus.ERROR_APP_DOWN
 
     async def _show_status_dialog(self, show_only_error: bool):
