@@ -65,6 +65,7 @@ _ = t.gettext
 from .utils import run_asyncio_and_show_errors
 
 DATA = "/var/run/qubes/qubes-clipboard.bin"
+DATA_IMAGE = "/var/run/qubes/qubes-clipboard.bin.image"
 METADATA = "/var/run/qubes/qubes-clipboard.bin.metadata"
 FROM = "/var/run/qubes/qubes-clipboard.bin.source"
 FROM_DIR = "/var/run/qubes/"
@@ -72,6 +73,9 @@ XEVENT = "/var/run/qubes/qubes-clipboard.bin.xevent"
 APPVIEWER_LOCK = "/var/run/qubes/appviewer.lock"
 COPY_FEATURE = "gui-default-secure-copy-sequence"
 PASTE_FEATURE = "gui-default-secure-paste-sequence"
+
+DATA_TYPE_TEXT = 0
+DATA_TYPE_IMAGE = 1
 
 # Defining all messages in one place for easy modification
 ERROR_MALFORMED_DATA = _("Malformed clipboard data received from qube: <b>{vmname}</b>")
@@ -98,6 +102,11 @@ WARNING_EMPTY_CLIPBOARD = _(
 MSG_COPY_SUCCESS = _(
     "Clipboard contents fetched from qube: <b>'{vmname}'</b>\n"
     "Copied <b>{size}</b> to the global clipboard.\n"
+    "<small>Press {shortcut} in qube to paste to local clipboard.</small>"
+)
+MSG_COPY_IMAGE_SUCCESS = _(
+    "Clipboard image fetched from qube: <b>'{vmname}'</b>\n"
+    "Copied a <b>{dimensions}</b> image ({size}) to the global clipboard.\n"
     "<small>Press {shortcut} in qube to paste to local clipboard.</small>"
 )
 MSG_WIPED = _("\n<small>Global clipboard has been wiped</small>")
@@ -133,6 +142,7 @@ class EventHandler(pyinotify.ProcessEvent):
     def _copy(self, metadata: dict) -> None:
         """Sends Copy notification via Gio.Notification"""
         size = clipboard_formatted_size(metadata["sent_size"])
+        label_size = size
 
         if metadata["malformed_request"]:
             body = ERROR_MALFORMED_DATA.format(vmname=metadata["vmname"])
@@ -163,6 +173,18 @@ class EventHandler(pyinotify.ProcessEvent):
         elif not metadata["successful"]:
             body = ERROR_ON_COPY.format(vmname=metadata["vmname"])
             icon = "dialog-error"
+        elif metadata.get("data_type") == DATA_TYPE_IMAGE:
+            dimensions = clipboard_image_dimensions(metadata)
+            body = MSG_COPY_IMAGE_SUCCESS.format(
+                vmname=metadata["vmname"],
+                dimensions=dimensions,
+                size=size,
+                shortcut=self.gtk_app.paste_shortcut,
+            )
+            label_size = _("{dimensions} image, {size}").format(
+                dimensions=dimensions, size=size
+            )
+            icon = "dialog-information"
         else:
             body = MSG_COPY_SUCCESS.format(
                 vmname=metadata["vmname"],
@@ -175,7 +197,7 @@ class EventHandler(pyinotify.ProcessEvent):
             body += MSG_WIPED
 
         self.gtk_app.update_clipboard_contents(
-            metadata["vmname"], size, message=body, icon=icon
+            metadata["vmname"], label_size, message=body, icon=icon
         )
 
     def _paste(self, metadata: dict) -> None:
@@ -202,11 +224,17 @@ class EventHandler(pyinotify.ProcessEvent):
         """Reacts to modifications of the FROM file"""
         metadata = {}
         with appviewer_lock():
-            if (
-                os.path.isfile(METADATA)
-                and os.path.isfile(DATA)
-                and os.path.getmtime(METADATA) >= os.path.getmtime(DATA)
-            ):
+            # an image copy leaves the text file empty or absent, so compare
+            # the metadata against whichever data file is actually there
+            data_mtime = max(
+                (
+                    os.path.getmtime(path)
+                    for path in (DATA, DATA_IMAGE)
+                    if os.path.isfile(path)
+                ),
+                default=0.0,
+            )
+            if os.path.isfile(METADATA) and os.path.getmtime(METADATA) >= data_mtime:
                 # parse JSON .metadata file if qubes-guid protocol 1.8 or newer
                 try:
                     with open(METADATA, "r", encoding="ascii") as metadata_file:
@@ -257,6 +285,12 @@ class EventHandler(pyinotify.ProcessEvent):
         if event.pathname == FROM:
             self.process_IN_CLOSE_WRITE()
             self.gtk_app.setup_watcher()
+
+
+def clipboard_image_dimensions(metadata: dict) -> str:
+    return "{}x{}".format(
+        metadata.get("image_width", 0), metadata.get("image_height", 0)
+    )
 
 
 def clipboard_formatted_size(size: int = None) -> str:
@@ -420,48 +454,88 @@ class NotificationApp(Gtk.Application):
     def copy_dom0_clipboard(self, *_args, **_kwargs):
         clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         text = clipboard.wait_for_text()
+        pixbuf = None if text else clipboard.wait_for_image()
 
-        if not text:
+        if not text and not pixbuf:
             self.send_notify(_("Dom0 clipboard is empty!"), icon="dialog-information")
             return
 
         try:
             with appviewer_lock():
-                with open(DATA, "w", encoding="utf-8") as contents:
-                    contents.write(text)
+                if pixbuf:
+                    if not pixbuf.get_has_alpha():
+                        pixbuf = pixbuf.add_alpha(False, 0, 0, 0)
+                    width, height = pixbuf.get_width(), pixbuf.get_height()
+                    rowstride, pixels = pixbuf.get_rowstride(), pixbuf.get_pixels()
+                    rgba = b"".join(
+                        pixels[y * rowstride : y * rowstride + width * 4]
+                        for y in range(height)
+                    )
+                    with open(DATA, "w", encoding="utf-8") as contents:
+                        contents.truncate(0)
+                    with open(DATA_IMAGE, "wb") as image:
+                        image.write(rgba)
+                    sent_size = len(rgba)
+                else:
+                    with open(DATA, "w", encoding="utf-8") as contents:
+                        contents.write(text)
+                    if os.path.exists(DATA_IMAGE):
+                        with open(DATA_IMAGE, "wb") as image:
+                            image.truncate(0)
+                    width, height = 0, 0
+                    sent_size = os.path.getsize(DATA)
                 with open(FROM, "w", encoding="ascii") as source:
                     source.write("dom0")
                 with open(XEVENT, "w", encoding="ascii") as timestamp:
                     timestamp.write(str(Gtk.get_current_event_time()))
-                with open(METADATA, "w", encoding="ascii") as metadata:
-                    metadata.write(
-                        "{{\n"
-                        '"vmname":"dom0",\n'
-                        '"xevent_timestamp":{xevent_timestamp},\n'
-                        '"successful":1,\n'
-                        '"copy_action":1,\n'
-                        '"paste_action":0,\n'
-                        '"malformed_request":0,\n'
-                        '"cleared":0,\n'
-                        '"qrexec_clipboard":0,\n'
-                        '"sent_size":{sent_size},\n'
-                        '"buffer_size":{buffer_size},\n'
-                        '"protocol_version_xside":65544,\n'
-                        '"protocol_version_vmside":65544,\n'
-                        "}}\n".format(
-                            xevent_timestamp=str(Gtk.get_current_event_time()),
-                            sent_size=os.path.getsize(DATA),
-                            buffer_size="256000",
-                        )
-                    )
-            self.update_clipboard_contents(
-                "dom0", "{} bytes".format(os.path.getsize(DATA))
-            )
+                self.write_metadata(
+                    successful=1,
+                    copy_action=1,
+                    cleared=0,
+                    sent_size=sent_size,
+                    data_type=DATA_TYPE_IMAGE if pixbuf else DATA_TYPE_TEXT,
+                    image_width=width,
+                    image_height=height,
+                )
+            if pixbuf:
+                self.update_clipboard_contents(
+                    "dom0", "{}x{} image, {} bytes".format(width, height, sent_size)
+                )
+            else:
+                self.update_clipboard_contents("dom0", "{} bytes".format(sent_size))
         except Exception:  # pylint: disable=broad-except
             self.send_notify(
                 _("Error while accessing global clipboard!"),
                 icon="dialog-error",
             )
+
+    @staticmethod
+    def write_metadata(**values):
+        """
+        Write the dom0 side of qubes-clipboard.bin.metadata.
+        """
+        fields = {
+            "xevent_timestamp": Gtk.get_current_event_time(),
+            "successful": 0,
+            "copy_action": 0,
+            "paste_action": 0,
+            "malformed_request": 0,
+            "oversized_request": 0,
+            "cleared": 0,
+            "qrexec_clipboard": 0,
+            "sent_size": 0,
+            "buffer_size": 256000,
+            "data_type": DATA_TYPE_TEXT,
+            "image_width": 0,
+            "image_height": 0,
+            "protocol_version_xside": 0x00010009,
+            "protocol_version_vmside": 0x00010009,
+        }
+        fields.update(values)
+        lines = ['"vmname":"dom0"']
+        lines += ['"{}":{}'.format(key, value) for key, value in fields.items()]
+        with open(METADATA, "w", encoding="ascii") as metadata:
+            metadata.write("{\n" + ",\n".join(lines) + "\n}\n")
 
     def send_notify(self, body, icon=None):
         # pylint: disable=attribute-defined-outside-init
@@ -493,30 +567,14 @@ class NotificationApp(Gtk.Application):
             with appviewer_lock():
                 with open(DATA, "w", encoding="utf-8") as contents:
                     contents.truncate(0)
+                if os.path.exists(DATA_IMAGE):
+                    with open(DATA_IMAGE, "wb") as image:
+                        image.truncate(0)
                 with open(FROM, "w", encoding="ascii") as source:
                     source.write("dom0")
                 with open(XEVENT, "w", encoding="ascii") as timestamp:
                     timestamp.write(str(Gtk.get_current_event_time()))
-                with open(METADATA, "w", encoding="ascii") as metadata:
-                    metadata.write(
-                        "{{\n"
-                        '"vmname":"dom0",\n'
-                        '"xevent_timestamp":{xevent_timestamp},\n'
-                        '"successful":1,\n'
-                        '"cleared":1,\n'
-                        '"copy_action":0,\n'
-                        '"paste_action":0,\n'
-                        '"malformed_request":0,\n'
-                        '"qrexec_clipboard":0,\n'
-                        '"sent_size":0,\n'
-                        '"buffer_size":{buffer_size},\n'
-                        '"protocol_version_xside":65544,\n'
-                        '"protocol_version_vmside":65544,\n'
-                        "}}\n".format(
-                            xevent_timestamp=str(Gtk.get_current_event_time()),
-                            buffer_size="256000",
-                        )
-                    )
+                self.write_metadata(successful=1, cleared=1)
                 self.update_clipboard_contents(
                     vm=None, size=0, message=("Global clipboard cleared")
                 )
