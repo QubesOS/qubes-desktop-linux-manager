@@ -145,7 +145,9 @@ class ClipboardHandler(PageHandler):
             "clipboard_image_size_reset"
         )
 
-        self.handlers: List[Union[PolicyHandler, FeatureHandler]] = [
+        self.handlers: List[
+            Union[PolicyHandler, FeatureHandler, SizeFeatureHandler]
+        ] = [
             PolicyHandler(
                 qapp=self.qapp,
                 gtk_builder=gtk_builder,
