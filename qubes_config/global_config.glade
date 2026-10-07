@@ -3914,7 +3914,7 @@
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="halign">start</property>
-                                    <property name="label" translatable="yes">Dom0 update proxy: </property>
+                                    <property name="label" translatable="yes">Dom0 update qube: </property>
                                     <style>
                                       <class name="main_text"/>
                                     </style>
@@ -4555,7 +4555,7 @@
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Update proxy</property>
+                            <property name="label" translatable="yes">Update qube</property>
                             <property name="xalign">0</property>
                             <style>
                               <class name="group_title"/>
@@ -4572,7 +4572,7 @@
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Templates don't have direct network access. Instead, a service qube called an "update proxy" downloads updates for them.</property>
+                            <property name="label" translatable="yes">Templates don't have direct network access. Instead, a service qube called an "update qube" downloads updates for them.</property>
                             <property name="wrap">True</property>
                             <property name="xalign">0</property>
                             <style>
@@ -4732,7 +4732,7 @@
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="halign">start</property>
-                                    <property name="label" translatable="yes">&lt;b&gt;Whonix&lt;/b&gt; update proxy</property>
+                                    <property name="label" translatable="yes">&lt;b&gt;Whonix&lt;/b&gt; update qube</property>
                                     <property name="use-markup">True</property>
                                     <style>
                                       <class name="main_text"/>
@@ -4748,7 +4748,7 @@
                                   <object class="GtkLabel">
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
-                                    <property name="label" translatable="yes">All Whonix qubes (those with the &lt;tt&gt;whonix-updatevm&lt;/tt&gt; tag) will use this qube as an update proxy. This qube must be a Whonix gateway (e.g., &lt;tt&gt;sys-whonix&lt;/tt&gt;).</property>
+                                    <property name="label" translatable="yes">All Whonix qubes (those with the &lt;tt&gt;whonix-updatevm&lt;/tt&gt; tag) will use this qube as an update qube. This qube must be a Whonix gateway (e.g., &lt;tt&gt;sys-whonix&lt;/tt&gt;).</property>
                                     <property name="use-markup">True</property>
                                     <property name="wrap">True</property>
                                     <property name="xalign">0</property>
@@ -4773,7 +4773,7 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="halign">start</property>
-                                <property name="label" translatable="yes">&lt;b&gt;Default&lt;/b&gt; update proxy</property>
+                                <property name="label" translatable="yes">&lt;b&gt;Default&lt;/b&gt; update qube</property>
                                 <property name="use-markup">True</property>
                                 <style>
                                   <class name="main_text"/>
