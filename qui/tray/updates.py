@@ -69,6 +69,12 @@ class RunItem(Gtk.MenuItem):
         self.connect("activate", command)
 
 
+def _spawn_detached(cmd):
+    # Run in a separate scope, so restarting the widget does not kill it.
+    # pylint: disable=consider-using-with
+    return subprocess.Popen(["systemd-run", "--user", "--scope", "--quiet", "--"] + cmd)
+
+
 class UpdatesTray(Gtk.Application):
     def __init__(self, app_name, qapp, dispatcher):
         super().__init__()
@@ -164,13 +170,11 @@ class UpdatesTray(Gtk.Application):
 
     @staticmethod
     def launch_updater(*_args, **_kwargs):
-        # pylint: disable=consider-using-with
-        subprocess.Popen(["qubes-update-gui"])
+        _spawn_detached(["qubes-update-gui"])
 
     @staticmethod
     def launch_template_manager(*_args, **_kwargs):
-        # pylint: disable=consider-using-with
-        subprocess.Popen(["qvm-template-gui"])
+        _spawn_detached(["qvm-template-gui"])
 
     def check_vms_needing_update(self):
         self.vms_needing_update.clear()
