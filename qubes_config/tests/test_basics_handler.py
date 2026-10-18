@@ -168,6 +168,7 @@ def test_size_feature_handler(mock_apply, mock_get, test_qapp):
             maximum=16 * 1024 * 1024,
             default=4 * 1024 * 1024,
             readable_name="size",
+            allow_disabled=True,
         )
 
     # an unset feature means the default, and there is nothing to reset
@@ -218,6 +219,13 @@ def test_size_feature_handler(mock_apply, mock_get, test_qapp):
     handler.spin_button.emit("activate")
     assert handler.spin_button.get_text() == "4 MiB (default)"
     assert handler.get_selected() is None
+
+    # zero is kept as is, it refuses every image
+    mock_get.return_value = "0"
+    handler = make_handler()
+    assert handler.get_selected() == 0
+    assert handler.spin_button.get_text() == "0 MiB"
+    assert handler.reset_button.get_sensitive()
 
     # reset goes back to the system default and saves None
     handler.reset_button.clicked()

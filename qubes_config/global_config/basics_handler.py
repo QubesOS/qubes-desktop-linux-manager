@@ -228,6 +228,7 @@ class SizeFeatureHandler(AbstractTraitHolder, TraitSelector):
         maximum: int,
         default: int,
         readable_name: str,
+        allow_disabled: bool = False,
     ):
         self.trait_holder = trait_holder
         self.trait_name = trait_name
@@ -237,6 +238,7 @@ class SizeFeatureHandler(AbstractTraitHolder, TraitSelector):
         self.unit_factor = unit_factor
         self.maximum = maximum
         self.readable_name = readable_name
+        self.lowest = 0 if allow_disabled else 1
         self.default_amount = default // unit_factor
         # GTK reads back the leading number
         self.default_text = self._format(default) + _(" (default)")
@@ -245,8 +247,15 @@ class SizeFeatureHandler(AbstractTraitHolder, TraitSelector):
             _("Restore the default limit ({})").format(self._format(default))
         )
 
+        if allow_disabled:
+            spin_button.set_tooltip_text(
+                _("Setting the limit to 0 disables image copying")
+            )
+
         adjustment = Gtk.Adjustment()
-        adjustment.configure(self.default_amount, 1, maximum // unit_factor, 1, 10, 0)
+        adjustment.configure(
+            self.default_amount, self.lowest, maximum // unit_factor, 1, 10, 0
+        )
         spin_button.configure(adjustment, 1, 0)
         spin_button.set_numeric(False)
         spin_button.set_snap_to_ticks(True)
@@ -282,6 +291,8 @@ class SizeFeatureHandler(AbstractTraitHolder, TraitSelector):
     def _show(self, value: Optional[int]):
         if value is None:
             self.spin_button.set_value(self.default_amount)
+        elif value == 0:
+            self.spin_button.set_value(0)
         else:
             self.spin_button.set_value(max(1, round(value / self.unit_factor)))
         self._update_reset()
