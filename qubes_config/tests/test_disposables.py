@@ -166,6 +166,21 @@ def test_preload_handler(
     assert preload_dispvm_threshold_spin.get_value_as_int() == default_threshold
 
 
+@patch("qubes_config.global_config.disposables.get_feature")
+def test_preload_handler_loads_zero_unchanged(
+    mock_get, real_builder, test_qapp, test_policy_manager
+):
+    mock_get.side_effect = lambda _vm, feature, *_args: (
+        "0" if feature == "preload-dispvm-max" else None
+    )
+    disposables_handler = DisposablesHandler(
+        test_qapp, test_policy_manager, real_builder
+    )
+    preload_handler = disposables_handler.preload_handler
+    assert preload_handler.preload_dispvm_spin.get_value_as_int() == 0
+    assert disposables_handler.get_unsaved() == ""
+
+
 def test_dvm_list(real_builder, test_qapp, test_policy_manager):
     test_qapp._qubes["default-dvm"].features["preload-dispvm-max"] = 9
     test_qapp._qubes["test-alt-dvm"].features["preload-dispvm-max"] = 42

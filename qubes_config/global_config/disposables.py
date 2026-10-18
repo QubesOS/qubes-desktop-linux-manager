@@ -285,7 +285,6 @@ class PreloadDispvmHandler(PageHandler):
         self.preload_dispvm_check.connect("toggled", self.on_check_changed)
 
         self.on_defdispvm_changed()
-        self.on_check_changed()
 
     def load_data(self):
         # get value of the preload feature
