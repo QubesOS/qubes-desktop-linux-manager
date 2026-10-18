@@ -212,6 +212,7 @@ qubes.ClipboardPaste * @anyvm @anyvm ask\n""",
                 maximum=self.IMAGE_SIZE_MAX,
                 default=self.IMAGE_SIZE_DEFAULT,
                 readable_name=_("Global Clipboard image size limit"),
+                allow_disabled=True,
             ),
         ]
 
