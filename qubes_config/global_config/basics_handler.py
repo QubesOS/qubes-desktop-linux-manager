@@ -228,6 +228,7 @@ class SizeFeatureHandler(AbstractTraitHolder, TraitSelector):
         maximum: int,
         default: int,
         readable_name: str,
+        allow_disabled: bool = False,
     ):
         self.trait_holder = trait_holder
         self.trait_name = trait_name
@@ -237,14 +238,20 @@ class SizeFeatureHandler(AbstractTraitHolder, TraitSelector):
         self.unit_factor = unit_factor
         self.maximum = maximum
         self.readable_name = readable_name
+        self.lowest = -1 if allow_disabled else 0
         self.default_text = _("default ({})").format(self._format(default))
 
         reset_button.set_tooltip_text(
             _("Restore the default limit ({})").format(self._format(default))
         )
 
+        if allow_disabled:
+            spin_button.set_tooltip_text(
+                _("Setting the limit to 0 disables image copying")
+            )
+
         adjustment = Gtk.Adjustment()
-        adjustment.configure(0, 0, maximum // unit_factor, 1, 10, 0)
+        adjustment.configure(self.lowest, self.lowest, maximum // unit_factor, 1, 10, 0)
         spin_button.configure(adjustment, 1, 0)
         spin_button.set_numeric(False)
 
@@ -265,7 +272,7 @@ class SizeFeatureHandler(AbstractTraitHolder, TraitSelector):
 
     def _on_output(self, spin_button: Gtk.SpinButton) -> bool:
         value = int(spin_button.get_adjustment().get_value())
-        if value == 0:
+        if value == self.lowest:
             spin_button.set_text(self.default_text)
         else:
             spin_button.set_text("{} {}".format(value, self.unit_name))
@@ -274,7 +281,7 @@ class SizeFeatureHandler(AbstractTraitHolder, TraitSelector):
     def _on_input(self, spin_button: Gtk.SpinButton, *_args):
         text = spin_button.get_text().strip()
         if not text or text == self.default_text:
-            return True, 0.0
+            return True, float(self.lowest)
         try:
             return True, float(text.split()[0].replace(",", "."))
         except ValueError:
@@ -282,16 +289,18 @@ class SizeFeatureHandler(AbstractTraitHolder, TraitSelector):
 
     def _show(self, value: Optional[int]):
         if value is None:
+            self.spin_button.set_value(self.lowest)
+        elif value == 0:
             self.spin_button.set_value(0)
         else:
             self.spin_button.set_value(max(1, round(value / self.unit_factor)))
         self._update_reset()
 
     def _update_reset(self, *_args):
-        self.reset_button.set_sensitive(self.spin_button.get_value() != 0)
+        self.reset_button.set_sensitive(self.spin_button.get_value() != self.lowest)
 
     def reset_to_default(self, *_args):
-        self.spin_button.set_value(0)
+        self.spin_button.set_value(self.lowest)
 
     def get_readable_description(self) -> str:
         return self.readable_name
@@ -305,7 +314,7 @@ class SizeFeatureHandler(AbstractTraitHolder, TraitSelector):
 
     def get_selected(self) -> Optional[int]:
         amount = int(self.spin_button.get_value())
-        if amount == 0:
+        if amount == self.lowest:
             return None
         return min(self.maximum, amount * self.unit_factor)
 
