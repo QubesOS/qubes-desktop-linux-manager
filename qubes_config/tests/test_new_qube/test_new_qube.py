@@ -21,10 +21,67 @@
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-class-docstring
 # pylint: disable=unnecessary-dunder-call
-from unittest.mock import patch, call, ANY
+import subprocess
+import unittest
+from unittest.mock import patch, call, ANY, MagicMock
 
 from ...new_qube.new_qube_app import CreateNewQube
 from ...new_qube.application_selector import AddButton
+
+
+class TestPostCreationFailure(unittest.TestCase):
+    """A failed follow-up command must not leave the creation window stuck."""
+
+    # Exercise the GTK callback directly so exceptions are visible to the test.
+    # pylint: disable=protected-access
+    @patch("qubes_config.new_qube.new_qube_app.show_error")
+    @patch("qubes_config.new_qube.new_qube_app.Gtk.MessageDialog")
+    @patch("qubes_config.new_qube.new_qube_app.subprocess.check_call")
+    def test_follow_up_failure(self, mock_command, mock_dialog, mock_error):
+        for command, launch_settings in (
+            ("qubes-vm-settings", True),
+            ("qubes-vm-boot-from-device", False),
+        ):
+            for error in (
+                None,
+                subprocess.CalledProcessError(2, [command, "test"]),
+                FileNotFoundError(command),
+            ):
+                with self.subTest(command=command, error=type(error).__name__):
+                    app = MagicMock()
+                    app.qube_name.get_text.return_value = "test"
+                    app.qube_type_template.get_active.return_value = False
+                    app.qube_type_standalone.get_active.return_value = True
+                    app.qube_type_dvm_template.get_active.return_value = False
+                    app.template_handler.get_selected_template.return_value = None
+                    app.app_box_handler.get_selected_apps.return_value = []
+                    app.advanced_handler.get_launch_settings.return_value = (
+                        launch_settings
+                    )
+                    app.advanced_handler.get_install_system.return_value = (
+                        not launch_settings
+                    )
+                    app._create_qube.return_value = "test"
+
+                    mock_command.reset_mock()
+                    mock_dialog.reset_mock()
+                    mock_error.reset_mock()
+                    # The boot helper exits with status 2 if the newly created
+                    # qube was deleted while the success dialog was open.
+                    mock_command.side_effect = error
+                    CreateNewQube._do_create_qube(app)
+
+                    mock_command.assert_called_once_with([command, "test"])
+                    if error is None:
+                        mock_error.assert_not_called()
+                    else:
+                        mock_error.assert_called_once_with(
+                            app.main_window,
+                            "Could not open qube configuration",
+                            f"An error occurred: {error}",
+                        )
+                    mock_dialog.return_value.destroy.assert_called_once_with()
+                    app.quit.assert_called_once_with()
 
 
 def mock_output(command, *_args, **_kwargs):
