@@ -369,14 +369,24 @@ class CreateNewQube(Gtk.Application):
             buttons=Gtk.ButtonsType.OK,
             text=_("Qube created successfully!"),
         )
-        msg.run()
+        try:
+            msg.run()
+        finally:
+            msg.destroy()
 
-        if self.advanced_handler.get_launch_settings():
-            subprocess.check_call(["qubes-vm-settings", str(vm)])
-        if self.advanced_handler.get_install_system():
-            subprocess.check_call(["qubes-vm-boot-from-device", str(vm)])
-
-        self.quit()
+        try:
+            if self.advanced_handler.get_launch_settings():
+                subprocess.check_call(["qubes-vm-settings", str(vm)])
+            if self.advanced_handler.get_install_system():
+                subprocess.check_call(["qubes-vm-boot-from-device", str(vm)])
+        except (subprocess.CalledProcessError, OSError) as ex:
+            show_error(
+                self.main_window,
+                _("Could not open qube configuration"),
+                _("An error occurred: {error}").format(error=ex),
+            )
+        finally:
+            self.quit()
 
     def _create_qube(
         self, vmclass, name, label, template, properties, pool
