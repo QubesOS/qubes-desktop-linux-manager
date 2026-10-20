@@ -33,11 +33,9 @@ from .tray.gtk3_xwayland_menu_dismisser import (
 )  # isort:skip
 
 import asyncio
-import contextlib
 import json
 import math
 import os
-import fcntl
 import qubesadmin
 import qubesadmin.events
 
@@ -62,14 +60,16 @@ import gettext
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
+from .global_clipboard import (
+    DATA,
+    METADATA,
+    FROM,
+    appviewer_lock,
+    copy_to_global_clipboard,
+)
 from .utils import run_asyncio_and_show_errors
 
-DATA = "/var/run/qubes/qubes-clipboard.bin"
-METADATA = "/var/run/qubes/qubes-clipboard.bin.metadata"
-FROM = "/var/run/qubes/qubes-clipboard.bin.source"
 FROM_DIR = "/var/run/qubes/"
-XEVENT = "/var/run/qubes/qubes-clipboard.bin.xevent"
-APPVIEWER_LOCK = "/var/run/qubes/appviewer.lock"
 COPY_FEATURE = "gui-default-secure-copy-sequence"
 PASTE_FEATURE = "gui-default-secure-paste-sequence"
 
@@ -110,17 +110,6 @@ MSG_PASTE_SUCCESS_LEGACY = _(
     "Global clipboard copied to qube and wiped.<i/>\n"
     "<small>Paste normally in qube (e.g. Ctrl+V).</small>"
 )
-
-
-@contextlib.contextmanager
-def appviewer_lock():
-    fd = os.open(APPVIEWER_LOCK, os.O_RDWR | os.O_CREAT, 0o0666)
-    try:
-        fcntl.flock(fd, fcntl.LOCK_EX)
-        yield
-    finally:
-        fcntl.flock(fd, fcntl.LOCK_UN)
-        os.close(fd)
 
 
 class EventHandler(pyinotify.ProcessEvent):
@@ -425,38 +414,10 @@ class NotificationApp(Gtk.Application):
             self.send_notify(_("Dom0 clipboard is empty!"), icon="dialog-information")
             return
 
+        data = text.encode("utf-8")
         try:
-            with appviewer_lock():
-                with open(DATA, "w", encoding="utf-8") as contents:
-                    contents.write(text)
-                with open(FROM, "w", encoding="ascii") as source:
-                    source.write("dom0")
-                with open(XEVENT, "w", encoding="ascii") as timestamp:
-                    timestamp.write(str(Gtk.get_current_event_time()))
-                with open(METADATA, "w", encoding="ascii") as metadata:
-                    metadata.write(
-                        "{{\n"
-                        '"vmname":"dom0",\n'
-                        '"xevent_timestamp":{xevent_timestamp},\n'
-                        '"successful":1,\n'
-                        '"copy_action":1,\n'
-                        '"paste_action":0,\n'
-                        '"malformed_request":0,\n'
-                        '"cleared":0,\n'
-                        '"qrexec_clipboard":0,\n'
-                        '"sent_size":{sent_size},\n'
-                        '"buffer_size":{buffer_size},\n'
-                        '"protocol_version_xside":65544,\n'
-                        '"protocol_version_vmside":65544,\n'
-                        "}}\n".format(
-                            xevent_timestamp=str(Gtk.get_current_event_time()),
-                            sent_size=os.path.getsize(DATA),
-                            buffer_size="256000",
-                        )
-                    )
-            self.update_clipboard_contents(
-                "dom0", "{} bytes".format(os.path.getsize(DATA))
-            )
+            copy_to_global_clipboard(data, timestamp=Gtk.get_current_event_time())
+            self.update_clipboard_contents("dom0", "{} bytes".format(len(data)))
         except Exception:  # pylint: disable=broad-except
             self.send_notify(
                 _("Error while accessing global clipboard!"),
@@ -490,36 +451,12 @@ class NotificationApp(Gtk.Application):
 
     def clear_clipboard(self, *_args, **_kwargs):
         try:
-            with appviewer_lock():
-                with open(DATA, "w", encoding="utf-8") as contents:
-                    contents.truncate(0)
-                with open(FROM, "w", encoding="ascii") as source:
-                    source.write("dom0")
-                with open(XEVENT, "w", encoding="ascii") as timestamp:
-                    timestamp.write(str(Gtk.get_current_event_time()))
-                with open(METADATA, "w", encoding="ascii") as metadata:
-                    metadata.write(
-                        "{{\n"
-                        '"vmname":"dom0",\n'
-                        '"xevent_timestamp":{xevent_timestamp},\n'
-                        '"successful":1,\n'
-                        '"cleared":1,\n'
-                        '"copy_action":0,\n'
-                        '"paste_action":0,\n'
-                        '"malformed_request":0,\n'
-                        '"qrexec_clipboard":0,\n'
-                        '"sent_size":0,\n'
-                        '"buffer_size":{buffer_size},\n'
-                        '"protocol_version_xside":65544,\n'
-                        '"protocol_version_vmside":65544,\n'
-                        "}}\n".format(
-                            xevent_timestamp=str(Gtk.get_current_event_time()),
-                            buffer_size="256000",
-                        )
-                    )
-                self.update_clipboard_contents(
-                    vm=None, size=0, message=("Global clipboard cleared")
-                )
+            copy_to_global_clipboard(
+                b"", timestamp=Gtk.get_current_event_time(), cleared=True
+            )
+            self.update_clipboard_contents(
+                vm=None, size=0, message=("Global clipboard cleared")
+            )
         except Exception:  # pylint: disable=broad-except
             self.send_notify(_("Error while clearing global clipboard!"))
 
