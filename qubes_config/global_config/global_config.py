@@ -24,7 +24,7 @@
 import sys
 import threading
 import time
-from typing import Dict, Optional, List, Union, Any
+from typing import Callable, Dict, Optional, List, Union, Any
 from html import escape
 import importlib.resources
 import logging
@@ -351,97 +351,86 @@ class GlobalConfig(Gtk.Application):
 
         self.main_window.connect("delete-event", self._ask_to_quit)
 
-        page_progress = 1 / self.main_notebook.get_n_pages()
-
-        # match page by widget name to handler
-        self.handlers["basics"] = BasicSettingsHandler(self.builder, self.qapp)
-        self.progress_bar_dialog.update_progress(page_progress)
-
-        self.handlers["usb"] = DevicesHandler(
-            self.qapp, self.policy_manager, self.builder
-        )
-        self.progress_bar_dialog.update_progress(page_progress)
-
-        self.handlers["updates"] = UpdatesHandler(
-            qapp=self.qapp,
-            policy_manager=self.policy_manager,
-            gtk_builder=self.builder,
-        )
-        self.progress_bar_dialog.update_progress(page_progress)
-
-        self.handlers["attachments"] = DevAttachmentHandler(self.qapp, self.builder)
-        self.progress_bar_dialog.update_progress(page_progress)
-
-        self.handlers["splitgpg"] = VMSubsetPolicyHandler(
-            qapp=self.qapp,
-            gtk_builder=self.builder,
-            policy_manager=self.policy_manager,
-            prefix="splitgpg",
-            service_name="qubes.Gpg",
-            policy_file_name="50-config-splitgpg",
-            default_policy="",
-            main_rule_class=RuleSimpleNoAllow,
-            main_verb_description=SimpleVerbDescription(
-                {
-                    "ask": _("ask to access GPG\nkeys from"),
-                    "deny": _("access GPG\nkeys from"),
-                }
+        # page handlers are created lazily, when the user first visits their
+        # page; this speeds up the tool's startup considerably
+        self.handlers = {}
+        self.handler_factories: Dict[str, Callable[[], PageHandler]] = {
+            "basics": lambda: BasicSettingsHandler(self.builder, self.qapp),
+            "usb": lambda: DevicesHandler(self.qapp, self.policy_manager, self.builder),
+            "updates": lambda: UpdatesHandler(
+                qapp=self.qapp,
+                policy_manager=self.policy_manager,
+                gtk_builder=self.builder,
             ),
-            exception_rule_class=RuleTargeted,
-            exception_verb_description=SimpleVerbDescription(
-                {
-                    "allow": _("access GPG\nkeys from"),
-                    "ask": _("to access GPG\nkeys from"),
-                    "deny": _("access GPG\nkeys from"),
-                }
+            "attachments": lambda: DevAttachmentHandler(self.qapp, self.builder),
+            "splitgpg": lambda: VMSubsetPolicyHandler(
+                qapp=self.qapp,
+                gtk_builder=self.builder,
+                policy_manager=self.policy_manager,
+                prefix="splitgpg",
+                service_name="qubes.Gpg",
+                policy_file_name="50-config-splitgpg",
+                default_policy="",
+                main_rule_class=RuleSimpleNoAllow,
+                main_verb_description=SimpleVerbDescription(
+                    {
+                        "ask": _("ask to access GPG\nkeys from"),
+                        "deny": _("access GPG\nkeys from"),
+                    }
+                ),
+                exception_rule_class=RuleTargeted,
+                exception_verb_description=SimpleVerbDescription(
+                    {
+                        "allow": _("access GPG\nkeys from"),
+                        "ask": _("to access GPG\nkeys from"),
+                        "deny": _("access GPG\nkeys from"),
+                    }
+                ),
             ),
-        )
-        self.progress_bar_dialog.update_progress(page_progress)
-
-        self.handlers["clipboard"] = ClipboardHandler(
-            qapp=self.qapp,
-            gtk_builder=self.builder,
-            policy_manager=self.policy_manager,
-        )
-        self.progress_bar_dialog.update_progress(page_progress)
-
-        self.handlers["file"] = PolicyHandler(
-            qapp=self.qapp,
-            gtk_builder=self.builder,
-            prefix="filecopy",
-            policy_manager=self.policy_manager,
-            default_policy="""qubes.Filecopy * @anyvm @adminvm deny\n
+            "clipboard": lambda: ClipboardHandler(
+                qapp=self.qapp,
+                gtk_builder=self.builder,
+                policy_manager=self.policy_manager,
+            ),
+            "file": lambda: PolicyHandler(
+                qapp=self.qapp,
+                gtk_builder=self.builder,
+                prefix="filecopy",
+                policy_manager=self.policy_manager,
+                default_policy="""qubes.Filecopy * @anyvm @adminvm deny\n
 qubes.Filecopy * @anyvm @anyvm ask""",
-            service_name="qubes.Filecopy",
-            policy_file_name="50-config-filecopy",
-            verb_description=SimpleVerbDescription(
-                {
-                    "ask": _("to be allowed to copy files to"),
-                    "allow": _("allow files to be copied to"),
-                    "deny": _("be allowed to copy files to"),
-                }
+                service_name="qubes.Filecopy",
+                policy_file_name="50-config-filecopy",
+                verb_description=SimpleVerbDescription(
+                    {
+                        "ask": _("to be allowed to copy files to"),
+                        "allow": _("allow files to be copied to"),
+                        "deny": _("be allowed to copy files to"),
+                    }
+                ),
+                rule_class=RuleSimple,
             ),
-            rule_class=RuleSimple,
-        )
+            "disposables": lambda: DisposablesHandler(
+                qapp=self.qapp,
+                policy_manager=self.policy_manager,
+                gtk_builder=self.builder,
+            ),
+            "thisdevice": lambda: ThisDeviceHandler(
+                self.qapp, self.builder, self.policy_manager
+            ),
+        }
 
-        self.progress_bar_dialog.update_progress(page_progress)
-        self.handlers["disposables"] = DisposablesHandler(
-            qapp=self.qapp, policy_manager=self.policy_manager, gtk_builder=self.builder
+        # construct only the initially visible page; others are constructed
+        # on first visit, in _page_switched
+        initial_page = self.main_notebook.get_nth_page(
+            self.main_notebook.get_current_page()
         )
-        self.progress_bar_dialog.update_progress(page_progress)
-
-        self.handlers["thisdevice"] = ThisDeviceHandler(
-            self.qapp, self.builder, self.policy_manager
-        )
-        self.progress_bar_dialog.update_progress(page_progress)
+        if initial_page:
+            self.get_or_create_handler(initial_page.get_name())
 
         self.main_notebook.connect("switch-page", self._page_switched)
 
         self._handle_urls()
-
-        self.progress_bar_dialog.update_progress(1)
-        self.progress_bar_dialog.hide()
-        self.progress_bar_dialog.destroy()
 
         self.viewport_handler = ViewportHandler(
             self.main_window,
@@ -513,6 +502,25 @@ qubes.Filecopy * @anyvm @anyvm ask""",
         return self.handlers.get(
             self.main_notebook.get_nth_page(page_num).get_name(), None
         )
+
+    def get_or_create_handler(self, page_name: str) -> Optional[PageHandler]:
+        """Get the handler for the page with given name, constructing it
+        if it was not visited before."""
+        if page_name not in self.handlers:
+            factory = self.handler_factories.get(page_name)
+            if not factory:
+                return None
+            try:
+                self.handlers[page_name] = factory()
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.exception("Failed to load the %s page", page_name)
+                show_error(
+                    self.main_window,
+                    _("Failed to load page"),
+                    _("The following error occurred: ") + escape(str(ex)),
+                )
+                return None
+        return self.handlers[page_name]
 
     def perform_save(self, page):
         """Actual saving thread"""
@@ -594,13 +602,47 @@ qubes.Filecopy * @anyvm @anyvm ask""",
                 return False
         return True
 
-    def _page_switched(self, *_args):
+    def _page_switched(self, _notebook, page, _page_num):
+        # at this point, the notebook still reports the old page as current:
+        # verify_changes below checks the page being left
         old_page_num = self.main_notebook.get_current_page()
         allow_switch = self.verify_changes()
         if not allow_switch:
             GLib.timeout_add(
                 1, lambda: self.main_notebook.set_current_page(old_page_num)
             )
+            return
+        page_name = page.get_name()
+        if page_name in self.handlers:
+            return
+        self._construct_page_with_feedback(page_name)
+
+    def _construct_page_with_feedback(self, page_name: str):
+        """Construct a page handler, with a spinner dialog shown while the
+        (potentially slow) construction is running."""
+        if page_name not in self.handler_factories:
+            return
+        spinner = Gtk.Spinner()
+        spinner.start()
+        dialog = show_dialog(
+            self.main_window,
+            _("Loading"),
+            _("Loading system settings..."),
+            {},
+            spinner,
+        )
+        dialog.set_deletable(False)
+        # block interaction and render the dialog before the synchronous
+        # construction below freezes the main loop
+        self.main_window.set_sensitive(False)
+        while Gtk.events_pending():
+            Gtk.main_iteration()
+        try:
+            self.get_or_create_handler(page_name)
+        finally:
+            self.main_window.set_sensitive(True)
+            spinner.stop()
+            dialog.destroy()
 
     def _ask_unsaved(self, description: str) -> Gtk.ResponseType:
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
