@@ -30,15 +30,6 @@ import time
 
 import importlib.resources
 
-import qubesadmin
-import qubesadmin.exc
-import qubesadmin.events
-import qubesadmin.tests
-import qubesadmin.tests.mock_app
-
-import qui
-import qui.utils
-
 import gi
 
 gi.require_version("Gtk", "3.0")  # isort:skip
@@ -52,6 +43,15 @@ except ImportError:
     import gbulb
 
     gbulb.install()
+
+import qubesadmin
+import qubesadmin.exc
+import qubesadmin.events
+import qubesadmin.tests
+import qubesadmin.tests.mock_app
+
+import qui
+import qui.utils
 
 from qui.devices import backend
 from qui.devices import actionable_widgets

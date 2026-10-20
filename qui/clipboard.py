@@ -38,8 +38,6 @@ import json
 import math
 import os
 import fcntl
-import qubesadmin
-import qubesadmin.events
 
 import gi
 
@@ -56,6 +54,9 @@ except ImportError:
     gbulb.install()
 
 import pyinotify
+
+import qubesadmin
+import qubesadmin.events
 
 import gettext
 
