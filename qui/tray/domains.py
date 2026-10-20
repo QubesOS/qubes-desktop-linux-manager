@@ -940,6 +940,13 @@ class DomainTray(Gtk.Application):
         self.dispatcher.add_handler(
             "domain-feature-delete:updates-available", self.feature_change
         )
+        self.dispatcher.add_handler(
+            "property-set:active_template", self.property_change
+        )
+        self.dispatcher.add_handler(
+            "property-reset:active_template", self.property_change
+        )
+        self.dispatcher.add_handler("property-set:template", self.property_change)
         self.dispatcher.add_handler("property-set:netvm", self.property_change)
         self.dispatcher.add_handler("property-set:label", self.property_change)
 
@@ -1129,10 +1136,17 @@ class DomainTray(Gtk.Application):
     def property_change(self, vm, event, *_args, **_kwargs):
         if vm not in self.menu_items:
             return
+        item = self.menu_items[vm]
         if event == "property-set:netvm":
-            self.menu_items[vm].name.update_tooltip(netvm_changed=True)
+            item.name.update_tooltip(netvm_changed=True)
         elif event == "property-set:label":
-            self.menu_items[vm].set_label_icon()
+            item.set_label_icon()
+        elif event in [
+            "property-set:active_template",
+            "property-reset:active_template",
+            "property-set:template",
+        ]:
+            item.name.update_template()
 
     def feature_change(self, vm, *_args, **_kwargs):
         if vm not in self.menu_items:
@@ -1309,6 +1323,13 @@ class DomainTray(Gtk.Application):
         self.dispatcher.remove_handler(
             "domain-feature-delete:updates-available", self.feature_change
         )
+        self.dispatcher.remove_handler(
+            "property-set:active_template", self.property_change
+        )
+        self.dispatcher.remove_handler(
+            "property-reset:active_template", self.property_change
+        )
+        self.dispatcher.remove_handler("property-set:template", self.property_change)
         self.dispatcher.remove_handler("property-set:netvm", self.property_change)
         self.dispatcher.remove_handler("property-set:label", self.property_change)
 

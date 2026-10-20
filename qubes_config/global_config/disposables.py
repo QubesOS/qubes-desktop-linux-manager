@@ -127,7 +127,7 @@ class DispVMRow(Gtk.ListBoxRow):
             return
 
         self.name_widget.set_token(str(self.dispvm.name))
-        self.based_on.set_token(str(getattr(self.dispvm, "template", None)))
+        self.based_on.set_token(str(self.dispvm.get_active_template()))
         self.netqube.set_token(str(self.dispvm.netvm))
 
         preload = self.dispvm.features.get("preload-dispvm-max", 0)
