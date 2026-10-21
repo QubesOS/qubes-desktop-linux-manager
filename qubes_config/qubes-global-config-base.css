@@ -247,6 +247,10 @@ separator {
     color: @link-color;
 }
 
+.explanation link {
+    color: @link-color;
+}
+
 .action_text {
     color: @text-color;
     font-weight: 700;
