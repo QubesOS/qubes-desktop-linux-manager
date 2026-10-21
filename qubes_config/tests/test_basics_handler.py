@@ -165,8 +165,8 @@ def test_size_feature_handler(mock_apply, mock_get, test_qapp):
             reset_button=Gtk.Button(),
             unit_name="MiB",
             unit_factor=1024 * 1024,
-            maximum=16 * 1024 * 1024,
-            default=4 * 1024 * 1024,
+            maximum=64 * 1024 * 1024,
+            default=32 * 1024 * 1024,
             readable_name="size",
             allow_disabled=True,
         )
@@ -179,7 +179,7 @@ def test_size_feature_handler(mock_apply, mock_get, test_qapp):
     assert not handler.is_changed()
     assert handler.get_unsaved() == ""
     assert not handler.reset_button.get_sensitive()
-    assert handler.spin_button.get_text() == "4 MiB (default)"
+    assert handler.spin_button.get_text() == "32 MiB (default)"
 
     # a value is shown in whole units, and the reset button wakes up
     mock_get.return_value = str(2 * 1024 * 1024)
@@ -205,8 +205,8 @@ def test_size_feature_handler(mock_apply, mock_get, test_qapp):
 
     # the spin button stops at the protocol ceiling
     handler.spin_button.set_value(999999)
-    assert handler.spin_button.get_value() == 16
-    assert handler.get_selected() == 16 * 1024 * 1024
+    assert handler.spin_button.get_value() == 64
+    assert handler.get_selected() == 64 * 1024 * 1024
 
     # a typed fraction snaps to whole units
     handler.spin_button.set_text("12.7 MiB")
@@ -217,7 +217,7 @@ def test_size_feature_handler(mock_apply, mock_get, test_qapp):
     # empty text means the default again
     handler.spin_button.set_text("")
     handler.spin_button.emit("activate")
-    assert handler.spin_button.get_text() == "4 MiB (default)"
+    assert handler.spin_button.get_text() == "32 MiB (default)"
     assert handler.get_selected() is None
 
     # zero is kept as is, it refuses every image
@@ -231,7 +231,7 @@ def test_size_feature_handler(mock_apply, mock_get, test_qapp):
     handler.reset_button.clicked()
     assert handler.get_selected() is None
     assert not handler.reset_button.get_sensitive()
-    assert handler.spin_button.get_text() == "4 MiB (default)"
+    assert handler.spin_button.get_text() == "32 MiB (default)"
     assert handler.is_changed()
     handler.save()
     mock_apply.assert_called_with(test_vm, "test_size", None)

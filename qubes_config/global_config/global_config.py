@@ -113,8 +113,8 @@ class ClipboardHandler(PageHandler):
     # bounds and defaults of the GUI protocol, see qubes-gui-protocol.h
     TEXT_SIZE_MAX = 256000
     TEXT_SIZE_DEFAULT = 64000
-    IMAGE_SIZE_MAX = 16 * 1024 * 1024
-    IMAGE_SIZE_DEFAULT = 4 * 1024 * 1024
+    IMAGE_SIZE_MAX = 64 * 1024 * 1024
+    IMAGE_SIZE_DEFAULT = 32 * 1024 * 1024
 
     def __init__(
         self,

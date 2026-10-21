@@ -394,7 +394,7 @@ def test_global_config_clipboard_size_plus(
     text_spin = handler.text_size_spin
     image_spin = handler.image_size_spin
     assert "64 kB" in text_spin.get_text()
-    assert "4 MiB" in image_spin.get_text()
+    assert "32 MiB" in image_spin.get_text()
 
     # PyGObject reports handler exceptions to sys.excepthook
     with patch("sys.excepthook") as mock_hook:
@@ -405,8 +405,8 @@ def test_global_config_clipboard_size_plus(
 
     mock_hook.assert_not_called()
     assert text_spin.get_text() == "65 kB"
-    assert "4 MiB" in image_text
-    assert image_spin.get_text() == "5 MiB"
+    assert "32 MiB" in image_text
+    assert image_spin.get_text() == "33 MiB"
 
     with patch(
         "qubes_config.global_config.basics_handler.apply_feature_change"
@@ -418,7 +418,7 @@ def test_global_config_clipboard_size_plus(
     mock_apply.assert_any_call(
         test_qapp.domains["dom0"],
         "gui-default-max-clipboard-image-size",
-        5 * 1024 * 1024,
+        33 * 1024 * 1024,
     )
 
     mock_error.assert_not_called()
@@ -439,7 +439,7 @@ def test_global_config_clipboard_size_minus(
 
     for spin_button, decreased in (
         (handler.text_size_spin, "63 kB"),
-        (handler.image_size_spin, "3 MiB"),
+        (handler.image_size_spin, "31 MiB"),
     ):
         adjustment = spin_button.get_adjustment()
         assert adjustment.get_value() > adjustment.get_lower()
@@ -456,7 +456,7 @@ def test_global_config_clipboard_size_minus(
     mock_apply.assert_any_call(
         test_qapp.domains["dom0"],
         "gui-default-max-clipboard-image-size",
-        3 * 1024 * 1024,
+        31 * 1024 * 1024,
     )
 
     mock_error.assert_not_called()
