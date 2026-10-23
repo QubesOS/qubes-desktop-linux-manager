@@ -88,8 +88,11 @@ class ProgressPage:
         self.update_task = None
         self.after_update_callback = callback
         self.retcode = None
+        self.settings = None
 
-        self.update_details = QubeUpdateDetails(self.builder)
+        self.update_details = QubeUpdateDetails(
+            self.builder, restart_callback=self.restart_update
+        )
 
         self.stack: Gtk.Stack = self.builder.get_object("main_stack")
         self.page: Gtk.Box = self.builder.get_object("progress_page")
@@ -122,7 +125,12 @@ class ProgressPage:
         """Schedules `perform_update` as an asyncio task on the main loop."""
         self.log.info("Prepare updating")
         self.vms_to_update = vms_to_update
+        self.settings = settings
         self.progress_list.set_model(vms_to_update.list_store_raw)
+        self._start_update(self.perform_update(settings))
+
+    def _start_update(self, update):
+        """Shows the page as updating and schedules `update` on the main loop."""
         self.next_button.set_sensitive(False)
         self.cancel_button.set_sensitive(True)
         self.cancel_button.set_label(l("_Cancel updates"))
@@ -132,7 +140,7 @@ class ProgressPage:
         self.header_label.set_halign(Gtk.Align.CENTER)
 
         loop = asyncio.get_running_loop()
-        self.update_task = loop.create_task(self.perform_update(settings))
+        self.update_task = loop.create_task(update)
 
     def interrupt_update(self):
         """
@@ -142,16 +150,31 @@ class ProgressPage:
         self.exit_triggered = True
         GLib.idle_add(self.header_label.set_text, l("Interrupting the update..."))
 
-    async def perform_update(self, settings):
-        """Uses qubes-vm-update to update dom0 and then other vms."""
+    def restart_update(self, row):
+        """Updates a single qube again once the whole update has finished."""
+        if self.update_task is not None and not self.update_task.done():
+            return
+        self.log.info("Restarting update for %s", row.name)
+        self.exit_triggered = False
+        row.set_update_progress(0)
+        self.update_details.set_restart_allowed(False)
+        self._start_update(self.perform_update(self.settings, rows=[row]))
+
+    async def perform_update(self, settings, rows=None):
+        """Uses qubes-vm-update to update dom0 and then other vms.
+
+        If `rows` is given, only those qubes are updated."""
         GLib.idle_add(self.set_total_progress, 0)
 
-        if self.vms_to_update:
-            await self.update_selected(self.vms_to_update, settings)
+        if rows is None:
+            rows = self.vms_to_update
+        if rows:
+            await self.update_selected(rows, settings)
 
         GLib.idle_add(self.header_label.set_text, l("Update finished"))
         GLib.idle_add(self.cancel_button.set_visible, False)
         GLib.idle_add(self.next_button.set_sensitive, True)
+        GLib.idle_add(self.update_details.set_restart_allowed, True)
         self.after_update_callback()
 
     async def update_selected(self, to_update, settings):
@@ -301,6 +324,9 @@ class ProgressPage:
         """Show this page and handle buttons."""
         self.log.debug("Show progress page")
         self.selection.unselect_all()
+        # Restarting is only offered before the summary is built, so the
+        # summary always matches the final update statuses.
+        self.update_details.set_restart_allowed(False)
         self.update_details.set_active_row(None)
         self.stack.set_visible_child(self.page)
 
@@ -344,9 +370,11 @@ class ProgressPage:
 
 class QubeUpdateDetails:
 
-    def __init__(self, builder):
+    def __init__(self, builder, restart_callback=None):
         self.active_row = None
         self.builder = builder
+        self.restart_callback = restart_callback
+        self.restart_allowed = False
 
         self.qube_details: Gtk.Box = self.builder.get_object("qube_details")
         self.details_label: Gtk.Label = self.builder.get_object("details_label")
@@ -356,6 +384,9 @@ class QubeUpdateDetails:
 
         self.copy_button: Gtk.Button = self.builder.get_object("copy_button")
         self.copy_button.connect("clicked", self.copy_content)
+
+        self.restart_button: Gtk.Button = self.builder.get_object("restart_button")
+        self.restart_button.connect("clicked", self.restart)
 
         self.progress_textview: Gtk.TextView = self.builder.get_object(
             "progress_textview"
@@ -374,6 +405,21 @@ class QubeUpdateDetails:
 
         copy_to_global_clipboard(text)
 
+    def restart(self, _emitter):
+        if self.active_row is not None and self.restart_callback is not None:
+            self.restart_callback(self.active_row)
+
+    def set_restart_allowed(self, allowed):
+        self.restart_allowed = allowed
+        self.update_restart_button()
+
+    def update_restart_button(self):
+        self.restart_button.set_visible(
+            self.restart_allowed
+            and self.active_row is not None
+            and self.active_row.status in (UpdateStatus.Error, UpdateStatus.Cancelled)
+        )
+
     def set_active_row(self, row):
         self.active_row = row
         row_activated = self.active_row is not None
@@ -391,6 +437,7 @@ class QubeUpdateDetails:
         self.progress_scrolled_window.set_visible(row_activated)
         self.progress_textview.set_visible(row_activated)
         self.copy_button.set_visible(row_activated)
+        self.update_restart_button()
 
     def update_buffer(self):
         if self.active_row is not None:
