@@ -126,7 +126,10 @@ def test_gui_actions_on_feature_change(widget_factory, caplog):
     ]:
         widget.qapp._qubes["untrusted"].features["gui"] = gui
         widget.qapp.update_vm_calls()
-        widget.dispatcher.handle("untrusted", event, feature="gui")
+        if gui is not None:
+            widget.dispatcher.handle("untrusted", event, feature="gui", value=gui)
+        else:
+            widget.dispatcher.handle("untrusted", event, feature="gui")
         assert_actions(widget, visible, debug_visible)
     assert not caplog.records
 
