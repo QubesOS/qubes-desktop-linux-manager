@@ -1,6 +1,7 @@
 [MASTER]
 persistent=no
 ignore=qubes_menu/tests
+extension-pkg-allow-list=cairo
 
 [MESSAGES CONTROL]
 disable=
