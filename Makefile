@@ -1,3 +1,5 @@
+USERUNITDIR ?= /lib/systemd/user
+
 default: help
 
 help:
@@ -44,8 +46,8 @@ install-autostart:
 	cp desktop/qubes-update-gui.desktop $(DESTDIR)/usr/share/applications/
 	mkdir -p $(DESTDIR)/usr/bin
 	cp qui/widget-wrapper $(DESTDIR)/usr/bin/widget-wrapper
-	mkdir -p $(DESTDIR)/lib/systemd/user/
-	cp linux-systemd/qubes-widget@.service $(DESTDIR)/lib/systemd/user/
+	mkdir -p $(DESTDIR)$(USERUNITDIR)/
+	cp linux-systemd/qubes-widget@.service $(DESTDIR)$(USERUNITDIR)/
 	cp desktop/qubes-global-config.desktop $(DESTDIR)/usr/share/applications/
 	cp desktop/qubes-new-qube.desktop $(DESTDIR)/usr/share/applications/
 	cp desktop/qubes-policy-editor-gui.desktop $(DESTDIR)/usr/share/applications/
