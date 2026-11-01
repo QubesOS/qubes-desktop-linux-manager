@@ -348,9 +348,9 @@ class QubeUpdateDetails:
         self.active_row = None
         self.builder = builder
         self._refresh_pending = False
-        # row whose buffer the text view shows, and how much of it
+        # row whose output the text view shows, and how many of its parts
         self._shown_row = None
-        self._shown_len = 0
+        self._shown_parts = 0
 
         self.qube_details: Gtk.Box = self.builder.get_object("qube_details")
         self.details_label: Gtk.Label = self.builder.get_object("details_label")
@@ -410,15 +410,16 @@ class QubeUpdateDetails:
         if row is None:
             return False
         text_buffer = self.progress_textview.get_buffer()
+        parts = row.buffer_parts
         if row is self._shown_row:
-            # the row's buffer is only appended to, insert just the new part
+            # the row's output is only appended to, insert just the new parts
             text_buffer.insert(
-                text_buffer.get_end_iter(), row.buffer[self._shown_len :]
+                text_buffer.get_end_iter(), "".join(parts[self._shown_parts :])
             )
         else:
-            text_buffer.set_text(row.buffer)
+            text_buffer.set_text("".join(parts))
             self._shown_row = row
-        self._shown_len = len(row.buffer)
+        self._shown_parts = len(parts)
         GLib.idle_add(self._autoscroll)
         return False
 

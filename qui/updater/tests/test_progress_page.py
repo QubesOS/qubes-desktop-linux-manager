@@ -187,7 +187,7 @@ def test_update_templates(
 
     # later output of the same row is appended, not set again
     text_buffer = mock_text_view.buffer = Mock()
-    updateable_vms_list[2].buffer += " more"
+    updateable_vms_list[2].append_text_view(" more")
     sut.update_details._refresh_buffer()
     text_buffer.insert.assert_called_once_with(text_buffer.get_end_iter(), " more")
     text_buffer.set_text.assert_not_called()
