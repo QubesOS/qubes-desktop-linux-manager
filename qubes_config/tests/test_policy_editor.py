@@ -123,6 +123,21 @@ def test_detect_changes(test_policy_client):
     assert not policy_editor.error_info.get_style_context().has_class("error_bad")
 
 
+def test_comment_not_at_line_start(test_policy_client):
+    policy_editor = PolicyEditor("a-test", test_policy_client)
+    policy_editor.perform_setup()
+
+    policy_editor.source_buffer.set_text("  # a comment\nTest * @anyvm @anyvm deny")
+
+    assert policy_editor.error_info.get_style_context().has_class("error_ok")
+
+    policy_editor.source_buffer.set_text("Test * @anyvm @anyvm deny #target=test-vm")
+
+    assert not policy_editor.builder.get_object("button_save").get_sensitive()
+    assert policy_editor.error_info.get_style_context().has_class("error_bad")
+    assert "comments must be on a separate line" in policy_editor.error_info.get_text()
+
+
 def test_open_another_file(test_policy_client):
     policy_editor = PolicyEditor("a-test", test_policy_client)
     policy_editor.perform_setup()

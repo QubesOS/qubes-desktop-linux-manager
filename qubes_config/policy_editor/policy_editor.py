@@ -587,13 +587,17 @@ class PolicyEditor(Gtk.Application):
                 StringPolicy(policy={"__main__": line}).rules
             except PolicySyntaxError as ex:
                 msg = str(ex).split(":", 2)[-1]
+                if "#" in line:
+                    msg += " (comments must be on a separate line)"
                 msg = html.escape(msg, quote=True)
                 errors.append("<b>Line " + str(lineno + 1) + "</b>:" + msg)
 
         if errors:
             self.error_info.get_style_context().remove_class("error_ok")
             self.error_info.get_style_context().add_class("error_bad")
-            self.error_info.set_markup("<b>Errors found:</b>\n" + "\n".join(errors))
+            self.error_info.set_markup(
+                "<b>Errors found, fix them to save changes:</b>\n" + "\n".join(errors)
+            )
         else:
             self.error_info.get_style_context().remove_class("error_bad")
             self.error_info.get_style_context().add_class("error_ok")
