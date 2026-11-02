@@ -213,6 +213,7 @@ def test_memory_summary(widget_factory, caplog):
     assert summary.level_bar.get_value() == pytest.approx(37.51, abs=0.01)
     tooltip = summary.get_tooltip_markup()
     assert "Not assigned to any qube: <b>9998 MiB</b>" in tooltip
+    assert "Used by qubes (incl. swap; self-reported): <b>4800 MiB</b>" in tooltip
     # maxmem cannot change, so it is fetched only once
     assert global_property_calls(widget) == calls
 
@@ -269,3 +270,77 @@ def test_memory_summary_position(widget_factory):
     # after all qubes, before the separator and Qube Manager entry
     assert all(hasattr(child, "vm") for child in children[:position])
     assert isinstance(children[position + 1], domains_widget.Gtk.SeparatorMenuItem)
+
+
+def test_memory_history(widget_factory, monkeypatch):
+    clock = [1000.0]
+    monkeypatch.setattr(domains_widget.time, "monotonic", lambda: clock[0])
+    widget = widget_factory()
+    set_maxmem(widget)
+    summary = widget.memory_summary
+    assert isinstance(summary.get_submenu(), domains_widget.Gtk.Menu)
+
+    # stats of all qubes in one round give one point
+    send_stats(widget, "dom0", 4096000, assigned_total=4097024)
+    send_stats(widget, "untrusted", 409600, assigned_total=1024000)
+    # memory_with_swap_used is memory_kb in send_stats()
+    assert summary.graph.samples == [(1000.0, 5121024, 4505600)]
+
+    clock[0] += 3
+    send_stats(widget, "untrusted", 819200, assigned_total=2048000)
+    assert summary.graph.samples == [
+        (1000.0, 5121024, 4505600),
+        (1003.0, 6145024, 4915200),
+    ]
+
+    # older points are dropped
+    clock[0] += domains_widget.MEMORY_HISTORY_SECONDS - 1
+    send_stats(widget, "untrusted", 409600, assigned_total=1024000)
+    assert [sample[1:] for sample in summary.graph.samples] == [
+        (6145024, 4915200),
+        (5121024, 4505600),
+    ]
+
+
+@pytest.mark.parametrize("maxmem", [True, False])
+def test_memory_graph_draw(widget_factory, maxmem):
+    cairo = pytest.importorskip("cairo")
+    widget = widget_factory()
+    if maxmem:
+        set_maxmem(widget)
+    else:
+        widget.qapp.update_global_properties()
+    graph = widget.memory_summary.graph
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 300, 120)
+    # called directly, as exceptions in GTK signal handlers are only printed
+    graph._draw(graph, cairo.Context(surface))
+    send_stats(widget, "dom0", 4096000, assigned_total=4097024)
+    send_stats(widget, "untrusted", 409600, assigned_total=1024000)
+    graph._draw(graph, cairo.Context(surface))
+
+
+@pytest.mark.parametrize(
+    "low, high, expected",
+    [
+        (3700, 3988, [3700, 3800, 3900, 4000]),
+        (3843.5, 3988.2, [3800, 3850, 3900, 3950, 4000]),
+        (100, 4095, [0, 1000, 2000, 3000, 4000, 5000]),
+        # flat line
+        (3988, 3988, [3970, 3980, 3990, 4000, 4010]),
+        (0, 0, [0, 10, 20, 30]),
+    ],
+)
+def test_memory_graph_ticks(low, high, expected):
+    assert domains_widget.memory_graph_ticks(low, high) == expected
+
+
+def test_memory_forgotten_on_domain_stopped(widget_factory):
+    widget = widget_factory()
+    set_maxmem(widget)
+    send_stats(widget, "dom0", 4096000, assigned_total=4097024)
+    send_stats(widget, "untrusted", 409600, assigned_total=1024000)
+    # qmemman gives the memory of the stopped qube to the other ones before
+    # domain-shutdown arrives
+    widget.dispatcher.handle("untrusted", "domain-stopped")
+    send_stats(widget, "dom0", 4096000, assigned_total=5121024)
+    assert widget.memory_summary.memory_label.get_text() == "5001 / 16000 MiB"
