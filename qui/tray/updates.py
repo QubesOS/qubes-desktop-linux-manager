@@ -91,6 +91,7 @@ class UpdatesTray(Gtk.Application):
 
         self.vms_needing_update = set()
         self.obsolete_vms = set()
+        self.reboot_required = False
 
         self.tray_menu = Gtk.Menu()
         self.fullscreen_window_hack.show_for_widget(self.tray_menu)
@@ -100,6 +101,7 @@ class UpdatesTray(Gtk.Application):
 
     def run(self):  # pylint: disable=arguments-differ
         self.check_vms_needing_update()
+        self.check_reboot_required()
         self.connect_events()
 
         self.update_indicator_state()
@@ -124,6 +126,16 @@ class UpdatesTray(Gtk.Application):
                         "<b>See officially supported releases</b>"
                     ),
                     self.obsolete_dom0,
+                )
+            )
+
+        if self.reboot_required:
+            self.tray_menu.append(
+                TextItem(
+                    _(
+                        "<b>System restart required!</b>\n"
+                        "Restart the computer to finish applying dom0 updates."
+                    )
                 )
             )
 
@@ -184,6 +196,14 @@ class UpdatesTray(Gtk.Application):
                 self.obsolete_vms.add(vm.name)
         return True
 
+    def check_reboot_required(self):
+        try:
+            self.reboot_required = bool(
+                self.qapp.domains["dom0"].features.get("reboot-required", False)
+            )
+        except exc.QubesException:
+            self.reboot_required = False
+
     def connect_events(self):
         self.dispatcher.add_handler(
             "domain-feature-set:updates-available", self.feature_change
@@ -200,6 +220,12 @@ class UpdatesTray(Gtk.Application):
         self.dispatcher.add_handler("domain-add", self.domain_added)
         self.dispatcher.add_handler("domain-delete", self.domain_removed)
         self.dispatcher.add_handler("domain-feature-set:os-eol", self.feature_change)
+        self.dispatcher.add_handler(
+            "domain-feature-set:reboot-required", self.reboot_required_change
+        )
+        self.dispatcher.add_handler(
+            "domain-feature-delete:reboot-required", self.reboot_required_change
+        )
 
     def domain_added(self, _submitter, _event, vm, *_args, **_kwargs):
         try:
@@ -248,10 +274,32 @@ class UpdatesTray(Gtk.Application):
 
         self.update_indicator_state()
 
+    def reboot_required_change(self, vm, _event, **_kwargs):
+        if getattr(vm, "klass", None) != "AdminVM":
+            return
+        was_required = self.reboot_required
+        self.check_reboot_required()
+        if self.reboot_required and not was_required:
+            notification = Gio.Notification.new(_("System restart required"))
+            notification.set_body(
+                _("Restart the computer to finish applying dom0 updates.")
+            )
+            notification.set_priority(Gio.NotificationPriority.HIGH)
+            self.send_notification(None, notification)
+        self.update_indicator_state()
+
     def update_indicator_state(self):
         if "dom0" in self.obsolete_vms:
             self.widget_icon.set_from_icon_name("qui-red-warn")
-        if self.vms_needing_update or self.obsolete_vms:
+        if self.reboot_required:
+            self.widget_icon.set_tooltip_markup(
+                _("<b>Qubes Update</b>\nSystem restart required.")
+            )
+        else:
+            self.widget_icon.set_tooltip_markup(
+                _("<b>Qubes Update</b>\nUpdates are available.")
+            )
+        if self.vms_needing_update or self.obsolete_vms or self.reboot_required:
             self.widget_icon.set_visible(True)
         else:
             self.widget_icon.set_visible(False)
