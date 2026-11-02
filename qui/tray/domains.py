@@ -710,6 +710,89 @@ class QubesManagerItem(Gtk.MenuItem):
         await asyncio.create_subprocess_exec("qubes-qube-manager")
 
 
+class MemorySummaryItem(Gtk.MenuItem):
+    """Memory assigned to all running qubes, compared to the system memory.
+
+    Hidden until the first stats event with ``memory_assigned_total``
+    arrives."""
+
+    def __init__(self):
+        super().__init__()
+
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+
+        # Same left offset as the icon of DomainMenuItem
+        placeholder = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        placeholder.set_size_request(16, 0)
+        hbox.pack_start(placeholder, False, True, 6)
+
+        grid = Gtk.Grid()
+        grid.set_column_spacing(10)
+        grid.set_row_spacing(4)
+
+        name_label = Gtk.Label(xalign=0)
+        name_label.set_markup(_("<b>Total memory assigned</b>"))
+        name_label.set_hexpand(True)
+
+        self.memory_label = Gtk.Label(xalign=1)
+
+        self.level_bar = Gtk.LevelBar()
+        self.level_bar.set_min_value(0)
+        self.level_bar.set_max_value(100)
+        self.level_bar.set_hexpand(True)
+        self.level_bar.set_valign(Gtk.Align.CENTER)
+
+        self.percentage_label = Gtk.Label(xalign=1)
+
+        grid.attach(name_label, 0, 0, 1, 1)
+        grid.attach(self.memory_label, 1, 0, 1, 1)
+        grid.attach(self.level_bar, 0, 1, 1, 1)
+        grid.attach(self.percentage_label, 1, 1, 1, 1)
+
+        hbox.pack_start(grid, True, True, 0)
+        self.add(hbox)
+        self.set_reserve_indicator(True)  # align with submenu triangles
+
+        hbox.show_all()
+        # visibility is managed by update_state(), not by show_all() on menu
+        self.level_bar.set_no_show_all(True)
+        self.percentage_label.set_no_show_all(True)
+        self.set_no_show_all(True)
+        self.hide()
+
+    def update_state(self, assigned_kb, total_kb=None):
+        """Show *assigned_kb* KiB assigned to qubes, out of *total_kb* KiB of
+        system memory; if *total_kb* is not known, show only the sum."""
+        assigned = int(assigned_kb / 1024)
+        if not total_kb:
+            self.memory_label.set_markup(f"{assigned} MiB")
+            self.level_bar.hide()
+            self.percentage_label.hide()
+            self.set_tooltip_markup(
+                _("Memory assigned to running qubes: <b>{} MiB</b>").format(assigned)
+            )
+            self.show()
+            return
+
+        total = int(total_kb / 1024)
+        unassigned = max(total - assigned, 0)
+        fraction = min(assigned_kb / total_kb, 1)
+        self.memory_label.set_markup(f"{assigned} / {total} MiB")
+        self.level_bar.set_value(fraction * 100)
+        # pylint: disable=consider-using-f-string
+        self.percentage_label.set_markup("{:.1%}".format(fraction))
+        self.set_tooltip_markup(
+            _(
+                "Memory assigned to running qubes: <b>{assigned} MiB</b>\n"
+                "Not assigned to any qube: <b>{unassigned} MiB</b>\n"
+                "Total system memory: <b>{total} MiB</b>"
+            ).format(assigned=assigned, unassigned=unassigned, total=total)
+        )
+        self.level_bar.show()
+        self.percentage_label.show()
+        self.show()
+
+
 class DomainMenuItem(Gtk.MenuItem):
     def __init__(self, vm, app, icon_cache, state=None):
         super().__init__()
@@ -887,6 +970,13 @@ class DomainTray(Gtk.Application):
         self.icon_cache = IconCache()
 
         self.menu_items = {}
+
+        # memory_assigned_total (KiB) of each running qube, by name
+        self.memory_assigned = {}
+        # system memory in KiB, fetched on first use (None if not available)
+        self._system_memory_kb = None
+        self._system_memory_checked = False
+        self.memory_summary = MemorySummaryItem()
 
         self.unpause_all_action = Gio.SimpleAction.new("do-unpause-all", None)
         self.unpause_all_action.connect("activate", self.do_unpause_all)
@@ -1162,6 +1252,7 @@ class DomainTray(Gtk.Application):
                     pass
 
     def remove_domain_item(self, _submitter, _event, vm, **_kwargs):
+        self.forget_memory(vm)
         if vm not in self.menu_items:
             return
         vm_widget = self.menu_items[vm]
@@ -1215,6 +1306,9 @@ class DomainTray(Gtk.Application):
             # it's a fragile DispVM
             state = "NA"
 
+        if state == "Halted" or event == "domain-shutdown":
+            self.forget_memory(vm)
+
         if event == "domain-shutdown-failed":
             item.shutdown_failed = True
         elif event in ("domain-start", "domain-pre-start", "domain-shutdown"):
@@ -1238,9 +1332,43 @@ class DomainTray(Gtk.Application):
             item.hide()
 
     def update_stats(self, vm, _event, **kwargs):
+        # memory_assigned_total is not sent by older dom0; it already includes
+        # the memory of the qube's stubdomain, if any
+        if "memory_assigned_total" in kwargs:
+            item = self.menu_items.get(vm)
+            # ignore late stats of a qube that has just shut down
+            if item is None or item.get_visible():
+                self.memory_assigned[str(vm)] = int(kwargs["memory_assigned_total"])
+                self.update_memory_summary()
         if vm not in self.menu_items:
             return
         self.menu_items[vm].update_stats(kwargs["memory_kb"], kwargs["cpu_usage"])
+
+    def forget_memory(self, vm):
+        if self.memory_assigned.pop(str(vm), None) is not None:
+            self.update_memory_summary()
+
+    @property
+    def system_memory_kb(self):
+        """Total system memory in KiB, or None if not available (older
+        dom0 or no permission)"""
+        if not self._system_memory_checked:
+            self._system_memory_checked = True
+            try:
+                # global maxmem is in MiB
+                maxmem = int(self.qapp.maxmem)
+            except (exc.QubesException, AttributeError, TypeError, ValueError):
+                maxmem = 0
+            self._system_memory_kb = maxmem * 1024 if maxmem > 0 else None
+        return self._system_memory_kb
+
+    def update_memory_summary(self):
+        if not self.memory_assigned:
+            self.memory_summary.hide()
+            return
+        self.memory_summary.update_state(
+            sum(self.memory_assigned.values()), self.system_memory_kb
+        )
 
     def initialize_menu(self):
         self.tray_menu.add(DomainMenuItem(None, self, self.icon_cache))
@@ -1263,6 +1391,9 @@ class DomainTray(Gtk.Application):
             except exc.QubesPropertyAccessError:
                 item.hide()
 
+        # Memory summary, shown once stats are received
+        self.tray_menu.add(self.memory_summary)
+
         # Separator
         separator = Gtk.SeparatorMenuItem()
         separator.show_all()
@@ -1280,6 +1411,9 @@ class DomainTray(Gtk.Application):
                 items_to_delete.append(vm)
         for vm in items_to_delete:
             self.remove_domain_item(None, None, vm)
+        for name in list(self.memory_assigned):
+            if name not in self.qapp.domains:
+                self.forget_memory(name)
         for vm in self.qapp.domains:
             self.update_domain_item(vm, "")
 
