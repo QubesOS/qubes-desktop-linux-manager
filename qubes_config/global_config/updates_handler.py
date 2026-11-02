@@ -29,7 +29,7 @@ from qrexec.policy.parser import Rule
 from qrexec.client import call as qrexec_call
 
 from ..widgets.gtk_widgets import VMListModeler, NONE_CATEGORY
-from ..widgets.utils import get_boolean_feature, apply_feature_change
+from ..widgets.utils import get_feature, get_boolean_feature, apply_feature_change
 from .page_handler import PageHandler
 from .policy_rules import RuleTargeted, SimpleVerbDescription
 from .policy_handler import PolicyHandler
@@ -245,6 +245,13 @@ class UpdateCheckerHandler:
     """Handler for checking for updates settings."""
 
     FEATURE_NAME = "service.qubes-update-check"
+    # Older name of FEATURE_NAME, mapped to the same qubes-update-check
+    # service. qubes-core-admin still sets it instead of FEATURE_NAME on new
+    # qubes when check_updates_vm is False. Therefore:
+    # - a qube without FEATURE_NAME takes its state from this feature;
+    # - enabling checking for a qube also removes this feature, because when
+    #   both are set, it is undefined which one wins.
+    LEGACY_FEATURE_NAME = "check-updates"
 
     def __init__(self, gtk_builder: Gtk.Builder, qapp: qubesadmin.Qubes):
         self.qapp = qapp
@@ -275,16 +282,15 @@ class UpdateCheckerHandler:
         )
         self.dom0_update_check.set_active(self.initial_dom0)
 
-        self.initial_default = get_boolean_feature(
-            self.qapp.domains["dom0"], "config.default.qubes-update-check", True
-        )
+        # default for all qubes, including the ones created later
+        self.initial_default = self.qapp.check_updates_vm
 
         self.initial_exceptions: List[qubesadmin.vm.QubesVM] = []
 
         for vm in self.qapp.domains:
             if vm.klass == "AdminVM":
                 continue
-            if get_boolean_feature(vm, self.FEATURE_NAME, True) != self.initial_default:
+            if self._get_vm_state(vm) != self.initial_default:
                 self.initial_exceptions.append(vm)
 
         if self.initial_default:
@@ -308,6 +314,12 @@ class UpdateCheckerHandler:
         self.flowbox_handler.set_visible(self.exceptions_check.get_active())
 
         self.exceptions_check.connect("toggled", self._enable_exceptions_clicked)
+
+    def _get_vm_state(self, vm: qubesadmin.vm.QubesVM) -> bool:
+        state = get_feature(vm, self.FEATURE_NAME, None)
+        if state is None:
+            state = get_feature(vm, self.LEGACY_FEATURE_NAME, None)
+        return True if state is None else bool(state)
 
     def _set_label(self):
         if self.enable_radio.get_active():
@@ -352,16 +364,10 @@ class UpdateCheckerHandler:
             self.initial_dom0 = self.dom0_update_check.get_active()
 
         default_state = self.enable_radio.get_active()
-        changed_default = False
+        changed_default = self.initial_default != default_state
 
-        if self.initial_default != default_state:
-            apply_feature_change(
-                self.qapp.domains["dom0"],
-                "config.default.qubes-update-check",
-                default_state,
-            )
-            changed_default = True
-            self.initial_default = default_state
+        if changed_default:
+            self.qapp.check_updates_vm = default_state
 
         exceptions = self.flowbox_handler.selected_vms
         if changed_default or self.flowbox_handler.is_changed():
@@ -371,8 +377,7 @@ class UpdateCheckerHandler:
                 vm_desired_state = (
                     default_state if vm not in exceptions else not default_state
                 )
-                vm_value = get_boolean_feature(vm, self.FEATURE_NAME, True)
-                if vm_value != vm_desired_state:
+                if self._get_vm_state(vm) != vm_desired_state:
                     # if we want False, we need to explicitly set it, else
                     # we just need to erase the feature
                     apply_feature_change(
@@ -380,7 +385,15 @@ class UpdateCheckerHandler:
                         self.FEATURE_NAME,
                         None if vm_desired_state else False,
                     )
+                if (
+                    vm_desired_state
+                    and get_feature(vm, self.LEGACY_FEATURE_NAME, None) is not None
+                ):
+                    # see LEGACY_FEATURE_NAME
+                    apply_feature_change(vm, self.LEGACY_FEATURE_NAME, None)
 
+        # only now, so that saving again after an error retries everything
+        self.initial_default = default_state
         self.flowbox_handler.save()
 
     def reset(self):

@@ -4284,7 +4284,7 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="halign">start</property>
-                                <property name="label" translatable="yes">The setting below will be applied only to &lt;b&gt;existing&lt;/b&gt; qubes. New qubes have checking for updates &lt;b&gt;enabled&lt;/b&gt; by default.</property>
+                                <property name="label" translatable="yes">&lt;b&gt;New&lt;/b&gt; qubes will also follow the setting below.</property>
                                 <property name="use-markup">True</property>
                                 <property name="wrap">True</property>
                               </object>
@@ -4315,7 +4315,7 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">&lt;b&gt;Enable&lt;/b&gt; checking for updates for all existing qubes</property>
+                                <property name="label" translatable="yes">&lt;b&gt;Enable&lt;/b&gt; checking for updates for all qubes</property>
                                 <property name="use-markup">True</property>
                                 <style>
                                   <class name="main_text"/>
@@ -4344,7 +4344,7 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">&lt;b&gt;Disable&lt;/b&gt; checking for updates for all existing qubes</property>
+                                <property name="label" translatable="yes">&lt;b&gt;Disable&lt;/b&gt; checking for updates for all qubes</property>
                                 <property name="use-markup">True</property>
                                 <style>
                                   <class name="main_text"/>
