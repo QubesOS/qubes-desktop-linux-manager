@@ -108,8 +108,9 @@ def test_perform_update(
             self.vm_rows = vm_rows
 
     sut.update_selected = VMConsumer()
+    sut.settings = mock_settings
 
-    run_coroutine(sut.perform_update(mock_settings))
+    run_coroutine(sut.perform_update())
 
     assert len(sut.update_selected.vm_rows) == len(sut.vms_to_update)
 
@@ -300,3 +301,133 @@ def test_set_active_row_none(real_builder):
     assert not sut.progress_scrolled_window.get_visible()
     assert not sut.progress_textview.get_visible()
     assert not sut.copy_button.get_visible()
+
+
+@patch("asyncio.get_running_loop")
+def test_restart_update(
+    mock_get_running_loop,
+    real_builder,
+    mock_next_button,
+    mock_cancel_button,
+    mock_label,
+    updateable_vms_list,
+):
+    mock_loop = Mock()
+    mock_get_running_loop.return_value = mock_loop
+    mock_callback = Mock()
+    sut = ProgressPage(
+        real_builder,
+        Mock(),
+        mock_label,
+        mock_next_button,
+        mock_cancel_button,
+        mock_callback,
+    )
+    sut.exit_triggered = True
+    sut.perform_update = Mock()
+    row = updateable_vms_list[0]
+
+    sut.restart_update(row)
+
+    assert not sut.exit_triggered
+    assert not mock_next_button.sensitive
+    assert mock_cancel_button.visible
+    assert mock_label.text == "Update in progress..."
+    sut.perform_update.assert_called_once_with(rows=[row])
+    mock_loop.create_task.assert_called_once()
+
+
+@patch("asyncio.get_running_loop")
+def test_restart_update_ignored_while_updating(
+    mock_get_running_loop,
+    real_builder,
+    mock_next_button,
+    mock_cancel_button,
+    mock_label,
+    updateable_vms_list,
+):
+    sut = ProgressPage(
+        real_builder,
+        Mock(),
+        mock_label,
+        mock_next_button,
+        mock_cancel_button,
+        Mock(),
+    )
+    sut.update_task = Mock()
+    sut.update_task.done.return_value = False
+
+    sut.restart_update(updateable_vms_list[0])
+
+    mock_get_running_loop.return_value.create_task.assert_not_called()
+
+
+@patch("gi.repository.GLib.idle_add")
+def test_perform_update_given_rows(
+    idle_add,
+    real_builder,
+    mock_next_button,
+    mock_cancel_button,
+    mock_label,
+    updateable_vms_list,
+):
+    mock_callback = Mock()
+    sut = ProgressPage(
+        real_builder,
+        Mock(),
+        mock_label,
+        mock_next_button,
+        mock_cancel_button,
+        mock_callback,
+    )
+    sut.vms_to_update = updateable_vms_list
+
+    class VMConsumer:
+        vm_rows = None
+
+        async def __call__(self, vm_rows, *args, **kwargs):
+            self.vm_rows = vm_rows
+
+    sut.update_selected = VMConsumer()
+    row = updateable_vms_list[0]
+
+    run_coroutine(sut.perform_update(rows=[row]))
+
+    assert sut.update_selected.vm_rows == [row]
+    idle_add.assert_any_call(sut.allow_restart_if_failed)
+    mock_callback.assert_called_once()
+
+
+@patch.object(ProgressPage, "restart_update")
+# run idle callbacks right away
+@patch("gi.repository.GLib.idle_add", lambda func, *args: func(*args))
+def test_restart_button_after_failed_update(
+    restart_update,
+    real_builder,
+    mock_next_button,
+    mock_cancel_button,
+    mock_label,
+    updateable_vms_list,
+):
+    sut = ProgressPage(
+        real_builder,
+        Mock(),
+        mock_label,
+        mock_next_button,
+        mock_cancel_button,
+        Mock(),
+    )
+    sut.vms_to_update = updateable_vms_list
+    failed_row = updateable_vms_list[1]
+
+    async def fail_one(*_args):
+        failed_row.set_status(UpdateStatus.Error)
+
+    sut.update_selected = fail_one
+
+    run_coroutine(sut.perform_update())
+    sut.update_details.set_active_row(failed_row)
+
+    assert sut.update_details.restart_button.get_visible()
+    sut.update_details.restart_button.clicked()
+    restart_update.assert_called_once_with(failed_row)
