@@ -504,7 +504,7 @@ Selected qubes will be automatically started if necessary and shutdown after suc
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="restart_button">
-                                    <property name="label" translatable="yes">  Restart update  </property>
+                                    <property name="label" translatable="yes">  Restart this update  </property>
                                     <property name="can-focus">True</property>
                                     <property name="receives-default">False</property>
                                     <property name="halign">start</property>

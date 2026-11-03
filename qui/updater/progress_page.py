@@ -127,7 +127,7 @@ class ProgressPage:
         self.vms_to_update = vms_to_update
         self.settings = settings
         self.progress_list.set_model(vms_to_update.list_store_raw)
-        self._start_update(self.perform_update(settings))
+        self._start_update(self.perform_update())
 
     def _start_update(self, update):
         """Shows the page as updating and schedules `update` on the main loop."""
@@ -158,9 +158,9 @@ class ProgressPage:
         self.exit_triggered = False
         row.set_update_progress(0)
         self.update_details.set_restart_allowed(False)
-        self._start_update(self.perform_update(self.settings, rows=[row]))
+        self._start_update(self.perform_update(rows=[row]))
 
-    async def perform_update(self, settings, rows=None):
+    async def perform_update(self, rows=None):
         """Uses qubes-vm-update to update dom0 and then other vms.
 
         If `rows` is given, only those qubes are updated."""
@@ -169,13 +169,20 @@ class ProgressPage:
         if rows is None:
             rows = self.vms_to_update
         if rows:
-            await self.update_selected(rows, settings)
+            await self.update_selected(rows, self.settings)
 
         GLib.idle_add(self.header_label.set_text, l("Update finished"))
         GLib.idle_add(self.cancel_button.set_visible, False)
         GLib.idle_add(self.next_button.set_sensitive, True)
-        GLib.idle_add(self.update_details.set_restart_allowed, True)
+        # queued after the status updates, so it sees the final statuses
+        GLib.idle_add(self.allow_restart_if_failed)
         self.after_update_callback()
+
+    def allow_restart_if_failed(self):
+        """Offers restarting only if some qube failed or was cancelled."""
+        self.update_details.set_restart_allowed(
+            any(QubeUpdateDetails.can_restart(row) for row in self.vms_to_update)
+        )
 
     async def update_selected(self, to_update, settings):
         """Updates templates and standalones and then sets update statuses."""
@@ -413,11 +420,15 @@ class QubeUpdateDetails:
         self.restart_allowed = allowed
         self.update_restart_button()
 
+    @staticmethod
+    def can_restart(row):
+        return row.status in (UpdateStatus.Error, UpdateStatus.Cancelled)
+
     def update_restart_button(self):
         self.restart_button.set_visible(
             self.restart_allowed
             and self.active_row is not None
-            and self.active_row.status in (UpdateStatus.Error, UpdateStatus.Cancelled)
+            and self.can_restart(self.active_row)
         )
 
     def set_active_row(self, row):
