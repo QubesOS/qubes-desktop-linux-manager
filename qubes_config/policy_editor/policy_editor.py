@@ -596,7 +596,7 @@ class PolicyEditor(Gtk.Application):
             self.error_info.get_style_context().remove_class("error_ok")
             self.error_info.get_style_context().add_class("error_bad")
             self.error_info.set_markup(
-                "<b>Errors found, fix them to save changes:</b>\n" + "\n".join(errors)
+                "<b>Policy cannot be saved due to errors:</b>\n" + "\n".join(errors)
             )
         else:
             self.error_info.get_style_context().remove_class("error_bad")

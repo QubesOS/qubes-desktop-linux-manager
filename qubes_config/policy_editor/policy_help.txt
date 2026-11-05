@@ -4,6 +4,8 @@ Each policy file consists of one or more policy lines:
 
 <tt>qrexec.Service  +ARGUMENT   source_qube     target_qube     {allow|deny|ask} [PARAM=VALUE [PARAM=VALUE ...]]</tt>
 
+Lines starting with <b>#</b> are comments. Comments cannot be added on the same line as a policy.
+
 <b>Service</b> corresponds to a Qubes OS RPC service.
 
 <b>>Argument</b> is the argument the service is called with; it can be empty (represented by a single +), match any argument (represented by *), or match a specific argument (always prefixed with a +), for example in the following line:

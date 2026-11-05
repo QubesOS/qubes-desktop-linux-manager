@@ -28,7 +28,6 @@
 
   <styles>
     <style id="comment" name="Comment" map-to="def:comment"/>
-    <style id="error" name="Error" map-to="def:error"/>
     <style id="include" name="Include" map-to="def:preprocessor"/>
     <style id="service" name="Service" map-to="def:function"/>
     <style id="wildcard" name="Wildcard" map-to="def:special-char"/>
@@ -43,11 +42,6 @@
       <include>
         <context id="comment" end-at-line-end="true" style-ref="comment">
           <start>^\s*#</start>
-        </context>
-
-        <!-- comments are only allowed at the start of a line -->
-        <context id="error" style-ref="error">
-          <match>#.*</match>
         </context>
 
         <context id="include" style-ref="include">
