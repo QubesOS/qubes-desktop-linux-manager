@@ -389,13 +389,8 @@ def test_updates_checker_init_disabled(real_builder, test_qapp):
     # set default to disabled (remember system default is still enabled)
     # disable it in two qubes explicitly
     test_qapp.expected_calls[
-        (
-            "dom0",
-            "admin.vm.feature.Get",
-            "config.default.qubes-update-check",
-            None,
-        )
-    ] = b"0\x00"
+        ("dom0", "admin.property.Get", "check_updates_vm", None)
+    ] = b"0\x00default=False type=bool False"
     test_qapp.expected_calls[
         ("test-red", "admin.vm.feature.Get", "service.qubes-update-check", None)
     ] = b"0\x00"
@@ -574,14 +569,6 @@ def test_updates_checker_save_dom0_initial_none(mock_feature, real_builder, test
 @patch("qubes_config.global_config.updates_handler.apply_feature_change")
 def test_updates_checker_save_add_exception(mock_feature, real_builder, test_qapp):
     test_qapp.expected_calls[
-        (
-            "dom0",
-            "admin.vm.feature.Get",
-            "config.default.qubes-update-check",
-            None,
-        )
-    ] = b"0\x001"
-    test_qapp.expected_calls[
         ("test-red", "admin.vm.feature.Get", "service.qubes-update-check", None)
     ] = b"0\x00"
 
@@ -600,14 +587,6 @@ def test_updates_checker_save_add_exception(mock_feature, real_builder, test_qap
 def test_updates_checker_save_del_exception(
     mock_feature, mock_question, real_builder, test_qapp
 ):
-    test_qapp.expected_calls[
-        (
-            "dom0",
-            "admin.vm.feature.Get",
-            "config.default.qubes-update-check",
-            None,
-        )
-    ] = b"0\x001"
     test_qapp.expected_calls[
         ("test-red", "admin.vm.feature.Get", "service.qubes-update-check", None)
     ] = b"0\x00"
@@ -638,15 +617,10 @@ def test_updates_checker_save_del_exception(
 @patch("qubes_config.global_config.updates_handler.apply_feature_change")
 def test_updates_checker_save_change_default(mock_feature, real_builder, test_qapp):
     test_qapp.expected_calls[
-        (
-            "dom0",
-            "admin.vm.feature.Get",
-            "config.default.qubes-update-check",
-            None,
-        )
-    ] = b"0\x001"
-    test_qapp.expected_calls[
         ("test-red", "admin.vm.feature.Get", "service.qubes-update-check", None)
+    ] = b"0\x00"
+    test_qapp.expected_calls[
+        ("dom0", "admin.property.Set", "check_updates_vm", b"False")
     ] = b"0\x00"
 
     handler = UpdateCheckerHandler(real_builder, test_qapp)
@@ -660,14 +634,12 @@ def test_updates_checker_save_change_default(mock_feature, real_builder, test_qa
 
     handler.save()
     assert (
-        call(
-            test_qapp.domains["dom0"],
-            "config.default.qubes-update-check",
-            False,
-        )
-        in mock_feature.mock_calls
-    )
-    counter = 1
+        "dom0",
+        "admin.property.Set",
+        "check_updates_vm",
+        b"False",
+    ) in test_qapp.actual_calls
+    counter = 0
 
     for vm in test_qapp.domains:
         if vm.klass == "AdminVM":
@@ -682,16 +654,116 @@ def test_updates_checker_save_change_default(mock_feature, real_builder, test_qa
     assert len(mock_feature.mock_calls) == counter
 
 
+@patch("qubes_config.global_config.updates_handler.apply_feature_change")
+def test_updates_checker_save_error(mock_feature, real_builder, test_qapp):
+    handler = UpdateCheckerHandler(real_builder, test_qapp)
+    handler.disable_radio.set_active(True)
+
+    with pytest.raises(AssertionError):
+        # should fail, no qapp call provided
+        handler.save()
+    assert not mock_feature.mock_calls
+
+    # saving again must still change all qubes
+    test_qapp.expected_calls[
+        ("dom0", "admin.property.Set", "check_updates_vm", b"False")
+    ] = b"0\x00"
+    handler.save()
+
+    assert (
+        call(test_qapp.domains["test-vm"], handler.FEATURE_NAME, False)
+        in mock_feature.mock_calls
+    )
+
+
+def test_updates_checker_init_legacy(real_builder, test_qapp):
+    # qubes created while check_updates_vm was False only have check-updates
+    test_qapp.expected_calls[
+        ("dom0", "admin.property.Get", "check_updates_vm", None)
+    ] = b"0\x00default=False type=bool False"
+    for vm in ["test-vm", "test-red"]:
+        test_qapp.expected_calls[
+            (vm, "admin.vm.feature.Get", "check-updates", None)
+        ] = b"0\x00"
+    # explicit value takes precedence
+    test_qapp.expected_calls[
+        ("test-red", "admin.vm.feature.Get", "service.qubes-update-check", None)
+    ] = b"0\x001"
+
+    handler = UpdateCheckerHandler(real_builder, test_qapp)
+    assert handler.disable_radio.get_active()
+    assert test_qapp.domains["test-vm"] not in handler.flowbox_handler.selected_vms
+    assert test_qapp.domains["test-red"] in handler.flowbox_handler.selected_vms
+    assert test_qapp.domains["test-blue"] in handler.flowbox_handler.selected_vms
+
+
+@patch("qubes_config.global_config.updates_handler.apply_feature_change")
+def test_updates_checker_save_enable_legacy(mock_feature, real_builder, test_qapp):
+    legacy_vms = ["test-vm", "test-red", "test-blue"]
+    test_qapp.expected_calls[
+        ("dom0", "admin.property.Get", "check_updates_vm", None)
+    ] = b"0\x00default=False type=bool False"
+    for vm in legacy_vms:
+        test_qapp.expected_calls[
+            (vm, "admin.vm.feature.Get", "check-updates", None)
+        ] = b"0\x00"
+    test_qapp.expected_calls[
+        ("dom0", "admin.property.Set", "check_updates_vm", b"True")
+    ] = b"0\x00"
+
+    handler = UpdateCheckerHandler(real_builder, test_qapp)
+    assert handler.disable_radio.get_active()
+    for vm in legacy_vms:
+        assert test_qapp.domains[vm] not in handler.flowbox_handler.selected_vms
+
+    handler.enable_radio.set_active(True)
+    handler.save()
+
+    assert (
+        "dom0",
+        "admin.property.Set",
+        "check_updates_vm",
+        b"True",
+    ) in test_qapp.actual_calls
+    # both features must be gone for checking to be enabled
+    expected = []
+    for vm in legacy_vms:
+        expected.append(call(test_qapp.domains[vm], handler.FEATURE_NAME, None))
+        expected.append(call(test_qapp.domains[vm], handler.LEGACY_FEATURE_NAME, None))
+    assert sorted(map(str, mock_feature.mock_calls)) == sorted(map(str, expected))
+
+
+@patch("qubes_config.global_config.updates_handler.apply_feature_change")
+def test_updates_checker_save_conflicting_features(
+    mock_feature, real_builder, test_qapp
+):
+    # enabled explicitly, but check-updates could still disable it
+    test_qapp.expected_calls[
+        ("test-red", "admin.vm.feature.Get", "service.qubes-update-check", None)
+    ] = b"0\x001"
+    test_qapp.expected_calls[
+        ("test-red", "admin.vm.feature.Get", "check-updates", None)
+    ] = b"0\x00"
+
+    handler = UpdateCheckerHandler(real_builder, test_qapp)
+    assert test_qapp.domains["test-red"] not in handler.flowbox_handler.selected_vms
+
+    handler.exceptions_check.set_active(True)
+    handler.flowbox_handler.add_selected_vm(test_qapp.domains["test-blue"])
+    handler.save()
+
+    assert (
+        call(test_qapp.domains["test-red"], handler.LEGACY_FEATURE_NAME, None)
+        in mock_feature.mock_calls
+    )
+    assert (
+        call(test_qapp.domains["test-red"], handler.FEATURE_NAME, None)
+        not in mock_feature.mock_calls
+    )
+
+
 @patch("qubes_config.global_config.vm_flowbox.ask_question")
 def test_updates_check_reset(mock_question, real_builder, test_qapp):
-    test_qapp.expected_calls[
-        (
-            "dom0",
-            "admin.vm.feature.Get",
-            "config.default.qubes-update-check",
-            None,
-        )
-    ] = b"0\x001"
     test_qapp.expected_calls[
         ("test-red", "admin.vm.feature.Get", "service.qubes-update-check", None)
     ] = b"0\x00"
