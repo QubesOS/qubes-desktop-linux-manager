@@ -42,7 +42,7 @@ import qui.utils
 import gi
 
 gi.require_version("Gtk", "3.0")  # isort:skip
-from gi.repository import Gtk, Gdk, Gio  # isort:skip
+from gi.repository import Gtk, Gdk, Gio, GLib  # isort:skip
 
 try:
     from gi.events import GLibEventLoopPolicy
@@ -62,6 +62,9 @@ import gettext
 
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
+
+
+MIC_ID = "mic:dom0:mic:dom0:mic::m000000"
 
 
 class DeviceMenu(Gtk.Menu):
@@ -151,6 +154,13 @@ class DevicesTray(Gtk.Application):
         self.dispatcher.add_handler("domain-start-failed", self.vm_shutdown)
         self.dispatcher.add_handler("domain-start", self.vm_start)
         self.dispatcher.add_handler("domain-unpaused", self.vm_unpaused)
+        self.dispatcher.add_handler("audio-input-blocked", self.audio_input_blocked)
+
+        attach_mic_action = Gio.SimpleAction.new(
+            "attach-mic", GLib.VariantType.new("s")  # pylint: disable=no-member
+        )
+        attach_mic_action.connect("activate", self.do_attach_mic)
+        self.add_action(attach_mic_action)
 
         self.dispatcher.add_handler(
             "property-set:template_for_dispvms", self.vm_dispvm_template_change
@@ -289,7 +299,7 @@ class DevicesTray(Gtk.Application):
         # connect with mic
         mic_feature = vm.features.get(backend.FEATURE_ATTACH_WITH_MIC, "").split(" ")
         if dev_id in mic_feature:
-            microphone = self.devices.get("mic:dom0:mic:dom0:mic::m000000", None)
+            microphone = self.devices.get(MIC_ID, None)
             microphone.devices_to_attach_with_me.append(dev)
             dev.devices_to_attach_with_me = [microphone]
 
@@ -315,7 +325,7 @@ class DevicesTray(Gtk.Application):
             # we never knew the device anyway
             return
 
-        microphone = self.devices.get("mic:dom0:mic:dom0:mic::m000000", None)
+        microphone = self.devices.get(MIC_ID, None)
 
         self.emit_notification(
             _("Device removed"),
@@ -438,7 +448,7 @@ class DevicesTray(Gtk.Application):
         add = new - old
         remove = old - new
 
-        microphone = self.devices.get("mic:dom0:mic:dom0:mic::m000000", None)
+        microphone = self.devices.get(MIC_ID, None)
 
         for dev_name in remove:
             if feature == backend.FEATURE_ATTACH_WITH_MIC:
@@ -527,7 +537,7 @@ class DevicesTray(Gtk.Application):
         """
         domains = self.qapp.domains
 
-        microphone = self.devices.get("mic:dom0:mic:dom0:mic::m000000", None)
+        microphone = self.devices.get(MIC_ID, None)
         # clear existing feature mappings
         for dev in self.devices.values():
             dev.devices_to_attach_with_me = []
@@ -670,6 +680,43 @@ class DevicesTray(Gtk.Application):
             dev.attachments.discard(wrapped_vm)
         for dev_port in devs_to_remove:
             self.device_removed(vm, None, port=dev_port)
+
+    def audio_input_blocked(self, vm, _event, **_kwargs):
+        """A qube tried to record audio, but the microphone is not attached
+        to it."""
+        microphone = self.devices.get(MIC_ID, None)
+        if microphone is None or not microphone.is_valid_for_vm(backend.VM(vm)):
+            return
+        notification = Gio.Notification.new(_("Microphone not attached"))
+        notification.set_body(
+            _(
+                "Qube {} tried to record audio, but the microphone is not "
+                "attached to it."
+            ).format(vm.name)
+        )
+        notification.set_icon(Gio.ThemedIcon.new("audio-input-microphone"))
+        notification.set_priority(Gio.NotificationPriority.NORMAL)
+        notification.add_button_with_target(
+            _("Attach microphone"),
+            "app.attach-mic",
+            GLib.Variant.new_string(vm.name),
+        )
+        self.send_notification("mic-blocked-" + vm.name, notification)
+
+    def do_attach_mic(self, _action, parameter):
+        """Attach the microphone to the qube named in the notification."""
+        microphone = self.devices.get(MIC_ID, None)
+        try:
+            vm = self.qapp.domains[parameter.get_string()]
+        except KeyError:
+            return
+        if microphone is None:
+            return
+        asyncio.create_task(
+            asyncio.to_thread(
+                microphone.attach_to_vm, backend.VM(vm), with_aux_devices=False
+            )
+        )
 
     def vm_dispvm_template_change(self, vm, _event, **_kwargs):
         """Is template for dispvms property changed"""
