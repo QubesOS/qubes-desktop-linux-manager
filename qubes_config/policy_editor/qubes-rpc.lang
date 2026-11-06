@@ -41,7 +41,7 @@
     <context id="qubes-rpc">
       <include>
         <context id="comment" end-at-line-end="true" style-ref="comment">
-          <start>#</start>
+          <start>^\s*#</start>
         </context>
 
         <context id="include" style-ref="include">

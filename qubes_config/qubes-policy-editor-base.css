@@ -29,6 +29,7 @@
 
 .error_bad {
     background: @error-background;
-    border-color: @dark-gray-2;
-    border-width: 1px;
+    border-color: @problem-frame;
+    border-width: 2px;
+    border-style: solid;
 }
