@@ -233,6 +233,7 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 /lib/systemd/user/qubes-widget@.service
 /usr/share/locale/en/LC_MESSAGES/desktop-linux-manager.mo
 /usr/share/locale/pl/LC_MESSAGES/desktop-linux-manager.mo
+/usr/share/locale/he/LC_MESSAGES/desktop-linux-manager.mo
 
 /usr/share/applications/qubes-global-config.desktop
 /usr/share/applications/qubes-new-qube.desktop

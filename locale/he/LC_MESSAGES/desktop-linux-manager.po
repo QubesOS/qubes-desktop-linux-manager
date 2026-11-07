@@ -1,0 +1,3609 @@
+# Hebrew translations for PACKAGE package.
+# Copyright (C) 2026 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Automatically generated, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: qubes-desktop-linux-manager\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-08 01:49+0200\n"
+"PO-Revision-Date: 2026-11-08 01:19+0200\n"
+"Last-Translator: David wacholder <185147826+David-wacholder@users.noreply.github.com>\n"
+"Language-Team: none\n"
+"Language: he\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: qubes_config/global_config.glade:20 qubes_config/global_config.glade:283
+#: qubes_config/global_config.glade:9810
+msgid "_Save and Close"
+msgstr "_שמירה וסגירה"
+
+#: qubes_config/global_config.glade:40 qubes_config/global_config.glade:303
+#: qubes_config/global_config.glade:9768 qubes_config/global_config.glade:9830
+#: qubes_config/global_config/global_config.py:629
+#: qubes_config/new_qube.glade:240 qubes_config/new_qube.glade:345
+#: qubes_config/widgets/gtk_utils.py:46 qui/updater.glade:748
+#: qui/updater_settings.glade:580
+msgid "_Cancel"
+msgstr "_ביטול"
+
+#: qubes_config/global_config.glade:88
+msgid "Qube"
+msgstr "Qube"
+
+#: qubes_config/global_config.glade:110
+msgid "Select qube:"
+msgstr "בחירת qube:"
+
+#: qubes_config/global_config.glade:159
+msgid "Select a qube to be able to select device types to block."
+msgstr "יש לבחור qube כדי לבחור סוגי התקנים לחסימה."
+
+#: qubes_config/global_config.glade:183
+msgid "Deny device attachment"
+msgstr "מניעת חיבור התקנים"
+
+#: qubes_config/global_config.glade:200
+msgid ""
+"You will not be able to manually attach any of the selected device types to "
+"this qube. This does <b>NOT</b> apply to automatic attachments."
+msgstr ""
+"לא תוכל לחבר ידנית ל-qube הזה אף אחד מסוגי ההתקנים שנבחרו. זה <b>לא</b> חל "
+"על חיבורים אוטומטיים."
+
+#: qubes_config/global_config.glade:349 qubes_config/global_config.glade:9876
+msgid "Device"
+msgstr "התקן"
+
+#: qubes_config/global_config.glade:371 qubes_config/global_config.glade:9898
+#: qui/devices/AttachConfirmationWindow.glade:258
+msgid "Device:"
+msgstr "התקן:"
+
+#: qubes_config/global_config.glade:431 qubes_config/global_config.glade:9976
+msgid ""
+"This device is not currently connected. The assignment cannot be modified."
+msgstr "ההתקן הזה לא מחובר כרגע. אי אפשר לשנות את ההקצאה."
+
+#: qubes_config/global_config.glade:457
+msgid "Apply rule to devices matching:"
+msgstr "החלת הכלל על התקנים שתואמים ל:"
+
+#: qubes_config/global_config.glade:475
+msgid "Backend qube:"
+msgstr "‏qube צד אחורי:"
+
+#: qubes_config/global_config.glade:480
+msgid ""
+"Backend qube cannot be changed dynamically. Select a device from desired "
+"backend qube."
+msgstr ""
+"אי אפשר לשנות את ה-qube של הצד האחורי באופן דינמי. יש לבחור התקן מה-qube "
+"הרצוי."
+
+#: qubes_config/global_config.glade:509
+#: qubes_config/global_config/device_attachments.py:159
+msgid "Device class: "
+msgstr "סוג התקן: "
+
+#: qubes_config/global_config.glade:514
+msgid ""
+"Device class cannot be set independently. Select a device from desired "
+"class."
+msgstr "אי אפשר להגדיר את סוג ההתקן בנפרד. יש לבחור התקן מהסוג הרצוי."
+
+#: qubes_config/global_config.glade:533 qubes_config/global_config.glade:1287
+#: qubes_config/global_config.glade:9208 qubes_config/new_qube.glade:1909
+msgid " "
+msgstr " "
+
+#: qubes_config/global_config.glade:558
+msgid "Device identity:"
+msgstr "זהות ההתקן:"
+
+#: qubes_config/global_config.glade:606
+#: qubes_config/global_config/device_attachments.py:221
+msgid "Port: "
+msgstr "יציאה: "
+
+#: qubes_config/global_config.glade:649
+msgid ""
+"<b>Port</b> refers to the port this device is currently plugged in. If you "
+"select matching the port, the device <b>must</b> be plugged into this port "
+"to be automatically attached. If you select port and not device identity, "
+"all devices plugged into this port will be automatically attached."
+msgstr ""
+"<b>יציאה</b> היא היציאה שאליה ההתקן מחובר כרגע. אם בוחרים התאמה לפי יציאה, "
+"ההתקן <b>חייב</b> להיות מחובר ליציאה הזו כדי שיחובר אוטומטית. אם בוחרים "
+"יציאה בלי זהות ההתקן, כל ההתקנים שמחוברים ליציאה הזו יחוברו אוטומטית."
+
+#: qubes_config/global_config.glade:668
+msgid "Action"
+msgstr "פעולה"
+
+#: qubes_config/global_config.glade:685
+msgid "Select what happens when the device becomes available."
+msgstr "יש לבחור מה יקרה כשההתקן יהיה זמין."
+
+#: qubes_config/global_config.glade:715
+msgid "Automatically attach the device to the selected qube"
+msgstr "לחבר את ההתקן אוטומטית ל-qube שנבחר"
+
+#: qubes_config/global_config.glade:733
+msgid ""
+"If multiple qubes are selected and running when the device is connected, you"
+" will be asked to choose one of them."
+msgstr "אם נבחרו כמה qubes והם פועלים כשההתקן מתחבר, תתבקש לבחור אחד מהם."
+
+#: qubes_config/global_config.glade:757
+msgid "Ask to attach to one of the selected qubes"
+msgstr "לשאול לאיזה מה-qubes שנבחרו לחבר"
+
+#: qubes_config/global_config.glade:775
+msgid "Read-only (only for block devices)"
+msgstr "קריאה בלבד (רק להתקני בלוק)"
+
+#: qubes_config/global_config.glade:793 qubes_config/global_config.glade:10123
+msgid "Qubes"
+msgstr "Qubes"
+
+#: qubes_config/global_config.glade:882 qubes_config/global_config.glade:2383
+#: qubes_config/global_config.glade:2681 qubes_config/global_config.glade:2916
+#: qubes_config/global_config.glade:10212
+msgid "Add qube"
+msgstr "הוספת qube"
+
+#: qubes_config/global_config.glade:923 qubes_config/global_config.glade:10253
+msgid "A device cannot be attached to its own backend qube."
+msgstr "אי אפשר לחבר התקן ל-qube הצד האחורי שלו."
+
+#: qubes_config/global_config.glade:967
+msgid "Qubes OS Global Config"
+msgstr "הגדרות כלליות של Qubes OS"
+
+#: qubes_config/global_config.glade:1006
+msgid "Default and service qubes"
+msgstr "‏qubes ברירת מחדל ו-qubes שירות"
+
+#: qubes_config/global_config.glade:1022
+msgid ""
+"Select the qubes that are used by default and that provide basic services."
+msgstr "יש לבחור את ה-qubes שמשמשים כברירת מחדל ושמספקים שירותים בסיסיים."
+
+#: qubes_config/global_config.glade:1043
+msgid "Clock qube:"
+msgstr "‏qube שעון:"
+
+#: qubes_config/global_config.glade:1059
+msgid "This qube sets the time in the system."
+msgstr "ה-qube הזה קובע את השעה במערכת."
+
+#: qubes_config/global_config.glade:1081
+msgid "Window Management"
+msgstr "ניהול חלונות"
+
+#: qubes_config/global_config.glade:1097
+msgid "Fullscreen mode:"
+msgstr "מצב מסך מלא:"
+
+#: qubes_config/global_config.glade:1226
+msgid "Memory Balancing"
+msgstr "איזון זיכרון"
+
+#: qubes_config/global_config.glade:1242
+msgid ""
+"These control the default memory settings for all qubes except those with "
+"connected PCI devices."
+msgstr ""
+"ההגדרות האלה קובעות את הגדרות הזיכרון שבברירת המחדל לכל ה-qubes, חוץ מ-qubes"
+" עם התקני PCI מחוברים."
+
+#: qubes_config/global_config.glade:1259
+msgid "Linux Kernel"
+msgstr "ליבת Linux"
+
+#: qubes_config/global_config.glade:1299
+msgid ""
+"This is the default kernel for Linux qubes. You can select a different "
+"kernel for an individual qube in that qube's settings."
+msgstr ""
+"זו ליבת ברירת המחדל ל-qubes של Linux. אפשר לבחור ליבה אחרת ל-qube מסוים "
+"בהגדרות של אותו qube."
+
+#: qubes_config/global_config.glade:1321
+msgid "Default net qube:"
+msgstr "‏qube רשת ברירת מחדל:"
+
+#: qubes_config/global_config.glade:1337
+msgid ""
+"This qube provides network access to all qubes using the default networking "
+"setting."
+msgstr ""
+"ה-qube הזה מספק גישה לרשת לכל ה-qubes שמשתמשים בהגדרת הרשת שבברירת המחדל."
+
+#: qubes_config/global_config.glade:1365
+msgid "Default template:"
+msgstr "תבנית ברירת מחדל:"
+
+#: qubes_config/global_config.glade:1381
+msgid ""
+"Default template for new qubes. This setting has no effect on existing "
+"qubes."
+msgstr ""
+"תבנית ברירת המחדל ל-qubes חדשים. ההגדרה הזו לא משפיעה על qubes קיימים."
+
+#: qubes_config/global_config.glade:1404
+msgid "Customize the appearance and behavior of windows and tray icons."
+msgstr "התאמה אישית של המראה וההתנהגות של חלונות וסמלים במגש המערכת."
+
+#: qubes_config/global_config.glade:1444
+msgid ""
+"Allowing qubes to use fullscreen mode can have unexpected security "
+"consequences. <a href=\"https://www.qubes-os.org/doc/how-to-enter-"
+"fullscreen-mode/\">Learn more.</a>"
+msgstr ""
+"מתן אפשרות ל-qubes להשתמש במצב מסך מלא עלול לגרום לבעיות אבטחה לא צפויות. <a"
+" href=\"https://www.qubes-os.org/doc/how-to-enter-fullscreen-mode/\">מידע "
+"נוסף.</a>"
+
+#: qubes_config/global_config.glade:1473
+msgid "UTF-8 window titles:"
+msgstr "כותרות חלון ב-UTF-8:"
+
+#: qubes_config/global_config.glade:1489
+msgid ""
+"\"Allow\" allows app qubes to display a wider range of characters in window "
+"titles, but increases the attack surface."
+msgstr ""
+"\"אפשר\" מאפשר ל-qubes יישומים להציג מגוון רחב יותר של תווים בכותרות חלונות,"
+" אבל מגדיל את שטח התקיפה."
+
+#: qubes_config/global_config.glade:1510 qubes_config/global_config.glade:1522
+#: qubes_config/global_config.glade:1534 qubes_config/global_config.glade:1546
+#: qubes_config/global_config.glade:1788 qubes_config/global_config.glade:2034
+#: qubes_config/global_config.glade:3046 qubes_config/global_config.glade:3293
+#: qubes_config/global_config.glade:3543 qubes_config/global_config.glade:3857
+#: qubes_config/global_config.glade:4191 qubes_config/global_config.glade:4543
+#: qubes_config/global_config.glade:4907 qubes_config/global_config.glade:5262
+#: qubes_config/global_config.glade:5548 qubes_config/global_config.glade:5790
+#: qubes_config/global_config.glade:6307 qubes_config/global_config.glade:6899
+#: qubes_config/global_config.glade:7022 qubes_config/global_config.glade:8514
+msgid "anchor"
+msgstr "עוגן"
+
+#: qubes_config/global_config.glade:1560
+msgid "General Settings"
+msgstr "הגדרות כלליות"
+
+#: qubes_config/global_config.glade:1576
+msgid "Tray icon style:"
+msgstr "סגנון סמלי מגש המערכת:"
+
+#: qubes_config/global_config.glade:1591
+msgid "Default Linux Kernel:"
+msgstr "ליבת Linux ברירת מחדל:"
+
+#: qubes_config/global_config.glade:1606
+msgid "Minimum qube memory:"
+msgstr "זיכרון מינימלי ל-qube:"
+
+#: qubes_config/global_config.glade:1621
+msgid "Additional dom0 memory:"
+msgstr "זיכרון נוסף ל-dom0:"
+
+#: qubes_config/global_config.glade:1655 qubes_config/global_config.glade:1695
+#: qubes_config/global_config.glade:5716 qubes_config/new_qube.glade:1419
+msgid "MiB"
+msgstr "MiB"
+
+#: qubes_config/global_config.glade:1753
+msgid "General"
+msgstr "כללי"
+
+#: qubes_config/global_config.glade:1803
+msgid "USB Input Devices"
+msgstr "התקני קלט USB"
+
+#: qubes_config/global_config.glade:1819
+msgid ""
+"USB input devices, especially keyboards, are a significant security risk. If"
+" you're not using a USB keyboard, USB mouse, USB touchscreen, or USB tablet,"
+" you can disable them here. (Note: Laptop built-in keyboards are usually not"
+" USB keyboards.)"
+msgstr ""
+"התקני קלט USB, במיוחד מקלדות, הם סיכון אבטחה משמעותי. אם אינך משתמש במקלדת "
+"USB, עכבר USB, מסך מגע USB או טאבלט USB, אפשר להשבית אותם כאן. (הערה: מקלדות"
+" מובנות במחשבים ניידים הן בדרך כלל לא מקלדות USB.)"
+
+#: qubes_config/global_config.glade:1841
+#: qubes_config/global_config/usb_devices.py:242
+msgid "Unexpected policy file contents:"
+msgstr "תוכן לא צפוי בקובץ כללי ההרשאות:"
+
+#: qubes_config/global_config.glade:1867 qubes_config/global_config.glade:2246
+#: qubes_config/global_config.glade:4595 qubes_config/global_config.glade:5890
+#: qubes_config/global_config.glade:6406 qubes_config/global_config.glade:7074
+#: qubes_config/global_config.glade:7723 qubes_config/global_config.glade:8567
+msgid ""
+"Custom policy changes found. The changes below may be overwritten by "
+"existing custom policy changes. View the files listed below to verify the "
+"existing policy."
+msgstr ""
+"נמצאו שינויים מותאמים אישית בכללי ההרשאות. השינויים שלמטה עשויים להידרס על "
+"ידי שינויים מותאמים אישית קיימים. יש לעיין בקבצים שברשימה למטה כדי לבדוק את "
+"כללי ההרשאות הקיימים."
+
+#: qubes_config/global_config.glade:1917
+msgid "USB <b>qube</b>"
+msgstr "<b>qube</b> USB"
+
+#: qubes_config/global_config.glade:1934
+msgid ""
+"A USB qube is a qube to which one or more USB controllers are connected. "
+msgstr "‏qube USB הוא qube שמחוברים אליו בקר USB אחד או יותר. "
+
+#: qubes_config/global_config.glade:1958
+msgid "<b>Keyboard</b>: "
+msgstr "<b>מקלדת</b>: "
+
+#: qubes_config/global_config.glade:1974
+msgid "<b>Mouse</b>: "
+msgstr "<b>עכבר</b>: "
+
+#: qubes_config/global_config.glade:1990
+msgid "<b>Touchscreen/Tablet</b>: "
+msgstr "<b>מסך מגע/טאבלט</b>: "
+
+#: qubes_config/global_config.glade:2049
+msgid "U2F devices"
+msgstr "התקני U2F"
+
+#: qubes_config/global_config.glade:2066
+msgid ""
+"Qubes U2F Proxy allows you to use Universal 2nd Factor (U2F) two-factor authentication (2FA) devices without exposing the whole device and all of its contents to every qube. <a href=\"https://www.qubes-os.org/doc/u2f-proxy/\">Learn more.</a>\n"
+"\n"
+"<b>Note:</b> In order to use the U2F proxy in a qube, its template must have the <tt>qubes-u2f</tt> package installed. By default, a qube can use only keys that it has registered itself."
+msgstr ""
+"‏Qubes U2F Proxy מאפשר להשתמש בהתקני אימות דו-שלבי (2FA) מסוג Universal 2nd Factor (U2F) בלי לחשוף את כל ההתקן ואת כל התוכן שלו לכל qube. <a href=\"https://www.qubes-os.org/doc/u2f-proxy/\">מידע נוסף.</a>\n"
+"\n"
+"<b>הערה:</b> כדי להשתמש ב-U2F proxy ב-qube, יש להתקין את החבילה <tt>qubes-u2f</tt> בתבנית שלו. בברירת המחדל, qube יכול להשתמש רק במפתחות שהוא רשם בעצמו."
+
+#: qubes_config/global_config.glade:2098
+msgid "<b>USB qube</b>"
+msgstr "<b>qube USB</b>"
+
+#: qubes_config/global_config.glade:2114
+msgid "Qube to which the USB controller is connected."
+msgstr "ה-qube שאליו מחובר בקר ה-USB."
+
+#: qubes_config/global_config.glade:2176
+msgid ""
+"Some policy rules could not be parsed. They are correct but are too "
+"complicated for this tool to handle. They will be discarded on save. The "
+"following rules were affected:"
+msgstr ""
+"לא ניתן היה לפענח חלק מכללי ההרשאות. הם תקינים, אבל מסובכים מדי לכלי הזה. הם"
+" יימחקו בשמירה. הכללים שהושפעו:"
+
+#: qubes_config/global_config.glade:2219
+msgid ""
+"The Qubes U2F Proxy service is not installed in the USB qube. If you wish to"
+" use this service, install the <tt>qubes-u2f</tt> package in the template on"
+" which the USB qube is based."
+msgstr ""
+"שירות Qubes U2F Proxy לא מותקן ב-qube ה-USB. כדי להשתמש בשירות, יש להתקין את"
+" החבילה <tt>qubes-u2f</tt> בתבנית שעליה מבוסס ה-qube של ה-USB."
+
+#: qubes_config/global_config.glade:2293
+msgid "<b>Enable the Qubes U2F Proxy</b> service"
+msgstr "<b>הפעלת השירות Qubes U2F Proxy</b>"
+
+#: qubes_config/global_config.glade:2321
+msgid "<b>List of qubes that can use the U2F Proxy:</b>"
+msgstr "<b>רשימת ה-qubes שיכולים להשתמש ב-U2F Proxy:</b>"
+
+#: qubes_config/global_config.glade:2436 qubes_config/global_config.glade:2717
+#: qubes_config/global_config.glade:2952
+msgid ""
+"If you don't see the desired qube here, install the <tt>qubes-u2f</tt> "
+"package in the template on which it is based (or, if it's a standalone, in "
+"the qube itself)."
+msgstr ""
+"אם ה-qube הרצוי לא מופיע כאן, יש להתקין את החבילה <tt>qubes-u2f</tt> בתבנית "
+"שעליה הוא מבוסס (או, אם הוא qube עצמאי, ב-qube עצמו)."
+
+#: qubes_config/global_config.glade:2483
+msgid "Enable <b>registering new keys</b> with the U2F Proxy service"
+msgstr "הפעלת <b>רישום מפתחות חדשים</b> בשירות U2F Proxy"
+
+#: qubes_config/global_config.glade:2516
+msgid "<b>All qubes</b>"
+msgstr "<b>כל ה-qubes</b>"
+
+#: qubes_config/global_config.glade:2529
+msgid "selected above can register new keys"
+msgstr "שנבחרו למעלה יכולים לרשום מפתחות חדשים"
+
+#: qubes_config/global_config.glade:2568
+msgid "<b>Only selected qubes</b>"
+msgstr "<b>רק qubes שנבחרו</b>"
+
+#: qubes_config/global_config.glade:2581
+msgid "can register new keys"
+msgstr "יכולים לרשום מפתחות חדשים"
+
+#: qubes_config/global_config.glade:2774
+msgid "Allow some qubes to access <b>ALL</b> keys stored on your U2F device"
+msgstr "לאפשר לחלק מה-qubes גישה ל<b>כל</b> המפתחות שבהתקן ה-U2F"
+
+#: qubes_config/global_config.glade:2825
+msgid ""
+"Caution:\n"
+"<b>All</b> keys, including those registered by other qubes and those registered previously, will be available to the qubes selected below."
+msgstr ""
+"זהירות:\n"
+"<b>כל</b> המפתחות, כולל מפתחות שנרשמו על ידי qubes אחרים ומפתחות שנרשמו בעבר, יהיו זמינים ל-qubes שנבחרו למטה."
+
+#: qubes_config/global_config.glade:3011
+#: qubes_config/global_config/device_attachments.py:75
+msgid "USB Devices"
+msgstr "התקני USB"
+
+#: qubes_config/global_config.glade:3061
+msgid "Device Attachment Policy"
+msgstr "כללי הרשאות לחיבור התקנים"
+
+#: qubes_config/global_config.glade:3077
+msgid ""
+"You can block the ability to manually attach some (or all) device types or "
+"devices to selected qubes. This does <b>not</b> apply to automatic "
+"attachment set below."
+msgstr ""
+"אפשר לחסום את האפשרות לחבר ידנית חלק מסוגי ההתקנים או ההתקנים (או את כולם) "
+"ל-qubes שנבחרו. זה <b>לא</b> חל על חיבור אוטומטי שמוגדר למטה."
+
+#: qubes_config/global_config.glade:3100
+msgid "No policy rules defined"
+msgstr "לא הוגדרו כללי הרשאות"
+
+#: qubes_config/global_config.glade:3152 qubes_config/global_config.glade:3402
+#: qubes_config/global_config.glade:3649
+msgid "Add new rule"
+msgstr "הוספת כלל חדש"
+
+#: qubes_config/global_config.glade:3206 qubes_config/global_config.glade:3456
+#: qubes_config/global_config.glade:3703
+msgid "Edit selected rule"
+msgstr "עריכת הכלל שנבחר"
+
+#: qubes_config/global_config.glade:3260 qubes_config/global_config.glade:3510
+#: qubes_config/global_config.glade:3757
+msgid "Remove selected rule"
+msgstr "הסרת הכלל שנבחר"
+
+#: qubes_config/global_config.glade:3308
+msgid "Device Assignment"
+msgstr "הקצאת התקנים"
+
+#: qubes_config/global_config.glade:3324
+msgid ""
+"Devices can be assigned to selected qubes. The device will be attached as "
+"soon as the qube is running and the device is available (e.g. plugged in)."
+msgstr ""
+"אפשר להקצות התקנים ל-qubes שנבחרו. ההתקן יחובר ברגע שה-qube פועל וההתקן זמין"
+" (למשל, מחובר למחשב)."
+
+#: qubes_config/global_config.glade:3350
+msgid "No automatic assignments defined"
+msgstr "לא הוגדרו הקצאות אוטומטיות"
+
+#: qubes_config/global_config.glade:3558
+msgid "Required Devices"
+msgstr "התקנים נדרשים"
+
+#: qubes_config/global_config.glade:3574
+msgid ""
+"A qube can require a device to start. This option is supported only for "
+"block and PCI devices, not for USB devices."
+msgstr ""
+"‏qube יכול לדרוש התקן כדי להתחיל לפעול. האפשרות הזו נתמכת רק בהתקני בלוק "
+"ו-PCI, לא בהתקני USB."
+
+#: qubes_config/global_config.glade:3597
+msgid "No required assignments defined"
+msgstr "לא הוגדרו הקצאות נדרשות"
+
+#: qubes_config/global_config.glade:3821
+msgid "Device Assignments"
+msgstr "הקצאות התקנים"
+
+#: qubes_config/global_config.glade:3872
+msgid "Dom0 updates"
+msgstr "עדכוני dom0"
+
+#: qubes_config/global_config.glade:3889
+msgid ""
+"Choose how updates are applied to dom0 to maintain system security and "
+"stability."
+msgstr ""
+"יש לבחור איך עדכונים מוחלים על dom0 כדי לשמור על האבטחה והיציבות של המערכת."
+
+#: qubes_config/global_config.glade:3917
+msgid "Dom0 update proxy: "
+msgstr "‏Proxy לעדכוני dom0: "
+
+#: qubes_config/global_config.glade:3933
+msgid ""
+"Dom0 uses a service qube as an update proxy to download updates securely."
+msgstr ""
+"‏dom0 משתמש ב-qube שירות כ-proxy לעדכונים כדי להוריד עדכונים בצורה מאובטחת."
+
+#: qubes_config/global_config.glade:3993
+msgid "Error accessing repository data. Cannot change update settings."
+msgstr "שגיאה בגישה לנתוני המאגר. אי אפשר לשנות את הגדרות העדכון."
+
+#: qubes_config/global_config.glade:4029
+msgid "Enable <b>stable</b> updates only <b>(recommended)</b>"
+msgstr "הפעלת עדכונים <b>יציבים</b> בלבד <b>(מומלץ)</b>"
+
+#: qubes_config/global_config.glade:4045
+msgid ""
+"Stable updates are well-tested and safe but may take time to be released."
+msgstr "עדכונים יציבים נבדקים היטב ובטוחים, אבל השחרור שלהם עשוי להתעכב."
+
+#: qubes_config/global_config.glade:4088
+msgid "Enable <b>security-related testing</b> updates only"
+msgstr "הפעלת עדכוני <b>בדיקה הקשורים לאבטחה</b> בלבד"
+
+#: qubes_config/global_config.glade:4105
+msgid ""
+"This option allows for timely security fixes while minimizing bugs from non-"
+"security updates. Suitable for advanced users willing to trade some "
+"stability for security."
+msgstr ""
+"האפשרות הזו מספקת תיקוני אבטחה בזמן ומצמצמת באגים מעדכונים שלא קשורים "
+"לאבטחה. מתאימה למשתמשים מתקדמים שמוכנים לוותר על מעט יציבות לטובת אבטחה."
+
+#: qubes_config/global_config.glade:4148
+msgid "Enable <b>all testing</b> updates"
+msgstr "הפעלת <b>כל עדכוני הבדיקה</b>"
+
+#: qubes_config/global_config.glade:4164
+msgid ""
+"This option provides immediate access to all changes, but updates may "
+"contain bugs that reduce system stability. Suitable for users who wish to "
+"help with testing new features. It is not recommended for stable or "
+"production systems."
+msgstr ""
+"האפשרות הזו נותנת גישה מיידית לכל השינויים, אבל העדכונים עלולים להכיל באגים "
+"שפוגעים ביציבות המערכת. מתאימה למשתמשים שרוצים לעזור בבדיקת פיצ'רים חדשים. "
+"לא מומלצת למערכות יציבות או למערכות ייצור."
+
+#: qubes_config/global_config.glade:4206
+msgid "Check for qube updates"
+msgstr "בדיקת עדכונים ל-qubes"
+
+#: qubes_config/global_config.glade:4223
+msgid ""
+"All qubes that have network access can check for updates. If such a qube is "
+"based on a template, you will be notified when updates are available for "
+"that template."
+msgstr ""
+"כל ה-qubes שיש להם גישה לרשת יכולים לבדוק אם יש עדכונים. אם qube כזה מבוסס "
+"על תבנית, תקבל הודעה כשיש עדכונים לתבנית הזו."
+
+#: qubes_config/global_config.glade:4248
+msgid "Check for and notify me about dom0 updates "
+msgstr "לבדוק עדכונים ל-dom0 ולהודיע לי עליהם "
+
+#: qubes_config/global_config.glade:4287
+msgid ""
+"The setting below will be applied only to <b>existing</b> qubes. New qubes "
+"have checking for updates <b>enabled</b> by default."
+msgstr ""
+"ההגדרה שלמטה תוחל רק על qubes <b>קיימים</b>. ב-qubes חדשים בדיקת העדכונים "
+"<b>מופעלת</b> בברירת המחדל."
+
+#: qubes_config/global_config.glade:4318
+msgid "<b>Enable</b> checking for updates for all existing qubes"
+msgstr "<b>הפעלת</b> בדיקת עדכונים לכל ה-qubes הקיימים"
+
+#: qubes_config/global_config.glade:4347
+msgid "<b>Disable</b> checking for updates for all existing qubes"
+msgstr "<b>השבתת</b> בדיקת עדכונים לכל ה-qubes הקיימים"
+
+#: qubes_config/global_config.glade:4390
+msgid ""
+"Except for the following qubes, for which checking for updates will be "
+msgstr "חוץ מה-qubes הבאים, שבהם בדיקת העדכונים תהיה "
+
+#: qubes_config/global_config.glade:4402
+#: qubes_config/global_config/updates_handler.py:314
+msgid "<b>disabled</b>"
+msgstr "<b>מושבתת</b>"
+
+#: qubes_config/global_config.glade:4503
+msgid "Add exception"
+msgstr "הוספת חריגה"
+
+#: qubes_config/global_config.glade:4558
+msgid "Update proxy"
+msgstr "‏Proxy לעדכונים"
+
+#: qubes_config/global_config.glade:4575
+msgid ""
+"Templates don't have direct network access. Instead, a service qube called "
+"an \"update proxy\" downloads updates for them."
+msgstr ""
+"לתבניות אין גישה ישירה לרשת. במקום זאת, qube שירות שנקרא \"proxy לעדכונים\" "
+"מוריד עבורן עדכונים."
+
+#: qubes_config/global_config.glade:4636 qubes_config/global_config.glade:5931
+#: qubes_config/global_config.glade:6447 qubes_config/global_config.glade:7115
+#: qubes_config/global_config.glade:7764 qubes_config/global_config.glade:8608
+msgid ""
+"Some policy rules could not be parsed. They are correct but are too "
+"complicated for this tool to handle. These rules will be discarded on save. "
+"The following rules were affected:"
+msgstr ""
+"לא ניתן היה לפענח חלק מכללי ההרשאות. הם תקינים, אבל מסובכים מדי לכלי הזה. "
+"הכללים האלה יימחקו בשמירה. הכללים שהושפעו:"
+
+#: qubes_config/global_config.glade:4735
+msgid "<b>Whonix</b> update proxy"
+msgstr "‏Proxy לעדכוני <b>Whonix</b>"
+
+#: qubes_config/global_config.glade:4751
+msgid ""
+"All Whonix qubes (those with the <tt>whonix-updatevm</tt> tag) will use this"
+" qube as an update proxy. This qube must be a Whonix gateway (e.g., <tt>sys-"
+"whonix</tt>)."
+msgstr ""
+"כל ה-qubes של Whonix (אלה עם התג <tt>whonix-updatevm</tt>) ישתמשו ב-qube הזה"
+" כ-proxy לעדכונים. ה-qube הזה חייב להיות gateway של Whonix (למשל, <tt>sys-"
+"whonix</tt>)."
+
+#: qubes_config/global_config.glade:4776
+msgid "<b>Default</b> update proxy"
+msgstr "‏Proxy <b>ברירת מחדל</b> לעדכונים"
+
+#: qubes_config/global_config.glade:4806 qubes_config/global_config.glade:7354
+#: qubes_config/global_config.glade:8182 qubes_config/global_config.glade:8846
+msgid "<b>With the following exceptions:</b>"
+msgstr "<b>עם החריגות הבאות:</b>"
+
+#: qubes_config/global_config.glade:4849 qubes_config/global_config.glade:6025
+#: qubes_config/global_config.glade:6563
+msgid "<b>QUBE</b>"
+msgstr "<b>QUBE</b>"
+
+#: qubes_config/global_config.glade:4863
+msgid "<b>UPDATE PROXY</b>"
+msgstr "‏<b>PROXY לעדכונים</b>"
+
+#: qubes_config/global_config.glade:4887 qubes_config/global_config.glade:6076
+#: qubes_config/global_config.glade:6614 qubes_config/global_config.glade:7393
+#: qubes_config/global_config.glade:8219 qubes_config/global_config.glade:8885
+msgid "No exceptions"
+msgstr "אין חריגות"
+
+#: qubes_config/global_config.glade:4946 qubes_config/global_config.glade:6124
+#: qubes_config/global_config.glade:6662 qubes_config/global_config.glade:7441
+#: qubes_config/global_config.glade:8267 qubes_config/global_config.glade:8933
+msgid "Add Exception"
+msgstr "הוספת חריגה"
+
+#: qubes_config/global_config.glade:4974
+msgid "Template repositories"
+msgstr "מאגרי תבניות"
+
+#: qubes_config/global_config.glade:4991
+msgid ""
+"The Qubes Template Manager will be able to install templates from these "
+"repositories."
+msgstr "מנהל התבניות של Qubes יוכל להתקין תבניות מהמאגרים האלה."
+
+#: qubes_config/global_config.glade:5013
+msgid "Official templates"
+msgstr "תבניות רשמיות"
+
+#: qubes_config/global_config.glade:5018
+msgid "The official template repositories are always enabled."
+msgstr "מאגרי התבניות הרשמיים תמיד מופעלים."
+
+#: qubes_config/global_config.glade:5046
+msgid "Official testing templates"
+msgstr "תבניות רשמיות בבדיקה"
+
+#: qubes_config/global_config.glade:5061 qubes_config/global_config.glade:5166
+msgid ""
+"Templates that are still in testing may contain bugs. Recommended for "
+"testers only."
+msgstr "תבניות שעדיין בבדיקה עלולות להכיל באגים. מומלץ לבודקים בלבד."
+
+#: qubes_config/global_config.glade:5098
+msgid "Community templates"
+msgstr "תבניות קהילה"
+
+#: qubes_config/global_config.glade:5113
+msgid "This repository contains templates maintained by the Qubes community."
+msgstr "המאגר הזה מכיל תבניות שהקהילה של Qubes מתחזקת."
+
+#: qubes_config/global_config.glade:5151
+msgid "Community testing templates"
+msgstr "תבניות קהילה בבדיקה"
+
+#: qubes_config/global_config.glade:5226
+msgid "Updates"
+msgstr "עדכונים"
+
+#: qubes_config/global_config.glade:5277
+msgid "Disposable qubes"
+msgstr "‏qubes זמניים"
+
+#: qubes_config/global_config.glade:5293
+msgid ""
+"Disposable qubes are isolated, one-use qubes. A disposable's contents are "
+"erased when it is stopped."
+msgstr ""
+"‏qubes זמניים הם qubes מבודדים לשימוש חד-פעמי. התוכן של qube זמני נמחק כשהוא"
+" נעצר."
+
+#: qubes_config/global_config.glade:5311
+msgid "Disposable qube templates"
+msgstr "תבניות ל-qubes זמניים"
+
+#: qubes_config/global_config.glade:5333
+msgid "Default disposable template:"
+msgstr "תבנית ברירת המחדל ל-qubes זמניים:"
+
+#: qubes_config/global_config.glade:5349
+msgid "Disposable qubes will by default launch from this qube."
+msgstr "‏qubes זמניים יופעלו בברירת המחדל מה-qube הזה."
+
+#: qubes_config/global_config.glade:5403
+msgid "<b>NAME</b>"
+msgstr "<b>שם</b>"
+
+#: qubes_config/global_config.glade:5419
+msgid "<b>BASED ON</b>"
+msgstr "<b>מבוסס על</b>"
+
+#: qubes_config/global_config.glade:5434
+msgid "<b>NET QUBE</b>"
+msgstr "‏<b>QUBE רשת</b>"
+
+#: qubes_config/global_config.glade:5449
+msgid "<b>PRELOAD</b>"
+msgstr "<b>טעינה מראש</b>"
+
+#: qubes_config/global_config.glade:5475
+msgid "No disposable templates"
+msgstr "אין תבניות ל-qubes זמניים"
+
+#: qubes_config/global_config.glade:5522
+msgid "Create a new disposable template"
+msgstr "יצירת תבנית חדשה ל-qubes זמניים"
+
+#: qubes_config/global_config.glade:5563
+msgid "Preloading"
+msgstr "טעינה מראש"
+
+#: qubes_config/global_config.glade:5580
+msgid "Preloaded qubes  are available immediately, but each one uses memory. "
+msgstr "‏qubes שנטענו מראש זמינים מיד, אבל כל אחד מהם משתמש בזיכרון. "
+
+#: qubes_config/global_config.glade:5659
+msgid "Disposables to preload from default disposable template"
+msgstr "‏qubes זמניים לטעינה מראש מתבנית ברירת המחדל ל-qubes זמניים"
+
+#: qubes_config/global_config.glade:5675
+msgid "Protected memory "
+msgstr "זיכרון מוגן "
+
+#: qubes_config/global_config.glade:5738
+msgid "Preload disposables from default disposable template"
+msgstr "טעינה מראש של qubes זמניים מתבנית ברירת המחדל ל-qubes זמניים"
+
+#: qubes_config/global_config.glade:5754
+msgid ""
+"The amount of free system memory that will never be used for preloading "
+"disposables."
+msgstr "כמות הזיכרון הפנוי במערכת שלעולם לא תשמש לטעינה מראש של qubes זמניים."
+
+#: qubes_config/global_config.glade:5805
+msgid "Open in Disposable Qube"
+msgstr "פתיחה ב-qube זמני"
+
+#: qubes_config/global_config.glade:5822
+msgid ""
+"This policy governs Qubes OS behavior when using <tt>qvm-open-in-dvm</tt> "
+"with file arguments on the command line and <b>Edit/View in disposable</b> "
+"in file managers."
+msgstr ""
+"כללי ההרשאות האלה קובעים את ההתנהגות של Qubes OS כשמשתמשים ב-<tt>qvm-open-"
+"in-dvm</tt> עם קבצים כארגומנטים בשורת הפקודה, וב-<b>Edit/View in "
+"disposable</b> במנהלי קבצים."
+
+#: qubes_config/global_config.glade:5863
+msgid ""
+"To learn more about the \"Open in VM\" policy and its uses, please see the "
+"<a href=\"https://www.qubes-os.org/doc/\">online documentation</a>."
+msgstr ""
+"מידע נוסף על כללי ההרשאות \"Open in VM\" ועל השימושים בהם זמין ב<a "
+"href=\"https://www.qubes-os.org/doc/\">תיעוד המקוון</a>."
+
+#: qubes_config/global_config.glade:5974 qubes_config/global_config.glade:6490
+msgid "Current Default Disposable Template:"
+msgstr "תבנית ברירת המחדל הנוכחית ל-qubes זמניים:"
+
+#: qubes_config/global_config.glade:6001 qubes_config/global_config.glade:6522
+msgid "<b>Exceptions:</b>"
+msgstr "<b>חריגות:</b>"
+
+#: qubes_config/global_config.glade:6050 qubes_config/global_config.glade:6588
+msgid "<b>DISPOSABLE TARGET</b>"
+msgstr "<b>יעד זמני</b>"
+
+#: qubes_config/global_config.glade:6178 qubes_config/global_config.glade:6716
+#: qubes_config/global_config.glade:7502 qubes_config/global_config.glade:8331
+#: qubes_config/global_config.glade:8994
+msgid "<b>View or edit</b> raw policy file for:"
+msgstr "<b>הצגה או עריכה</b> של קובץ כללי ההרשאות הגולמי עבור:"
+
+#: qubes_config/global_config.glade:6191
+msgid "qubes.OpenInVM"
+msgstr "qubes.OpenInVM"
+
+#: qubes_config/global_config.glade:6236 qubes_config/global_config.glade:6774
+#: qubes_config/global_config.glade:7560 qubes_config/global_config.glade:8389
+#: qubes_config/global_config.glade:9052
+msgid "   SAVE   "
+msgstr "   שמירה   "
+
+#: qubes_config/global_config.glade:6255 qubes_config/global_config.glade:6793
+#: qubes_config/global_config.glade:7578 qubes_config/global_config.glade:8071
+#: qubes_config/global_config.glade:8408 qubes_config/global_config.glade:9071
+#: qubes_config/global_config/rule_list_widgets.py:378
+msgid "CANCEL"
+msgstr "ביטול"
+
+#: qubes_config/global_config.glade:6322
+msgid "Open URL in Disposable"
+msgstr "פתיחת URL ב-qube זמני"
+
+#: qubes_config/global_config.glade:6339
+msgid ""
+"This policy governs Qubes OS behavior when using <tt>qvm-open-in-dvm</tt> "
+"with URL arguments on the command line."
+msgstr ""
+"כללי ההרשאות האלה קובעים את ההתנהגות של Qubes OS כשמשתמשים ב-<tt>qvm-open-"
+"in-dvm</tt> עם כתובות URL כארגומנטים בשורת הפקודה."
+
+#: qubes_config/global_config.glade:6379
+msgid ""
+"To learn more about the \"Open URL\" policy and its uses, please see the <a "
+"href=\"https://www.qubes-os.org/doc/how-to-use-disposables/\">online "
+"documentation</a>."
+msgstr ""
+"מידע נוסף על כללי ההרשאות \"Open URL\" ועל השימושים בהם זמין ב<a "
+"href=\"https://www.qubes-os.org/doc/how-to-use-disposables/\">תיעוד "
+"המקוון</a>."
+
+#: qubes_config/global_config.glade:6729
+msgid "qubes.OpenURL"
+msgstr "qubes.OpenURL"
+
+#: qubes_config/global_config.glade:6863
+msgid "Disposables"
+msgstr "‏qubes זמניים"
+
+#: qubes_config/global_config.glade:6914
+msgid "Clipboard Shortcuts"
+msgstr "קיצורי לוח ההעתקה"
+
+#: qubes_config/global_config.glade:6931
+msgid ""
+"Qubes OS features a secure \"inter-qube\" or \"global\" clipboard that allows you to copy and paste between qubes while preventing any qube other than your selected target from stealing content from the clipboard. Without such a system, any content copied to the global clipboard, such as a password, would instantly be exposed to every other running qube, including qubes you don't trust. By giving you precise control over exactly which qube receives inter-qube clipboard content, then immediately wiping the inter-qube clipboard afterward, Qubes OS protects the confidentiality of the text being copied.\n"
+"\n"
+"Inter-qube copy and paste actions are performed via special keyboard shortcuts, as specified below. These keyboard shortcuts are always intercepted by dom0 (so that rogue qubes can't perform global copy/paste actions on their own).\n"
+"\n"
+"<b>Note:</b> Changes below require a qube restart to take effect."
+msgstr ""
+"ב-Qubes OS יש לוח העתקה מאובטח \"בין-qubes\" או \"גלובלי\". הוא מאפשר להעתיק ולהדביק בין qubes, ומונע מכל qube חוץ מהיעד שבחרת לגנוב תוכן מלוח ההעתקה. בלי מערכת כזו, כל תוכן שמועתק ללוח ההעתקה הגלובלי, למשל סיסמה, היה נחשף מיד לכל qube אחר שפועל, כולל qubes שאינך סומך עליהם. Qubes OS שומר על סודיות הטקסט שמועתק: הוא נותן לך שליטה מדויקת על ה-qube שמקבל את התוכן מלוח ההעתקה הבין-qubes, ומיד אחר כך מוחק את לוח ההעתקה הבין-qubes.\n"
+"\n"
+"העתקה והדבקה בין qubes מתבצעות בקיצורי מקשים מיוחדים, כמו שמוגדר למטה. dom0 תמיד מיירט את קיצורי המקשים האלה (כדי ש-qubes זדוניים לא יוכלו לבצע העתקה/הדבקה גלובלית בעצמם).\n"
+"\n"
+"<b>הערה:</b> השינויים שלמטה ייכנסו לתוקף רק אחרי הפעלה מחדש של ה-qube."
+
+#: qubes_config/global_config.glade:6958
+msgid "<b>Copy</b> shortcut: "
+msgstr "קיצור <b>העתקה</b>: "
+
+#: qubes_config/global_config.glade:6988
+msgid "<b>Paste</b> shortcut: "
+msgstr "קיצור <b>הדבקה</b>: "
+
+#: qubes_config/global_config.glade:7037
+msgid "Clipboard Policy"
+msgstr "כללי הרשאות ללוח ההעתקה"
+
+#: qubes_config/global_config.glade:7054
+msgid ""
+"Prevent accidental errors when using the inter-qube (global) clipboard."
+msgstr "מניעת טעויות בשימוש בלוח ההעתקה הבין-qubes (הגלובלי)."
+
+#: qubes_config/global_config.glade:7166
+msgid "<b>Default policy.</b>"
+msgstr "<b>כללי הרשאות ברירת מחדל.</b>"
+
+#: qubes_config/global_config.glade:7183
+msgid "Allow any qube to copy/paste into any other qube, except dom0."
+msgstr "לאפשר לכל qube להעתיק/להדביק לכל qube אחר, חוץ מ-dom0."
+
+#: qubes_config/global_config.glade:7225
+msgid "<b>Custom policy.</b>"
+msgstr "<b>כללי הרשאות מותאמים אישית.</b>"
+
+#: qubes_config/global_config.glade:7242
+msgid "Specify which qubes are allowed to copy/paste into which other qubes."
+msgstr "קביעה אילו qubes מורשים להעתיק/להדביק לאילו qubes אחרים."
+
+#: qubes_config/global_config.glade:7283 qubes_config/global_config.glade:8775
+msgid "<b>ORIGIN QUBE</b>"
+msgstr "‏<b>QUBE מקור</b>"
+
+#: qubes_config/global_config.glade:7297 qubes_config/global_config.glade:7945
+#: qubes_config/global_config.glade:8789
+msgid "<b>PERMISSION</b>"
+msgstr "<b>הרשאה</b>"
+
+#: qubes_config/global_config.glade:7311 qubes_config/global_config.glade:8803
+msgid "<b>DESTINATION QUBE</b>"
+msgstr "‏<b>QUBE יעד</b>"
+
+#: qubes_config/global_config.glade:7515
+msgid "qubes.ClipboardPaste"
+msgstr "qubes.ClipboardPaste"
+
+#: qubes_config/global_config.glade:7647
+msgid "Clipboard"
+msgstr "לוח ההעתקה"
+
+#: qubes_config/global_config.glade:7685 qubes_config/global_config.glade:8478
+msgid "Split GPG"
+msgstr "Split GPG"
+
+#: qubes_config/global_config.glade:7702
+msgid ""
+"This feature protects your PGP keys by \"splitting\" GNU Privacy Guard "
+"(GnuPG or GPG) into two halves: one or more backend \"key\" qubes that "
+"securely store your PGP keys and one or more frontend \"access\" qubes with "
+"the ability to use those keys according to rules you specify. <a "
+"href=\"https://www.qubes-os.org/doc/split-gpg/\">Learn more.</a>"
+msgstr ""
+"הפיצ'ר הזה מגן על מפתחות ה-PGP שלך: הוא \"מפצל\" את GNU Privacy Guard (GnuPG"
+" או GPG) לשני חלקים. חלק אחד הוא qube \"מפתח\" אחורי אחד או יותר, ששומרים "
+"בצורה מאובטחת את מפתחות ה-PGP. החלק השני הוא qube \"גישה\" קדמי אחד או יותר,"
+" שיכולים להשתמש במפתחות האלה לפי כללים שאתה קובע. <a "
+"href=\"https://www.qubes-os.org/doc/split-gpg/\">מידע נוסף.</a>"
+
+#: qubes_config/global_config.glade:7815
+msgid "<b>Disabled.</b>"
+msgstr "<b>מושבת.</b>"
+
+#: qubes_config/global_config.glade:7832
+msgid "Each instance of GPG in a qube is confined to that qube."
+msgstr "כל מופע של GPG ב-qube מוגבל ל-qube הזה."
+
+#: qubes_config/global_config.glade:7873
+msgid "<b>Enabled.</b>"
+msgstr "<b>מופעל.</b>"
+
+#: qubes_config/global_config.glade:7890
+msgid "Split GPG is enabled according to the rules below."
+msgstr "‏Split GPG מופעל לפי הכללים שלמטה."
+
+#: qubes_config/global_config.glade:7931
+msgid "<b>ACCESS QUBE</b>"
+msgstr "‏<b>QUBE גישה</b>"
+
+#: qubes_config/global_config.glade:7977
+msgid "<b>KEY QUBE</b>"
+msgstr "‏<b>QUBE מפתח</b>"
+
+#: qubes_config/global_config.glade:8010
+msgid "No key qubes"
+msgstr "אין qubes מפתח"
+
+#: qubes_config/global_config.glade:8037
+msgid "Add new key qube:"
+msgstr "הוספת qube מפתח חדש:"
+
+#: qubes_config/global_config.glade:8090
+msgid "  ADD  "
+msgstr "  הוספה  "
+
+#: qubes_config/global_config.glade:8147
+msgid "Add New Key Qube"
+msgstr "הוספת qube מפתח חדש"
+
+#: qubes_config/global_config.glade:8344
+msgid "qubes.Gpg"
+msgstr "qubes.Gpg"
+
+#: qubes_config/global_config.glade:8530
+msgid "Moving and Copying Files"
+msgstr "העברה והעתקה של קבצים"
+
+#: qubes_config/global_config.glade:8546
+msgid ""
+"Control access for moving and copying files between qubes using <tt>qvm-"
+"copy</tt>, <tt>qvm-move</tt>, and file manager actions such as <b>Copy/Move "
+"to other qube</b>."
+msgstr ""
+"שליטה בגישה להעברה ולהעתקה של קבצים בין qubes באמצעות <tt>qvm-copy</tt>, "
+"<tt>qvm-move</tt> ופעולות במנהל הקבצים כמו <b>Copy/Move to other qube</b>."
+
+#: qubes_config/global_config.glade:8659
+msgid "<b>Default policy</b>"
+msgstr "<b>כללי הרשאות ברירת מחדל</b>"
+
+#: qubes_config/global_config.glade:8676
+msgid ""
+"You will always be asked for permission when copying and moving files "
+"between qubes, except for dom0, which is handled differently. <a "
+"href=\"https://www.qubes-os.org/doc/how-to-copy-from-dom0/\">Learn about "
+"copying to and from dom0.</a>"
+msgstr ""
+"תמיד תתבקש לאשר העתקה והעברה של קבצים בין qubes, חוץ מ-dom0, שמטופל אחרת. <a"
+" href=\"https://www.qubes-os.org/doc/how-to-copy-from-dom0/\">מידע על העתקה "
+"אל dom0 וממנו.</a>"
+
+#: qubes_config/global_config.glade:8718
+msgid "<b>Custom policy</b>"
+msgstr "<b>כללי הרשאות מותאמים אישית</b>"
+
+#: qubes_config/global_config.glade:8735
+msgid "As specified below:"
+msgstr "כמו שמוגדר למטה:"
+
+#: qubes_config/global_config.glade:9007
+msgid "qubes.Filecopy"
+msgstr "qubes.Filecopy"
+
+#: qubes_config/global_config.glade:9141
+msgid "File Access"
+msgstr "גישה לקבצים"
+
+#: qubes_config/global_config.glade:9193
+msgid "data"
+msgstr "נתונים"
+
+#: qubes_config/global_config.glade:9218
+msgid ""
+"Copy system information\n"
+"to global clipboard"
+msgstr ""
+"העתקת מידע המערכת\n"
+"ללוח ההעתקה הגלובלי"
+
+#: qubes_config/global_config.glade:9237
+msgid "Device Information"
+msgstr "מידע על המחשב"
+
+#: qubes_config/global_config.glade:9251
+msgid ""
+"Copy HCL report\n"
+"to global clipboard"
+msgstr ""
+"העתקת דוח HCL\n"
+"ללוח ההעתקה הגלובלי"
+
+#: qubes_config/global_config.glade:9271
+msgid "Qubes OS Security Report"
+msgstr "דוח האבטחה של Qubes OS"
+
+#: qubes_config/global_config.glade:9296
+msgid "HVM:"
+msgstr "HVM:"
+
+#: qubes_config/global_config.glade:9319
+msgid "I/O MMU:"
+msgstr "I/O MMU:"
+
+#: qubes_config/global_config.glade:9342
+msgid "HAP/SLAT:"
+msgstr "HAP/SLAT:"
+
+#: qubes_config/global_config.glade:9354
+msgid "TPM:"
+msgstr "TPM:"
+
+#: qubes_config/global_config.glade:9366
+msgid "Remapping:"
+msgstr "מיפוי מחדש:"
+
+#: qubes_config/global_config.glade:9454
+msgid ""
+"<b>This device is officially certified for your current Qubes OS release.</b>\n"
+"<a href=\"https://www.qubes-os.org/doc/certified-hardware/\">Learn more about Qubes-certified hardware.</a>"
+msgstr ""
+"<b>המחשב הזה מאושר רשמית לגרסת Qubes OS הנוכחית שלך.</b>\n"
+"<a href=\"https://www.qubes-os.org/doc/certified-hardware/\">מידע נוסף על חומרה מאושרת ל-Qubes.</a>"
+
+#: qubes_config/global_config.glade:9485
+msgid "USB keyboards:"
+msgstr "מקלדות USB:"
+
+#: qubes_config/global_config.glade:9497 qubes_config/global_config.glade:9538
+msgid ""
+"Granting a USB keyboard unconditional access can be dangerous. You can check"
+" your policy settings on the USB Devices page."
+msgstr ""
+"מתן גישה בלתי מוגבלת למקלדת USB עלול להיות מסוכן. אפשר לבדוק את כללי ההרשאות"
+" בעמוד התקני USB."
+
+#: qubes_config/global_config.glade:9526
+msgid "PV qubes:"
+msgstr "‏qubes מסוג PV:"
+
+#: qubes_config/global_config.glade:9594
+msgid ""
+"To learn more about the Qubes OS Security Report, please see the <a "
+"href=\"https://www.qubes-os.org/doc/\">online documentation</a>."
+msgstr ""
+"מידע נוסף על דוח האבטחה של Qubes OS זמין ב<a href=\"https://www.qubes-"
+"os.org/doc/\">תיעוד המקוון</a>."
+
+#: qubes_config/global_config.glade:9646
+msgid "This Device"
+msgstr "המחשב הזה"
+
+#: qubes_config/global_config.glade:9694
+msgid "Global Config"
+msgstr "הגדרות כלליות"
+
+#: qubes_config/global_config.glade:9730
+msgid "_Apply Changes and Close"
+msgstr "_החלת השינויים וסגירה"
+
+#: qubes_config/global_config.glade:9749
+msgid "_Apply Changes"
+msgstr "_החלת השינויים"
+
+#: qubes_config/global_config.glade:9935
+msgid "Select available PCI or block device."
+msgstr "יש לבחור התקן PCI או התקן בלוק זמין."
+
+#: qubes_config/global_config.glade:10003
+msgid ""
+"Device class:\n"
+"Other description:"
+msgstr ""
+"סוג התקן:\n"
+"תיאור אחר:"
+
+#: qubes_config/global_config.glade:10021
+msgid "Options"
+msgstr "אפשרויות"
+
+#: qubes_config/global_config.glade:10036
+msgid ""
+"<b>No strict reset</b> and <b>permissive</b> options should only be used in "
+"case of compatibility problems. They can lead to security issues."
+msgstr ""
+"יש להשתמש באפשרויות <b>ללא איפוס קפדני</b> ו<b>מתירני</b> רק במקרה של בעיות "
+"תאימות. הן עלולות לגרום לבעיות אבטחה."
+
+#: qubes_config/global_config.glade:10052
+msgid "No strict reset"
+msgstr "ללא איפוס קפדני"
+
+#: qubes_config/global_config.glade:10069
+msgid "Permissive"
+msgstr "מתירני"
+
+#: qubes_config/global_config.glade:10086
+msgid "Read-only"
+msgstr "לקריאה בלבד"
+
+#: qubes_config/global_config.glade:10103
+msgid ""
+"Require port (device will match only when plugged into the currently used "
+"port)"
+msgstr "דרישת יציאה (ההתקן יתאים רק כשהוא מחובר ליציאה שבשימוש כרגע)"
+
+#: qubes_config/global_config/basics_handler.py:335
+msgid "Qube memory settings"
+msgstr "הגדרות זיכרון של qube"
+
+#: qubes_config/global_config/basics_handler.py:420
+msgid "Default kernel"
+msgstr "ליבת ברירת המחדל"
+
+#: qubes_config/global_config/basics_handler.py:475
+msgid "Clock qube"
+msgstr "‏qube שעון"
+
+#: qubes_config/global_config/basics_handler.py:486
+msgid "Default template"
+msgstr "תבנית ברירת המחדל"
+
+#: qubes_config/global_config/basics_handler.py:497
+msgid "Default net qube"
+msgstr "‏qube רשת ברירת המחדל"
+
+#: qubes_config/global_config/basics_handler.py:508
+#: qubes_config/global_config/basics_handler.py:522
+msgid "default (disallow)"
+msgstr "ברירת מחדל (לא לאפשר)"
+
+#: qubes_config/global_config/basics_handler.py:509
+#: qubes_config/global_config/basics_handler.py:523
+#: qubes_config/global_config/policy_rules.py:232
+msgid "allow"
+msgstr "לאפשר"
+
+#: qubes_config/global_config/basics_handler.py:510
+#: qubes_config/global_config/basics_handler.py:524
+msgid "disallow"
+msgstr "לא לאפשר"
+
+#: qubes_config/global_config/basics_handler.py:512
+msgid "Allow fullscreen"
+msgstr "לאפשר מסך מלא"
+
+#: qubes_config/global_config/basics_handler.py:526
+msgid "Allow utf8 window titles"
+msgstr "לאפשר כותרות חלון ב-utf8"
+
+#: qubes_config/global_config/basics_handler.py:536
+msgid "default (tinted icon)"
+msgstr "ברירת מחדל (סמל צבוע)"
+
+#: qubes_config/global_config/basics_handler.py:537
+msgid "full background"
+msgstr "רקע מלא"
+
+#: qubes_config/global_config/basics_handler.py:538
+msgid "thin border"
+msgstr "מסגרת דקה"
+
+#: qubes_config/global_config/basics_handler.py:539
+msgid "thick border"
+msgstr "מסגרת עבה"
+
+#: qubes_config/global_config/basics_handler.py:540
+msgid "tinted icon"
+msgstr "סמל צבוע"
+
+#: qubes_config/global_config/basics_handler.py:541
+msgid "tinted icon with modified white"
+msgstr "סמל צבוע עם לבן מותאם"
+
+#: qubes_config/global_config/basics_handler.py:543
+#, no-python-format
+msgid "tinted icon with 50% saturation"
+msgstr "סמל צבוע עם רוויה של 50%"
+
+#: qubes_config/global_config/conflict_handler.py:57
+msgid ""
+"This is a legacy file from previous Qubes versions. Custom policy contained "
+"there will no longer be supported in Qubes 4.2."
+msgstr ""
+"זהו קובץ ישן מגרסאות קודמות של Qubes. כללי הרשאות מותאמים אישית שבו לא "
+"ייתמכו יותר ב-Qubes 4.2."
+
+#: qubes_config/global_config/device_attachments.py:61
+msgid "Block device"
+msgstr "התקן בלוק"
+
+#: qubes_config/global_config/device_attachments.py:62
+#: qubes_config/global_config/device_attachments.py:74
+msgid "Microphone"
+msgstr "מיקרופון"
+
+#: qubes_config/global_config/device_attachments.py:63
+msgid "PCI device"
+msgstr "התקן PCI"
+
+#: qubes_config/global_config/device_attachments.py:64
+msgid "USB device"
+msgstr "התקן USB"
+
+#: qubes_config/global_config/device_attachments.py:76
+#: qubes_config/global_config/device_attachments.py:361
+msgid "Block Devices"
+msgstr "התקני בלוק"
+
+#: qubes_config/global_config/device_attachments.py:213
+msgid "Device class:"
+msgstr "סוג התקן:"
+
+#: qubes_config/global_config/device_attachments.py:305
+#: qubes_config/global_config/device_attachments.py:507
+msgid "Create New Device Assignment"
+msgstr "יצירת הקצאת התקן חדשה"
+
+#: qubes_config/global_config/device_attachments.py:319
+#: qubes_config/global_config/device_attachments.py:523
+msgid "Edit Device Assignment"
+msgstr "עריכת הקצאת התקן"
+
+#: qubes_config/global_config/device_attachments.py:361
+msgid "PCI Devices"
+msgstr "התקני PCI"
+
+#: qubes_config/global_config/device_attachments.py:442
+#, python-brace-format
+msgid "Not available for {0} devices"
+msgstr "לא זמין עבור התקני {0}"
+
+#: qubes_config/global_config/device_attachments.py:446
+#, python-brace-format
+msgid "Always enabled for {0} devices"
+msgstr "תמיד מופעל עבור התקני {0}"
+
+#: qubes_config/global_config/device_attachments.py:466
+#: qubes_config/global_config/device_attachments.py:508
+msgid "No device selected."
+msgstr "לא נבחר התקן."
+
+#: qubes_config/global_config/device_attachments.py:614
+msgid "Unknown device"
+msgstr "התקן לא ידוע"
+
+#: qubes_config/global_config/device_attachments.py:615
+msgid "Device name: "
+msgstr "שם ההתקן: "
+
+#: qubes_config/global_config/device_attachments.py:617
+msgid "Type: "
+msgstr "סוג: "
+
+#: qubes_config/global_config/device_attachments.py:621
+msgid "Vendor: "
+msgstr "יצרן: "
+
+#: qubes_config/global_config/device_attachments.py:622
+msgid "Serial number: "
+msgstr "מספר סידורי: "
+
+#: qubes_config/global_config/device_attachments.py:731
+msgid "will attach automatically to"
+msgstr "יחובר אוטומטית אל"
+
+#: qubes_config/global_config/device_attachments.py:733
+msgid "is required by "
+msgstr "נדרש על ידי "
+
+#: qubes_config/global_config/device_attachments.py:734
+msgid "will ask to be attached to"
+msgstr "ישאל לפני חיבור אל"
+
+#: qubes_config/global_config/device_attachments.py:742
+msgid "Any {} device attached to <b>{}</b> "
+msgstr "כל התקן {} שמחובר ל-<b>{}</b> "
+
+#: qubes_config/global_config/device_attachments.py:881
+msgid "This rule cannot be edited with GUI tools."
+msgstr "אי אפשר לערוך את הכלל הזה בכלים הגרפיים."
+
+#: qubes_config/global_config/device_attachments.py:1073
+msgid "Duplicate rules"
+msgstr "כללים כפולים"
+
+#: qubes_config/global_config/device_attachments.py:1075
+msgid ""
+"Duplicate device rules were found. Those rules cannot be all present in a "
+"system; only the last one will be saved. "
+msgstr ""
+"נמצאו כללי התקנים כפולים. כללים אלה לא יכולים להתקיים יחד במערכת; רק האחרון "
+"יישמר. "
+
+#: qubes_config/global_config/device_blocks.py:97
+msgid "New Device Attachment Block"
+msgstr "חסימת חיבור התקן חדשה"
+
+#: qubes_config/global_config/device_blocks.py:103
+msgid "Edit Device Attachment Block"
+msgstr "עריכת חסימת חיבור התקן"
+
+#: qubes_config/global_config/device_blocks.py:260
+msgid "Other: "
+msgstr "אחר: "
+
+#: qubes_config/global_config/device_blocks.py:266
+msgid "Block set in command line."
+msgstr "החסימה הוגדרה בשורת הפקודה."
+
+#: qubes_config/global_config/device_blocks.py:278
+msgid "Network devices"
+msgstr "התקני רשת"
+
+#: qubes_config/global_config/device_blocks.py:280
+msgid "modems, WiFi and Ethernet adapters"
+msgstr "מודמים, מתאמי WiFi ו-Ethernet"
+
+#: qubes_config/global_config/device_blocks.py:285
+msgid "Human interface devices"
+msgstr "התקני ממשק אנוש"
+
+#: qubes_config/global_config/device_blocks.py:287
+msgid "all input devices, such as mice, keyboards, tablets etc."
+msgstr "כל התקני הקלט, כמו עכברים, מקלדות, טאבלטים וכו'."
+
+#: qubes_config/global_config/device_blocks.py:291
+msgid "Keyboards"
+msgstr "מקלדות"
+
+#: qubes_config/global_config/device_blocks.py:294
+msgid "Mice"
+msgstr "עכברים"
+
+#: qubes_config/global_config/device_blocks.py:298
+msgid "Printers"
+msgstr "מדפסות"
+
+#: qubes_config/global_config/device_blocks.py:303
+msgid "Image input devices"
+msgstr "התקני קלט תמונה"
+
+#: qubes_config/global_config/device_blocks.py:305
+msgid "Scanners and cameras"
+msgstr "סורקים ומצלמות"
+
+#: qubes_config/global_config/device_blocks.py:311
+msgid "Multimedia output devices"
+msgstr "התקני פלט מולטימדיה"
+
+#: qubes_config/global_config/device_blocks.py:313
+msgid "Displays and audio output devices"
+msgstr "מסכים והתקני פלט שמע"
+
+#: qubes_config/global_config/device_blocks.py:317
+msgid "Audio devices"
+msgstr "התקני שמע"
+
+#: qubes_config/global_config/device_blocks.py:320
+msgid "Microphones"
+msgstr "מיקרופונים"
+
+#: qubes_config/global_config/device_blocks.py:324
+msgid "Storage devices"
+msgstr "התקני אחסון"
+
+#: qubes_config/global_config/device_blocks.py:328
+msgid "Block devices"
+msgstr "התקני בלוק"
+
+#: qubes_config/global_config/device_blocks.py:332
+msgid "USB storage devices"
+msgstr "התקני אחסון USB"
+
+#: qubes_config/global_config/device_blocks.py:335
+msgid ""
+"USB storage devices may offer more capabilities than block storage devices.\n"
+"Most storage devices can be attached as either block device or USB device"
+msgstr ""
+"התקני אחסון USB עשויים להציע יותר יכולות מהתקני אחסון בלוק.\n"
+"את רוב התקני האחסון אפשר לחבר כהתקן בלוק או כהתקן USB"
+
+#: qubes_config/global_config/device_blocks.py:344
+msgid "Bluetooth"
+msgstr "Bluetooth"
+
+#: qubes_config/global_config/device_blocks.py:349
+msgid "Smart card readers"
+msgstr "קוראי כרטיסים חכמים"
+
+#: qubes_config/global_config/device_blocks.py:421
+msgid "<b>{}</b> cannot be attached to "
+msgstr "‏<b>{}</b> לא יכול להתחבר אל "
+
+#: qubes_config/global_config/device_widgets.py:286
+#: qubes_config/global_config/rule_list_widgets.py:437
+msgid "Delete rule"
+msgstr "מחיקת כלל"
+
+#: qubes_config/global_config/device_widgets.py:287
+msgid "Are you sure you want to delete rule:\n"
+msgstr "האם למחוק את הכלל:\n"
+
+#: qubes_config/global_config/device_widgets.py:323
+msgid "Attachment changed: "
+msgstr "החיבור השתנה: "
+
+#: qubes_config/global_config/device_widgets.py:326
+msgid "Removed assignment: "
+msgstr "הקצאה הוסרה: "
+
+#: qubes_config/global_config/disposables.py:161
+msgid "Default disposable template uses the value configured below"
+msgstr "תבנית ברירת המחדל ל-qubes זמניים משתמשת בערך שמוגדר למטה"
+
+#: qubes_config/global_config/disposables.py:334
+msgid "Preloading from default disposable template"
+msgstr "טעינה מראש מתבנית ברירת המחדל ל-qubes זמניים"
+
+#: qubes_config/global_config/disposables.py:427
+msgid "Default disposable qube template"
+msgstr "תבנית ברירת המחדל ל-qubes זמניים"
+
+#: qubes_config/global_config/global_config.py:136
+#: qubes_config/global_config/global_config.py:137
+msgid ""
+"be allowed to paste\n"
+" into clipboard of"
+msgstr ""
+"יורשה להדביק\n"
+" ללוח ההעתקה של"
+
+#: qubes_config/global_config/global_config.py:148
+msgid "default (Ctrl+Shift+C)"
+msgstr "ברירת מחדל (Ctrl+Shift+C)"
+
+#: qubes_config/global_config/global_config.py:149
+msgid "Ctrl+Shift+C"
+msgstr "Ctrl+Shift+C"
+
+#: qubes_config/global_config/global_config.py:150
+msgid "Ctrl+Win+C"
+msgstr "Ctrl+Win+C"
+
+#: qubes_config/global_config/global_config.py:151
+msgid "Win+C"
+msgstr "Win+C"
+
+#: qubes_config/global_config/global_config.py:153
+msgid "Global Clipboard copy shortcut"
+msgstr "קיצור מקשים להעתקה ללוח ההעתקה הכללי"
+
+#: qubes_config/global_config/global_config.py:160
+msgid "default (Ctrl+Shift+V)"
+msgstr "ברירת מחדל (Ctrl+Shift+V)"
+
+#: qubes_config/global_config/global_config.py:161
+msgid "Ctrl+Shift+V"
+msgstr "Ctrl+Shift+V"
+
+#: qubes_config/global_config/global_config.py:162
+msgid "Ctrl+Win+V"
+msgstr "Ctrl+Win+V"
+
+#: qubes_config/global_config/global_config.py:163
+msgid "Ctrl+Insert"
+msgstr "Ctrl+Insert"
+
+#: qubes_config/global_config/global_config.py:164
+msgid "Win+V"
+msgstr "Win+V"
+
+#: qubes_config/global_config/global_config.py:166
+msgid "Global Clipboard paste shortcut"
+msgstr "קיצור מקשים להדבקה מלוח ההעתקה הכללי"
+
+#: qubes_config/global_config/global_config.py:216
+msgid "Loading system settings..."
+msgstr "טעינת הגדרות המערכת..."
+
+#: qubes_config/global_config/global_config.py:387
+msgid ""
+"ask to access GPG\n"
+"keys from"
+msgstr ""
+"יבקש גישה למפתחות\n"
+"‏GPG של"
+
+#: qubes_config/global_config/global_config.py:388
+#: qubes_config/global_config/global_config.py:394
+#: qubes_config/global_config/global_config.py:396
+msgid ""
+"access GPG\n"
+"keys from"
+msgstr ""
+"יקבל גישה למפתחות\n"
+"‏GPG של"
+
+#: qubes_config/global_config/global_config.py:395
+msgid ""
+"to access GPG\n"
+"keys from"
+msgstr ""
+"לגשת למפתחות\n"
+"‏GPG של"
+
+#: qubes_config/global_config/global_config.py:420
+msgid "to be allowed to copy files to"
+msgstr "לקבל הרשאה להעתיק קבצים אל"
+
+#: qubes_config/global_config/global_config.py:421
+msgid "allow files to be copied to"
+msgstr "יורשה להעתיק קבצים אל"
+
+#: qubes_config/global_config/global_config.py:422
+msgid "be allowed to copy files to"
+msgstr "יורשה להעתיק קבצים אל"
+
+#: qubes_config/global_config/global_config.py:551
+msgid "Saving changes"
+msgstr "שמירת השינויים"
+
+#: qubes_config/global_config/global_config.py:552
+msgid "Saving global configuration changes..."
+msgstr "שמירת השינויים בהגדרות הכלליות..."
+
+#: qubes_config/global_config/global_config.py:574
+msgid "Could not save changes"
+msgstr "לא ניתן לשמור את השינויים"
+
+#: qubes_config/global_config/global_config.py:575
+msgid "The following error occurred: "
+msgstr "אירעה השגיאה הבאה: "
+
+#: qubes_config/global_config/global_config.py:609
+msgid "The following <b>unsaved changes</b> were found:"
+msgstr "נמצאו <b>השינויים שלא נשמרו</b> הבאים:"
+
+#: qubes_config/global_config/global_config.py:616
+msgid "Do you want to save changes?"
+msgstr "האם לשמור את השינויים?"
+
+#: qubes_config/global_config/global_config.py:624
+#: qubes_config/global_config/policy_handler.py:385
+msgid "Unsaved changes"
+msgstr "שינויים שלא נשמרו"
+
+#: qubes_config/global_config/global_config.py:627
+#: qubes_config/global_config/policy_handler.py:393
+msgid "_Save changes"
+msgstr "_שמירת השינויים"
+
+#: qubes_config/global_config/global_config.py:628
+#: qubes_config/global_config/policy_handler.py:394
+msgid "_Discard changes"
+msgstr "_ביטול השינויים"
+
+#: qubes_config/global_config/policy_exceptions_handler.py:156
+#: qubes_config/global_config/policy_handler.py:431
+msgid "Raw policy text"
+msgstr "טקסט גולמי של כללי ההרשאות"
+
+#: qubes_config/global_config/policy_exceptions_handler.py:159
+#: qubes_config/global_config/policy_handler.py:434
+msgid "Policy rules"
+msgstr "כללי הרשאה"
+
+#: qubes_config/global_config/policy_exceptions_handler.py:282
+msgid "and default to"
+msgstr "וברירת המחדל תהיה"
+
+#: qubes_config/global_config/policy_exceptions_handler.py:283
+msgid "use"
+msgstr "ישתמש ב-"
+
+#: qubes_config/global_config/policy_exceptions_handler.py:284
+msgid "open in disposable qube"
+msgstr "לפתוח ב-qube זמני"
+
+#: qubes_config/global_config/policy_exceptions_handler.py:301
+msgid "Exceptions for disposable templates "
+msgstr "חריגים עבור תבניות ל-qubes זמניים "
+
+#: qubes_config/global_config/policy_handler.py:387
+msgid ""
+"A rule is currently being edited. \n"
+"Do you want to save changes to the followingrule?\n"
+msgstr ""
+"כלל נמצא כרגע בעריכה. \n"
+"האם לשמור את השינויים בכלל הבא?\n"
+
+#: qubes_config/global_config/policy_handler.py:442
+msgid "Unknown rule found in police file"
+msgstr "נמצא כלל לא מוכר בקובץ כללי ההרשאות"
+
+#: qubes_config/global_config/policy_handler.py:443
+#: qubes_config/global_config/policy_handler.py:526
+msgid "The following rules could not be parsed:\n"
+msgstr "לא ניתן לפענח את הכללים הבאים:\n"
+
+#: qubes_config/global_config/policy_handler.py:446
+msgid ""
+"\n"
+"This has probably happened due to manual editing of the policy file. The rule will be discarded."
+msgstr ""
+"\n"
+"כנראה שזה קרה בגלל עריכה ידנית של קובץ כללי ההרשאות. הכלל יימחק."
+
+#: qubes_config/global_config/policy_handler.py:525
+msgid "Error parsing rules"
+msgstr "שגיאה בפענוח הכללים"
+
+#: qubes_config/global_config/policy_handler.py:651
+msgid ""
+"Are you sure you want to delete this rule? All related exceptions will also "
+"be deleted."
+msgstr "האם למחוק את הכלל הזה? כל החריגים הקשורים אליו יימחקו גם הם."
+
+#: qubes_config/global_config/policy_handler.py:664
+#: qubes_config/global_config/rule_list_widgets.py:313
+#: qubes_config/global_config/rule_list_widgets.py:617
+#: qubes_config/global_config/rule_list_widgets.py:678
+msgid "will"
+msgstr " "
+
+#: qubes_config/global_config/policy_handler.py:755
+msgid "Invalid selection"
+msgstr "בחירה לא חוקית"
+
+#: qubes_config/global_config/policy_handler.py:757
+#, python-brace-format
+msgid "Invalid object was selected. {new_qube} is not a valid Qubes qube."
+msgstr "נבחר אובייקט לא חוקי. {new_qube} אינו qube חוקי של Qubes."
+
+#: qubes_config/global_config/policy_handler.py:765
+msgid "Add new key qube"
+msgstr "הוספת qube מפתחות חדש"
+
+#: qubes_config/global_config/policy_handler.py:767
+#, python-brace-format
+msgid ""
+"Are you sure you want to add {new_qube} as a key qube? It has network "
+"access, which may lead to decreased security."
+msgstr ""
+"האם להוסיף את {new_qube} כ-qube מפתחות? יש לו גישה לרשת, וזה עלול להפחית את "
+"האבטחה."
+
+#: qubes_config/global_config/policy_manager.py:52
+msgid ""
+"\n"
+"# THIS IS AN AUTOMATICALLY GENERATED POLICY FILE.\n"
+"# Any changes made manually may be overwritten by Qubes Configuration Tools.\n"
+"\n"
+msgstr ""
+"\n"
+"# THIS IS AN AUTOMATICALLY GENERATED POLICY FILE.\n"
+"# Any changes made manually may be overwritten by Qubes Configuration Tools.\n"
+"\n"
+
+#: qubes_config/global_config/policy_rules.py:126
+#: qubes_config/global_config/policy_rules.py:299
+#: qubes_config/global_config/policy_rules.py:417
+msgid "ask"
+msgstr "לשאול"
+
+#: qubes_config/global_config/policy_rules.py:126
+#: qubes_config/global_config/policy_rules.py:179
+#: qubes_config/global_config/policy_rules.py:417
+msgid "always"
+msgstr "תמיד"
+
+#: qubes_config/global_config/policy_rules.py:126
+#: qubes_config/global_config/policy_rules.py:179
+#: qubes_config/global_config/policy_rules.py:301
+#: qubes_config/global_config/policy_rules.py:417
+msgid "never"
+msgstr "לעולם לא"
+
+#: qubes_config/global_config/policy_rules.py:138
+#: qubes_config/global_config/policy_rules.py:188
+#: qubes_config/global_config/policy_rules.py:194
+#: qubes_config/global_config/policy_rules.py:210
+#: qubes_config/global_config/policy_rules.py:216
+msgid "Unrecognized action: "
+msgstr "פעולה לא מוכרת: "
+
+#: qubes_config/global_config/policy_rules.py:201
+msgid "can"
+msgstr "יכול"
+
+#: qubes_config/global_config/policy_rules.py:201
+msgid "can not"
+msgstr "לא יכול"
+
+#: qubes_config/global_config/policy_rules.py:231
+#: qubes_config/global_config/usb_devices.py:94
+msgid "enable"
+msgstr "להפעיל"
+
+#: qubes_config/global_config/policy_rules.py:233
+#: qubes_config/global_config/usb_devices.py:95
+msgid "disable"
+msgstr "להשבית"
+
+#: qubes_config/global_config/policy_rules.py:242
+#: qubes_config/global_config/policy_rules.py:310
+#: qubes_config/global_config/policy_rules.py:426
+msgid "Rule cannot have an argument"
+msgstr "לכלל לא יכול להיות ארגומנט"
+
+#: qubes_config/global_config/policy_rules.py:244
+msgid "Target must be @adminvm"
+msgstr "היעד חייב להיות @adminvm"
+
+#: qubes_config/global_config/policy_rules.py:247
+msgid "If action is ask, default_target must be @adminvm"
+msgstr "אם הפעולה היא ask, ערך default_target חייב להיות @adminvm"
+
+#: qubes_config/global_config/policy_rules.py:250
+msgid "If action is allow, no parameters are allowed"
+msgstr "אם הפעולה היא allow, אסור להגדיר פרמטרים"
+
+#: qubes_config/global_config/policy_rules.py:258
+msgid "Cannot set target on this type of rule."
+msgstr "אי אפשר להגדיר יעד לסוג כלל כזה."
+
+#: qubes_config/global_config/policy_rules.py:300
+msgid "automatically"
+msgstr "באופן אוטומטי"
+
+#: qubes_config/global_config/policy_rules.py:385
+msgid ""
+"This type of action supports only single-qube destination qubes for single-"
+"qube source qubes."
+msgstr "סוג פעולה זה תומך רק ב-qube יעד יחיד כשה-qube המקור הוא יחיד."
+
+#: qubes_config/global_config/rule_list_widgets.py:48
+#: qubes_config/global_config/rule_list_widgets.py:55
+#: qubes_config/global_config/rule_list_widgets.py:63
+msgid "ALL QUBES"
+msgstr "כל ה-QUBES"
+
+#: qubes_config/global_config/rule_list_widgets.py:49
+#: qubes_config/global_config/rule_list_widgets.py:56
+#: qubes_config/global_config/rule_list_widgets.py:65
+#: qubes_config/global_config/rule_list_widgets.py:71
+msgid "TYPE: APP"
+msgstr "סוג: יישומים"
+
+#: qubes_config/global_config/rule_list_widgets.py:50
+#: qubes_config/global_config/rule_list_widgets.py:57
+#: qubes_config/global_config/rule_list_widgets.py:66
+#: qubes_config/global_config/rule_list_widgets.py:72
+msgid "TYPE: TEMPLATES"
+msgstr "סוג: תבניות"
+
+#: qubes_config/global_config/rule_list_widgets.py:51
+#: qubes_config/global_config/rule_list_widgets.py:58
+#: qubes_config/global_config/rule_list_widgets.py:67
+#: qubes_config/global_config/rule_list_widgets.py:73
+msgid "TYPE: DISPOSABLE"
+msgstr "סוג: זמני"
+
+#: qubes_config/global_config/rule_list_widgets.py:59
+msgid "TYPE: ADMINVM"
+msgstr "סוג: ADMINVM"
+
+#: qubes_config/global_config/rule_list_widgets.py:64
+msgid "Default Disposable Qube"
+msgstr "‏qube זמני ברירת מחדל"
+
+#: qubes_config/global_config/rule_list_widgets.py:77
+msgid "Default Disposable Template"
+msgstr "תבנית ברירת המחדל ל-qubes זמניים"
+
+#: qubes_config/global_config/rule_list_widgets.py:172
+#, python-brace-format
+msgid "{name} is not a valid qube name."
+msgstr "‏{name} אינו שם qube חוקי."
+
+#: qubes_config/global_config/rule_list_widgets.py:314
+msgid "Are you sure you want to delete this rule?"
+msgstr "האם למחוק את הכלל הזה?"
+
+#: qubes_config/global_config/rule_list_widgets.py:351
+msgid "Editing rule:"
+msgstr "עריכת כלל:"
+
+#: qubes_config/global_config/rule_list_widgets.py:372
+msgid "ACCEPT"
+msgstr "ACCEPT"
+
+#: qubes_config/global_config/rule_list_widgets.py:511
+msgid "Invalid rule"
+msgstr "כלל לא חוקי"
+
+#: qubes_config/global_config/rule_list_widgets.py:512
+#, python-brace-format
+msgid "This rule is not valid: {error}"
+msgstr "הכלל הזה לא חוקי: {error}"
+
+#: qubes_config/global_config/rule_list_widgets.py:522
+#: qubes_config/global_config/rule_list_widgets.py:535
+msgid "Cannot save rule"
+msgstr "לא ניתן לשמור את הכלל"
+
+#: qubes_config/global_config/rule_list_widgets.py:524
+#, python-brace-format
+msgid ""
+"This rule conflicts with the following existing rule:\n"
+"{error}\n"
+msgstr ""
+"הכלל הזה מתנגש עם הכלל הקיים הבא:\n"
+"‏{error}\n"
+
+#: qubes_config/global_config/rule_list_widgets.py:561
+msgid "uses"
+msgstr "משתמש ב-"
+
+#: qubes_config/global_config/thisdevice_handler.py:118
+#, python-brace-format
+msgid "Failed to load system data: {ex}\n"
+msgstr "טעינת נתוני המערכת נכשלה: {ex}\n"
+
+#: qubes_config/global_config/thisdevice_handler.py:129
+msgid "Failed to load system data.\n"
+msgstr "טעינת נתוני המערכת נכשלה.\n"
+
+#: qubes_config/global_config/thisdevice_handler.py:132
+#, python-brace-format
+msgid ""
+"<b>Brand:</b> {brand}\n"
+"<b>Model:</b> {model}\n"
+"\n"
+"<b>CPU:</b> {cpu}\n"
+"<b>Chipset:</b> {chipset}\n"
+"<b>Graphics:</b> {gpu}\n"
+"\n"
+"<b>RAM:</b> {memory} Mb\n"
+"\n"
+"<b>QubesOS version:</b> {qubes_ver}\n"
+"<b>BIOS:</b> {bios}\n"
+"<b>Kernel:</b> {kernel_ver}\n"
+"<b>Xen:</b> {xen_ver}\n"
+msgstr ""
+"<b>מותג:</b> {brand}\n"
+"<b>דגם:</b> {model}\n"
+"\n"
+"<b>מעבד:</b> {cpu}\n"
+"<b>שבבים:</b> {chipset}\n"
+"<b>גרפיקה:</b> {gpu}\n"
+"\n"
+"<b>זיכרון RAM:</b> {memory} Mb\n"
+"\n"
+"<b>גרסת QubesOS:</b> {qubes_ver}\n"
+"‏<b>BIOS:</b> {bios}\n"
+"<b>ליבה:</b> {kernel_ver}\n"
+"‏<b>Xen:</b> {xen_ver}\n"
+
+#: qubes_config/global_config/thisdevice_handler.py:173
+msgid "<b>TPM version</b>: 2.0 (not yet supported)"
+msgstr "<b>גרסת TPM</b>: 2.0 (עדיין לא נתמכת)"
+
+#: qubes_config/global_config/thisdevice_handler.py:177
+msgid "<b>TPM version</b>: 1.2"
+msgstr "<b>גרסת TPM</b>: 1.2"
+
+#: qubes_config/global_config/thisdevice_handler.py:180
+msgid "<b>TPM version</b>: device not found"
+msgstr "<b>גרסת TPM</b>: ההתקן לא נמצא"
+
+#: qubes_config/global_config/thisdevice_handler.py:195
+#, python-brace-format
+msgid "<b>PV qubes:</b> {num_pvs} found"
+msgstr "‏<b>qubes מסוג PV:</b> נמצאו {num_pvs}"
+
+#: qubes_config/global_config/thisdevice_handler.py:198
+msgid ""
+"<b>The following qubes have PV virtualization mode:</b>\n"
+" - "
+msgstr ""
+"<b>ל-qubes הבאים יש מצב וירטואליזציה PV:</b>\n"
+" - "
+
+#: qubes_config/global_config/thisdevice_handler.py:213
+#: qubes_config/global_config/thisdevice_handler.py:214
+#: qubes_config/global_config/thisdevice_handler.py:218
+#: qubes_config/global_config/thisdevice_handler.py:220
+#: qubes_config/global_config/thisdevice_handler.py:221
+msgid "unknown"
+msgstr "לא ידוע"
+
+#: qubes_config/global_config/thisdevice_handler.py:235
+msgid "Failed to copy to Global Clipboard"
+msgstr "ההעתקה ללוח ההעתקה הכללי נכשלה"
+
+#: qubes_config/global_config/thisdevice_handler.py:236
+msgid "An error occurred while trying to access Global Clipboard"
+msgstr "אירעה שגיאה בניסיון לגשת ללוח ההעתקה הכללי"
+
+#: qubes_config/global_config/thisdevice_handler.py:278
+msgid "<b>USB keyboards</b>: "
+msgstr "<b>מקלדות USB</b>: "
+
+#: qubes_config/global_config/thisdevice_handler.py:281
+msgid "unknown (legacy policy found)"
+msgstr "לא ידוע (נמצאו כללי הרשאות ישנים)"
+
+#: qubes_config/global_config/thisdevice_handler.py:284
+msgid "insecure policy"
+msgstr "כללי הרשאות לא מאובטחים"
+
+#: qubes_config/global_config/thisdevice_handler.py:287
+msgid "secure policy"
+msgstr "כללי הרשאות מאובטחים"
+
+#: qubes_config/global_config/updates_handler.py:136
+msgid " Encountered error: "
+msgstr " אירעה שגיאה: "
+
+#: qubes_config/global_config/updates_handler.py:199
+msgid "dom0 update source"
+msgstr "מקור העדכונים של dom0"
+
+#: qubes_config/global_config/updates_handler.py:201
+msgid "Official template update source"
+msgstr "מקור העדכונים של התבניות הרשמיות"
+
+#: qubes_config/global_config/updates_handler.py:203
+msgid "Community template update source"
+msgstr "מקור העדכונים של תבניות הקהילה"
+
+#: qubes_config/global_config/updates_handler.py:316
+msgid "<b>enabled</b>"
+msgstr "<b>מופעלת</b>"
+
+#: qubes_config/global_config/updates_handler.py:331
+msgid "dom0 \"check for updates\" setting"
+msgstr "ההגדרה \"בדיקת עדכונים\" של dom0"
+
+#: qubes_config/global_config/updates_handler.py:333
+msgid "Default \"check for updates\" setting"
+msgstr "הגדרת ברירת המחדל של \"בדיקת עדכונים\""
+
+#: qubes_config/global_config/updates_handler.py:339
+msgid "Qubes selected for unusual 'check for updates' behaviors"
+msgstr "‏qubes שנבחרו להתנהגות חריגה של \"בדיקת עדכונים\""
+
+#: qubes_config/global_config/updates_handler.py:450
+#: qubes_config/global_config/updates_handler.py:457
+#: qubes_config/widgets/gtk_widgets.py:44
+msgid "(none)"
+msgstr "(אין)"
+
+#: qubes_config/global_config/updates_handler.py:582
+msgid "Whonix qubes can only use Whonix update proxies!"
+msgstr "‏qubes של Whonix יכולים להשתמש רק בשרתי proxy לעדכונים של Whonix!"
+
+#: qubes_config/global_config/updates_handler.py:748
+msgid "dom0 Update Proxy"
+msgstr "שרת proxy לעדכונים של dom0"
+
+#: qubes_config/global_config/updates_handler.py:750
+msgid "Update proxy settings"
+msgstr "הגדרות שרת proxy לעדכונים"
+
+#: qubes_config/global_config/usb_devices.py:93
+msgid "always ask"
+msgstr "תמיד לשאול"
+
+#: qubes_config/global_config/usb_devices.py:235
+#, python-brace-format
+msgid "{name} input settings"
+msgstr "הגדרות קלט של {name}"
+
+#: qubes_config/global_config/usb_devices.py:383
+msgid "U2F not enabled in qube"
+msgstr "‏U2F לא מופעל ב-qube"
+
+#: qubes_config/global_config/usb_devices.py:384
+msgid "U2F is not enabled in this qube. Do you want to enable it?"
+msgstr "‏U2F לא מופעל ב-qube הזה. להפעיל אותו?"
+
+#: qubes_config/global_config/usb_devices.py:565
+msgid "Incorrect configuration found"
+msgstr "נמצאה הגדרה שגויה"
+
+#: qubes_config/global_config/usb_devices.py:567
+msgid ""
+"U2F is enabled, but not qubes are selected to be used with U2F. This is "
+"equivalent to disabling U2F and will be treated as such."
+msgstr ""
+"‏U2F מופעל, אבל לא נבחרו qubes לשימוש עם U2F. זה שקול להשבתת U2F, וכך זה "
+"יטופל."
+
+#: qubes_config/global_config/usb_devices.py:673
+msgid "U2F enabled"
+msgstr "‏U2F מופעל"
+
+#: qubes_config/global_config/usb_devices.py:674
+msgid "U2F disabled"
+msgstr "‏U2F מושבת"
+
+#: qubes_config/global_config/usb_devices.py:681
+msgid "USB qube for U2F Proxy changed"
+msgstr "ה-qube של USB עבור U2F Proxy השתנה"
+
+#: qubes_config/global_config/usb_devices.py:684
+msgid "List of qubes with U2F enabled changed"
+msgstr "רשימת ה-qubes שבהם U2F מופעל השתנתה"
+
+#: qubes_config/global_config/usb_devices.py:687
+#: qubes_config/global_config/usb_devices.py:689
+#: qubes_config/global_config/usb_devices.py:691
+msgid "U2F key registration settings changed"
+msgstr "הגדרות רישום מפתחות U2F השתנו"
+
+#: qubes_config/global_config/usb_devices.py:697
+msgid "List of qubes with unrestricted U2F key access changed"
+msgstr "רשימת ה-qubes עם גישה בלתי מוגבלת למפתחות U2F השתנתה"
+
+#: qubes_config/global_config/vm_flowbox.py:50
+msgid "No qubes selected"
+msgstr "לא נבחרו qubes"
+
+#: qubes_config/global_config/vm_flowbox.py:84
+msgid "Delete"
+msgstr "מחיקה"
+
+#: qubes_config/global_config/vm_flowbox.py:85
+msgid "Are you sure you want to remove this qube from the list?"
+msgstr "האם להסיר את ה-qube הזה מהרשימה?"
+
+#: qubes_config/global_config/vm_flowbox.py:179
+msgid "Cannot add qube"
+msgstr "לא ניתן להוסיף qube"
+
+#: qubes_config/global_config/vm_flowbox.py:180
+msgid "This qube is already selected."
+msgstr "ה-qube הזה כבר נבחר."
+
+#: qubes_config/new_qube.glade:9
+msgid "Select Applications"
+msgstr "בחירת יישומים"
+
+#: qubes_config/new_qube.glade:27
+msgid ""
+"Select applications that will be listed in the menu for this qube. This can "
+"be changed at any time through Qube Settings."
+msgstr ""
+"יש לבחור את היישומים שיופיעו בתפריט עבור ה-qube הזה. אפשר לשנות זאת בכל עת "
+"בהגדרות ה-qube."
+
+#: qubes_config/new_qube.glade:91
+msgid "No matching applications found in current template."
+msgstr "לא נמצאו יישומים מתאימים בתבנית הנוכחית."
+
+#: qubes_config/new_qube.glade:110
+msgid "Other qubes containing matching applications"
+msgstr "‏qubes אחרים שמכילים יישומים מתאימים"
+
+#: qubes_config/new_qube.glade:130
+msgid "Load applications available in other templates"
+msgstr "טעינת יישומים שזמינים בתבניות אחרות"
+
+#: qubes_config/new_qube.glade:174
+msgid "_Close and save choice"
+msgstr "_סגירה ושמירת הבחירה"
+
+#: qubes_config/new_qube.glade:203
+msgid "Switch template?"
+msgstr "להחליף תבנית?"
+
+#: qubes_config/new_qube.glade:221
+msgid "_Switch template"
+msgstr "_החלפת תבנית"
+
+#: qubes_config/new_qube.glade:273
+msgid "Do you want to switch the template to:"
+msgstr "להחליף את התבנית אל:"
+
+#: qubes_config/new_qube.glade:299 qubes_config/new_qube.glade:1492
+msgid "Create New Qube"
+msgstr "יצירת qube חדש"
+
+#: qubes_config/new_qube.glade:322
+msgid "C_reate new qube"
+msgstr "_יצירת qube חדש"
+
+#: qubes_config/new_qube.glade:391
+msgid "Basic properties"
+msgstr "מאפיינים בסיסיים"
+
+#: qubes_config/new_qube.glade:414
+msgid "Name:"
+msgstr "שם:"
+
+#: qubes_config/new_qube.glade:427 qubes_config/new_qube.glade:445
+msgid ""
+"Qube name can have up to 63 characters\n"
+"A-Z, a-z, numbers, hyphen, underscores and dot are accepted\n"
+"The first character must be a letter\n"
+"Qube name can not end in \"-dm\""
+msgstr ""
+"שם ה-qube יכול להכיל עד 63 תווים\n"
+"מותר להשתמש ב-A-Z, a-z, ספרות, מקף, קו תחתון ונקודה\n"
+"התו הראשון חייב להיות אות\n"
+"שם ה-qube לא יכול להסתיים ב-\"-dm\""
+
+#: qubes_config/new_qube.glade:433
+msgid "enter qube name (required)"
+msgstr "יש להזין שם ל-qube (חובה)"
+
+#: qubes_config/new_qube.glade:472
+msgid "Label:"
+msgstr "תווית:"
+
+#: qubes_config/new_qube.glade:497
+msgid ""
+"Label is the color of the qube, used to distinguish its windows (with a "
+"frame of this color) and programs (with a tinted icon). "
+msgstr ""
+"התווית היא הצבע של ה-qube. הצבע מבדיל בין החלונות שלו (במסגרת בצבע הזה) "
+"והתוכנות שלו (בסמל צבוע). "
+
+#: qubes_config/new_qube.glade:524
+msgid "Launch Qube Settings after creation"
+msgstr "פתיחת הגדרות ה-qube אחרי היצירה"
+
+#: qubes_config/new_qube.glade:542 qubes_config/new_qube.glade:917
+#: qubes_config/new_qube.glade:1633
+msgid "Template"
+msgstr "תבנית"
+
+#: qubes_config/new_qube.glade:558
+msgid ""
+"Select template for this qube. Applications available in the qube depend on "
+"the template."
+msgstr "יש לבחור תבנית ל-qube הזה. היישומים שזמינים ב-qube תלויים בתבנית."
+
+#: qubes_config/new_qube.glade:595 qubes_config/new_qube.glade:728
+msgid "Clone from existing"
+msgstr "שכפול מקיים"
+
+#: qubes_config/new_qube.glade:611
+msgid ""
+"You can clone your new template from an existing one; initially, the new "
+"template will have the same applications as the source template."
+msgstr ""
+"אפשר לשכפל את התבנית החדשה מתבנית קיימת. בהתחלה יהיו בתבנית החדשה אותם "
+"יישומים כמו בתבנית המקור."
+
+#: qubes_config/new_qube.glade:641 qubes_config/new_qube.glade:775
+msgid "Do not clone"
+msgstr "ללא שכפול"
+
+#: qubes_config/new_qube.glade:654 qubes_config/new_qube.glade:788
+msgid ""
+"If you do not clone from an existing template, the resulting qube will be "
+"completely empty and you will need to install an operating system inside "
+"manually."
+msgstr ""
+"אם לא משכפלים מתבנית קיימת, ה-qube שייווצר יהיה ריק לגמרי ויהיה צורך להתקין "
+"בו מערכת הפעלה באופן ידני."
+
+#: qubes_config/new_qube.glade:682
+msgid "Template:"
+msgstr "תבנית:"
+
+#: qubes_config/new_qube.glade:744
+msgid ""
+"You can clone your new qube from an existing one; initially, the new qube "
+"will have the same applications as the source qube."
+msgstr ""
+"אפשר לשכפל את ה-qube החדש מ-qube קיים. בהתחלה יהיו ב-qube החדש אותם יישומים "
+"כמו ב-qube המקור."
+
+#: qubes_config/new_qube.glade:816
+msgid "Template or standalone qube:"
+msgstr "תבנית או qube עצמאי:"
+
+#: qubes_config/new_qube.glade:862
+msgid "Disposable qube template"
+msgstr "תבנית ל-qubes זמניים"
+
+#: qubes_config/new_qube.glade:878
+msgid ""
+"Select disposable qube template to base your new qube on. The state on the "
+"disposable qube when started will be the same as of the template."
+msgstr ""
+"יש לבחור תבנית ל-qubes זמניים שעליה יתבסס ה-qube החדש. ה-qube הזמני יופעל "
+"באותו מצב כמו התבנית."
+
+#: qubes_config/new_qube.glade:933
+msgid ""
+"Select template for your new disposable qube template. Applications "
+"available in the qube depend on the template."
+msgstr ""
+"יש לבחור תבנית לתבנית החדשה ל-qubes זמניים. היישומים שזמינים ב-qube תלויים "
+"בתבנית."
+
+#: qubes_config/new_qube.glade:972
+msgid "Network"
+msgstr "רשת"
+
+#: qubes_config/new_qube.glade:1014
+msgid "Network connection: "
+msgstr "חיבור לרשת: "
+
+#: qubes_config/new_qube.glade:1026
+msgid "<b>None</b>"
+msgstr "<b>ללא</b>"
+
+#: qubes_config/new_qube.glade:1060
+msgid "Default:"
+msgstr "ברירת מחדל:"
+
+#: qubes_config/new_qube.glade:1090
+msgid "No network connection"
+msgstr "ללא חיבור לרשת"
+
+#: qubes_config/new_qube.glade:1109
+msgid "Tor/Whonix:"
+msgstr "Tor/Whonix:"
+
+#: qubes_config/new_qube.glade:1143
+msgid "Custom:"
+msgstr "מותאם אישית:"
+
+#: qubes_config/new_qube.glade:1198
+msgid "Applications"
+msgstr "יישומים"
+
+#: qubes_config/new_qube.glade:1214
+msgid ""
+"Choose applications available in the qube. This can be changed later in Qube"
+" Settings."
+msgstr ""
+"יש לבחור את היישומים שזמינים ב-qube. אפשר לשנות זאת אחר כך בהגדרות ה-qube."
+
+#: qubes_config/new_qube.glade:1245
+msgid "Advanced Options"
+msgstr "אפשרויות מתקדמות"
+
+#: qubes_config/new_qube.glade:1287
+#: qubes_config/new_qube/advanced_handler.py:65
+msgid "Show advanced settings"
+msgstr "הצגת הגדרות מתקדמות"
+
+#: qubes_config/new_qube.glade:1318
+msgid ""
+"<b>Caution:</b> Changing these settings can compromise your system or make "
+"the qube unable to boot. Use only if you know what you're doing."
+msgstr ""
+"<b>זהירות:</b> שינוי ההגדרות האלה יכול לסכן את המערכת או למנוע מה-qube "
+"לעלות. יש להשתמש בהן רק אם יודעים מה עושים."
+
+#: qubes_config/new_qube.glade:1331
+msgid "Provides network access to other qubes"
+msgstr "מספק גישה לרשת ל-qubes אחרים"
+
+#: qubes_config/new_qube.glade:1346
+msgid "Install system from device (also available from settings)"
+msgstr "התקנת מערכת מהתקן (זמין גם מההגדרות)"
+
+#: qubes_config/new_qube.glade:1368
+msgid "Storage pool:"
+msgstr "מאגר אחסון:"
+
+#: qubes_config/new_qube.glade:1391
+msgid "Initial RAM:"
+msgstr "זיכרון RAM התחלתי:"
+
+#: qubes_config/new_qube.glade:1405
+msgid "0"
+msgstr "0"
+
+#: qubes_config/new_qube.glade:1406
+msgid "(default)"
+msgstr "(ברירת מחדל)"
+
+#: qubes_config/new_qube.glade:1509
+msgid "<b>Select type</b>"
+msgstr "<b>בחירת סוג</b>"
+
+#: qubes_config/new_qube.glade:1557
+msgid "Application"
+msgstr "‏qube יישומים"
+
+#: qubes_config/new_qube.glade:1570
+msgid ""
+"The most widely-used qube type - this is a template-based qube designed to "
+"be used to run various applications. An application qube can run all "
+"applications installed in its template."
+msgstr ""
+"סוג ה-qube הנפוץ ביותר. זה qube שמבוסס על תבנית ומיועד להרצת יישומים שונים. "
+"qube יישומים יכול להריץ את כל היישומים שמותקנים בתבנית שלו."
+
+#: qubes_config/new_qube.glade:1646
+msgid "Template qubes are the qubes on which application qubes are based. "
+msgstr "תבניות הן ה-qubes שעליהם מבוססים qubes היישומים. "
+
+#: qubes_config/new_qube.glade:1709
+msgid "Standalone"
+msgstr "‏qube עצמאי"
+
+#: qubes_config/new_qube.glade:1722
+msgid ""
+"Standalone qubes contain their whole operating system inside; unlike "
+"application qubes, they are not based on a template qube and therefore "
+"generally take up significantly more disk space than application qubes."
+msgstr ""
+"‏qubes עצמאיים מכילים בתוכם מערכת הפעלה שלמה. הם לא מבוססים על תבנית כמו "
+"qubes יישומים, ולכן בדרך כלל הם תופסים הרבה יותר מקום בדיסק."
+
+#: qubes_config/new_qube.glade:1785
+msgid "Named disposable"
+msgstr "‏qube זמני עם שם"
+
+#: qubes_config/new_qube.glade:1798
+msgid ""
+"Disposable qubes do not store any persistent information between restarts. "
+"There is rarely a need to create one manually - if you just want to use one "
+"to e.g. browser internet, use the menu to open application in new disposable"
+" qube."
+msgstr ""
+"‏qubes זמניים לא שומרים מידע קבוע בין הפעלות. כמעט אף פעם אין צורך ליצור אחד"
+" באופן ידני. אם רוצים רק להשתמש בו, למשל לגלישה באינטרנט, אפשר לפתוח יישום "
+"ב-qube זמני חדש דרך התפריט."
+
+#: qubes_config/new_qube.glade:1862
+msgid "Disposable template"
+msgstr "תבנית ל-qubes זמניים"
+
+#: qubes_config/new_qube.glade:1875
+msgid ""
+"Disposable qubes do not store any persistent information between restarts. A"
+" disposable template represents the state a new disposable based on it will "
+"have on start."
+msgstr ""
+"‏qubes זמניים לא שומרים מידע קבוע בין הפעלות. תבנית ל-qubes זמניים קובעת את "
+"המצב שיהיה ל-qube זמני חדש שמבוסס עליה כשהוא מופעל."
+
+#: qubes_config/new_qube/advanced_handler.py:64
+msgid "Hide advanced settings"
+msgstr "הסתרת הגדרות מתקדמות"
+
+#: qubes_config/new_qube/application_selector.py:138
+msgid " found in "
+msgstr " נמצא בתוך "
+
+#: qubes_config/new_qube/application_selector.py:177
+msgid "Click to remove this application from selection"
+msgstr "יש ללחוץ כדי להסיר את היישום הזה מהבחירה"
+
+#: qubes_config/new_qube/application_selector.py:326
+msgid "Loading applications..."
+msgstr "טעינת יישומים..."
+
+#: qubes_config/new_qube/application_selector.py:339
+msgid "No matching applications found"
+msgstr "לא נמצאו יישומים מתאימים"
+
+#: qubes_config/new_qube/new_qube_app.py:92
+msgid "Loading available applications..."
+msgstr "טעינת יישומים זמינים..."
+
+#: qubes_config/new_qube/new_qube_app.py:342
+msgid "Could not create qube"
+msgstr "לא ניתן ליצור את ה-qube"
+
+#: qubes_config/new_qube/new_qube_app.py:343
+#: qubes_config/new_qube/new_qube_app.py:362
+#, python-brace-format
+msgid "An error occurred: {error}"
+msgstr "אירעה שגיאה: {error}"
+
+#: qubes_config/new_qube/new_qube_app.py:361
+msgid "Failed to select applications"
+msgstr "בחירת היישומים נכשלה"
+
+#: qubes_config/new_qube/new_qube_app.py:371
+msgid "Qube created successfully!"
+msgstr "ה-qube נוצר בהצלחה!"
+
+#: qubes_config/new_qube/template_handler.py:350
+#: qubes_config/new_qube/template_handler.py:375
+msgid "Failed to load application data"
+msgstr "טעינת נתוני היישומים נכשלה"
+
+#: qubes_config/new_qube/template_handler.py:351
+msgid "Failed to load application data for "
+msgstr "טעינת נתוני היישומים נכשלה עבור "
+
+#: qubes_config/new_qube/template_handler.py:376
+msgid "Failed to load default_applications for "
+msgstr "טעינת default_applications נכשלה עבור "
+
+#: qubes_config/policy_editor.glade:11
+msgid "Copyright (C) 2023 marmarta@invisiblethingslab.com"
+msgstr "Copyright (C) 2023 marmarta@invisiblethingslab.com"
+
+#: qubes_config/policy_editor.glade:133
+#: qubes_config/policy_editor/policy_editor.py:614
+msgid "No errors found!"
+msgstr "לא נמצאו שגיאות!"
+
+#: qubes_config/policy_editor.glade:201
+msgid "Save and Exit"
+msgstr "שמירה ויציאה"
+
+#: qubes_config/policy_editor.glade:223
+msgid "Save Changes"
+msgstr "שמירת השינויים"
+
+#: qubes_config/policy_editor.glade:245
+msgid "Quit"
+msgstr "יציאה"
+
+#: qubes_config/policy_editor.glade:301 qui/tray/domains.py:263
+msgid "Cancel"
+msgstr "ביטול"
+
+#: qubes_config/policy_editor.glade:323
+msgid "Select file"
+msgstr "בחירת קובץ"
+
+#: qubes_config/policy_editor.glade:359
+msgid "Select policy file to open:"
+msgstr "יש לבחור קובץ כללי הרשאות לפתיחה:"
+
+#: qubes_config/policy_editor.glade:385
+msgid "no policy files found"
+msgstr "לא נמצאו קובצי כללי הרשאות"
+
+#: qubes_config/policy_editor/policy_editor.py:388
+#: qubes_config/policy_editor/policy_editor.py:406
+msgid "Unsaved changes found"
+msgstr "יש שינויים שלא נשמרו"
+
+#: qubes_config/policy_editor/policy_editor.py:389
+msgid "Do you want to save changes before exiting?"
+msgstr "לשמור את השינויים לפני היציאה?"
+
+#: qubes_config/policy_editor/policy_editor.py:407
+msgid "Do you want to save changes before creating a new file?"
+msgstr "לשמור את השינויים לפני יצירת קובץ חדש?"
+
+#: qubes_config/policy_editor/policy_editor.py:420
+msgid "Name of the new policy file:"
+msgstr "שם קובץ כללי ההרשאות החדש:"
+
+#: qubes_config/policy_editor/policy_editor.py:423
+msgid "New file"
+msgstr "קובץ חדש"
+
+#: qubes_config/policy_editor/policy_editor.py:445
+msgid "Invalid policy file name"
+msgstr "שם לא חוקי לקובץ כללי הרשאות"
+
+#: qubes_config/policy_editor/policy_editor.py:447
+#, python-brace-format
+msgid ""
+"Invalid policy file name: {name}. Policy file names must contain only "
+"alphanumeric characters, underscore and hyphen."
+msgstr ""
+"שם לא חוקי לקובץ כללי הרשאות: {name}. שמות של קובצי כללי הרשאות יכולים להכיל"
+" רק אותיות לטיניות, ספרות, קו תחתון ומקף."
+
+#: qubes_config/policy_editor/policy_editor.py:458
+msgid "File already exists"
+msgstr "הקובץ כבר קיים"
+
+#: qubes_config/policy_editor/policy_editor.py:459
+#, python-brace-format
+msgid "Policy file: {name} already exists."
+msgstr "קובץ כללי ההרשאות {name} כבר קיים."
+
+#: qubes_config/policy_editor/policy_editor.py:478
+msgid "Failed to save policy"
+msgstr "שמירת כללי ההרשאות נכשלה"
+
+#: qubes_config/policy_editor/policy_editor.py:562
+msgid "Access denied"
+msgstr "הגישה נדחתה"
+
+#: qubes_config/policy_editor/policy_editor.py:563
+msgid "Access denied to file {}."
+msgstr "הגישה לקובץ {} נדחתה."
+
+#: qubes_config/policy_editor/policy_editor.py:569
+msgid "Policy file not found"
+msgstr "קובץ כללי ההרשאות לא נמצא"
+
+#: qubes_config/policy_editor/policy_editor.py:571
+msgid "File {} not found. Do you want to create a new policy file?"
+msgstr "הקובץ {} לא נמצא. ליצור קובץ כללי הרשאות חדש?"
+
+#: qubes_config/widgets/gtk_utils.py:41
+msgid "_OK"
+msgstr "_אישור"
+
+#: qubes_config/widgets/gtk_utils.py:44
+msgid "_Yes"
+msgstr "_כן"
+
+#: qubes_config/widgets/gtk_utils.py:45
+msgid "_No"
+msgstr "_לא"
+
+#: qubes_config/widgets/gtk_widgets.py:101 qui/decorators.py:151
+#: qui/decorators.py:157
+msgid "None"
+msgstr "ללא"
+
+#: qubes_config/widgets/gtk_widgets.py:342
+#: qubes_config/widgets/gtk_widgets.py:371
+msgid " (default)"
+msgstr " (ברירת מחדל)"
+
+#: qubes_config/widgets/utils.py:80
+#, python-brace-format
+msgid "Failed to set {feature_name} due to insufficient permissions"
+msgstr "לא ניתן להגדיר את {feature_name} בגלל הרשאות לא מספיקות"
+
+#: qui/clipboard.py:81
+#, python-brace-format
+msgid "Malformed clipboard data received from qube: <b>{vmname}</b>"
+msgstr "התקבלו נתוני לוח העתקה פגומים מה-qube: <b>{vmname}</b>"
+
+#: qui/clipboard.py:82
+#, python-brace-format
+msgid "Failed to fetch clipboard data from qube: <b>{vmname}</b>"
+msgstr "לא ניתן לקבל את נתוני לוח ההעתקה מה-qube: <b>{vmname}</b>"
+
+#: qui/clipboard.py:83
+#, python-brace-format
+msgid "Failed to paste global clipboard contents to qube: <b>{vmname}</b>"
+msgstr "לא ניתן להדביק את תוכן לוח ההעתקה הגלובלי ב-qube: <b>{vmname}</b>"
+
+#: qui/clipboard.py:85
+#, python-brace-format
+msgid ""
+"Global clipboard size exceeded.\n"
+"qube: <b>{vmname}</b> attempted to send {size} bytes to global clipboard.\n"
+"Current global clipboard limit is {limit}, increase limit or use <i>qvm-copy</i> to transfer large amounts of data between qubes."
+msgstr ""
+"חריגה מגודל לוח ההעתקה הגלובלי.\n"
+"ה-qube <b>{vmname}</b> ניסה לשלוח {size} בתים ללוח ההעתקה הגלובלי.\n"
+"המגבלה הנוכחית של לוח ההעתקה הגלובלי היא {limit}. יש להגדיל את המגבלה או להשתמש ב-<i>qvm-copy</i> כדי להעביר כמויות גדולות של נתונים בין qubes."
+
+#: qui/clipboard.py:91
+#, python-brace-format
+msgid ""
+"Global clipboard size limit exceed.\n"
+"qube: <b>{vmname}</b> attempted to send {size} bytes to global clipboard.\n"
+"Global clipboard might have been truncated.\n"
+"<small>Use <i>qvm-copy</i> to transfer large amounts of data between qubes.</small>"
+msgstr ""
+"חריגה ממגבלת הגודל של לוח ההעתקה הגלובלי.\n"
+"ה-qube <b>{vmname}</b> ניסה לשלוח {size} בתים ללוח ההעתקה הגלובלי.\n"
+"ייתכן שהתוכן בלוח ההעתקה הגלובלי נחתך.\n"
+"<small>יש להשתמש ב-<i>qvm-copy</i> כדי להעביר כמויות גדולות של נתונים בין qubes.</small>"
+
+#: qui/clipboard.py:98
+#, python-brace-format
+msgid ""
+"Empty source qube clipboard.\n"
+"qube: <b>{vmname}</b> attempted to send <b>0</b> bytes to global clipboard."
+msgstr ""
+"לוח ההעתקה של ה-qube המקור ריק.\n"
+"ה-qube <b>{vmname}</b> ניסה לשלוח <b>0</b> בתים ללוח ההעתקה הגלובלי."
+
+#: qui/clipboard.py:103
+#, python-brace-format
+msgid ""
+"Clipboard contents fetched from qube: <b>'{vmname}'</b>\n"
+"Copied <b>{size}</b> to the global clipboard.\n"
+"<small>Press {shortcut} in qube to paste to local clipboard.</small>"
+msgstr ""
+"תוכן לוח ההעתקה נלקח מה-qube: <b>'{vmname}'</b>\n"
+"‏<b>{size}</b> הועתקו ללוח ההעתקה הגלובלי.\n"
+"<small>יש ללחוץ {shortcut} ב-qube כדי להדביק ללוח ההעתקה המקומי.</small>"
+
+#: qui/clipboard.py:108
+#, python-brace-format
+msgid ""
+"Clipboard image fetched from qube: <b>'{vmname}'</b>\n"
+"Copied a <b>{dimensions}</b> image ({size}) to the global clipboard.\n"
+"<small>Press {shortcut} in qube to paste to local clipboard.</small>"
+msgstr ""
+"תמונה מלוח ההעתקה נלקחה מה-qube: <b>'{vmname}'</b>\n"
+"תמונה בגודל <b>{dimensions}</b> ({size}) הועתקה ללוח ההעתקה הגלובלי.\n"
+"<small>יש ללחוץ {shortcut} ב-qube כדי להדביק ללוח ההעתקה המקומי.</small>"
+
+#: qui/clipboard.py:112
+msgid ""
+"\n"
+"<small>Global clipboard has been wiped</small>"
+msgstr ""
+"\n"
+"<small>לוח ההעתקה הגלובלי נוקה</small>"
+
+#: qui/clipboard.py:114
+#, python-brace-format
+msgid ""
+"Global clipboard copied <b>{size}</b> to <b>{vmname}</b>.\n"
+"Global clipboard has been wiped.\n"
+"<small>Paste normally in qube (e.g. Ctrl+V).</small>"
+msgstr ""
+"לוח ההעתקה הגלובלי העתיק <b>{size}</b> אל <b>{vmname}</b>.\n"
+"לוח ההעתקה הגלובלי נוקה.\n"
+"<small>אפשר להדביק כרגיל ב-qube (למשל Ctrl+V).</small>"
+
+#: qui/clipboard.py:119
+msgid ""
+"Global clipboard copied to qube and wiped.<i/>\n"
+"<small>Paste normally in qube (e.g. Ctrl+V).</small>"
+msgstr ""
+"לוח ההעתקה הגלובלי הועתק ל-qube ונוקה.<i/>\n"
+"<small>אפשר להדביק כרגיל ב-qube (למשל Ctrl+V).</small>"
+
+#: qui/clipboard.py:184
+#, python-brace-format
+msgid "{dimensions} image, {size}"
+msgstr "תמונה {dimensions}, {size}"
+
+#: qui/clipboard.py:305
+msgid "? bytes"
+msgstr "? בתים"
+
+#: qui/clipboard.py:307
+msgid "1 byte"
+msgstr "בית אחד"
+
+#: qui/clipboard.py:309
+msgid " bytes"
+msgstr " בתים"
+
+#: qui/clipboard.py:339
+msgid ""
+"<b>Global Clipboard</b>\n"
+"Information about the current state of the global clipboard."
+msgstr ""
+"<b>לוח ההעתקה הגלובלי</b>\n"
+"מידע על המצב הנוכחי של לוח ההעתקה הגלובלי."
+
+#: qui/clipboard.py:390
+msgid "<i>Global clipboard is empty</i>"
+msgstr "<i>לוח ההעתקה הגלובלי ריק</i>"
+
+#: qui/clipboard.py:397
+#, python-brace-format
+msgid "<i>Global clipboard contents: {0} from <b>{1}</b></i>"
+msgstr "<i>תוכן לוח ההעתקה הגלובלי: {0} מ-<b>{1}</b></i>"
+
+#: qui/clipboard.py:418
+msgid "<b>Current clipboard</b>"
+msgstr "<b>לוח ההעתקה הנוכחי</b>"
+
+#: qui/clipboard.py:433
+#, python-brace-format
+msgid "<i>Use <b>{copy}</b> to copy and <b>{paste}</b> to paste.</i>"
+msgstr ""
+"<i>יש להשתמש ב-<b>{copy}</b> כדי להעתיק וב-<b>{paste}</b> כדי להדביק.</i>"
+
+#: qui/clipboard.py:445
+msgid "Clear global clipboard"
+msgstr "ניקוי לוח ההעתקה הגלובלי"
+
+#: qui/clipboard.py:450
+msgid "Copy dom0 clipboard"
+msgstr "העתקת לוח ההעתקה של dom0"
+
+#: qui/clipboard.py:460
+msgid "Dom0 clipboard is empty!"
+msgstr "לוח ההעתקה של dom0 ריק!"
+
+#: qui/clipboard.py:508
+msgid "Error while accessing global clipboard!"
+msgstr "שגיאה בגישה ללוח ההעתקה הגלובלי!"
+
+#: qui/clipboard.py:542
+msgid "Global Clipboard"
+msgstr "לוח ההעתקה הגלובלי"
+
+#: qui/clipboard.py:582
+msgid "Error while clearing global clipboard!"
+msgstr "שגיאה בניקוי לוח ההעתקה הגלובלי!"
+
+#: qui/clipboard.py:600
+msgid "Qubes Clipboard Widget"
+msgstr "וידג'ט לוח ההעתקה של Qubes"
+
+#: qui/decorators.py:64
+msgid "<b>Qube</b>"
+msgstr "<b>Qube</b>"
+
+#: qui/decorators.py:75
+msgid "Updates available"
+msgstr "יש עדכונים זמינים"
+
+#: qui/decorators.py:77
+msgid "Qube must be restarted to reflect changes in template"
+msgstr "יש להפעיל מחדש את ה-qube כדי שהשינויים בתבנית ייכנסו לתוקף"
+
+#: qui/decorators.py:79
+msgid "Preloaded disposable qube"
+msgstr "‏qube זמני שנטען מראש"
+
+#: qui/decorators.py:136
+msgid ""
+"\n"
+"Administrative domain"
+msgstr ""
+"\n"
+"‏qube ניהול"
+
+#: qui/decorators.py:155 qui/decorators.py:280
+msgid "permission denied"
+msgstr "אין הרשאה"
+
+#: qui/decorators.py:179
+#, python-brace-format
+msgid ""
+"\n"
+"Active Template: <b>{active_template}</b>\n"
+"Next Template: <b>{next_template}</b>"
+msgstr ""
+"\n"
+"תבנית פעילה: <b>{active_template}</b>\n"
+"התבנית הבאה: <b>{next_template}</b>"
+
+#: qui/decorators.py:186
+#, python-brace-format
+msgid ""
+"\n"
+"Template: <b>{template}</b>"
+msgstr ""
+"\n"
+"תבנית: <b>{template}</b>"
+
+#: qui/decorators.py:190
+#, python-brace-format
+msgid ""
+"\n"
+"Networking: <b>{netvm}</b>\n"
+"Private storage: <b>{current_storage:.2f}GB/{max_storage:.2f}GB ({perc_storage:.1%})</b>"
+msgstr ""
+"\n"
+"רשת: <b>{netvm}</b>\n"
+"אחסון פרטי: <b>{current_storage:.2f}GB/{max_storage:.2f}GB ({perc_storage:.1%})</b>"
+
+#: qui/decorators.py:201
+msgid ""
+"\n"
+"\n"
+"Restart qube to apply changes from template."
+msgstr ""
+"\n"
+"\n"
+"יש להפעיל מחדש את ה-qube כדי להחיל את השינויים מהתבנית."
+
+#: qui/decorators.py:204
+msgid ""
+"\n"
+"\n"
+"Updates available."
+msgstr ""
+"\n"
+"\n"
+"יש עדכונים זמינים."
+
+#: qui/decorators.py:222
+msgid "<b>CPU</b>"
+msgstr "<b>CPU</b>"
+
+#: qui/decorators.py:244
+msgid "<b>RAM</b>"
+msgstr "<b>RAM</b>"
+
+#: qui/decorators.py:282
+msgid "No"
+msgstr "לא"
+
+#: qui/devices/AttachConfirmationWindow.glade:8
+msgid "Device attachment"
+msgstr "חיבור התקן"
+
+#: qui/devices/AttachConfirmationWindow.glade:61
+msgid "ErrorMessage"
+msgstr "הודעת שגיאה"
+
+#: qui/devices/AttachConfirmationWindow.glade:170
+msgid ""
+"Do you want to attach the following device?\n"
+"<small>Select the target domain and confirm with 'OK'</small>"
+msgstr ""
+"לחבר את ההתקן הבא?\n"
+"<small>יש לבחור את ה-qube היעד ולאשר עם 'אישור'</small>"
+
+#: qui/devices/AttachConfirmationWindow.glade:200
+msgid "Target:"
+msgstr "יעד:"
+
+#: qui/devices/AttachConfirmationWindow.glade:218
+msgid "Start typing or use the arrow"
+msgstr "יש להתחיל להקליד או להשתמש בחץ"
+
+#: qui/devices/AttachConfirmationWindow.glade:233
+msgid "Source:"
+msgstr "מקור:"
+
+#: qui/devices/AttachConfirmationWindow.glade:245
+msgid "source"
+msgstr "מקור"
+
+#: qui/devices/AttachConfirmationWindow.glade:270
+msgid "qubes.<b>MyOperation</b>"
+msgstr "qubes.<b>MyOperation</b>"
+
+#: qui/devices/AttachConfirmationWindow.glade:298
+msgid "Display templates in the target list"
+msgstr "הצגת תבניות ברשימת היעדים"
+
+#: qui/devices/AttachConfirmationWindow.glade:313
+msgid "Choose a custom destination in the target"
+msgstr "בחירת יעד מותאם אישית בתוך היעד"
+
+#: qui/devices/AttachConfirmationWindow.glade:331
+msgid "Advanced options"
+msgstr "אפשרויות מתקדמות"
+
+#: qui/devices/actionable_widgets.py:515
+msgid "This device will attach with camera "
+msgstr "ההתקן יחובר יחד עם מצלמה "
+
+#: qui/devices/actionable_widgets.py:518
+msgid "This device will attach with microphone "
+msgstr "ההתקן יחובר יחד עם מיקרופון "
+
+#: qui/devices/backend.py:338
+msgid "Attaching device"
+msgstr "חיבור התקן"
+
+#: qui/devices/backend.py:339
+msgid "Attaching {} to {}"
+msgstr "מחבר את {} אל {}"
+
+#: qui/devices/backend.py:354 qui/devices/backend.py:393
+msgid "Error"
+msgstr "שגיאה"
+
+#: qui/devices/backend.py:355
+#, python-brace-format
+msgid "Attaching device {0} to {1} failed. Error: {2} - {3}"
+msgstr "חיבור ההתקן {0} אל {1} נכשל. שגיאה: {2} - {3}"
+
+#: qui/devices/backend.py:369
+msgid "Detaching device"
+msgstr "ניתוק התקן"
+
+#: qui/devices/backend.py:370
+msgid "Detaching {} from {}"
+msgstr "מנתק את {} מ-{}"
+
+#: qui/devices/backend.py:380
+msgid "Device detached"
+msgstr "ההתקן נותק"
+
+#: qui/devices/backend.py:381
+msgid "{} was detached from {}."
+msgstr "‏{} נותק מ-{}."
+
+#: qui/devices/backend.py:394
+#, python-brace-format
+msgid "Detaching device {0} from {1} failed. Error: {2}"
+msgstr "ניתוק ההתקן {0} מ-{1} נכשל. שגיאה: {2}"
+
+#: qui/devices/device_widget.py:202
+msgid "Qubes Devices"
+msgstr "התקני Qubes"
+
+#: qui/devices/device_widget.py:202
+msgid "View and manage devices."
+msgstr "צפייה בהתקנים וניהול שלהם."
+
+#: qui/devices/device_widget.py:297
+msgid "Device available"
+msgstr "התקן זמין"
+
+#: qui/devices/device_widget.py:298
+msgid "Device {} is available."
+msgstr "ההתקן {} זמין."
+
+#: qui/devices/device_widget.py:321
+msgid "Device removed"
+msgstr "ההתקן הוסר"
+
+#: qui/devices/device_widget.py:322
+msgid "Device {} has been removed."
+msgstr "ההתקן {} הוסר."
+
+#: qui/tray/disk_space.py:97
+msgid "volume <b>{}</b> is {:.1%} full"
+msgstr "אמצעי האחסון <b>{}</b> מלא ב-{:.1%}"
+
+#: qui/tray/disk_space.py:111
+msgid "Open Qube Settings"
+msgstr "פתיחת הגדרות ה-qube"
+
+#: qui/tray/disk_space.py:127
+msgid "Do not show notifications about this qube"
+msgstr "לא להציג התראות על ה-qube הזה"
+
+#: qui/tray/disk_space.py:225
+msgid ""
+"\n"
+"{:.1%} space left in pool {}"
+msgstr ""
+"\n"
+"נותר {:.1%} מקום פנוי במאגר {}"
+
+#: qui/tray/disk_space.py:234
+msgid ""
+"\n"
+"Metadata space for pool {} is running out. Current usage: {:.0%}"
+msgstr ""
+"\n"
+"שטח המטא-דאטה במאגר {} עומד להיגמר. שימוש נוכחי: {:.0%}"
+
+#: qui/tray/disk_space.py:279
+msgid "Error accessing pool data"
+msgstr "שגיאה בגישה לנתוני המאגר"
+
+#: qui/tray/disk_space.py:347
+msgid "Open qube settings"
+msgstr "פתיחת הגדרות ה-qube"
+
+#: qui/tray/disk_space.py:393
+msgid "Disk usage warning!"
+msgstr "אזהרת שימוש בדיסק!"
+
+#: qui/tray/disk_space.py:394
+msgid "You are running out of disk space."
+msgstr "שטח הדיסק עומד להיגמר."
+
+#: qui/tray/disk_space.py:413
+msgid "Qube usage warning"
+msgstr "אזהרת שימוש ב-qube"
+
+#: qui/tray/disk_space.py:414
+msgid "Qube {} is running out of storage space."
+msgstr "שטח האחסון של ה-qube {} עומד להיגמר."
+
+#: qui/tray/disk_space.py:426
+msgid ""
+"<b>Qubes Disk Space Monitor</b>\n"
+"\n"
+"WARNING!"
+msgstr ""
+"<b>ניטור שטח הדיסק של Qubes</b>\n"
+"\n"
+"אזהרה!"
+
+#: qui/tray/disk_space.py:428
+msgid ""
+"\n"
+"You are running out of disk space.\n"
+msgstr ""
+"\n"
+"שטח הדיסק עומד להיגמר.\n"
+
+#: qui/tray/disk_space.py:433
+msgid ""
+"\n"
+"The following qubes are running out of space: "
+msgstr ""
+"\n"
+"שטח האחסון עומד להיגמר ב-qubes הבאים: "
+
+#: qui/tray/disk_space.py:439
+msgid ""
+"<b>Qubes Disk Space Monitor</b>\n"
+"View free disk space."
+msgstr ""
+"<b>ניטור שטח הדיסק של Qubes</b>\n"
+"צפייה בשטח הפנוי בדיסק."
+
+#: qui/tray/disk_space.py:468
+msgid "Qubes warnings"
+msgstr "אזהרות Qubes"
+
+#: qui/tray/disk_space.py:490
+msgid "<b>{}</b>"
+msgstr "<b>{}</b>"
+
+#: qui/tray/disk_space.py:501
+msgid "<b>Total disk usage</b>"
+msgstr "<b>שימוש כולל בדיסק</b>"
+
+#: qui/tray/domains.py:149
+msgid "Emergency pause"
+msgstr "השהיית חירום"
+
+#: qui/tray/domains.py:159
+msgid "Error pausing qube"
+msgstr "שגיאה בהשהיית ה-qube"
+
+#: qui/tray/domains.py:161
+#, python-brace-format
+msgid ""
+"The following error occurred while attempting to pause qube {0}:\n"
+"{1}"
+msgstr ""
+"השגיאה הבאה אירעה בניסיון להשהות את ה-qube {0}:\n"
+"‏{1}"
+
+#: qui/tray/domains.py:172
+msgid "Unpause"
+msgstr "ביטול השהיה"
+
+#: qui/tray/domains.py:180
+msgid "Error unpausing qube"
+msgstr "שגיאה בביטול ההשהיה של ה-qube"
+
+#: qui/tray/domains.py:182
+#, python-brace-format
+msgid ""
+"The following error occurred while attempting to unpause qube {0}:\n"
+"{1}"
+msgstr ""
+"השגיאה הבאה אירעה בניסיון לבטל את ההשהיה של ה-qube {0}:\n"
+"‏{1}"
+
+#: qui/tray/domains.py:202 qui/tray/domains.py:219 qui/tray/domains.py:265
+msgid "Force shutdown"
+msgstr "כיבוי בכוח"
+
+#: qui/tray/domains.py:204 qui/tray/domains.py:221
+msgid "Shutdown"
+msgstr "כיבוי"
+
+#: qui/tray/domains.py:231
+#, python-brace-format
+msgid "Qube {0} is in use"
+msgstr "ה-qube {0} בשימוש"
+
+#: qui/tray/domains.py:233
+#, python-brace-format
+msgid ""
+"The qube <b>{0}</b> could not be shut down because it is in use by connected qubes.\n"
+"\n"
+"<b>Warning:</b> force shutdown may cause unexpected issues in connected qubes."
+msgstr ""
+"לא ניתן לכבות את ה-qube <b>{0}</b> כי qubes מחוברים משתמשים בו.\n"
+"\n"
+"<b>אזהרה:</b> כיבוי בכוח עלול לגרום לבעיות לא צפויות ב-qubes המחוברים."
+
+#: qui/tray/domains.py:240
+#, python-brace-format
+msgid "Qube {0} shutdown timed out"
+msgstr "תם הזמן לכיבוי ה-qube {0}"
+
+#: qui/tray/domains.py:242
+#, python-brace-format
+msgid ""
+"The qube <b>{0}</b> did not shut down within the expected time.\n"
+"\n"
+"You can retry the shutdown or, if the problem persists, kill the qube."
+msgstr ""
+"ה-qube <b>{0}</b> לא כבה בזמן הצפוי.\n"
+"\n"
+"אפשר לנסות לכבות שוב. אם הבעיה נמשכת, אפשר לעצור את ה-qube בכוח."
+
+#: qui/tray/domains.py:248
+#, python-brace-format
+msgid "Error shutting down qube {0}"
+msgstr "שגיאה בכיבוי ה-qube {0}"
+
+#: qui/tray/domains.py:250
+#, python-brace-format
+msgid ""
+"The qube <b>{0}</b> could not be shut down. The following error occurred:\n"
+"<tt>{1}</tt>\n"
+"\n"
+"Would you like to kill the qube?"
+msgstr ""
+"לא ניתן לכבות את ה-qube <b>{0}</b>. אירעה השגיאה הבאה:\n"
+"‏<tt>{1}</tt>\n"
+"\n"
+"לעצור את ה-qube בכוח?"
+
+#: qui/tray/domains.py:268
+msgid "Retry force shutdown"
+msgstr "ניסיון חוזר לכיבוי בכוח"
+
+#: qui/tray/domains.py:270
+msgid "Retry shutdown"
+msgstr "ניסיון חוזר לכיבוי"
+
+#: qui/tray/domains.py:271 qui/tray/domains.py:273 qui/tray/domains.py:364
+msgid "Kill"
+msgstr "עצירה בכוח"
+
+#: qui/tray/domains.py:309 qui/tray/domains.py:320
+msgid "Restart"
+msgstr "הפעלה מחדש"
+
+#: qui/tray/domains.py:310 qui/tray/domains.py:318
+msgid "Force restart"
+msgstr "הפעלה מחדש בכוח"
+
+#: qui/tray/domains.py:329
+msgid "Error restarting qube"
+msgstr "שגיאה בהפעלה מחדש של ה-qube"
+
+#: qui/tray/domains.py:331
+#, python-brace-format
+msgid ""
+"The following error occurred when restarting the qube during start stage: {0}:\n"
+"{1}"
+msgstr ""
+"השגיאה הבאה אירעה בהפעלה מחדש של ה-qube בשלב ההפעלה: {0}:\n"
+"‏{1}"
+
+#: qui/tray/domains.py:371
+msgid "Error shutting down qube"
+msgstr "שגיאה בכיבוי ה-qube"
+
+#: qui/tray/domains.py:373
+#, python-brace-format
+msgid ""
+"The following error occurred while attempting to killqube {0}:\n"
+"{1}"
+msgstr ""
+"השגיאה הבאה אירעה בניסיון לעצור בכוח את ה-qube {0}:\n"
+"‏{1}"
+
+#: qui/tray/domains.py:385
+msgid "Settings"
+msgstr "הגדרות"
+
+#: qui/tray/domains.py:423
+msgid "Run Root Terminal"
+msgstr "הפעלת מסוף root"
+
+#: qui/tray/domains.py:424
+msgid "Run Terminal"
+msgstr "הפעלת מסוף"
+
+#: qui/tray/domains.py:442
+msgid "Error starting terminal"
+msgstr "שגיאה בהפעלת המסוף"
+
+#: qui/tray/domains.py:444
+#, python-brace-format
+msgid ""
+"The following error occurred while attempting to run terminal {0}:\n"
+"{1}"
+msgstr ""
+"השגיאה הבאה אירעה בניסיון להפעיל מסוף {0}:\n"
+"‏{1}"
+
+#: qui/tray/domains.py:456
+msgid "Debug Console"
+msgstr "מסוף ניפוי באגים"
+
+#: qui/tray/domains.py:481
+msgid "Open File Manager"
+msgstr "פתיחת מנהל הקבצים"
+
+#: qui/tray/domains.py:493
+msgid "Error opening file manager"
+msgstr "שגיאה בפתיחת מנהל הקבצים"
+
+#: qui/tray/domains.py:495
+#, python-brace-format
+msgid ""
+"The following error occurred while attempting to open file manager {0}:\n"
+"{1}"
+msgstr ""
+"השגיאה הבאה אירעה בניסיון לפתוח את מנהל הקבצים {0}:\n"
+"‏{1}"
+
+#: qui/tray/domains.py:520
+msgid "<b>"
+msgstr "<b>"
+
+#: qui/tray/domains.py:622 qui/tray/domains.py:658
+msgid "Console Log"
+msgstr "יומן המסוף"
+
+#: qui/tray/domains.py:626 qui/tray/domains.py:662
+msgid "QEMU Console Log"
+msgstr "יומן מסוף QEMU"
+
+#: qui/tray/domains.py:694
+msgid "Open Qube Manager"
+msgstr "פתיחת מנהל ה-qubes"
+
+#: qui/tray/domains.py:877
+msgid ""
+"<b>Qubes Domains</b>\n"
+"View and manage running domains."
+msgstr ""
+"<b>הדומיינים של Qubes</b>\n"
+"צפייה בדומיינים פועלים וניהול שלהם."
+
+#: qui/tray/domains.py:998
+msgid "Qube Status: {}"
+msgstr "מצב ה-qube: {}"
+
+#: qui/tray/domains.py:1003
+msgid "Qube {} has failed to start: {}"
+msgstr "הפעלת ה-qube {} נכשלה: {}"
+
+#: qui/tray/domains.py:1008
+msgid "Qube {} is starting."
+msgstr "ה-qube {} מופעל."
+
+#: qui/tray/domains.py:1010
+msgid "Qube {} has started."
+msgstr "ה-qube {} הופעל."
+
+#: qui/tray/domains.py:1013
+msgid "Qube {} was preloaded and is now being used."
+msgstr "ה-qube {} נטען מראש ועכשיו נמצא בשימוש."
+
+#: qui/tray/domains.py:1019
+msgid "Qube {} is attempting to shut down."
+msgstr "ה-qube {} מנסה לכבות."
+
+#: qui/tray/domains.py:1022
+msgid "Qube {} has shut down."
+msgstr "ה-qube {} כבה."
+
+#: qui/tray/domains.py:1025
+msgid "Qube {} failed to shut down: {}"
+msgstr "כיבוי ה-qube {} נכשל: {}"
+
+#: qui/tray/domains.py:1035
+msgid "Your qubes have been paused!"
+msgstr "ה-qubes שלך הושהו!"
+
+#: qui/tray/domains.py:1038
+msgid ""
+"All your qubes are currently paused. If this was an accident, simply click "
+"'Unpause All' to unpause them (except preloaded disposables). Otherwise, you"
+" can unpause individual qubes via the Qubes Domains tray widget."
+msgstr ""
+"כל ה-qubes שלך מושהים כרגע. אם זה קרה בטעות, אפשר ללחוץ על 'ביטול השהיה "
+"לכולם' כדי לבטל את ההשהיה שלהם (חוץ מ-qubes זמניים שנטענו מראש). אחרת, אפשר "
+"לבטל השהיה של qubes בודדים דרך וידג'ט הדומיינים של Qubes במגש המערכת."
+
+#: qui/tray/domains.py:1046
+msgid "Unpause All"
+msgstr "ביטול השהיה לכולם"
+
+#: qui/tray/domains.py:1201
+msgid "Unexpected property access error"
+msgstr "שגיאה לא צפויה בגישה למאפיין"
+
+#: qui/tray/updates.py:89
+msgid ""
+"<b>Qubes Update</b>\n"
+"Updates are available."
+msgstr ""
+"<b>עדכון Qubes</b>\n"
+"יש עדכונים זמינים."
+
+#: qui/tray/updates.py:120
+msgid ""
+"<span foreground=\"red\"><b>Warning! This release of Qubes OS is no longer supported!</b></span>\n"
+"<b>See officially supported releases</b>"
+msgstr ""
+"<span foreground=\"red\"><b>אזהרה! הגרסה הזו של Qubes OS כבר לא נתמכת!</b></span>\n"
+"<b>לצפייה בגרסאות הנתמכות באופן רשמי</b>"
+
+#: qui/tray/updates.py:131
+msgid "<b>Qube updates available!</b>"
+msgstr "<b>יש עדכונים זמינים ל-qubes!</b>"
+
+#: qui/tray/updates.py:135
+msgid ""
+"Updates for {} qubes are available!\n"
+"<b>Launch updater</b>"
+msgstr ""
+"יש עדכונים זמינים ל-{} qubes!\n"
+"<b>הפעלת כלי העדכון</b>"
+
+#: qui/tray/updates.py:143
+msgid "<b>Some qubes are no longer supported!</b>"
+msgstr "<b>חלק מה-qubes כבר לא נתמכים!</b>"
+
+#: qui/tray/updates.py:147
+msgid ""
+"The following qubes are based on distributions that are no longer "
+"supported:\n"
+msgstr "ה-qubes הבאים מבוססים על הפצות שכבר לא נתמכות:\n"
+
+#: qui/tray/updates.py:151
+msgid ""
+"\n"
+"<b>Install new templates with Template Manager</b>"
+msgstr ""
+"\n"
+"<b>התקנת תבניות חדשות עם מנהל התבניות</b>"
+
+#: qui/tray/updates.py:237
+msgid "New updates are available for {}."
+msgstr "יש עדכונים חדשים זמינים עבור {}."
+
+#: qui/updater.glade:10
+msgid "Click here or press Ctrl+A to toggle selection"
+msgstr "יש ללחוץ כאן או על Ctrl+A כדי להחליף את הבחירה"
+
+#: qui/updater.glade:70
+msgid "Qubes OS Update"
+msgstr "עדכון Qubes OS"
+
+#: qui/updater.glade:96
+msgid "Select qubes to update:"
+msgstr "בחירת qubes לעדכון:"
+
+#: qui/updater.glade:237
+#, python-brace-format
+msgid ""
+"Qubes OS checks for updates for running and networked qubes and their templates. Updates may also be available in other qubes, marked as {MAYBE} above.\n"
+"\n"
+"{OBSOLETE} qubes are based on templates that are no longer supported and no longer receive updates. Please install new templates using the Qubes Template Manager. {PROHIBITED} qubes have the `prohibit-start` feature set.\n"
+"\n"
+"Selected qubes will be automatically started if necessary and shutdown after successful update."
+msgstr ""
+"‏Qubes OS בודק עדכונים ל-qubes פועלים ומחוברים לרשת ולתבניות שלהם. ייתכן שיש עדכונים גם ל-qubes אחרים, שמסומנים למעלה ב-{MAYBE}.\n"
+"\n"
+"‏qubes מסוג {OBSOLETE} מבוססים על תבניות שכבר לא נתמכות ולא מקבלות עדכונים. יש להתקין תבניות חדשות בעזרת מנהל התבניות של Qubes. ל-qubes מסוג {PROHIBITED} מוגדרת התכונה `prohibit-start`.\n"
+"\n"
+"ה-qubes שנבחרו יופעלו אוטומטית אם צריך, ויכובו אחרי עדכון מוצלח."
+
+#: qui/updater.glade:433
+msgid ":"
+msgstr ":"
+
+#: qui/updater.glade:481
+msgid "  Copy details to global clipboard  "
+msgstr "  העתקת הפרטים ללוח ההעתקה הגלובלי  "
+
+#: qui/updater.glade:617
+msgid ""
+"The following qubes need to be restarted to use an updated template (to "
+"configure restarting qubes by default, go to 'Updater Settings' in the top "
+"right corner of this window):"
+msgstr ""
+"צריך להפעיל מחדש את ה-qubes הבאים כדי שישתמשו בתבנית המעודכנת (כדי להגדיר "
+"הפעלה מחדש של qubes כברירת מחדל, יש לעבור אל 'הגדרות כלי העדכון' בפינה "
+"הימנית העליונה של החלון):"
+
+#: qui/updater.glade:727
+msgid "_Update"
+msgstr "_עדכון"
+
+#: qui/updater/summary_page.py:164
+#, python-format
+msgid "%(num)d qube updated successfully."
+msgid_plural "%(num)d qubes updated successfully."
+msgstr[0] "‏%(num)d qube עודכן בהצלחה."
+msgstr[1] "‏%(num)d qubes עודכנו בהצלחה."
+
+#: qui/updater/summary_page.py:169
+#, python-format
+msgid "%(num)d qube attempted to update but found no updates."
+msgid_plural "%(num)d qubes attempted to update but found no updates."
+msgstr[0] "‏%(num)d qube ניסה להתעדכן אבל לא נמצאו עדכונים."
+msgstr[1] "‏%(num)d qubes ניסו להתעדכן אבל לא נמצאו עדכונים."
+
+#: qui/updater/summary_page.py:174
+#, python-format
+msgid "%(num)d qube failed to update."
+msgid_plural "%(num)d qubes failed to update."
+msgstr[0] "עדכון %(num)d qube נכשל."
+msgstr[1] "עדכון %(num)d qubes נכשל."
+
+#: qui/updater/summary_page.py:454
+#, python-format
+msgid "_Finish and restart/shutdown %(num)d qube"
+msgid_plural "_Finish and restart/shutdown %(num)d qubes"
+msgstr[0] "_סיום והפעלה מחדש/כיבוי של %(num)d qube"
+msgstr[1] "_סיום והפעלה מחדש/כיבוי של %(num)d qubes"
+
+#: qui/updater_settings.glade:9
+msgid "Qubes OS Updater Settings"
+msgstr "הגדרות כלי העדכון של Qubes OS"
+
+#: qui/updater_settings.glade:47
+msgid "Additional Update Check"
+msgstr "בדיקת עדכונים נוספת"
+
+#: qui/updater_settings.glade:65
+msgid ""
+"Qubes OS automatically checks for updates only for running qubes and their "
+"templates. Updates can also become available for other qubes; therefore, the"
+" updater will attempt to update qubes after some time has passed without "
+"checking for updates."
+msgstr ""
+"‏Qubes OS בודק עדכונים באופן אוטומטי רק ל-qubes פועלים ולתבניות שלהם. ייתכן "
+"שיהיו עדכונים גם ל-qubes אחרים. לכן כלי העדכון ינסה לעדכן qubes אחרי פרק זמן"
+" מסוים בלי בדיקת עדכונים."
+
+#: qui/updater_settings.glade:89
+msgid "Attempt to update qubes after"
+msgstr "לנסות לעדכן qubes אחרי"
+
+#: qui/updater_settings.glade:120
+msgid " days without checking for updates."
+msgstr " ימים בלי בדיקת עדכונים."
+
+#: qui/updater_settings.glade:146
+msgid "Restart After Update"
+msgstr "הפעלה מחדש אחרי עדכון"
+
+#: qui/updater_settings.glade:163
+msgid "Qubes that are based on templates need to be restarted after update."
+msgstr "צריך להפעיל מחדש qubes שמבוססים על תבניות אחרי עדכון."
+
+#: qui/updater_settings.glade:178
+msgid "Restart all _service qubes after update by default"
+msgstr "הפעלה מחדש של כל qubes ה_שירות אחרי עדכון, כברירת מחדל"
+
+#: qui/updater_settings.glade:200
+msgid "Restart _other qubes after update if needed"
+msgstr "הפעלה מחדש של qubes _אחרים אחרי עדכון, לפי הצורך"
+
+#: qui/updater_settings.glade:234
+msgid "Exclude the following qubes from automatic restart:"
+msgstr "החרגת ה-qubes הבאים מהפעלה מחדש אוטומטית:"
+
+#: qui/updater_settings.glade:288
+msgid "+ADD"
+msgstr "+הוספה"
+
+#: qui/updater_settings.glade:304
+msgid "qube"
+msgstr "qube"
+
+#: qui/updater_settings.glade:389
+msgid "Simultaneous Updates"
+msgstr "עדכונים בו-זמניים"
+
+#: qui/updater_settings.glade:407
+msgid ""
+"By default, all qubes update at the same time. If this is too demanding for "
+"your system or internet connection, you can limit the number of simultaneous"
+" updates."
+msgstr ""
+"כברירת מחדל, כל ה-qubes מתעדכנים באותו הזמן. אם זה מעמיס מדי על המערכת או על"
+" החיבור לאינטרנט, אפשר להגביל את מספר העדכונים בו-זמנית."
+
+#: qui/updater_settings.glade:428
+msgid "_Limit how many qubes can update at the same time"
+msgstr "_הגבלת מספר ה-qubes שמתעדכנים בו-זמנית"
+
+#: qui/updater_settings.glade:471
+msgid "Hide"
+msgstr "הסתרת"
+
+#: qui/updater_settings.glade:485
+msgid "qubes that don't need updating."
+msgstr "‏qubes שלא צריכים עדכון."
+
+#: qui/updater_settings.glade:506
+msgid "qubes with 'skip-update' feature."
+msgstr "‏qubes עם התכונה 'skip-update'."
+
+#: qui/updater_settings.glade:528
+msgid "qubes with 'prohibit-start' feature."
+msgstr "‏qubes עם התכונה 'prohibit-start'."
+
+#: qui/updater_settings.glade:560
+msgid "_Save and close"
+msgstr "_שמירה וסגירה"
+
+#: qui/utils.py:67
+msgid ""
+"<b>Whoops. A critical error in {} has occurred.</b> This is most likely a "
+"bug."
+msgstr "<b>אופס. אירעה שגיאה קריטית ב-{}.</b> כנראה מדובר בבאג."
+
+#: qui/utils.py:71
+msgid " {} will restart itself."
+msgstr "‏ {} יופעל מחדש מעצמו."
+
+#: qui/utils.py:81
+msgid "Houston, we have a problem..."
+msgstr "יוסטון, יש לנו בעיה..."

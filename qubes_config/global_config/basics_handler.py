@@ -539,6 +539,7 @@ class BasicSettingsHandler(PageHandler):
                     _("thick border"): "border2",
                     _("tinted icon"): "tint",
                     _("tinted icon with modified white"): "tint+whitehack",
+                    # xgettext:no-python-format
                     _("tinted icon with 50% saturation"): "tint+saturation50",
                 },
                 readable_name="Tray icon mode",
