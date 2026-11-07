@@ -6952,9 +6952,10 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                             <property name="can-focus">False</property>
                             <property name="spacing">20</property>
                             <child>
-                              <object class="GtkLabel">
+                              <object class="GtkLabel" id="clipboard_copy_label">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
+                                <property name="xalign">0</property>
                                 <property name="label" translatable="yes">&lt;b&gt;Copy&lt;/b&gt; shortcut: </property>
                                 <property name="use-markup">True</property>
                                 <property name="wrap">True</property>
@@ -7018,6 +7019,134 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           </packing>
                         </child>
                         <child>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="spacing">10</property>
+                            <child>
+                              <object class="GtkLabel" id="clipboard_text_size_label">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="xalign">0</property>
+                                <property name="label" translatable="yes">&lt;b&gt;Text&lt;/b&gt; size limit: </property>
+                                <property name="use-markup">True</property>
+                                <property name="wrap">True</property>
+                                <style>
+                                  <class name="main_text"/>
+                                </style>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSpinButton" id="clipboard_text_size_spin">
+                                <property name="margin-start">10</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="margin-bottom">5</property>
+                                <property name="width-chars">18</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="clipboard_text_size_reset">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="margin-bottom">5</property>
+                                <child>
+                                  <object class="GtkImage">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="icon-name">edit-undo-symbolic</property>
+                                  </object>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="spacing">10</property>
+                            <child>
+                              <object class="GtkLabel" id="clipboard_image_size_label">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="xalign">0</property>
+                                <property name="label" translatable="yes">&lt;b&gt;Image&lt;/b&gt; size limit: </property>
+                                <property name="use-markup">True</property>
+                                <property name="wrap">True</property>
+                                <style>
+                                  <class name="main_text"/>
+                                </style>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSpinButton" id="clipboard_image_size_spin">
+                                <property name="margin-start">10</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="margin-bottom">5</property>
+                                <property name="width-chars">18</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="clipboard_image_size_reset">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">True</property>
+                                <property name="margin-bottom">5</property>
+                                <child>
+                                  <object class="GtkImage">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="icon-name">edit-undo-symbolic</property>
+                                  </object>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">5</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkButton" id="clipboard_policy">
                             <property name="label" translatable="yes">anchor</property>
                             <property name="visible">True</property>
@@ -7027,7 +7156,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">4</property>
+                            <property name="position">6</property>
                           </packing>
                         </child>
                         <child>
@@ -7044,7 +7173,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">5</property>
+                            <property name="position">7</property>
                           </packing>
                         </child>
                         <child>
@@ -7061,7 +7190,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">6</property>
+                            <property name="position">8</property>
                           </packing>
                         </child>
                         <child>
@@ -7102,7 +7231,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">7</property>
+                            <property name="position">9</property>
                           </packing>
                         </child>
                         <child>
@@ -7143,7 +7272,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">8</property>
+                            <property name="position">10</property>
                           </packing>
                         </child>
                         <child>
@@ -7201,7 +7330,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">9</property>
+                            <property name="position">11</property>
                           </packing>
                         </child>
                         <child>
@@ -7260,7 +7389,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">10</property>
+                            <property name="position">12</property>
                           </packing>
                         </child>
                         <child>
@@ -7466,7 +7595,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">11</property>
+                            <property name="position">13</property>
                           </packing>
                         </child>
                         <child>
@@ -7532,7 +7661,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">12</property>
+                            <property name="position">14</property>
                           </packing>
                         </child>
                         <child>
@@ -7609,7 +7738,7 @@ Inter-qube copy and paste actions are performed via special keyboard shortcuts, 
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">14</property>
+                            <property name="position">16</property>
                           </packing>
                         </child>
                         <style>
@@ -10281,5 +10410,13 @@ Other description:</property>
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkSizeGroup" id="clipboard_label_group">
+    <property name="mode">horizontal</property>
+    <widgets>
+      <widget name="clipboard_copy_label"/>
+      <widget name="clipboard_text_size_label"/>
+      <widget name="clipboard_image_size_label"/>
+    </widgets>
   </object>
 </interface>
