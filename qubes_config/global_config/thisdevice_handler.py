@@ -155,13 +155,13 @@ class ThisDeviceHandler(PageHandler):
             xen_ver=self._get_version("xen"),
         )
         self.set_state(self.compat_hvm_image, self._get_data("hvm"))
-        self.compat_hvm_label.set_markup(f"<b>HVM:</b> {self._get_data('hvm')}")
+        self.compat_hvm_label.set_markup(f"<b>{_('HVM')}:</b> {self._get_data('hvm')}")
 
         self.set_state(self.compat_iommu_image, self._get_data("iommu"))
-        self.compat_iommu_label.set_markup(f"<b>I/O MMU:</b> {self._get_data('iommu')}")
+        self.compat_iommu_label.set_markup(f"<b>{_('I/O MMU')}:</b> {self._get_data('iommu')}")
 
         self.set_state(self.compat_hap_image, self._get_data("slat"))
-        self.compat_hap_label.set_markup(f"<b>HAP/SLAT:</b> {self._get_data('slat')}")
+        self.compat_hap_label.set_markup(f"<b>{_('HAP/SLAT')}:</b> {self._get_data('slat')}")
 
         self.set_state(
             self.compat_tpm_image,
@@ -181,7 +181,7 @@ class ThisDeviceHandler(PageHandler):
 
         self.set_state(self.compat_remapping_image, self._get_data("remap"))
         self.compat_remapping_label.set_markup(
-            f"<b>Remapping:</b> {self._get_data('remap')}"
+            f"<b>{_('Remapping')}:</b> {self._get_data('remap')}"
         )
 
         self.set_policy_state()

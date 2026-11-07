@@ -52,6 +52,11 @@ gi.require_version("Gtk", "3.0")
 gi.require_version("GtkSource", "4")
 from gi.repository import Gtk, GtkSource, Gio, Gdk
 
+import gettext
+
+t = gettext.translation("desktop-linux-manager", fallback=True)
+_ = t.gettext
+
 HEADER_NORMAL = (
     " service_name\targument\tsource_qube\ttarget_qube\taction [parameter=value]    "
 )
@@ -194,6 +199,7 @@ class PolicyEditor(Gtk.Application):
         self.clipboard: Gtk.Clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
 
         self.builder = Gtk.Builder()
+        self.builder.set_translation_domain("desktop-linux-manager")
 
         glade_ref = importlib.resources.files("qubes_config") / "policy_editor.glade"
         with importlib.resources.as_file(glade_ref) as path:
@@ -379,8 +385,8 @@ class PolicyEditor(Gtk.Application):
             # changes can be saved
             response = ask_question(
                 self.main_window,
-                "Unsaved changes found",
-                "Do you want to save changes before exiting?",
+                _("Unsaved changes found"),
+                _("Do you want to save changes before exiting?"),
             )
             if response == Gtk.ResponseType.YES:
                 if not self._save():
@@ -397,8 +403,8 @@ class PolicyEditor(Gtk.Application):
         if self.action_items["save"].get_enabled():
             response = ask_question(
                 self.main_window,
-                "Unsaved changes found",
-                "Do you want to save changes before creating a new file?",
+                _("Unsaved changes found"),
+                _("Do you want to save changes before creating a new file?"),
             )
             if response == Gtk.ResponseType.YES:
                 if not self._save():
@@ -411,10 +417,10 @@ class PolicyEditor(Gtk.Application):
             modal=True,
             message_type=Gtk.MessageType.QUESTION,
             buttons=Gtk.ButtonsType.OK_CANCEL,
-            text="Name of the new policy file:",
+            text=_("Name of the new policy file:"),
         )
 
-        ask_dialog.set_title("New file")
+        ask_dialog.set_title(_("New file"))
         entry = Gtk.Entry()
         ask_dialog.get_content_area().pack_end(entry, False, False, 0)
 
@@ -436,10 +442,12 @@ class PolicyEditor(Gtk.Application):
         if not re.compile(r"^[\w-]+$").match(new_name):
             show_error(
                 self.main_window,
-                "Invalid policy file name",
-                f"Invalid policy file name: {new_name}. Policy file "
-                "names must contain only alphanumeric characters, "
-                "underscore and hyphen.",
+                _("Invalid policy file name"),
+                _(
+                    "Invalid policy file name: {name}. Policy file "
+                    "names must contain only alphanumeric characters, "
+                    "underscore and hyphen."
+                ).format(name=new_name),
             )
             return
 
@@ -447,8 +455,8 @@ class PolicyEditor(Gtk.Application):
         if new_name in self.policy_client.policy_list():
             show_error(
                 self.main_window,
-                "File already exists",
-                f"Policy file: {new_name} already exists.",
+                _("File already exists"),
+                _("Policy file: {name} already exists.").format(name=new_name),
             )
             return
 
@@ -467,7 +475,7 @@ class PolicyEditor(Gtk.Application):
                 err_msg += ex.stdout.decode()
             else:
                 err_msg += str(ex)
-            show_error(self.main_window, "Failed to save policy", err_msg)
+            show_error(self.main_window, _("Failed to save policy"), err_msg)
             return False
         self.open_policy_file(self.filename)
         self.source_buffer.set_modified(False)
@@ -551,16 +559,18 @@ class PolicyEditor(Gtk.Application):
                 if getattr(ex, "returncode", None) == 126:
                     show_error(
                         self.main_window,
-                        "Access denied",
-                        "Access denied to file {}.".format(name),
+                        _("Access denied"),
+                        _("Access denied to file {}.").format(name),
                     )
                     response = Gtk.ResponseType.NO
                 else:
                     response = ask_question(
                         self.main_window,
-                        "Policy file not found",
-                        "File {} not found. Do you want to create a "
-                        "new policy file?".format(name),
+                        _("Policy file not found"),
+                        _(
+                            "File {} not found. Do you want to create a "
+                            "new policy file?"
+                        ).format(name),
                     )
                 if response == Gtk.ResponseType.YES:
                     # make new file
@@ -601,7 +611,7 @@ class PolicyEditor(Gtk.Application):
         else:
             self.error_info.get_style_context().remove_class("error_bad")
             self.error_info.get_style_context().add_class("error_ok")
-            self.error_info.set_text("No errors found!")
+            self.error_info.set_text(_("No errors found!"))
 
         if self.source_buffer.get_modified():
             self.main_window.set_title(self.window_title + " *")

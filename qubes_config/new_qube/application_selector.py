@@ -323,7 +323,7 @@ class ApplicationBoxHandler:
         return self._filter_func_app_list(x)
 
     def _load_all_apps(self, *_args):
-        self.load_all_button.set_label("Loading applications...")
+        self.load_all_button.set_label(_("Loading applications..."))
 
         while Gtk.events_pending():
             Gtk.main_iteration()
@@ -336,7 +336,7 @@ class ApplicationBoxHandler:
             Gtk.main_iteration()
 
         self.apps_list_other.set_visible(True)
-        self.load_all_button.set_label("No matching applications found")
+        self.load_all_button.set_label(_("No matching applications found"))
         self.load_all_button.set_sensitive(False)
 
     @staticmethod

@@ -199,7 +199,7 @@ class DevicesTray(Gtk.Application):
         self.widget_icon.set_from_icon_name("qubes-devices")
         self.widget_icon.connect("button-press-event", self.show_menu)
         self.widget_icon.set_tooltip_markup(
-            "<b>Qubes Devices</b>\nView and manage devices."
+            "<b>{}</b>\n{}".format(_("Qubes Devices"), _("View and manage devices."))
         )
 
     def _update_queue(self, vm, device, device_class):

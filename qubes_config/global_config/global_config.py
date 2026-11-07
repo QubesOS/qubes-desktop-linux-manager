@@ -322,6 +322,7 @@ class GlobalConfig(Gtk.Application):
         The function that performs actual widget realization and setup.
         """
         self.builder = Gtk.Builder()
+        self.builder.set_translation_domain("desktop-linux-manager")
         glade_ref = importlib.resources.files("qubes_config") / "global_config.glade"
         with importlib.resources.as_file(glade_ref) as path:
             self.builder.add_from_file(str(path))

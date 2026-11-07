@@ -239,7 +239,7 @@ qubes.InputTablet * {vm.name} @adminvm deny"""
         """Reset changes to the initial state."""
         for widget in self.widgets.values():
             widget.reset()
-        self.warn_label.set_text("Unexpected policy file contents:")
+        self.warn_label.set_text(_("Unexpected policy file contents:"))
 
 
 class U2FPolicyHandler:

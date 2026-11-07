@@ -165,3 +165,19 @@ tooltip {
 tooltip * {
     color: @text-color;
 }
+
+/* RTL: mirror the asymmetric spacing above */
+.explanation:dir(rtl) {
+    margin-left: 0;
+    margin-right: 5px;
+}
+
+checkbutton check:dir(rtl) {
+    margin-right: 0;
+    margin-left: 10px;
+}
+
+radiobutton radio:dir(rtl) {
+    margin-right: 0;
+    margin-left: 10px;
+}
