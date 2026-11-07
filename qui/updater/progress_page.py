@@ -347,6 +347,10 @@ class QubeUpdateDetails:
     def __init__(self, builder):
         self.active_row = None
         self.builder = builder
+        self._refresh_pending = False
+        # row whose output the text view shows, and how many of its parts
+        self._shown_row = None
+        self._shown_parts = 0
 
         self.qube_details: Gtk.Box = self.builder.get_object("qube_details")
         self.details_label: Gtk.Label = self.builder.get_object("details_label")
@@ -393,10 +397,31 @@ class QubeUpdateDetails:
         self.copy_button.set_visible(row_activated)
 
     def update_buffer(self):
-        if self.active_row is not None:
-            buffer_ = self.progress_textview.get_buffer()
-            GLib.idle_add(buffer_.set_text, self.active_row.buffer)
-            GLib.idle_add(self._autoscroll)
+        # Schedule at most one refresh and read the row's buffer when it runs.
+        # Passing the buffer to idle_add on every output line kept a full copy
+        # of it per pending callback, which could use gigabytes of memory.
+        if self.active_row is not None and not self._refresh_pending:
+            self._refresh_pending = True
+            GLib.idle_add(self._refresh_buffer)
+
+    def _refresh_buffer(self):
+        self._refresh_pending = False
+        row = self.active_row
+        if row is None:
+            return False
+        text_buffer = self.progress_textview.get_buffer()
+        parts = row.buffer_parts
+        if row is self._shown_row:
+            # the row's output is only appended to, insert just the new parts
+            text_buffer.insert(
+                text_buffer.get_end_iter(), "".join(parts[self._shown_parts :])
+            )
+        else:
+            text_buffer.set_text("".join(parts))
+            self._shown_row = row
+        self._shown_parts = len(parts)
+        GLib.idle_add(self._autoscroll)
+        return False
 
     def _autoscroll(self):
         adjustment = self.progress_scrolled_window.get_vadjustment()

@@ -166,14 +166,31 @@ def test_update_templates(
         sut.interrupt_update()
     run_coroutine(sut.update_selected(updateable_vms_list, mock_settings))
 
-    sut.update_details.set_active_row(updateable_vms_list[2])
-
     calls = [
         call(sut.set_total_progress, 100),
-        call(mock_text_view.buffer.set_text, "Details 0"),
-        call(mock_text_view.buffer.set_text, "Details 2"),
+        call(sut.update_details._refresh_buffer),
     ]
     idle_add.assert_has_calls(calls, any_order=True)
+
+    # refreshes stay coalesced until the scheduled one runs
+    refresh_calls = idle_add.call_args_list.count(
+        call(sut.update_details._refresh_buffer)
+    )
+    sut.update_details.set_active_row(updateable_vms_list[2])
+    assert (
+        idle_add.call_args_list.count(call(sut.update_details._refresh_buffer))
+        == refresh_calls
+    )
+    # and read the buffer of the row active when they run
+    sut.update_details._refresh_buffer()
+    assert mock_text_view.buffer.text == "Details 2"
+
+    # later output of the same row is appended, not set again
+    text_buffer = mock_text_view.buffer = Mock()
+    updateable_vms_list[2].append_text_view(" more")
+    sut.update_details._refresh_buffer()
+    text_buffer.insert.assert_called_once_with(text_buffer.get_end_iter(), " more")
+    text_buffer.set_text.assert_not_called()
     if not interrupted:
         sut.do_update_selected.assert_called()
     mock_callback.assert_not_called()

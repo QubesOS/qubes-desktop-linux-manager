@@ -24,7 +24,7 @@ from enum import Enum
 import gi
 
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import List, Optional
 
 gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk  # isort:skip
@@ -369,10 +369,20 @@ class UpdateRowWrapper(RowWrapper):
 
         super().__init__(list_store, vm, raw_row)
 
-        self.buffer: str = ""
+        # Update output, one item per append. Appending to a single str copied
+        # the whole output on every line, which took minutes for a long log.
+        self.buffer_parts: List[str] = []
+
+    @property
+    def buffer(self) -> str:
+        return "".join(self.buffer_parts)
+
+    @buffer.setter
+    def buffer(self, text: str):
+        self.buffer_parts = [text]
 
     def append_text_view(self, text):
-        self.buffer += text
+        self.buffer_parts.append(text)
 
     @property
     def selected(self):
