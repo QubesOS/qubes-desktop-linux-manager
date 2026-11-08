@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: qubes-desktop-linux-manager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-08 02:33+0200\n"
+"POT-Creation-Date: 2026-11-08 03:57+0200\n"
 "PO-Revision-Date: 2026-11-08 01:19+0200\n"
 "Last-Translator: David wacholder <185147826+David-wacholder@users.noreply.github.com>\n"
 "Language-Team: none\n"
@@ -1971,24 +1971,40 @@ msgstr ""
 "<b>ליבה:</b> {kernel_ver}\n"
 "‏<b>Xen:</b> {xen_ver}\n"
 
-#: qubes_config/global_config/thisdevice_handler.py:173
+#: qubes_config/global_config/thisdevice_handler.py:159
+msgid "<b>HVM:</b> {}"
+msgstr "<b>HVM:</b> {}"
+
+#: qubes_config/global_config/thisdevice_handler.py:164
+msgid "<b>I/O MMU:</b> {}"
+msgstr "<b>I/O MMU:</b> {}"
+
+#: qubes_config/global_config/thisdevice_handler.py:169
+msgid "<b>HAP/SLAT:</b> {}"
+msgstr "<b>HAP/SLAT:</b> {}"
+
+#: qubes_config/global_config/thisdevice_handler.py:179
 msgid "<b>TPM version</b>: 2.0 (not yet supported)"
 msgstr "<b>גרסת TPM</b>: 2.0 (עדיין לא נתמכת)"
 
-#: qubes_config/global_config/thisdevice_handler.py:177
+#: qubes_config/global_config/thisdevice_handler.py:183
 msgid "<b>TPM version</b>: 1.2"
 msgstr "<b>גרסת TPM</b>: 1.2"
 
-#: qubes_config/global_config/thisdevice_handler.py:180
+#: qubes_config/global_config/thisdevice_handler.py:186
 msgid "<b>TPM version</b>: device not found"
 msgstr "<b>גרסת TPM</b>: ההתקן לא נמצא"
 
-#: qubes_config/global_config/thisdevice_handler.py:195
+#: qubes_config/global_config/thisdevice_handler.py:190
+msgid "<b>Remapping:</b> {}"
+msgstr "<b>מיפוי מחדש:</b> {}"
+
+#: qubes_config/global_config/thisdevice_handler.py:201
 #, python-brace-format
 msgid "<b>PV qubes:</b> {num_pvs} found"
 msgstr "‏<b>qubes מסוג PV:</b> נמצאו {num_pvs}"
 
-#: qubes_config/global_config/thisdevice_handler.py:198
+#: qubes_config/global_config/thisdevice_handler.py:204
 msgid ""
 "<b>The following qubes have PV virtualization mode:</b>\n"
 " - "
@@ -1996,35 +2012,35 @@ msgstr ""
 "<b>ל-qubes הבאים יש מצב וירטואליזציה PV:</b>\n"
 " - "
 
-#: qubes_config/global_config/thisdevice_handler.py:213
-#: qubes_config/global_config/thisdevice_handler.py:214
-#: qubes_config/global_config/thisdevice_handler.py:218
+#: qubes_config/global_config/thisdevice_handler.py:219
 #: qubes_config/global_config/thisdevice_handler.py:220
-#: qubes_config/global_config/thisdevice_handler.py:221
+#: qubes_config/global_config/thisdevice_handler.py:224
+#: qubes_config/global_config/thisdevice_handler.py:226
+#: qubes_config/global_config/thisdevice_handler.py:227
 msgid "unknown"
 msgstr "לא ידוע"
 
-#: qubes_config/global_config/thisdevice_handler.py:235
+#: qubes_config/global_config/thisdevice_handler.py:241
 msgid "Failed to copy to Global Clipboard"
 msgstr "ההעתקה ללוח ההעתקה הכללי נכשלה"
 
-#: qubes_config/global_config/thisdevice_handler.py:236
+#: qubes_config/global_config/thisdevice_handler.py:242
 msgid "An error occurred while trying to access Global Clipboard"
 msgstr "אירעה שגיאה בניסיון לגשת ללוח ההעתקה הכללי"
 
-#: qubes_config/global_config/thisdevice_handler.py:278
+#: qubes_config/global_config/thisdevice_handler.py:284
 msgid "<b>USB keyboards</b>: "
 msgstr "<b>מקלדות USB</b>: "
 
-#: qubes_config/global_config/thisdevice_handler.py:281
+#: qubes_config/global_config/thisdevice_handler.py:287
 msgid "unknown (legacy policy found)"
 msgstr "לא ידוע (נמצאו כללי הרשאות ישנים)"
 
-#: qubes_config/global_config/thisdevice_handler.py:284
+#: qubes_config/global_config/thisdevice_handler.py:290
 msgid "insecure policy"
 msgstr "כללי הרשאות לא מאובטחים"
 
-#: qubes_config/global_config/thisdevice_handler.py:287
+#: qubes_config/global_config/thisdevice_handler.py:293
 msgid "secure policy"
 msgstr "כללי הרשאות מאובטחים"
 
@@ -2534,7 +2550,7 @@ msgid "Copyright (C) 2023 marmarta@invisiblethingslab.com"
 msgstr "Copyright (C) 2023 marmarta@invisiblethingslab.com"
 
 #: qubes_config/policy_editor.glade:133
-#: qubes_config/policy_editor/policy_editor.py:626
+#: qubes_config/policy_editor/policy_editor.py:622
 msgid "No errors found!"
 msgstr "לא נמצאו שגיאות!"
 
@@ -2626,32 +2642,32 @@ msgstr "_הצגה/הסתרה של העזרה"
 msgid "_About"
 msgstr "_אודות"
 
-#: qubes_config/policy_editor/policy_editor.py:398
-#: qubes_config/policy_editor/policy_editor.py:416
+#: qubes_config/policy_editor/policy_editor.py:396
+#: qubes_config/policy_editor/policy_editor.py:414
 msgid "Unsaved changes found"
 msgstr "יש שינויים שלא נשמרו"
 
-#: qubes_config/policy_editor/policy_editor.py:399
+#: qubes_config/policy_editor/policy_editor.py:397
 msgid "Do you want to save changes before exiting?"
 msgstr "לשמור את השינויים לפני היציאה?"
 
-#: qubes_config/policy_editor/policy_editor.py:417
+#: qubes_config/policy_editor/policy_editor.py:415
 msgid "Do you want to save changes before creating a new file?"
 msgstr "לשמור את השינויים לפני יצירת קובץ חדש?"
 
-#: qubes_config/policy_editor/policy_editor.py:430
+#: qubes_config/policy_editor/policy_editor.py:428
 msgid "Name of the new policy file:"
 msgstr "שם קובץ כללי ההרשאות החדש:"
 
-#: qubes_config/policy_editor/policy_editor.py:433
+#: qubes_config/policy_editor/policy_editor.py:431
 msgid "New file"
 msgstr "קובץ חדש"
 
-#: qubes_config/policy_editor/policy_editor.py:455
+#: qubes_config/policy_editor/policy_editor.py:453
 msgid "Invalid policy file name"
 msgstr "שם לא חוקי לקובץ כללי הרשאות"
 
-#: qubes_config/policy_editor/policy_editor.py:457
+#: qubes_config/policy_editor/policy_editor.py:455
 #, python-brace-format
 msgid ""
 "Invalid policy file name: {name}. Policy file names must contain only "
@@ -2660,44 +2676,44 @@ msgstr ""
 "שם לא חוקי לקובץ כללי הרשאות: {name}. שמות של קובצי כללי הרשאות יכולים להכיל"
 " רק אותיות לטיניות, ספרות, קו תחתון ומקף."
 
-#: qubes_config/policy_editor/policy_editor.py:468
+#: qubes_config/policy_editor/policy_editor.py:466
 msgid "File already exists"
 msgstr "הקובץ כבר קיים"
 
-#: qubes_config/policy_editor/policy_editor.py:469
+#: qubes_config/policy_editor/policy_editor.py:467
 #, python-brace-format
 msgid "Policy file: {name} already exists."
 msgstr "קובץ כללי ההרשאות {name} כבר קיים."
 
-#: qubes_config/policy_editor/policy_editor.py:488
+#: qubes_config/policy_editor/policy_editor.py:486
 msgid "Failed to save policy"
 msgstr "שמירת כללי ההרשאות נכשלה"
 
-#: qubes_config/policy_editor/policy_editor.py:540
+#: qubes_config/policy_editor/policy_editor.py:538
 msgid "Qubes OS Policy Editor - {}"
 msgstr "עורך כללי ההרשאות של Qubes OS - {}"
 
-#: qubes_config/policy_editor/policy_editor.py:574
+#: qubes_config/policy_editor/policy_editor.py:570
 msgid "Access denied"
 msgstr "הגישה נדחתה"
 
-#: qubes_config/policy_editor/policy_editor.py:575
+#: qubes_config/policy_editor/policy_editor.py:571
 msgid "Access denied to file {}."
 msgstr "הגישה לקובץ {} נדחתה."
 
-#: qubes_config/policy_editor/policy_editor.py:581
+#: qubes_config/policy_editor/policy_editor.py:577
 msgid "Policy file not found"
 msgstr "קובץ כללי ההרשאות לא נמצא"
 
-#: qubes_config/policy_editor/policy_editor.py:583
+#: qubes_config/policy_editor/policy_editor.py:579
 msgid "File {} not found. Do you want to create a new policy file?"
 msgstr "הקובץ {} לא נמצא. ליצור קובץ כללי הרשאות חדש?"
 
-#: qubes_config/policy_editor/policy_editor.py:613
+#: qubes_config/policy_editor/policy_editor.py:609
 msgid " (comments must be on a separate line)"
 msgstr " (הערות חייבות להיות בשורה נפרדת)"
 
-#: qubes_config/policy_editor/policy_editor.py:615
+#: qubes_config/policy_editor/policy_editor.py:611
 msgid "<b>Line {}</b>:"
 msgstr "<b>שורה {}</b>:"
 

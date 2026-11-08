@@ -335,9 +335,7 @@ class PolicyEditor(Gtk.Application):
     def _load_help_text() -> str:
         """Help text in the UI language if a translated file exists,
         e.g. policy_help.he.txt, else the English policy_help.txt"""
-        help_dir = importlib.resources.files("qubes_config").joinpath(
-            "policy_editor"
-        )
+        help_dir = importlib.resources.files("qubes_config").joinpath("policy_editor")
         lang = locale.getlocale(locale.LC_MESSAGES)[0] or ""
         for name in (f"policy_help.{lang}.txt", f"policy_help.{lang[:2]}.txt"):
             if lang and help_dir.joinpath(name).is_file():
@@ -537,9 +535,7 @@ class PolicyEditor(Gtk.Application):
         self.filename = name
         self.source_buffer.begin_not_undoable_action()
         self.source_buffer.set_text(contents)
-        self.window_title = _("Qubes OS Policy Editor - {}").format(
-            self.filename
-        )
+        self.window_title = _("Qubes OS Policy Editor - {}").format(self.filename)
         self.main_window.set_title(self.window_title)
         self.source_buffer.set_modified(False)
         self.source_buffer.end_not_undoable_action()
