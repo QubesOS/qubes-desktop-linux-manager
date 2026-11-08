@@ -283,7 +283,7 @@ class DevicePolicyHandler:
         current_row = self.rule_list.get_selected_row()
         response = ask_question(
             self.main_window,
-            "Delete rule",
+            _("Delete rule"),
             _("Are you sure you want to delete rule:\n") + str(current_row),
         )
         if response == Gtk.ResponseType.NO:

@@ -129,6 +129,7 @@ setuptools.setup(
             "qubes-policy-editor-dark.css",
             "policy_editor.glade",
             "policy_editor/policy_help.txt",
+            "policy_editor/policy_help.he.txt",
         ],
     },
     cmdclass={"install": InstallWithLocale},

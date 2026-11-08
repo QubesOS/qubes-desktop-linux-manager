@@ -1,6 +1,7 @@
 [Desktop Entry]
 Icon=drive-harddisk
 Name=Disk Space Tray
+Name[he]=וידג'ט שטח הדיסק
 Categories=System;Monitor;
 Exec=systemctl --user start qubes-widget@qui-disk-space
 Terminal=false

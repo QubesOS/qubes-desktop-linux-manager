@@ -237,3 +237,9 @@ treeview.view:selected {
     color: @qubes-blue;
     font-weight: bold;
 }
+
+/* RTL: mirror the asymmetric spacing above */
+checkbutton check:dir(rtl) {
+    margin-right: 0;
+    margin-left: 5px;
+}

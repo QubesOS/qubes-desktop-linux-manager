@@ -100,7 +100,7 @@ class DevicePolicyDialog(DevPolicyDialogHandler):
 
     def run_for_existing(self, row: "DevPolicyRow"):
         """Run for an existing rule"""
-        self.dialog.set_title("Edit Device Attachment Block")
+        self.dialog.set_title(_("Edit Device Attachment Block"))
         super().run_for_existing(row)
         self.clear()
         self.qube_model.select_value(row.vm_wrapper.vm)

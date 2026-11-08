@@ -41,6 +41,11 @@ from gi.repository import Gtk, GdkPixbuf, GLib  # isort:skip
 
 from . import backend
 
+import gettext
+
+t = gettext.translation("desktop-linux-manager", fallback=True)
+_ = t.gettext
+
 
 def load_icon(icon_name: str, backup_name: str, size: int = 24):
     """Load icon from provided name/path, if available. If not, load backup
@@ -507,10 +512,10 @@ class DeviceHeaderWidget(Gtk.Box, ActionableWidget):
             mic_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
             mic_label = Gtk.Label()
             if device.device_class == "mic":
-                mic_label.set_markup("This device will attach with camera ")
+                mic_label.set_markup(_("This device will attach with camera "))
                 mic_box.add(mic_label)
             else:
-                mic_label.set_markup("This device will attach with microphone ")
+                mic_label.set_markup(_("This device will attach with microphone "))
                 mic_box.add(mic_label)
             mic_img = VariantIcon(
                 "camera" if device.device_class == "mic" else "mic", variant, 18
