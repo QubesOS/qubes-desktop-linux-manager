@@ -76,6 +76,14 @@ def test_show(
     assert sut.cancel_button.label == "_Back"
     refresh_buttons.assert_called_once()
 
+    sut.show(1, 0, 0, reboot_required=True)
+    assert (
+        sut.label_summary.get_text() == "1 qube updated successfully.\n"
+        "0 qubes attempted to update but found no updates.\n"
+        "0 qubes failed to update.\n\n"
+        "Restart the computer to finish applying dom0 updates."
+    )
+
 
 def test_on_header_toggled(
     real_builder, test_qapp, appvms_list, mock_next_button, mock_cancel_button

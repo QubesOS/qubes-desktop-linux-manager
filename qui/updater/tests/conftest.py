@@ -71,6 +71,9 @@ def test_qapp():
     qapp._qubes["test-standalone"].updateable = True
 
     qapp.update_vm_calls()
+    qapp.expected_calls[("dom0", "admin.vm.feature.Get", "reboot-required", None)] = (
+        b"2\x00QubesFeatureNotFoundError\x00\x00reboot-required\x00"
+    )
     return qapp
 
 
