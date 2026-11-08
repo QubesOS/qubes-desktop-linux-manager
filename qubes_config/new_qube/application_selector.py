@@ -64,7 +64,7 @@ class ApplicationData:
         self.name = name
         self.ident = ident
         self.template = template
-        additional_description = ".desktop filename: " + str(self.ident)
+        additional_description = _(".desktop filename: {}").format(self.ident)
 
         file_name_root = self.ident[: -len(".desktop")]
         self.icon_path = os.path.expanduser(

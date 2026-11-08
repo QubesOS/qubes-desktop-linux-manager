@@ -145,9 +145,11 @@ class InputDeviceHandler:
 
         if not self.usb_qubes:
             self._warn(
-                "No USB qubes found: to apply policy to USB input "
-                "devices, connect your USB controller to a "
-                "dedicated USB qube."
+                _(
+                    "No USB qubes found: to apply policy to USB input "
+                    "devices, connect your USB controller to a "
+                    "dedicated USB qube."
+                )
             )
             return
 
@@ -398,8 +400,10 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
 
         if not self.usb_qubes:
             self.disable_u2f(
-                "No USB qubes found. To use U2F Proxy, you have to"
-                "connect your USB controller to a qube."
+                _(
+                    "No USB qubes found. To use U2F Proxy, you have to "
+                    "connect your USB controller to a qube."
+                )
             )
             return
 

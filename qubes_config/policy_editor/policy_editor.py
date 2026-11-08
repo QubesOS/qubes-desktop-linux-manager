@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program; if not, see <http://www.gnu.org/licenses/>.
 import html
+import locale
 import subprocess
 import sys
 import re
@@ -176,7 +177,7 @@ class PolicyEditor(Gtk.Application):
         self.token: Optional[str] = None
         self.policy_client = PolicyClientWrapper(policy_client)
         self.filename = filename
-        self.window_title = "Qubes OS Policy Editor"
+        self.window_title = _("Qubes OS Policy Editor")
         self.action_items: Dict[str, Gio.SimpleAction] = {}
         self.accel_group = Gtk.AccelGroup()
 
@@ -262,11 +263,7 @@ class PolicyEditor(Gtk.Application):
         )
 
         self.setup_source()
-        help_text = (
-            importlib.resources.files("qubes_config")
-            .joinpath("policy_editor/policy_help.txt")
-            .read_text()
-        )
+        help_text = self._load_help_text()
         self.builder.get_object("help_label").set_markup(help_text)
 
         self.open_policy_file(self.filename)
@@ -303,36 +300,49 @@ class PolicyEditor(Gtk.Application):
     def setup_menu(self):
         # File
         file_menu = Gtk.Menu()
-        file_item = self._get_menu_item("_File")
+        file_item = self._get_menu_item(_("_File"))
         file_item.set_submenu(file_menu)
-        file_menu.add(self._get_menu_item_with_ac("_New", "win.new", Gdk.KEY_n))
-        file_menu.add(self._get_menu_item_with_ac("_Open", "win.open", Gdk.KEY_o))
-        file_menu.add(self._get_menu_item_with_ac("_Save", "win.save", Gdk.KEY_s))
-        file_menu.add(self._get_menu_item_with_ac("_Quit", "win.quit", Gdk.KEY_q))
+        file_menu.add(self._get_menu_item_with_ac(_("_New"), "win.new", Gdk.KEY_n))
+        file_menu.add(self._get_menu_item_with_ac(_("_Open"), "win.open", Gdk.KEY_o))
+        file_menu.add(self._get_menu_item_with_ac(_("_Save"), "win.save", Gdk.KEY_s))
+        file_menu.add(self._get_menu_item_with_ac(_("_Quit"), "win.quit", Gdk.KEY_q))
         self.menu_bar.add(file_item)
 
         # Edit
         edit_menu = Gtk.Menu()
-        edit_item = self._get_menu_item("_Edit")
+        edit_item = self._get_menu_item(_("_Edit"))
         edit_item.set_submenu(edit_menu)
-        edit_menu.add(self._get_menu_item_with_ac("_Redo", "win.redo", Gdk.KEY_y))
-        edit_menu.add(self._get_menu_item_with_ac("_Undo", "win.undo", Gdk.KEY_z))
-        edit_menu.add(self._get_menu_item_with_ac("_Copy", "win.copy", Gdk.KEY_c))
-        edit_menu.add(self._get_menu_item_with_ac("_Paste", "win.paste", Gdk.KEY_v))
-        edit_menu.add(self._get_menu_item_with_ac("Re_set", "win.reset", None))
+        edit_menu.add(self._get_menu_item_with_ac(_("_Redo"), "win.redo", Gdk.KEY_y))
+        edit_menu.add(self._get_menu_item_with_ac(_("_Undo"), "win.undo", Gdk.KEY_z))
+        edit_menu.add(self._get_menu_item_with_ac(_("_Copy"), "win.copy", Gdk.KEY_c))
+        edit_menu.add(self._get_menu_item_with_ac(_("_Paste"), "win.paste", Gdk.KEY_v))
+        edit_menu.add(self._get_menu_item_with_ac(_("Re_set"), "win.reset", None))
         self.menu_bar.add(edit_item)
 
         # About
         help_menu = Gtk.Menu()
-        help_item = self._get_menu_item("_Help")
+        help_item = self._get_menu_item(_("_Help"))
         help_item.set_submenu(help_menu)
         help_menu.add(
-            self._get_menu_item_with_ac("_Show/Hide Help", "win.help", Gdk.KEY_h)
+            self._get_menu_item_with_ac(_("_Show/Hide Help"), "win.help", Gdk.KEY_h)
         )
-        help_menu.add(self._get_menu_item_with_ac("_About", "win.about", None))
+        help_menu.add(self._get_menu_item_with_ac(_("_About"), "win.about", None))
         self.menu_bar.add(help_item)
 
         self.menu_bar.show_all()
+
+    @staticmethod
+    def _load_help_text() -> str:
+        """Help text in the UI language if a translated file exists,
+        e.g. policy_help.he.txt, else the English policy_help.txt"""
+        help_dir = importlib.resources.files("qubes_config").joinpath(
+            "policy_editor"
+        )
+        lang = locale.getlocale(locale.LC_MESSAGES)[0] or ""
+        for name in (f"policy_help.{lang}.txt", f"policy_help.{lang[:2]}.txt"):
+            if lang and help_dir.joinpath(name).is_file():
+                return help_dir.joinpath(name).read_text(encoding="utf-8")
+        return help_dir.joinpath("policy_help.txt").read_text(encoding="utf-8")
 
     @staticmethod
     def _get_menu_item(name) -> Gtk.MenuItem:
@@ -527,7 +537,9 @@ class PolicyEditor(Gtk.Application):
         self.filename = name
         self.source_buffer.begin_not_undoable_action()
         self.source_buffer.set_text(contents)
-        self.window_title = "Qubes OS Policy Editor - " + self.filename
+        self.window_title = _("Qubes OS Policy Editor - {}").format(
+            self.filename
+        )
         self.main_window.set_title(self.window_title)
         self.source_buffer.set_modified(False)
         self.source_buffer.end_not_undoable_action()
@@ -598,9 +610,9 @@ class PolicyEditor(Gtk.Application):
             except PolicySyntaxError as ex:
                 msg = str(ex).split(":", 2)[-1]
                 if "#" in line:
-                    msg += " (comments must be on a separate line)"
+                    msg += _(" (comments must be on a separate line)")
                 msg = html.escape(msg, quote=True)
-                errors.append("<b>Line " + str(lineno + 1) + "</b>:" + msg)
+                errors.append(_("<b>Line {}</b>:").format(lineno + 1) + msg)
 
         if errors:
             self.error_info.get_style_context().remove_class("error_ok")
