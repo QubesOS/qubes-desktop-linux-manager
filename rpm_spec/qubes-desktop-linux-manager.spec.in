@@ -46,6 +46,7 @@ BuildRequires:  make
 BuildRequires:  python%{python3_pkgversion}-devel
 BuildRequires:  python%{python3_pkgversion}-setuptools
 BuildRequires:  gettext
+BuildRequires:  systemd-rpm-macros
 
 Requires:  python%{python3_pkgversion}-setuptools
 %if 0%{?fedora} < 42
@@ -81,7 +82,7 @@ A collection of GUI application for enhancing the Qubes UX.
 
 %install
 %py3_install
-make install DESTDIR=$RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT USERUNITDIR=%{_userunitdir}
 
 %post
 touch --no-create %{_datadir}/icons/Adwaita &>/dev/null || :
@@ -91,6 +92,12 @@ if [ $1 -eq 0 ]; then
     touch --no-create %{_datadir}/icons/Adwaita &>/dev/null || :
     gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 fi
+%systemd_user_postun_with_restart \
+    qubes-widget@qui-domains.service \
+    qubes-widget@qui-devices.service \
+    qubes-widget@qui-disk-space.service \
+    qubes-widget@qui-clipboard.service \
+    qubes-widget@qui-updates.service
 
 %posttrans
 gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
@@ -230,7 +237,7 @@ gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 /usr/share/icons/Adwaita/22x22/status/outdated.png
 /usr/share/applications/qubes-update-gui.desktop
 /usr/bin/widget-wrapper
-/lib/systemd/user/qubes-widget@.service
+%{_userunitdir}/qubes-widget@.service
 /usr/share/locale/en/LC_MESSAGES/desktop-linux-manager.mo
 /usr/share/locale/pl/LC_MESSAGES/desktop-linux-manager.mo
 

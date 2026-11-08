@@ -1,0 +1,15 @@
+#!/bin/sh
+# Restart Qubes system tray widgets of logged in users after a package upgrade.
+
+set -e
+
+[ -d /run/systemd/system ] || exit 0
+
+users="$(loginctl list-users --no-legend)"
+
+printf '%s\n' "$users" | while read -r uid _; do
+    [ -n "$uid" ] || continue
+    systemctl --user -M "$uid@" is-active --quiet 'qubes-widget@*' || continue
+    systemctl --user -M "$uid@" daemon-reload
+    systemctl --user -M "$uid@" try-restart 'qubes-widget@*'
+done
