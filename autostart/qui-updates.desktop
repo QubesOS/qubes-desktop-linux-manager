@@ -1,6 +1,7 @@
 [Desktop Entry]
 Icon=qubes
 Name=Updates Tray
+Name[he]=וידג'ט העדכונים
 Categories=System;Monitor;
 Exec=systemctl --user start qubes-widget@qui-updates
 Terminal=false

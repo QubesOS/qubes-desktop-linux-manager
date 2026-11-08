@@ -1,6 +1,7 @@
 [Desktop Entry]
 Icon=edit-paste
 Name=Clipboard Tray
+Name[he]=וידג'ט לוח ההעתקה
 Categories=System;Monitor;
 Exec=systemctl --user start qubes-widget@qui-clipboard
 Terminal=false

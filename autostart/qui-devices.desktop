@@ -1,6 +1,7 @@
 [Desktop Entry]
 Icon=media-removable
 Name=Devices Tray
+Name[he]=וידג'ט ההתקנים
 Categories=System;Monitor;
 Exec=systemctl --user start qubes-widget@qui-devices
 Terminal=false
