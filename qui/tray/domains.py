@@ -9,8 +9,10 @@ from .gtk3_xwayland_menu_dismisser import (
 )  # isort:skip
 
 import asyncio
+import math
 import os
 import sys
+import time
 import traceback
 import abc
 
@@ -710,6 +712,299 @@ class QubesManagerItem(Gtk.MenuItem):
         await asyncio.create_subprocess_exec("qubes-qube-manager")
 
 
+# how far back the memory graph goes
+MEMORY_HISTORY_SECONDS = 600
+# a longer time without stats breaks the lines of the memory graph
+MEMORY_GAP_SECONDS = 30
+
+
+def memory_graph_ticks(low, high):
+    """Round values (in MiB) for the y axis of the memory graph, covering
+    *low* to *high* with at most 5 intervals"""
+    if high - low < 30:
+        # a flat line still gets a few MiB around it
+        middle = (low + high) / 2
+        low, high = max(middle - 15, 0), max(middle + 15, 30)
+    magnitude = 10 ** math.floor(math.log10((high - low) / 5))
+    for factor in (1, 2, 5, 10, 20, 50):
+        step = int(factor * magnitude)
+        first = math.floor(low / step) * step
+        last = math.ceil(high / step) * step
+        if (last - first) / step <= 5:
+            break
+    return list(range(first, last + 1, step))
+
+
+def boot_time():
+    """Seconds since boot, including time spent in suspend"""
+    return time.clock_gettime(time.CLOCK_BOOTTIME)
+
+
+class MemoryGraph(Gtk.DrawingArea):
+    """Total memory assigned to and used by qubes over the last
+    MEMORY_HISTORY_SECONDS, as recorded since the widget started."""
+
+    def __init__(self, clock=boot_time):
+        super().__init__()
+        self.clock = clock
+        self.set_size_request(320, 160)
+        # (time, assigned KiB, used KiB), oldest first
+        self.samples: list[tuple[float, int, int]] = []
+        self.connect("draw", self._draw)
+
+    def add_sample(self, assigned_kb, used_kb):
+        now = self.clock()
+        if self.samples and now - self.samples[-1][0] < 1:
+            # all qubes send their stats at the same time, keep one point
+            self.samples[-1] = (self.samples[-1][0], assigned_kb, used_kb)
+        else:
+            self.samples.append((now, assigned_kb, used_kb))
+        self._expire(now)
+        self.queue_draw()
+
+    def _expire(self, now):
+        # keep one older point, so the lines start at the left edge
+        while (
+            len(self.samples) > 1 and now - self.samples[1][0] > MEMORY_HISTORY_SECONDS
+        ):
+            self.samples.pop(0)
+
+    def _draw(self, widget, context):
+        now = self.clock()
+        self._expire(now)
+        style = widget.get_style_context()
+        # draw text and lines as usual, though the menu item is insensitive
+        style.save()
+        style.set_state(Gtk.StateFlags.NORMAL)
+        try:
+            self._draw_graph(widget, context, style, now)
+        finally:
+            style.restore()
+
+    def _draw_graph(self, widget, context, style, now):
+        width = widget.get_allocated_width()
+        height = widget.get_allocated_height()
+        color = style.get_color(Gtk.StateFlags.NORMAL)
+
+        def set_color(alpha):
+            Gdk.cairo_set_source_rgba(
+                context, Gdk.RGBA(color.red, color.green, color.blue, alpha)
+            )
+
+        values = [
+            value / 1024
+            for _time, assigned, used in self.samples
+            for value in (assigned, used)
+        ]
+        ticks = memory_graph_ticks(min(values, default=0), max(values, default=0))
+        y_labels = [widget.create_pango_layout(f"{tick} MiB") for tick in ticks]
+        x_labels = [
+            widget.create_pango_layout(text)
+            for text in (
+                _("-{} min").format(MEMORY_HISTORY_SECONDS // 60),
+                _("-{} min").format(MEMORY_HISTORY_SECONDS // 120),
+                _("now"),
+            )
+        ]
+        label_height = x_labels[0].get_pixel_size()[1]
+        # plot area; the legend is above it, the time labels below
+        left = max(label.get_pixel_size()[0] for label in y_labels) + 6
+        top = label_height + 6
+        right = width - x_labels[-1].get_pixel_size()[0] // 2 - 1
+        bottom = height - label_height - 4
+
+        self._draw_legend(widget, context, style, set_color, left, label_height)
+
+        def to_x(sample_time):
+            return right - (now - sample_time) / MEMORY_HISTORY_SECONDS * (right - left)
+
+        def to_y(value_kb):
+            return bottom - (value_kb / 1024 - ticks[0]) / (ticks[-1] - ticks[0]) * (
+                bottom - top
+            )
+
+        context.set_line_width(1)
+        for tick, label in zip(ticks, y_labels):
+            y = round(to_y(tick * 1024)) + 0.5
+            set_color(0.25)
+            context.move_to(left, y)
+            context.line_to(right, y)
+            context.stroke()
+            label_width, label_h = label.get_pixel_size()
+            Gtk.render_layout(
+                style, context, left - 6 - label_width, y - label_h / 2, label
+            )
+        for index, label in enumerate(x_labels):
+            x = left + (right - left) * index / (len(x_labels) - 1)
+            label_width = label.get_pixel_size()[0]
+            Gtk.render_layout(
+                style,
+                context,
+                min(max(x - label_width / 2, left), width - label_width),
+                bottom + 4,
+                label,
+            )
+        set_color(0.4)
+        context.rectangle(left + 0.5, top + 0.5, right - left, bottom - top)
+        context.stroke()
+
+        context.save()
+        context.rectangle(left, top, right - left, bottom - top)
+        context.clip()
+        for segment in self._segments(now):
+            points = [
+                (to_x(sample_time), to_y(assigned), to_y(used))
+                for sample_time, assigned, used in segment
+            ]
+            # used: filled area
+            context.move_to(points[0][0], bottom)
+            for x, _assigned_y, used_y in points:
+                context.line_to(x, used_y)
+            context.line_to(points[-1][0], bottom)
+            context.close_path()
+            set_color(0.25)
+            context.fill()
+            # assigned: line
+            context.set_line_width(2)
+            context.move_to(points[0][0], points[0][1])
+            for x, assigned_y, _used_y in points[1:]:
+                context.line_to(x, assigned_y)
+            set_color(1)
+            context.stroke()
+        context.restore()
+
+    def _segments(self, now):
+        """Samples split where stats were missing for a while; the last
+        values are extended to now if they are recent"""
+        segments = []
+        for sample in self.samples:
+            if segments and sample[0] - segments[-1][-1][0] <= MEMORY_GAP_SECONDS:
+                segments[-1].append(sample)
+            else:
+                segments.append([sample])
+        if segments and now - segments[-1][-1][0] <= MEMORY_GAP_SECONDS:
+            segments[-1].append((now,) + segments[-1][-1][1:])
+        return segments
+
+    @staticmethod
+    def _draw_legend(widget, context, style, set_color, x, label_height):
+        for text, alpha, filled in (
+            (_("Assigned"), 1, False),
+            (_("Used (self-reported)"), 0.25, True),
+        ):
+            set_color(alpha)
+            if filled:
+                context.rectangle(x, label_height / 2 - 4, 16, 8)
+                context.fill()
+            else:
+                context.set_line_width(2)
+                context.move_to(x, label_height / 2)
+                context.line_to(x + 16, label_height / 2)
+                context.stroke()
+            label = widget.create_pango_layout(text)
+            Gtk.render_layout(style, context, x + 20, 0, label)
+            x += 20 + label.get_pixel_size()[0] + 16
+
+
+class MemorySummaryItem(Gtk.MenuItem):
+    """Memory assigned to all running qubes, compared to the system memory,
+    with a graph of the last minutes in its submenu.
+
+    Hidden until the first stats event with ``memory_assigned_total``
+    arrives."""
+
+    def __init__(self):
+        super().__init__()
+
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+
+        # Same left offset as the icon of DomainMenuItem
+        placeholder = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        placeholder.set_size_request(16, 0)
+        hbox.pack_start(placeholder, False, True, 6)
+
+        grid = Gtk.Grid()
+        grid.set_column_spacing(10)
+        grid.set_row_spacing(4)
+
+        name_label = Gtk.Label(xalign=0)
+        name_label.set_markup(_("<b>Total memory assigned</b>"))
+        name_label.set_hexpand(True)
+
+        self.memory_label = Gtk.Label(xalign=1)
+
+        self.level_bar = Gtk.LevelBar()
+        self.level_bar.set_min_value(0)
+        self.level_bar.set_max_value(100)
+        self.level_bar.set_hexpand(True)
+        self.level_bar.set_valign(Gtk.Align.CENTER)
+
+        self.percentage_label = Gtk.Label(xalign=1)
+
+        grid.attach(name_label, 0, 0, 1, 1)
+        grid.attach(self.memory_label, 1, 0, 1, 1)
+        grid.attach(self.level_bar, 0, 1, 1, 1)
+        grid.attach(self.percentage_label, 1, 1, 1, 1)
+
+        hbox.pack_start(grid, True, True, 0)
+        self.add(hbox)
+
+        self.graph = MemoryGraph()
+        history_item = Gtk.MenuItem()
+        history_item.add(self.graph)
+        # only shows information
+        history_item.set_sensitive(False)
+        submenu = Gtk.Menu()
+        submenu.add(history_item)
+        submenu.show_all()
+        self.set_submenu(submenu)
+
+        hbox.show_all()
+        # visibility is managed by update_state(), not by show_all() on menu
+        self.level_bar.set_no_show_all(True)
+        self.percentage_label.set_no_show_all(True)
+        self.set_no_show_all(True)
+        self.hide()
+
+    def update_state(self, assigned_kb, used_kb, total_kb=None):
+        """Show *assigned_kb* KiB assigned to qubes (of which they use
+        *used_kb* KiB), out of *total_kb* KiB of system memory; if *total_kb*
+        is not known, show only the sum."""
+        assigned = int(assigned_kb / 1024)
+        used = int(used_kb / 1024)
+        if not total_kb:
+            self.memory_label.set_markup(f"{assigned} MiB")
+            self.level_bar.hide()
+            self.percentage_label.hide()
+            self.set_tooltip_markup(
+                _(
+                    "Memory assigned to running qubes: <b>{assigned} MiB</b>\n"
+                    "Used by qubes (incl. swap; self-reported): <b>{used} MiB</b>"
+                ).format(assigned=assigned, used=used)
+            )
+            self.show()
+            return
+
+        total = int(total_kb / 1024)
+        unassigned = max(total - assigned, 0)
+        fraction = min(assigned_kb / total_kb, 1)
+        self.memory_label.set_markup(f"{assigned} / {total} MiB")
+        self.level_bar.set_value(fraction * 100)
+        # pylint: disable=consider-using-f-string
+        self.percentage_label.set_markup("{:.1%}".format(fraction))
+        self.set_tooltip_markup(
+            _(
+                "Memory assigned to running qubes: <b>{assigned} MiB</b>\n"
+                "Used by qubes (incl. swap; self-reported): <b>{used} MiB</b>\n"
+                "Not assigned to any qube: <b>{unassigned} MiB</b>\n"
+                "Total system memory: <b>{total} MiB</b>"
+            ).format(assigned=assigned, used=used, unassigned=unassigned, total=total)
+        )
+        self.level_bar.show()
+        self.percentage_label.show()
+        self.show()
+
+
 class DomainMenuItem(Gtk.MenuItem):
     def __init__(self, vm, app, icon_cache, state=None):
         super().__init__()
@@ -888,6 +1183,16 @@ class DomainTray(Gtk.Application):
 
         self.menu_items = {}
 
+        # (memory_assigned_total, memory_with_swap_used) in KiB of each
+        # running qube, by name
+        self.qube_memory = {}
+        # qubes whose late stats must be ignored, until they start again
+        self.stopped_qubes = set()
+        # system memory in KiB, fetched on first use (None if not available)
+        self._system_memory_kb = None
+        self._system_memory_checked = False
+        self.memory_summary = MemorySummaryItem()
+
         self.unpause_all_action = Gio.SimpleAction.new("do-unpause-all", None)
         self.unpause_all_action.connect("activate", self.do_unpause_all)
         self.add_action(self.unpause_all_action)
@@ -915,6 +1220,7 @@ class DomainTray(Gtk.Application):
         self.dispatcher.add_handler("domain-shutdown", self.update_domain_item)
         self.dispatcher.add_handler("domain-pre-shutdown", self.update_domain_item)
         self.dispatcher.add_handler("domain-shutdown-failed", self.update_domain_item)
+        self.dispatcher.add_handler("domain-stopped", self.domain_stopped)
 
         self.dispatcher.add_handler("domain-add", self.add_domain_item)
         self.dispatcher.add_handler("domain-delete", self.remove_domain_item)
@@ -1162,6 +1468,7 @@ class DomainTray(Gtk.Application):
                     pass
 
     def remove_domain_item(self, _submitter, _event, vm, **_kwargs):
+        self.forget_memory(vm, stopped=True)
         if vm not in self.menu_items:
             return
         vm_widget = self.menu_items[vm]
@@ -1215,6 +1522,12 @@ class DomainTray(Gtk.Application):
             # it's a fragile DispVM
             state = "NA"
 
+        if state == "Halted" or event == "domain-shutdown":
+            self.forget_memory(vm, stopped=True)
+        elif event in ("domain-pre-start", "domain-start", ""):
+            # "" is from refresh_all(), e.g. after reconnecting to qubesd
+            self.stopped_qubes.discard(str(vm))
+
         if event == "domain-shutdown-failed":
             item.shutdown_failed = True
         elif event in ("domain-start", "domain-pre-start", "domain-shutdown"):
@@ -1238,9 +1551,60 @@ class DomainTray(Gtk.Application):
             item.hide()
 
     def update_stats(self, vm, _event, **kwargs):
+        # memory_assigned_total is not sent by older dom0; it already includes
+        # the memory of the qube's stubdomain, if any
+        # stats and qube events come over separate connections, so late stats
+        # of a stopped qube must be ignored
+        if "memory_assigned_total" in kwargs and str(vm) not in self.stopped_qubes:
+            self.qube_memory[str(vm)] = (
+                int(kwargs["memory_assigned_total"]),
+                int(kwargs["memory_with_swap_used"]),
+            )
+            self.update_memory_summary()
         if vm not in self.menu_items:
             return
         self.menu_items[vm].update_stats(kwargs["memory_kb"], kwargs["cpu_usage"])
+
+    def domain_stopped(self, vm, _event, **_kwargs):
+        # the qube is gone from Xen and qmemman gives its memory to the other
+        # qubes right away, while domain-shutdown can come later
+        self.forget_memory(vm, stopped=True)
+
+    def forget_memory(self, vm, stopped=False):
+        if stopped:
+            self.stopped_qubes.add(str(vm))
+        if self.qube_memory.pop(str(vm), None) is not None:
+            self.update_memory_summary()
+
+    @property
+    def system_memory_kb(self):
+        """Total system memory in KiB, or None if not available (older
+        dom0 or no permission)"""
+        if not self._system_memory_checked:
+            try:
+                # global maxmem is in MiB
+                maxmem = int(self.qapp.maxmem)
+            except (exc.QubesDaemonAccessError, AttributeError, TypeError, ValueError):
+                # no such property, or not allowed
+                maxmem = 0
+            except exc.QubesException:
+                # e.g. qubesd restarting: try again with the next stats
+                return None
+            self._system_memory_checked = True
+            self._system_memory_kb = maxmem * 1024 if maxmem > 0 else None
+        return self._system_memory_kb
+
+    def update_memory_summary(self):
+        if not self.qube_memory:
+            self.memory_summary.hide()
+            return
+        assigned = sum(memory[0] for memory in self.qube_memory.values())
+        used = sum(memory[1] for memory in self.qube_memory.values())
+        self.memory_summary.graph.add_sample(assigned, used)
+        # without dom0 (e.g. in a GUI qube), only some qubes may be visible,
+        # so the system memory cannot be compared with their sum
+        total = self.system_memory_kb if "dom0" in self.qube_memory else None
+        self.memory_summary.update_state(assigned, used, total)
 
     def initialize_menu(self):
         self.tray_menu.add(DomainMenuItem(None, self, self.icon_cache))
@@ -1263,6 +1627,9 @@ class DomainTray(Gtk.Application):
             except exc.QubesPropertyAccessError:
                 item.hide()
 
+        # Memory summary, shown once stats are received
+        self.tray_menu.add(self.memory_summary)
+
         # Separator
         separator = Gtk.SeparatorMenuItem()
         separator.show_all()
@@ -1280,6 +1647,9 @@ class DomainTray(Gtk.Application):
                 items_to_delete.append(vm)
         for vm in items_to_delete:
             self.remove_domain_item(None, None, vm)
+        for name in list(self.qube_memory):
+            if name not in self.qapp.domains:
+                self.forget_memory(name, stopped=True)
         for vm in self.qapp.domains:
             self.update_domain_item(vm, "")
 
@@ -1294,6 +1664,7 @@ class DomainTray(Gtk.Application):
         self.dispatcher.remove_handler("domain-paused", self.update_domain_item)
         self.dispatcher.remove_handler("domain-unpaused", self.update_domain_item)
         self.dispatcher.remove_handler("domain-shutdown", self.update_domain_item)
+        self.dispatcher.remove_handler("domain-stopped", self.domain_stopped)
         self.dispatcher.remove_handler("domain-pre-shutdown", self.update_domain_item)
         self.dispatcher.remove_handler(
             "domain-shutdown-failed", self.update_domain_item
