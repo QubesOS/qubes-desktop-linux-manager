@@ -36,7 +36,7 @@ class PropertiesDecorator:
 
 
 class DomainDecorator(PropertiesDecorator):
-    """Useful methods for domain data representation"""
+    """Useful methods for qube data representation"""
 
     def __init__(self, vm, margins=(5, 5)) -> None:
         super().__init__(vm, margins)
@@ -133,7 +133,7 @@ class DomainDecorator(PropertiesDecorator):
 
             if self.vm.klass == "AdminVM":
 
-                tooltip += _("\nAdministrative domain")
+                tooltip += _("\nAdministrative qube")
 
             else:
                 if template_changed:
