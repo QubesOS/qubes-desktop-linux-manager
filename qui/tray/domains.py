@@ -885,6 +885,8 @@ class DomainTray(Gtk.Application):
             _("<b>Qubes Domains</b>\nView and manage running domains.")
         )
 
+        self.scale_submenu_arrows()
+
         self.tray_menu = Gtk.Menu()
         self.tray_menu.set_reserve_toggle_size(False)
         self.fullscreen_window_hack = get_fullscreen_window_hack()
@@ -911,6 +913,22 @@ class DomainTray(Gtk.Application):
         # to display debug console for all qubes
         self.expert_mode = self.qapp.domains[self.qapp.local_name].features.get(
             "expert-mode", False
+        )
+
+    @staticmethod
+    def scale_submenu_arrows():
+        """Scale the theme's submenu arrows with the DPI, like the icons."""
+        size = qui.decorators.icon_size()
+        if size == qui.decorators.BASE_ICON_SIZE:
+            return
+        provider = Gtk.CssProvider()
+        provider.load_from_data(
+            f"menuitem > arrow {{ min-width: {size}px; min-height: {size}px; }}".encode()
+        )
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(),
+            provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
         )
 
     def register_events(self):
