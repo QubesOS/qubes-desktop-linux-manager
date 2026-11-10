@@ -31,12 +31,27 @@ from ..global_config.device_attachments import (
     AttachmentHandler,
     RequiredDeviceDialog,
     DevAttachmentHandler,
+    DEVICE_CLASSES,
 )
 
 import gi
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
+
+
+def test_device_manager_refused_qube(test_qapp_devices):
+    for devclass in DEVICE_CLASSES:
+        for call in ("Available", "Assigned"):
+            test_qapp_devices.expected_calls[
+                ("sys-net", f"admin.vm.device.{devclass}.{call}", None, None)
+            ] = b""
+    manager = DeviceManager(test_qapp_devices)
+    manager.load_data()
+    assigned_to = {str(vm) for _assignment, vm in manager.assignments}
+    assert "sys-net" not in assigned_to
+    assert "test-red" in assigned_to
+
 
 ### AUTO ATTACH HANDLER TESTS
 

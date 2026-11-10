@@ -463,8 +463,11 @@ class UpdateProxy:
 
     def _check_for_whonix(self) -> bool:
         for vm in self.qapp.domains:
-            if "whonix-updatevm" in vm.tags or "anon-gateway" in vm.tags:
-                return True
+            try:
+                if "whonix-updatevm" in vm.tags or "anon-gateway" in vm.tags:
+                    return True
+            except qubesadmin.exc.QubesDaemonAccessError:
+                continue
         return False
 
     @staticmethod

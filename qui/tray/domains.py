@@ -715,6 +715,11 @@ class DomainMenuItem(Gtk.MenuItem):
         super().__init__()
         self.vm = vm
         self.app = app
+        # Never pause or kill dom0 or this GUI domain
+        self.this_machine = self.vm is not None and (
+            getattr(self.vm, "klass", None) == "AdminVM"
+            or self.vm.name == self.app.qapp.local_name
+        )
         self.icon_cache = icon_cache
         self.shutdown_failed = False
         self.decorator = qui.decorators.DomainDecorator(vm)
@@ -756,7 +761,7 @@ class DomainMenuItem(Gtk.MenuItem):
             self.memory.update_state(header=True)
             self.show_all()  # header should always be visible
         else:
-            if self.vm.klass == "AdminVM":  # no submenu for AdminVM
+            if self.this_machine:  # no submenu for dom0 or this GUI domain
                 self.set_reserve_indicator(True)  # align with submenu triangles
             else:
                 if not state:
@@ -808,8 +813,8 @@ class DomainMenuItem(Gtk.MenuItem):
     def update_state(self, state):
         vm_klass = getattr(self.vm, "klass", None)
 
-        if not self.vm or vm_klass == "AdminVM":
-            # it's a header or an AdminVM, no need to do anything
+        if not self.vm or self.this_machine:
+            # it's a header, dom0 or this GUI domain, no need to do anything
             return
 
         if not vm_klass:
@@ -1055,7 +1060,7 @@ class DomainTray(Gtk.Application):
 
     def do_unpause_all(self, _vm, *_args, **_kwargs):
         for vm_name in self.menu_items:
-            if vm_name == "dom0" or getattr(
+            if vm_name in ("dom0", self.qapp.local_name) or getattr(
                 self.qapp.domains[vm_name], "is_preload", False
             ):
                 continue
@@ -1074,7 +1079,11 @@ class DomainTray(Gtk.Application):
     def have_running_and_all_are_paused(self):
         found_paused = False
         for vm in self.qapp.domains:
-            if vm.klass == "AdminVM" or getattr(vm, "is_preload", False):
+            if (
+                vm.klass == "AdminVM"
+                or vm.name == self.qapp.local_name
+                or getattr(vm, "is_preload", False)
+            ):
                 continue
             if vm.is_running() and vm.is_paused():
                 # a running that is paused

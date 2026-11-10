@@ -85,7 +85,11 @@ class OpenDialogHandler:
         self.file_list.connect("row-activated", self._ok)
 
         # populate dialog
-        for file in self.policy_client.policy_list():
+        try:
+            files = self.policy_client.policy_list()
+        except (PolicyAdminException, subprocess.CalledProcessError):
+            files = []
+        for file in files:
             self.file_list.add(FileListBoxRow(file))
 
         self.file_list.show_all()

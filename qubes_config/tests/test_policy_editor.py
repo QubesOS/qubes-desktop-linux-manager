@@ -20,6 +20,7 @@
 # pylint: disable=missing-module-docstring,missing-function-docstring
 # pylint: disable=missing-class-docstring
 
+import subprocess
 from unittest.mock import patch
 
 from ..policy_editor.policy_editor import PolicyEditor
@@ -29,6 +30,17 @@ import gi
 gi.require_version("Gtk", "3.0")
 gi.require_version("GdkPixbuf", "2.0")
 from gi.repository import Gtk
+
+
+def test_open_list_refused(test_policy_client):
+    with patch.object(
+        test_policy_client,
+        "policy_list",
+        side_effect=subprocess.CalledProcessError(1, "qrexec-client-vm"),
+    ):
+        policy_editor = PolicyEditor("a-test", test_policy_client)
+        policy_editor.perform_setup()
+    assert not policy_editor.file_select_handler.file_list.get_children()
 
 
 def test_open_file(test_policy_client):

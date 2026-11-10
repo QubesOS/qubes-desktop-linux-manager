@@ -4,6 +4,7 @@
 import argparse
 import asyncio
 import logging
+import os
 import sys
 
 import importlib.resources
@@ -52,6 +53,21 @@ class ArgumentError(Exception):
     """Nonsense arguments"""
 
 
+def log_file_handler(path):
+    """
+    Log to path or to the user's state directory
+    """
+    try:
+        return logging.FileHandler(path, encoding="utf-8")
+    except OSError:
+        state = os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state")
+        directory = os.path.join(state, "qubes")
+        os.makedirs(directory, exist_ok=True)
+        return logging.FileHandler(
+            os.path.join(directory, os.path.basename(path)), encoding="utf-8"
+        )
+
+
 class QubesUpdater(Gtk.Application):
     # pylint: disable=too-many-instance-attributes
 
@@ -78,7 +94,7 @@ class QubesUpdater(Gtk.Application):
         # awaited by main() -> loop keeps running as long as the window is open
         self.exit_future = self.loop.create_future()
 
-        log_handler = logging.FileHandler(QubesUpdater.LOGPATH, encoding="utf-8")
+        log_handler = log_file_handler(QubesUpdater.LOGPATH)
         log_formatter = logging.Formatter(QubesUpdater.LOG_FORMAT)
         log_handler.setFormatter(log_formatter)
 

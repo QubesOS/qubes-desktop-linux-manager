@@ -466,7 +466,13 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
         self.error_handler.clear_all_errors()
 
         for vm in self.qapp.domains:
-            if vm.features.check_with_template(self.SUPPORTED_SERVICE_FEATURE):
+            try:
+                supported = vm.features.check_with_template(
+                    self.SUPPORTED_SERVICE_FEATURE
+                )
+            except qubesadmin.exc.QubesDaemonAccessError:
+                continue
+            if supported:
                 if vm == usb_qube:
                     continue
                 self.available_vms.append(vm)
@@ -715,7 +721,11 @@ class DevicesHandler(PageHandler):
         usb_qubes: Set[qubesadmin.vm.QubesVM] = set()
 
         for vm in self.qapp.domains:
-            for assignment in vm.devices["pci"].get_assigned_devices():
+            try:
+                assignments = list(vm.devices["pci"].get_assigned_devices())
+            except qubesadmin.exc.QubesDaemonAccessError:
+                continue
+            for assignment in assignments:
                 cats = [infc.category for infc in assignment.device.interfaces]
                 if DeviceCategory.PCI_USB in cats:
                     usb_qubes.add(vm)

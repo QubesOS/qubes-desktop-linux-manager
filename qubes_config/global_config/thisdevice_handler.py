@@ -114,7 +114,8 @@ class ThisDeviceHandler(PageHandler):
             self.hcl_check = subprocess.check_output(
                 ["qubes-hcl-report", "-y"]
             ).decode()
-        except subprocess.CalledProcessError as ex:
+        except (subprocess.CalledProcessError, OSError) as ex:
+            # No qubes-hcl-report outside dom0
             label_text += _("Failed to load system data: {ex}\n").format(ex=str(ex))
             self.hcl_check = ""
 

@@ -28,6 +28,21 @@ from qui.updater.updater import parse_args
 from qui.updater.utils import ListWrapper, HeaderCheckbox
 
 
+def test_row_with_refused_features(test_qapp, mock_list_store):
+    for feature in (
+        "updates-available",
+        "last-updates-check",
+        "last-update",
+        "prohibit-start",
+    ):
+        test_qapp.expected_calls[("dom0", "admin.vm.feature.Get", feature, None)] = b""
+    row = UpdateRowWrapper(mock_list_store, test_qapp.domains["dom0"], False)
+    assert not row.selected
+    assert row.updates_available == UpdatesAvailable.NO
+    row.updates_available = True
+    assert row.updates_available == UpdatesAvailable.MAYBE
+
+
 @patch("subprocess.check_output")
 def test_populate_vm_list(
     mock_subprocess, real_builder, test_qapp, mock_next_button, mock_settings

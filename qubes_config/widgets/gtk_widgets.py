@@ -104,7 +104,9 @@ class QubeName(Gtk.Box):
 
         if vm is not None:
             self._image = Gtk.Image()
-            self._image.set_from_pixbuf(load_icon(vm.icon, 20, 20))
+            # Properties may be refused in a GUI domain
+            icon = getattr(vm, "icon", "appvm-black")
+            self._image.set_from_pixbuf(load_icon(icon, 20, 20))
             self._image.set_halign(Gtk.Align.CENTER)
             self.pack_start(self._image, False, False, 0)
 
@@ -112,7 +114,8 @@ class QubeName(Gtk.Box):
 
         self.get_style_context().add_class("qube-box-base")
         if vm:
-            self.get_style_context().add_class(f"qube-box-{vm.label}")
+            label = getattr(vm, "label", "black")
+            self.get_style_context().add_class(f"qube-box-{label}")
         else:
             self.get_style_context().add_class("qube-box-black")
 
