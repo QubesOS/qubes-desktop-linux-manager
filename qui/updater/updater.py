@@ -458,15 +458,12 @@ class QubesUpdater(Gtk.Application):
 
 def parse_args(args, app):
     parser = argparse.ArgumentParser()
-    try:
-        default_update_if_stale = int(
-            app.domains["dom0"].features.get(
-                "qubes-vm-update-update-if-stale",
-                Settings.DEFAULT_UPDATE_IF_STALE,
-            )
+    default_update_if_stale = int(
+        app.domains["dom0"].features.get_if_allowed(
+            "qubes-vm-update-update-if-stale",
+            Settings.DEFAULT_UPDATE_IF_STALE,
         )
-    except qubesadmin.exc.QubesDaemonAccessError:
-        default_update_if_stale = Settings.DEFAULT_UPDATE_IF_STALE
+    )
 
     parser.add_argument(
         "--log",
