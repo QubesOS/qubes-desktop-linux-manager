@@ -17,6 +17,23 @@ import gettext
 t = gettext.translation("desktop-linux-manager", fallback=True)
 _ = t.gettext
 
+#: Icon pixel size at the default 96 DPI; scaled up by :func:`icon_size`.
+BASE_ICON_SIZE = 16
+
+
+def icon_size() -> int:
+    """Icon pixel size matching the current DPI-scaled text.
+
+    GTK scales fonts by the Xft DPI but loads these themed icons at a fixed
+    pixel size, so on a high-DPI display the icons stay tiny while the text
+    grows. Scale the base size by the same DPI ratio so icons track the text.
+    """
+    settings = Gtk.Settings.get_default()
+    xft_dpi = settings.get_property("gtk-xft-dpi") if settings else -1
+    # gtk-xft-dpi is the DPI times 1024, or -1 when unset.
+    dpi = xft_dpi / 1024 if xft_dpi and xft_dpi > 0 else 96
+    return max(1, round(BASE_ICON_SIZE * dpi / 96))
+
 
 class PropertiesDecorator:
     """Base class for all decorators"""
@@ -270,8 +287,9 @@ class DomainDecorator(PropertiesDecorator):
         except exc.QubesDaemonCommunicationError:
             # no permission to access icon
             icon = "appvm-black"
+        size = icon_size()
         icon_vm = Gtk.IconTheme.get_default().load_icon(
-            icon, 16, Gtk.IconLookupFlags.FORCE_SIZE
+            icon, size, Gtk.IconLookupFlags.FORCE_SIZE
         )
         icon_img = Gtk.Image.new_from_pixbuf(icon_vm)
         return icon_img
@@ -348,17 +366,18 @@ def create_icon(name) -> Gtk.Image:
     found, outputs a blank icon."""
 
     names = [name, f"{name}-symbolic"]
+    size = icon_size()
     pixbuf = None
     for icon_name in names:
         try:
             pixbuf = Gtk.IconTheme.get_default().load_icon(
-                icon_name, 16, Gtk.IconLookupFlags.FORCE_SIZE
+                icon_name, size, Gtk.IconLookupFlags.FORCE_SIZE
             )
             break
         except (TypeError, GLib.Error):
             continue
     if not pixbuf:
-        pixbuf = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, True, 8, 16, 16)
+        pixbuf = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, True, 8, size, size)
         pixbuf.fill(0x000)
 
     return Gtk.Image.new_from_pixbuf(pixbuf)

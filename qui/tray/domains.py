@@ -67,13 +67,18 @@ class IconCache:
         if icon_name in self.icons:
             icon = self.icons[icon_name]
         else:
+            size = qui.decorators.icon_size()
             try:
                 icon = Gtk.IconTheme.get_default().load_icon(
-                    self.icon_files[icon_name], 16, Gtk.IconLookupFlags.FORCE_SIZE
+                    self.icon_files[icon_name],
+                    size,
+                    Gtk.IconLookupFlags.FORCE_SIZE,
                 )
                 self.icons[icon_name] = icon
             except (TypeError, GLib.Error):
-                icon = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, True, 8, 16, 16)
+                icon = GdkPixbuf.Pixbuf.new(
+                    GdkPixbuf.Colorspace.RGB, True, 8, size, size
+                )
                 icon.fill(0)
                 self.icons[icon_name] = icon
         return icon
@@ -108,7 +113,10 @@ class ActionMenuItem(Gtk.MenuItem, metaclass=ABCGtkMenuItemMeta):
             # Add a placeholder to keep alignment consistent
             # when no icon is present
             placeholder = Gtk.Label()
-            placeholder.set_size_request(24, -1)
+            # Reserve the icon's width (plus padding) so labels stay aligned
+            # with items that do show an icon; scale it with the icons.
+            placeholder_width = round(24 * qui.decorators.icon_size() / 16)
+            placeholder.set_size_request(placeholder_width, -1)
             box.pack_start(placeholder, False, False, 0)
 
         # Add a label to the menu item
@@ -685,7 +693,7 @@ class QubesManagerItem(Gtk.MenuItem):
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
 
         # Icon box with fixed width
-        iconbox = Gtk.Image.new_from_icon_name("qubes-logo-icon", Gtk.IconSize.MENU)
+        iconbox = qui.decorators.create_icon("qubes-logo-icon")
         hbox.pack_start(iconbox, False, True, 6)
 
         # Name box
@@ -724,7 +732,7 @@ class DomainMenuItem(Gtk.MenuItem):
 
         # Icon box with fixed width
         self.iconbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        self.iconbox.set_size_request(16, 0)
+        self.iconbox.set_size_request(qui.decorators.icon_size(), 0)
         self.set_label_icon()
 
         self.hbox.pack_start(self.iconbox, False, True, 6)
@@ -877,6 +885,8 @@ class DomainTray(Gtk.Application):
             _("<b>Qubes Domains</b>\nView and manage running domains.")
         )
 
+        self.scale_submenu_arrows()
+
         self.tray_menu = Gtk.Menu()
         self.tray_menu.set_reserve_toggle_size(False)
         self.fullscreen_window_hack = get_fullscreen_window_hack()
@@ -903,6 +913,22 @@ class DomainTray(Gtk.Application):
         # to display debug console for all qubes
         self.expert_mode = self.qapp.domains[self.qapp.local_name].features.get(
             "expert-mode", False
+        )
+
+    @staticmethod
+    def scale_submenu_arrows():
+        """Scale the theme's submenu arrows with the DPI, like the icons."""
+        size = qui.decorators.icon_size()
+        if size == qui.decorators.BASE_ICON_SIZE:
+            return
+        provider = Gtk.CssProvider()
+        provider.load_from_data(
+            f"menuitem > arrow {{ min-width: {size}px; min-height: {size}px; }}".encode()
+        )
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(),
+            provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
         )
 
     def register_events(self):
