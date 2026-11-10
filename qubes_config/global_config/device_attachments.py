@@ -558,10 +558,14 @@ class DeviceManager:
 
         for vm in self.qapp.domains:
             for devclass in DEVICE_CLASSES:
-                for dev in vm.devices[devclass].get_exposed_devices():
-                    self.all_devices.append(dev)
-                for ass in vm.devices[devclass].get_assigned_devices():
-                    self.assignments.append((ass, vm))
+                try:
+                    exposed = list(vm.devices[devclass].get_exposed_devices())
+                    assigned = list(vm.devices[devclass].get_assigned_devices())
+                except qubesadmin.exc.QubesDaemonAccessError:
+                    # A GUI domain may not read every qube
+                    continue
+                self.all_devices.extend(exposed)
+                self.assignments.extend((ass, vm) for ass in assigned)
 
     def get_available_devices(self, dev_classes: List[str]) -> Iterator[DeviceInfo]:
         """Get all available devices of listed classes"""
