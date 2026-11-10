@@ -256,6 +256,8 @@ class PreloadDispvmHandler(PageHandler):
     MAX_PRELOAD_FEATURE = "preload-dispvm-max"
     MAX_THRESHOLD_FEATURE = "preload-dispvm-threshold"
     DEFAULT_MAX = 1
+    # Spin value while the feature is unset, distinct from a stored 0.
+    UNSET_MAX = -1
 
     def __init__(
         self,
@@ -276,7 +278,7 @@ class PreloadDispvmHandler(PageHandler):
         )
 
         self.initial_preload_state = False
-        self.initial_preload_number = 0
+        self.initial_preload_number = self.UNSET_MAX
         self.initial_threshold = 0
 
         self.load_data()
@@ -285,6 +287,7 @@ class PreloadDispvmHandler(PageHandler):
         self.preload_dispvm_check.connect("toggled", self.on_check_changed)
 
         self.on_defdispvm_changed()
+        self.on_check_changed()
 
     def load_data(self):
         # get value of the preload feature
@@ -292,10 +295,10 @@ class PreloadDispvmHandler(PageHandler):
 
         if preload_val == "" or preload_val is None:
             self.preload_dispvm_check.set_active(False)
-            self.preload_dispvm_spin.set_value(0)
+            self.preload_dispvm_spin.set_value(self.UNSET_MAX)
             self.preload_dispvm_spin.set_sensitive(False)
             self.initial_preload_state = False
-            self.initial_preload_number = 0
+            self.initial_preload_number = self.UNSET_MAX
         else:
             preload_val_int = int(preload_val)
             self.preload_dispvm_check.set_active(True)
@@ -320,12 +323,17 @@ class PreloadDispvmHandler(PageHandler):
             self.preload_dispvm_threshold_spin.set_sensitive(False)
 
     def on_check_changed(self, *_args):
+        # A checked box saves the spin value, so UNSET_MAX is only reachable
+        # while unchecked.
+        adjustment = self.preload_dispvm_spin.get_adjustment()
         if self.preload_dispvm_check.get_active():
             self.preload_dispvm_spin.set_sensitive(True)
-            if self.preload_dispvm_spin.get_value_as_int() == 0:
+            if self.preload_dispvm_spin.get_value_as_int() == self.UNSET_MAX:
                 self.preload_dispvm_spin.set_value(self.DEFAULT_MAX)
+            adjustment.set_lower(0)
         else:
             self.preload_dispvm_spin.set_sensitive(False)
+            adjustment.set_lower(self.UNSET_MAX)
 
     @staticmethod
     def get_readable_description() -> str:  # pylint: disable=arguments-differ

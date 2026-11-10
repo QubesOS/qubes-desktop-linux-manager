@@ -66,7 +66,10 @@ def test_preload_handler(
 
     # Start available but unchecked.
     assert preload_dispvm_spin_check.is_sensitive()
-    assert preload_dispvm_spin.get_value_as_int() == 0
+    assert (
+        preload_dispvm_spin.get_value_as_int()
+        == disposables_handler.preload_handler.UNSET_MAX
+    )
     assert not preload_dispvm_spin.is_sensitive()
     assert preload_dispvm_threshold_spin.is_sensitive()
     assert preload_dispvm_threshold_spin.get_value_as_int() == default_threshold
@@ -78,6 +81,8 @@ def test_preload_handler(
         preload_dispvm_spin.get_value_as_int()
         == disposables_handler.preload_handler.DEFAULT_MAX
     )
+    preload_dispvm_spin.set_value(disposables_handler.preload_handler.UNSET_MAX)
+    assert preload_dispvm_spin.get_value_as_int() == 0
 
     # check that reset works
     preload_dispvm_spin.set_value(9)
@@ -85,7 +90,10 @@ def test_preload_handler(
     disposables_handler.defdispvm_handler.model.select_value("None")
     disposables_handler.reset()
     assert preload_dispvm_spin_check.is_sensitive()
-    assert preload_dispvm_spin.get_value_as_int() == 0
+    assert (
+        preload_dispvm_spin.get_value_as_int()
+        == disposables_handler.preload_handler.UNSET_MAX
+    )
     assert not preload_dispvm_spin.is_sensitive()
     assert preload_dispvm_threshold_spin.is_sensitive()
     assert preload_dispvm_threshold_spin.get_value_as_int() == default_threshold
