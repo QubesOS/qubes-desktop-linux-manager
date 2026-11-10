@@ -26,8 +26,9 @@ def widget_factory(monkeypatch):
     )
     widgets = []
 
-    def create(*, running=True, guivm="dom0", gui="1"):
+    def create(*, running=True, guivm="dom0", gui="1", local_name="dom0"):
         qapp = MockQubes()
+        qapp._local_name = local_name
         qapp._qubes["untrusted"] = MockQube(
             name="untrusted",
             qapp=qapp,
@@ -132,6 +133,21 @@ def test_gui_actions_on_feature_change(widget_factory, caplog):
             widget.dispatcher.handle("untrusted", event, feature="gui")
         assert_actions(widget, visible, debug_visible)
     assert not caplog.records
+
+
+def test_local_gui_domain_like_dom0(widget_factory, monkeypatch):
+    widget = widget_factory(local_name="untrusted")
+    item = widget.menu_items[widget.qapp.domains["untrusted"]]
+    assert item.get_submenu() is None
+    unpaused = []
+    monkeypatch.setattr(
+        domains_widget.qubesadmin.vm.QubesVM,
+        "unpause",
+        lambda vm: unpaused.append(vm.name),
+    )
+    widget.do_unpause_all(None)
+    assert unpaused
+    assert "untrusted" not in unpaused
 
 
 def test_disconnect_guivm_reset_handler(widget_factory):
