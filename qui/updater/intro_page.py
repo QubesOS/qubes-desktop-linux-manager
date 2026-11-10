@@ -328,6 +328,16 @@ def is_stale(vm, expiration_period):
     return False
 
 
+def _feature(vm, name, default):
+    """
+    Read a feature, default if refused
+    """
+    try:
+        return vm.features.get(name, default)
+    except exc.QubesDaemonAccessError:
+        return default
+
+
 class UpdateRowWrapper(RowWrapper):
     COLUMN_NUM = 9
     _SELECTION = 1
@@ -340,18 +350,18 @@ class UpdateRowWrapper(RowWrapper):
     _STATUS = 8
 
     def __init__(self, list_store, vm, to_update: bool):
-        updates_available = bool(vm.features.get("updates-available", False))
+        updates_available = bool(_feature(vm, "updates-available", False))
         if to_update and not updates_available:
             updates_available = None
         selected = updates_available is True
         supported = check_support(vm)
 
-        last_updates_check = vm.features.get("last-updates-check", None)
-        last_update = vm.features.get("last-update", None)
+        last_updates_check = _feature(vm, "last-updates-check", None)
+        last_update = _feature(vm, "last-update", None)
 
         icon = load_icon(vm.icon)
         name = QubeName(vm.name, str(vm.label))
-        prohibit_rationale = vm.features.get("prohibit-start", False)
+        prohibit_rationale = _feature(vm, "prohibit-start", False)
 
         raw_row = [
             selected,
@@ -410,8 +420,8 @@ class UpdateRowWrapper(RowWrapper):
 
     @updates_available.setter
     def updates_available(self, value):
-        prohibited = bool(self.vm.features.get("prohibit-start", False))
-        updates_available = bool(self.vm.features.get("updates-available", False))
+        prohibited = bool(_feature(self.vm, "prohibit-start", False))
+        updates_available = bool(_feature(self.vm, "updates-available", False))
         supported = check_support(self.vm)
 
         if value and not updates_available:
