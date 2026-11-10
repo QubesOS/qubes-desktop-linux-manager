@@ -67,13 +67,18 @@ class IconCache:
         if icon_name in self.icons:
             icon = self.icons[icon_name]
         else:
+            size = qui.decorators.icon_size()
             try:
                 icon = Gtk.IconTheme.get_default().load_icon(
-                    self.icon_files[icon_name], 16, Gtk.IconLookupFlags.FORCE_SIZE
+                    self.icon_files[icon_name],
+                    size,
+                    Gtk.IconLookupFlags.FORCE_SIZE,
                 )
                 self.icons[icon_name] = icon
             except (TypeError, GLib.Error):
-                icon = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, True, 8, 16, 16)
+                icon = GdkPixbuf.Pixbuf.new(
+                    GdkPixbuf.Colorspace.RGB, True, 8, size, size
+                )
                 icon.fill(0)
                 self.icons[icon_name] = icon
         return icon
@@ -108,7 +113,10 @@ class ActionMenuItem(Gtk.MenuItem, metaclass=ABCGtkMenuItemMeta):
             # Add a placeholder to keep alignment consistent
             # when no icon is present
             placeholder = Gtk.Label()
-            placeholder.set_size_request(24, -1)
+            # Reserve the icon's width (plus padding) so labels stay aligned
+            # with items that do show an icon; scale it with the icons.
+            placeholder_width = round(24 * qui.decorators.icon_size() / 16)
+            placeholder.set_size_request(placeholder_width, -1)
             box.pack_start(placeholder, False, False, 0)
 
         # Add a label to the menu item
@@ -685,7 +693,7 @@ class QubesManagerItem(Gtk.MenuItem):
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
 
         # Icon box with fixed width
-        iconbox = Gtk.Image.new_from_icon_name("qubes-logo-icon", Gtk.IconSize.MENU)
+        iconbox = qui.decorators.create_icon("qubes-logo-icon")
         hbox.pack_start(iconbox, False, True, 6)
 
         # Name box
@@ -724,7 +732,7 @@ class DomainMenuItem(Gtk.MenuItem):
 
         # Icon box with fixed width
         self.iconbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        self.iconbox.set_size_request(16, 0)
+        self.iconbox.set_size_request(qui.decorators.icon_size(), 0)
         self.set_label_icon()
 
         self.hbox.pack_start(self.iconbox, False, True, 6)
