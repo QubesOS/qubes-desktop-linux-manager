@@ -23,7 +23,7 @@ from unittest.mock import patch, call, Mock, AsyncMock
 
 import pytest
 
-from qui.updater.updater import QubesUpdater, parse_args
+from qui.updater.updater import QubesUpdater, log_file_handler, parse_args
 from qui.updater.summary_page import RestartStatus
 from qui.updater.tests.conftest import run_coroutine
 from qubes_config.widgets import gtk_utils
@@ -498,3 +498,23 @@ def test_dialog(
         icon_name="qubes-check-yes",
     )
     summary_dialog_async.assert_not_awaited()
+
+
+def test_log_file_handler_writable(tmp_path):
+    path = tmp_path / "qui.updater.log"
+    handler = log_file_handler(str(path))
+    try:
+        assert handler.baseFilename == str(path)
+    finally:
+        handler.close()
+
+
+def test_log_file_handler_falls_back(tmp_path, monkeypatch):
+    monkeypatch.setenv("XDG_STATE_HOME", str(tmp_path / "state"))
+    handler = log_file_handler(str(tmp_path / "no-such-dir" / "qui.updater.log"))
+    try:
+        assert handler.baseFilename == str(
+            tmp_path / "state" / "qubes" / "qui.updater.log"
+        )
+    finally:
+        handler.close()
