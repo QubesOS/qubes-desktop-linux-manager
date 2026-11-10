@@ -52,6 +52,10 @@ FROM = "/var/run/qubes/qubes-clipboard.bin.source"
 XEVENT = "/var/run/qubes/qubes-clipboard.bin.xevent"
 
 
+# Icon of a qube whose own icon cannot be read
+UNKNOWN_QUBE_ICON = "qube-unknown"
+
+
 def load_icon_at_gtk_size(
     icon_name, icon_size: Gtk.IconSize = Gtk.IconSize.LARGE_TOOLBAR
 ):

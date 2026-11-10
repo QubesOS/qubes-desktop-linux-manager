@@ -466,7 +466,9 @@ policy.RegisterArgument +u2f.Register @anyvm @anyvm deny
         self.error_handler.clear_all_errors()
 
         for vm in self.qapp.domains:
-            if vm.features.check_with_template(self.SUPPORTED_SERVICE_FEATURE):
+            if vm.features.check_with_template_if_allowed(
+                self.SUPPORTED_SERVICE_FEATURE
+            ):
                 if vm == usb_qube:
                     continue
                 self.available_vms.append(vm)

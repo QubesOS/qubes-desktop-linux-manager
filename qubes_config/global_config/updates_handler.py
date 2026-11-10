@@ -463,7 +463,10 @@ class UpdateProxy:
 
     def _check_for_whonix(self) -> bool:
         for vm in self.qapp.domains:
-            if "whonix-updatevm" in vm.tags or "anon-gateway" in vm.tags:
+            if any(
+                vm.tags.contains_if_allowed(tag)
+                for tag in ("whonix-updatevm", "anon-gateway")
+            ):
                 return True
         return False
 
