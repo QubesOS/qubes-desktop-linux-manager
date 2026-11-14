@@ -137,6 +137,9 @@ class DevicesTray(Gtk.Application):
                 "device-removed:" + devclass, self.device_removed
             )
             self.dispatcher.add_handler(
+                "device-list-change:" + devclass, self.device_list_changed
+            )
+            self.dispatcher.add_handler(
                 "device-assign:" + devclass, self.device_assigned
             )
             self.dispatcher.add_handler(
@@ -301,6 +304,20 @@ class DevicesTray(Gtk.Application):
         )
 
         self._update_queue(vm, dev_id, dev.device_class)
+
+    def device_list_changed(self, vm, event, **_kwargs):
+        # a device can change its description without leaving its port
+        # (e.g. a renamed dm device), which fires no device-added
+        devclass = event.split(":", 1)[1]
+        try:
+            exposed = list(vm.devices[devclass].get_exposed_devices())
+        except qubesadmin.exc.QubesException:
+            # we have no permission to access VM's devices
+            return
+        for device in exposed:
+            dev = self.devices.get(backend.Device.id_from_device(device))
+            if dev is not None:
+                dev.update_description(device)
 
     def device_removed(self, vm, _event, port):
         for potential_dev_id, potential_dev in self.devices.items():
