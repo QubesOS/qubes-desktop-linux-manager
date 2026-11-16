@@ -175,12 +175,11 @@ class Device:
         # Monotonic connection timestamp only for new devices
         self.connection_timestamp: float = None
 
-        self._dev_name: str = getattr(dev, "description", "unknown")
-        if dev.devclass == "block" and "size" in getattr(dev, "data", {}):
-            self._dev_name += " (" + size_to_human(int(dev.data["size"])) + ")"
+        self._dev_name: str = ""
+        self._description: str = ""
+        self.update_description(dev)
 
         self._ident: str = getattr(dev, "port_id", "unknown")
-        self._description: str = getattr(dev, "description", "unknown")
         self._devclass: str = getattr(dev, "devclass", "unknown")
 
         for interface in dev.interfaces:
@@ -230,6 +229,14 @@ class Device:
                     except ValueError:
                         # malformed options, ignore them
                         pass
+
+    def update_description(self, dev: qubesadmin.devices.DeviceInfo):
+        """Set name and description from device info (they can change while
+        the device stays on the same port, e.g. a renamed dm device)."""
+        self._dev_name = getattr(dev, "description", "unknown")
+        if dev.devclass == "block" and "size" in getattr(dev, "data", {}):
+            self._dev_name += " (" + size_to_human(int(dev.data["size"])) + ")"
+        self._description = getattr(dev, "description", "unknown")
 
     def __str__(self):
         return self._dev_name
