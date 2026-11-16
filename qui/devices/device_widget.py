@@ -156,11 +156,15 @@ class DevicesTray(Gtk.Application):
         self.dispatcher.add_handler("domain-unpaused", self.vm_unpaused)
         self.dispatcher.add_handler("audio-input-blocked", self.audio_input_blocked)
 
-        attach_mic_action = Gio.SimpleAction.new(
-            "attach-mic", GLib.VariantType.new("s")  # pylint: disable=no-member
-        )
-        attach_mic_action.connect("activate", self.do_attach_mic)
-        self.add_action(attach_mic_action)
+        for action_name, with_camera in (
+            ("attach-mic", False),
+            ("attach-mic-with-camera", True),
+        ):
+            attach_mic_action = Gio.SimpleAction.new(
+                action_name, GLib.VariantType.new("s")  # pylint: disable=no-member
+            )
+            attach_mic_action.connect("activate", self.do_attach_mic, with_camera)
+            self.add_action(attach_mic_action)
 
         self.dispatcher.add_handler(
             "property-set:template_for_dispvms", self.vm_dispvm_template_change
@@ -701,20 +705,27 @@ class DevicesTray(Gtk.Application):
             "app.attach-mic",
             GLib.Variant.new_string(vm.name),
         )
+        if microphone.devices_to_attach_with_me:
+            notification.add_button_with_target(
+                _("Attach microphone and camera"),
+                "app.attach-mic-with-camera",
+                GLib.Variant.new_string(vm.name),
+            )
         self.send_notification("mic-blocked-" + vm.name, notification)
 
-    def do_attach_mic(self, _action, parameter):
-        """Attach the microphone to the qube named in the notification."""
+    def do_attach_mic(self, _action, parameter, with_camera=False):
+        """Attach the microphone (and its linked camera if with_camera) to the
+        qube named in the notification."""
         microphone = self.devices.get(MIC_ID, None)
+        if microphone is None:
+            return
         try:
             vm = self.qapp.domains[parameter.get_string()]
         except KeyError:
             return
-        if microphone is None:
-            return
         asyncio.create_task(
             asyncio.to_thread(
-                microphone.attach_to_vm, backend.VM(vm), with_aux_devices=False
+                microphone.attach_to_vm, backend.VM(vm), with_aux_devices=with_camera
             )
         )
 
