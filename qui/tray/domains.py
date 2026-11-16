@@ -974,12 +974,17 @@ class DomainTray(Gtk.Application):
 
     def debug_change(self, vm, *_args, **_kwargs):
         if vm == self.qapp.local_name:
+            # expert-mode of the GUI domain applies to all rows
             self.expert_mode = self.qapp.domains[self.qapp.local_name].features.get(
                 "expert-mode", False
             )
             vms = self.menu_items
-        else:
+        elif vm in self.menu_items:
+            # only this qube's row, a set to reuse the loop below
             vms = {vm}
+        else:
+            # no row, such as RemoteVM
+            return
         for menu in vms:
             submenu = self.menu_items[menu].get_submenu()
             if isinstance(submenu, StartedMenu):

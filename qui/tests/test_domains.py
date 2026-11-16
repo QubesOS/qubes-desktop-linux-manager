@@ -134,6 +134,26 @@ def test_gui_actions_on_feature_change(widget_factory, caplog):
     assert not caplog.records
 
 
+@pytest.mark.parametrize(
+    "event,kwargs",
+    [
+        ("property-set:debug", {"name": "debug"}),
+        ("property-set:guivm", {"name": "guivm"}),
+        ("domain-feature-set:gui", {"feature": "gui", "value": "1"}),
+    ],
+)
+def test_change_of_qube_without_row(widget_factory, event, kwargs, caplog):
+    widget = widget_factory()
+    widget.qapp._qubes["remote"] = MockQube(
+        name="remote", qapp=widget.qapp, klass="RemoteVM"
+    )
+    widget.qapp.update_vm_calls()
+    widget.dispatcher.handle("remote", event, **kwargs)
+    assert "remote" not in [str(vm) for vm in widget.menu_items]
+    assert_actions(widget, True, False)
+    assert not caplog.records
+
+
 def test_disconnect_guivm_reset_handler(widget_factory):
     widget = widget_factory()
     widget.emit("shutdown")
