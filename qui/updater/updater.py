@@ -446,7 +446,7 @@ def parse_args(args, app):
     parser.add_argument(
         "--max-concurrency",
         action="store",
-        help="Maximum number of VMs configured simultaneously "
+        help="Maximum number of qubes configured simultaneously "
         "(default: number of cpus)",
         type=int,
     )
@@ -480,13 +480,13 @@ def parse_args(args, app):
     update_state.add_argument(
         "--force-update",
         action="store_true",
-        help="Attempt to update all targeted VMs even if no updates are available",
+        help="Attempt to update all targeted qubes even if no updates are available",
     )
     update_state.add_argument(
         "--update-if-stale",
         action="store",
         help="DEFAULT. "
-        "Attempt to update targeted VMs with known updates available "
+        "Attempt to update targeted qubes with known updates available "
         "or for which last update check was more than N days ago. "
         "(default: %(default)d)",
         type=int,
@@ -495,13 +495,13 @@ def parse_args(args, app):
     update_state.add_argument(
         "--update-if-available",
         action="store_true",
-        help="Update targeted VMs with known updates available.",
+        help="Update targeted qubes with known updates available.",
     )
 
     parser.add_argument(
         "--skip",
         action="store",
-        help="Comma separated list of VMs to be skipped, "
+        help="Comma separated list of qubes to be skipped, "
         "works with all other options. "
         "If present, skip manual selection of qubes to update.",
         default="",
@@ -509,7 +509,7 @@ def parse_args(args, app):
     parser.add_argument(
         "--targets",
         action="store",
-        help="Comma separated list of updatable VMs to target. "
+        help="Comma separated list of updatable qubes to target. "
         "If present, skip manual selection of qubes to update.",
     )
     parser.add_argument(

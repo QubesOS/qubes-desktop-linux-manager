@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position,import-error,superfluous-parens
-"""A menu listing domains"""
+"""A menu listing qubes"""
 
 # Must be imported before creating threads
 from .gtk3_xwayland_menu_dismisser import (
@@ -141,7 +141,7 @@ class VMActionMenuItem(ActionMenuItem):
 
 
 class PauseItem(VMActionMenuItem):
-    """Shutdown menu Item. When activated pauses the domain."""
+    """Shutdown menu Item. When activated pauses the qube."""
 
     def __init__(self, vm, icon_cache):
         super().__init__(
@@ -165,7 +165,7 @@ class PauseItem(VMActionMenuItem):
 
 
 class UnpauseItem(VMActionMenuItem):
-    """Unpause menu Item. When activated unpauses the domain."""
+    """Unpause menu Item. When activated unpauses the qube."""
 
     def __init__(self, vm, icon_cache):
         super().__init__(
@@ -186,7 +186,7 @@ class UnpauseItem(VMActionMenuItem):
 
 
 class ShutdownItem(VMActionMenuItem):
-    """Shutdown menu Item. When activated shutdowns the domain."""
+    """Shutdown menu Item. When activated shutdowns the qube."""
 
     def __init__(
         self,
@@ -298,7 +298,7 @@ class ShutdownItem(VMActionMenuItem):
 
 
 class RestartItem(ShutdownItem):
-    """Restart menu Item. When activated shutdowns the domain and
+    """Restart menu Item. When activated shutdowns the qube and
     then starts it again."""
 
     def __init__(self, vm, icon_cache, force=False):
@@ -358,7 +358,7 @@ class RestartItem(ShutdownItem):
 
 
 class KillItem(VMActionMenuItem):
-    """Kill domain menu Item. When activated kills the domain."""
+    """Kill qube menu Item. When activated kills the qube."""
 
     def __init__(self, vm, icon_cache):
         super().__init__(vm, label=_("Kill"), icon_cache=icon_cache, icon_name="kill")
@@ -524,7 +524,7 @@ class InternalInfoItem(Gtk.MenuItem):
 
 
 class StartedMenu(Gtk.Menu):
-    """The sub-menu for a started domain"""
+    """The sub-menu for a started qube"""
 
     def __init__(self, vm, app, icon_cache, shutdown_failed=False):
         super().__init__()
@@ -594,7 +594,7 @@ class StartedMenu(Gtk.Menu):
 
 
 class PausedMenu(Gtk.Menu):
-    """The sub-menu for a paused domain"""
+    """The sub-menu for a paused qube"""
 
     def __init__(self, vm, icon_cache):
         super().__init__()
@@ -609,7 +609,7 @@ class PausedMenu(Gtk.Menu):
 
 
 class DebugMenu(Gtk.Menu):
-    """Sub-menu providing multiple MenuItem for domain logs."""
+    """Sub-menu providing multiple MenuItem for qube logs."""
 
     def __init__(self, vm, icon_cache):
         super().__init__()
@@ -862,7 +862,7 @@ class DomainMenuItem(Gtk.MenuItem):
 
 
 class DomainTray(Gtk.Application):
-    """A tray icon application listing all but halted domains. ”"""
+    """A tray icon application listing all but halted qubes. ”"""
 
     def __init__(self, app_name, qapp, dispatcher, stats_dispatcher):
         super().__init__()
@@ -874,7 +874,7 @@ class DomainTray(Gtk.Application):
         self.widget_icon.set_from_icon_name("qui-domains-scalable")
         self.widget_icon.connect("button-press-event", self.show_menu)
         self.widget_icon.set_tooltip_markup(
-            _("<b>Qubes Domains</b>\nView and manage running domains.")
+            _("<b>Qubes Domains</b>\nView and manage running qubes.")
         )
 
         self.tray_menu = Gtk.Menu()
