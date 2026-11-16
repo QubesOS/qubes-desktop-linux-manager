@@ -298,7 +298,7 @@ class ShutdownItem(VMActionMenuItem):
 
 
 class RestartItem(ShutdownItem):
-    """Restart menu Item. When activated shutdowns the domain and
+    """Restart menu Item. When activated shuts down the domain and
     then starts it again."""
 
     def __init__(self, vm, icon_cache, force=False):
@@ -319,27 +319,13 @@ class RestartItem(ShutdownItem):
         else:
             self.label.set_text(_("Restart"))
 
-    async def start(self):
+    async def perform_action(self, *_args, **_kwargs):
         if self.give_up:
             return
         try:
-            await asyncio.to_thread(self.vm.start)
-        except exc.QubesException as ex:
-            show_error(
-                _("Error restarting qube"),
-                _(
-                    "The following error occurred when restarting the qube "
-                    "during start stage: {0}:\n{1}"
-                ).format(self.vm.name, str(ex)),
-            )
-
-    async def perform_action(self, *_args, **_kwargs):
-        try:
-            await asyncio.to_thread(self.vm.shutdown, force=self.force, wait=True)
+            await asyncio.to_thread(self.vm.restart, force=self.force)
         except exc.QubesException as ex:
             self.show_shutdown_dialog(ex)
-        else:
-            await self.start()
 
     def react_to_question(self, widget, response, action):
         asyncio.create_task(self.react_to_question_async(widget, response, action))
@@ -350,11 +336,24 @@ class RestartItem(ShutdownItem):
             self.give_up = True
             return
         try:
-            await self.shutdown_from_response(response, action)
+            await self.restart_from_response(response, action)
         except exc.QubesException as ex:
             self.show_shutdown_dialog(ex)
-        else:
-            await self.start()
+
+    async def restart_from_response(self, response, action):
+        if action == "force":
+            self.set_force(True)
+            await asyncio.to_thread(self.vm.restart, force=True)
+        elif action == "timeout":
+            if response == Gtk.ResponseType.YES:
+                await asyncio.to_thread(self.vm.restart, kill=True)
+            elif response == Gtk.ResponseType.OK:
+                await asyncio.to_thread(self.vm.restart, force=self.force)
+        elif action == "kill" and response == Gtk.ResponseType.OK:
+            # show_shutdown_dialog() doesn't know startup exceptions, it will
+            # return "kill", but the intended behavior could also be to start
+            # a previously shut down domain.
+            await asyncio.to_thread(self.vm.restart, kill=True, start=True)
 
 
 class KillItem(VMActionMenuItem):
