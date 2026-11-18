@@ -17,7 +17,7 @@
 #
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program; if not, see <http://www.gnu.org/licenses/>.
-from typing import Set, Dict, Optional, List
+from typing import Set, Optional, List
 
 import qubesadmin
 import qubesadmin.exc
@@ -168,7 +168,6 @@ class Device:
 
     def __init__(self, dev: qubesadmin.devices.DeviceInfo, gtk_app: Gtk.Application):
         self.gtk_app: Gtk.Application = gtk_app
-        self._dev: qubesadmin.devices.DeviceInfo = dev
         self.__hash = hash(dev)
         self._port: str = str(dev.port)
         self._interfaces = dev.interfaces
@@ -191,7 +190,6 @@ class Device:
 
         self._category: DeviceCategory = main_category
 
-        self._data: Dict = getattr(dev, "data", {})
         self._device_id = getattr(dev, "device_id", "*")
         self.options = {}
         self.parent = str(getattr(dev, "parent_device", None) or "")
