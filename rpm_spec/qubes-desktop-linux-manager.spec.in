@@ -92,12 +92,7 @@ if [ $1 -eq 0 ]; then
     touch --no-create %{_datadir}/icons/Adwaita &>/dev/null || :
     gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
 fi
-%systemd_user_postun_with_restart \
-    qubes-widget@qui-domains.service \
-    qubes-widget@qui-devices.service \
-    qubes-widget@qui-disk-space.service \
-    qubes-widget@qui-clipboard.service \
-    qubes-widget@qui-updates.service
+%systemd_user_postun_with_restart qubes-widget@qui-domains.service qubes-widget@qui-devices.service qubes-widget@qui-disk-space.service qubes-widget@qui-clipboard.service qubes-widget@qui-updates.service
 
 %posttrans
 gtk-update-icon-cache %{_datadir}/icons/Adwaita &>/dev/null || :
