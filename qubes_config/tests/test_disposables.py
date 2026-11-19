@@ -66,7 +66,10 @@ def test_preload_handler(
 
     # Start available but unchecked.
     assert preload_dispvm_spin_check.is_sensitive()
-    assert preload_dispvm_spin.get_value_as_int() == 0
+    assert (
+        preload_dispvm_spin.get_value_as_int()
+        == disposables_handler.preload_handler.UNSET_MAX
+    )
     assert not preload_dispvm_spin.is_sensitive()
     assert preload_dispvm_threshold_spin.is_sensitive()
     assert preload_dispvm_threshold_spin.get_value_as_int() == default_threshold
@@ -78,6 +81,8 @@ def test_preload_handler(
         preload_dispvm_spin.get_value_as_int()
         == disposables_handler.preload_handler.DEFAULT_MAX
     )
+    preload_dispvm_spin.set_value(disposables_handler.preload_handler.UNSET_MAX)
+    assert preload_dispvm_spin.get_value_as_int() == 0
 
     # check that reset works
     preload_dispvm_spin.set_value(9)
@@ -85,7 +90,10 @@ def test_preload_handler(
     disposables_handler.defdispvm_handler.model.select_value("None")
     disposables_handler.reset()
     assert preload_dispvm_spin_check.is_sensitive()
-    assert preload_dispvm_spin.get_value_as_int() == 0
+    assert (
+        preload_dispvm_spin.get_value_as_int()
+        == disposables_handler.preload_handler.UNSET_MAX
+    )
     assert not preload_dispvm_spin.is_sensitive()
     assert preload_dispvm_threshold_spin.is_sensitive()
     assert preload_dispvm_threshold_spin.get_value_as_int() == default_threshold
@@ -164,6 +172,21 @@ def test_preload_handler(
         == disposables_handler.preload_handler.DEFAULT_MAX
     )
     assert preload_dispvm_threshold_spin.get_value_as_int() == default_threshold
+
+
+@patch("qubes_config.global_config.disposables.get_feature")
+def test_preload_handler_loads_zero_unchanged(
+    mock_get, real_builder, test_qapp, test_policy_manager
+):
+    mock_get.side_effect = lambda _vm, feature, *_args: (
+        "0" if feature == "preload-dispvm-max" else None
+    )
+    disposables_handler = DisposablesHandler(
+        test_qapp, test_policy_manager, real_builder
+    )
+    preload_handler = disposables_handler.preload_handler
+    assert preload_handler.preload_dispvm_spin.get_value_as_int() == 0
+    assert disposables_handler.get_unsaved() == ""
 
 
 def test_dvm_list(real_builder, test_qapp, test_policy_manager):
