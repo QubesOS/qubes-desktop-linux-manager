@@ -17,6 +17,7 @@ from qubes_config.widgets.gtk_utils import (
     show_dialog_with_icon_async,
     RESPONSES_OK,
 )
+from qubes_config.widgets.utils import get_boolean_feature
 from qui.updater.progress_page import ProgressPage
 from qui.updater.updater_settings import Settings, OverriddenSettings
 from qui.updater.summary_page import SummaryPage
@@ -288,7 +289,12 @@ class QubesUpdater(Gtk.Application):
             if cancelled:
                 self.retcode = 130
             if failed or cancelled or not self.cliargs.non_interactive:
-                self.summary_page.show(updated, no_updates, failed + cancelled)
+                self.summary_page.show(
+                    updated,
+                    no_updates,
+                    failed + cancelled,
+                    reboot_required=self.reboot_required,
+                )
             else:
                 #  at this point retcode is in (0, 100)
                 self.loop.create_task(
@@ -336,13 +342,24 @@ class QubesUpdater(Gtk.Application):
             msg = "All selected qubes have been updated."
         elif self.retcode == 100:
             msg = "There are no updates available for the selected Qubes."
+        msg = l(msg)
+        if self.reboot_required:
+            msg += "\n" + l("Restart the computer to finish applying dom0 updates.")
         await show_dialog_with_icon_async(
             None,
             l("Success"),
-            l(msg),
+            msg,
             buttons=RESPONSES_OK,
             icon_name="qubes-check-yes",
         )
+
+    @property
+    def reboot_required(self) -> bool:
+        """Whether dom0 updates are waiting for a system restart."""
+        try:
+            return get_boolean_feature(self.qapp.domains["dom0"], "reboot-required")
+        except qubesadmin.exc.QubesException:
+            return False
 
     def cancel_clicked(self, _emitter):
         self.log.debug("Cancel clicked")

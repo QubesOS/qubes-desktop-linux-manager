@@ -432,7 +432,9 @@ def test_retcode(
         update_results[1],
         update_results[2] + update_results[3],
     )
-    sut.summary_page.show.assert_called_once_with(*expected_summary)
+    sut.summary_page.show.assert_called_once_with(
+        *expected_summary, reboot_required=False
+    )
 
 
 @patch("qui.updater.updater.show_dialog_with_icon_async")
@@ -441,6 +443,18 @@ def test_retcode(
 @patch("logging.getLogger")
 @patch("qui.updater.intro_page.IntroPage.populate_vm_list")
 @patch("qubesadmin.events.EventsDispatcher.listen_for_events")
+@pytest.mark.parametrize(
+    "reboot_required, expected_msg",
+    (
+        pytest.param(None, "Qubes OS is up to date.", id="no reboot"),
+        pytest.param(
+            "kernel",
+            "Qubes OS is up to date.\n"
+            "Restart the computer to finish applying dom0 updates.",
+            id="reboot required",
+        ),
+    ),
+)
 def test_dialog(
     _listen_for_events,
     _populate_vm_list,
@@ -448,8 +462,14 @@ def test_dialog(
     _mock_log_handler,
     summary_dialog_async,
     updater_dialog_async,
+    reboot_required,
+    expected_msg,
     test_qapp,
 ):
+    if reboot_required is not None:
+        test_qapp.expected_calls[
+            ("dom0", "admin.vm.feature.Get", "reboot-required", None)
+        ] = (b"0\x00" + reboot_required.encode())
     sut = _make_updater(test_qapp, parse_args((), test_qapp))
     sut.perform_setup()
 
@@ -493,7 +513,7 @@ def test_dialog(
     updater_dialog_async.assert_awaited_once_with(
         None,
         "Success",
-        "Qubes OS is up to date.",
+        expected_msg,
         buttons=gtk_utils.RESPONSES_OK,
         icon_name="qubes-check-yes",
     )

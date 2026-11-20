@@ -156,6 +156,7 @@ class SummaryPage:
         qube_updated_num: int,
         qube_no_updates_num: int,
         qube_failed_num: int,
+        reboot_required: bool = False,
     ):
         """Show this page and handle buttons."""
         self.log.debug("Show summary page")
@@ -176,7 +177,13 @@ class SummaryPage:
             qube_failed_num,
         ) % {"num": qube_failed_num}
         summary = "\n".join((summary_1, summary_2, summary_3))
-        self.label_summary.set_label(summary)
+        if reboot_required:
+            summary += (
+                "\n\n<b>"
+                + l("Restart the computer to finish applying dom0 updates.")
+                + "</b>"
+            )
+        self.label_summary.set_markup(summary)
         self.cancel_button.set_label(l("_Back"))
         self.cancel_button.show()
         self.refresh_buttons()
