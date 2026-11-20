@@ -1,6 +1,8 @@
 [Desktop Entry]
 Name=Qubes Device Agent
+Name[he]=סוכן ההתקנים של Qubes
 Comment=Agent for handling device attach confirmation prompts
+Comment[he]=סוכן שמציג בקשות אישור לחיבור התקנים
 Icon=qubes
 Exec=/usr/lib/qubes/qubes-device-agent-autostart
 Terminal=false

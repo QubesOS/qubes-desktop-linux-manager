@@ -142,6 +142,7 @@ class CreateNewQube(Gtk.Application):
         be only called once, in the main instance of this application.
         """
         self.builder = Gtk.Builder()
+        self.builder.set_translation_domain("desktop-linux-manager")
         glade_ref = importlib.resources.files("qubes_config") / "new_qube.glade"
         with importlib.resources.as_file(glade_ref) as path:
             self.builder.add_from_file(str(path))

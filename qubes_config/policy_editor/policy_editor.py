@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program; if not, see <http://www.gnu.org/licenses/>.
 import html
+import locale
 import subprocess
 import sys
 import re
@@ -51,6 +52,11 @@ from qubes_config.widgets.utils import open_url_in_disposable
 gi.require_version("Gtk", "3.0")
 gi.require_version("GtkSource", "4")
 from gi.repository import Gtk, GtkSource, Gio, Gdk
+
+import gettext
+
+t = gettext.translation("desktop-linux-manager", fallback=True)
+_ = t.gettext
 
 HEADER_NORMAL = (
     " service_name\targument\tsource_qube\ttarget_qube\taction [parameter=value]    "
@@ -171,7 +177,7 @@ class PolicyEditor(Gtk.Application):
         self.token: Optional[str] = None
         self.policy_client = PolicyClientWrapper(policy_client)
         self.filename = filename
-        self.window_title = "Qubes OS Policy Editor"
+        self.window_title = _("Qubes OS Policy Editor")
         self.action_items: Dict[str, Gio.SimpleAction] = {}
         self.accel_group = Gtk.AccelGroup()
 
@@ -194,6 +200,7 @@ class PolicyEditor(Gtk.Application):
         self.clipboard: Gtk.Clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
 
         self.builder = Gtk.Builder()
+        self.builder.set_translation_domain("desktop-linux-manager")
 
         glade_ref = importlib.resources.files("qubes_config") / "policy_editor.glade"
         with importlib.resources.as_file(glade_ref) as path:
@@ -256,11 +263,7 @@ class PolicyEditor(Gtk.Application):
         )
 
         self.setup_source()
-        help_text = (
-            importlib.resources.files("qubes_config")
-            .joinpath("policy_editor/policy_help.txt")
-            .read_text()
-        )
+        help_text = self._load_help_text()
         self.builder.get_object("help_label").set_markup(help_text)
 
         self.open_policy_file(self.filename)
@@ -297,36 +300,47 @@ class PolicyEditor(Gtk.Application):
     def setup_menu(self):
         # File
         file_menu = Gtk.Menu()
-        file_item = self._get_menu_item("_File")
+        file_item = self._get_menu_item(_("_File"))
         file_item.set_submenu(file_menu)
-        file_menu.add(self._get_menu_item_with_ac("_New", "win.new", Gdk.KEY_n))
-        file_menu.add(self._get_menu_item_with_ac("_Open", "win.open", Gdk.KEY_o))
-        file_menu.add(self._get_menu_item_with_ac("_Save", "win.save", Gdk.KEY_s))
-        file_menu.add(self._get_menu_item_with_ac("_Quit", "win.quit", Gdk.KEY_q))
+        file_menu.add(self._get_menu_item_with_ac(_("_New"), "win.new", Gdk.KEY_n))
+        file_menu.add(self._get_menu_item_with_ac(_("_Open"), "win.open", Gdk.KEY_o))
+        file_menu.add(self._get_menu_item_with_ac(_("_Save"), "win.save", Gdk.KEY_s))
+        file_menu.add(self._get_menu_item_with_ac(_("_Quit"), "win.quit", Gdk.KEY_q))
         self.menu_bar.add(file_item)
 
         # Edit
         edit_menu = Gtk.Menu()
-        edit_item = self._get_menu_item("_Edit")
+        edit_item = self._get_menu_item(_("_Edit"))
         edit_item.set_submenu(edit_menu)
-        edit_menu.add(self._get_menu_item_with_ac("_Redo", "win.redo", Gdk.KEY_y))
-        edit_menu.add(self._get_menu_item_with_ac("_Undo", "win.undo", Gdk.KEY_z))
-        edit_menu.add(self._get_menu_item_with_ac("_Copy", "win.copy", Gdk.KEY_c))
-        edit_menu.add(self._get_menu_item_with_ac("_Paste", "win.paste", Gdk.KEY_v))
-        edit_menu.add(self._get_menu_item_with_ac("Re_set", "win.reset", None))
+        edit_menu.add(self._get_menu_item_with_ac(_("_Redo"), "win.redo", Gdk.KEY_y))
+        edit_menu.add(self._get_menu_item_with_ac(_("_Undo"), "win.undo", Gdk.KEY_z))
+        edit_menu.add(self._get_menu_item_with_ac(_("_Copy"), "win.copy", Gdk.KEY_c))
+        edit_menu.add(self._get_menu_item_with_ac(_("_Paste"), "win.paste", Gdk.KEY_v))
+        edit_menu.add(self._get_menu_item_with_ac(_("Re_set"), "win.reset", None))
         self.menu_bar.add(edit_item)
 
         # About
         help_menu = Gtk.Menu()
-        help_item = self._get_menu_item("_Help")
+        help_item = self._get_menu_item(_("_Help"))
         help_item.set_submenu(help_menu)
         help_menu.add(
-            self._get_menu_item_with_ac("_Show/Hide Help", "win.help", Gdk.KEY_h)
+            self._get_menu_item_with_ac(_("_Show/Hide Help"), "win.help", Gdk.KEY_h)
         )
-        help_menu.add(self._get_menu_item_with_ac("_About", "win.about", None))
+        help_menu.add(self._get_menu_item_with_ac(_("_About"), "win.about", None))
         self.menu_bar.add(help_item)
 
         self.menu_bar.show_all()
+
+    @staticmethod
+    def _load_help_text() -> str:
+        """Help text in the UI language if a translated file exists,
+        e.g. policy_help.he.txt, else the English policy_help.txt"""
+        help_dir = importlib.resources.files("qubes_config").joinpath("policy_editor")
+        lang = locale.getlocale(locale.LC_MESSAGES)[0] or ""
+        for name in (f"policy_help.{lang}.txt", f"policy_help.{lang[:2]}.txt"):
+            if lang and help_dir.joinpath(name).is_file():
+                return help_dir.joinpath(name).read_text(encoding="utf-8")
+        return help_dir.joinpath("policy_help.txt").read_text(encoding="utf-8")
 
     @staticmethod
     def _get_menu_item(name) -> Gtk.MenuItem:
@@ -379,8 +393,8 @@ class PolicyEditor(Gtk.Application):
             # changes can be saved
             response = ask_question(
                 self.main_window,
-                "Unsaved changes found",
-                "Do you want to save changes before exiting?",
+                _("Unsaved changes found"),
+                _("Do you want to save changes before exiting?"),
             )
             if response == Gtk.ResponseType.YES:
                 if not self._save():
@@ -397,8 +411,8 @@ class PolicyEditor(Gtk.Application):
         if self.action_items["save"].get_enabled():
             response = ask_question(
                 self.main_window,
-                "Unsaved changes found",
-                "Do you want to save changes before creating a new file?",
+                _("Unsaved changes found"),
+                _("Do you want to save changes before creating a new file?"),
             )
             if response == Gtk.ResponseType.YES:
                 if not self._save():
@@ -411,10 +425,10 @@ class PolicyEditor(Gtk.Application):
             modal=True,
             message_type=Gtk.MessageType.QUESTION,
             buttons=Gtk.ButtonsType.OK_CANCEL,
-            text="Name of the new policy file:",
+            text=_("Name of the new policy file:"),
         )
 
-        ask_dialog.set_title("New file")
+        ask_dialog.set_title(_("New file"))
         entry = Gtk.Entry()
         ask_dialog.get_content_area().pack_end(entry, False, False, 0)
 
@@ -436,10 +450,12 @@ class PolicyEditor(Gtk.Application):
         if not re.compile(r"^[\w-]+$").match(new_name):
             show_error(
                 self.main_window,
-                "Invalid policy file name",
-                f"Invalid policy file name: {new_name}. Policy file "
-                "names must contain only alphanumeric characters, "
-                "underscore and hyphen.",
+                _("Invalid policy file name"),
+                _(
+                    "Invalid policy file name: {name}. Policy file "
+                    "names must contain only alphanumeric characters, "
+                    "underscore and hyphen."
+                ).format(name=new_name),
             )
             return
 
@@ -447,8 +463,8 @@ class PolicyEditor(Gtk.Application):
         if new_name in self.policy_client.policy_list():
             show_error(
                 self.main_window,
-                "File already exists",
-                f"Policy file: {new_name} already exists.",
+                _("File already exists"),
+                _("Policy file: {name} already exists.").format(name=new_name),
             )
             return
 
@@ -467,7 +483,7 @@ class PolicyEditor(Gtk.Application):
                 err_msg += ex.stdout.decode()
             else:
                 err_msg += str(ex)
-            show_error(self.main_window, "Failed to save policy", err_msg)
+            show_error(self.main_window, _("Failed to save policy"), err_msg)
             return False
         self.open_policy_file(self.filename)
         self.source_buffer.set_modified(False)
@@ -519,7 +535,7 @@ class PolicyEditor(Gtk.Application):
         self.filename = name
         self.source_buffer.begin_not_undoable_action()
         self.source_buffer.set_text(contents)
-        self.window_title = "Qubes OS Policy Editor - " + self.filename
+        self.window_title = _("Qubes OS Policy Editor - {}").format(self.filename)
         self.main_window.set_title(self.window_title)
         self.source_buffer.set_modified(False)
         self.source_buffer.end_not_undoable_action()
@@ -551,16 +567,18 @@ class PolicyEditor(Gtk.Application):
                 if getattr(ex, "returncode", None) == 126:
                     show_error(
                         self.main_window,
-                        "Access denied",
-                        "Access denied to file {}.".format(name),
+                        _("Access denied"),
+                        _("Access denied to file {}.").format(name),
                     )
                     response = Gtk.ResponseType.NO
                 else:
                     response = ask_question(
                         self.main_window,
-                        "Policy file not found",
-                        "File {} not found. Do you want to create a "
-                        "new policy file?".format(name),
+                        _("Policy file not found"),
+                        _(
+                            "File {} not found. Do you want to create a "
+                            "new policy file?"
+                        ).format(name),
                     )
                 if response == Gtk.ResponseType.YES:
                     # make new file
@@ -588,9 +606,9 @@ class PolicyEditor(Gtk.Application):
             except PolicySyntaxError as ex:
                 msg = str(ex).split(":", 2)[-1]
                 if "#" in line:
-                    msg += " (comments must be on a separate line)"
+                    msg += _(" (comments must be on a separate line)")
                 msg = html.escape(msg, quote=True)
-                errors.append("<b>Line " + str(lineno + 1) + "</b>:" + msg)
+                errors.append(_("<b>Line {}</b>:").format(lineno + 1) + msg)
 
         if errors:
             self.error_info.get_style_context().remove_class("error_ok")
@@ -601,7 +619,7 @@ class PolicyEditor(Gtk.Application):
         else:
             self.error_info.get_style_context().remove_class("error_bad")
             self.error_info.get_style_context().add_class("error_ok")
-            self.error_info.set_text("No errors found!")
+            self.error_info.set_text(_("No errors found!"))
 
         if self.source_buffer.get_modified():
             self.main_window.set_title(self.window_title + " *")

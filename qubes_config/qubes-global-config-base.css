@@ -303,3 +303,18 @@ spinbutton button {
 .default_dvm_row {
     background: @blue-bg;
 }
+/* RTL: mirror the asymmetric spacing above */
+.red_code:dir(rtl) {
+    margin-left: 0;
+    margin-right: 5px;
+}
+
+.explanation_text:dir(rtl) {
+    margin-left: 0;
+    margin-right: 5px;
+}
+
+.problem_list:dir(rtl) {
+    padding-left: 0;
+    padding-right: 50px;
+}

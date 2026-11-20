@@ -44,7 +44,7 @@ import qubesadmin.exc
 import locale
 from locale import gettext as l
 
-locale.bindtextdomain("desktop-linux-manager", "/usr/locales/")
+locale.bindtextdomain("desktop-linux-manager", "/usr/share/locale/")
 locale.textdomain("desktop-linux-manager")
 
 

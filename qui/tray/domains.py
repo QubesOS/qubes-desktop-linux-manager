@@ -691,7 +691,7 @@ class QubesManagerItem(Gtk.MenuItem):
         # Name box
         namebox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         label = Gtk.Label(xalign=0)
-        label.set_markup("<b>Open Qube Manager</b>")
+        label.set_markup("<b>{}</b>".format(_("Open Qube Manager")))
         namebox.pack_start(label, False, True, 0)
 
         hbox.pack_start(namebox, True, True, 0)

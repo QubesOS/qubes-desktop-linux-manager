@@ -218,7 +218,7 @@ class AutoDeviceDialog(DevPolicyDialogHandler):
         self.devident_check.set_sensitive(False)
 
         # port
-        self.port_check.set_label("Port: ")
+        self.port_check.set_label(_("Port: "))
         self.port_check.set_active(True)
         self.port_check.set_sensitive(False)
 
@@ -463,7 +463,7 @@ class RequiredDeviceDialog(DevPolicyDialogHandler):
                 self._init_check(self.no_strict_check, False, False, "block")
                 self._init_check(self.port_check, True, True, "block")
         else:
-            self.devident_label.set_text("No device selected.")
+            self.devident_label.set_text(_("No device selected."))
             self._init_check(self.readonly_check, False, False, "not selected")
             self._init_check(self.permissive_check, False, False, "not selected")
             self._init_check(self.no_strict_check, False, False, "not selected")
@@ -505,7 +505,7 @@ class RequiredDeviceDialog(DevPolicyDialogHandler):
 
     def run_for_new(self, new_row_function: Callable) -> DevPolicyRow:
         self.dialog.set_title(_("Create New Device Assignment"))
-        self.devident_label.set_text("No device selected.")
+        self.devident_label.set_text(_("No device selected."))
         self._init_check(self.readonly_check, False, False, "not selected")
         self._init_check(self.permissive_check, False, False, "not selected")
         self._init_check(self.no_strict_check, False, False, "not selected")

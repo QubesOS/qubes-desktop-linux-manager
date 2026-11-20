@@ -276,7 +276,7 @@ class PoolUsageData:
 
         if pool.has_error:
             error_desc = Gtk.Label(xalign=0)
-            error_desc.set_markup("Error accessing pool data")
+            error_desc.set_markup(_("Error accessing pool data"))
             error_desc.set_margin_left(40)
             name_box.pack_start(error_desc, True, True, 0)
             return name_box, percentage_box, usage_box

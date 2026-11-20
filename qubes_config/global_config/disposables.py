@@ -158,7 +158,7 @@ class DispVMRow(Gtk.ListBoxRow):
             self.get_style_context().add_class("default_dvm_row")
             self.preload_spin.set_sensitive(False)
             self.preload_spin.set_tooltip_text(
-                "Default disposable template uses the value configured below"
+                _("Default disposable template uses the value configured below")
             )
         else:
             self.get_style_context().remove_class("default_dvm_row")

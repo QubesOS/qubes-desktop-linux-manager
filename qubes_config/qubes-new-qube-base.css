@@ -88,3 +88,14 @@ radiobutton:checked radio {
 .explanation {
     font-size: 90%;
 }
+
+/* RTL: mirror the asymmetric spacing above */
+.info-tooltip:dir(rtl) {
+    margin-left: 0;
+    margin-right: 5px;
+}
+
+#applications:dir(rtl) {
+    margin-right: 0;
+    margin-left: 20px;
+}
