@@ -45,7 +45,11 @@ from qubesadmin.tests.mock_app import (
     QubesTestWrapper,
     GLOBAL_PROPERTIES,
     MockDevice,
+    Property,
 )
+
+# not provided by qubesadmin's mock app yet
+GLOBAL_PROPERTIES.setdefault("check_updates_vm", Property("True", "bool", True))
 
 try:
     from qrexec.policy.admin import (
