@@ -139,6 +139,7 @@ class AttachmentConfirmationWindow(RPCConfirmationWindow):
         )
 
         self._gtk_builder = Gtk.Builder()
+        self._gtk_builder.set_translation_domain("desktop-linux-manager")
         with importlib.resources.as_file(self._source_file_ref) as path:
             self._gtk_builder.add_from_file(str(path))
         self._rpc_window = self._gtk_builder.get_object(self._source_id["window"])

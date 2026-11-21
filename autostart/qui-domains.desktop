@@ -1,6 +1,7 @@
 [Desktop Entry]
 Icon=qubes
 Name=Domains Tray
+Name[he]=וידג'ט ה-qubes
 Categories=System;Monitor;
 Exec=systemctl --user start qubes-widget@qui-domains
 Terminal=false

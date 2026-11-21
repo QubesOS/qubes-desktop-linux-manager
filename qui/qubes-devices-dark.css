@@ -35,3 +35,9 @@
 .vm_item {
     margin: 4px 0 4px 0;
 }
+
+/* RTL: mirror the asymmetric spacing above */
+.main_device_label:dir(rtl) {
+    margin-left: 0;
+    margin-right: 5px;
+}
