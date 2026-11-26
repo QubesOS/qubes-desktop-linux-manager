@@ -161,6 +161,13 @@ class VM:
             self._devices_denied = []
 
 
+INPUT_CATEGORIES = (
+    DeviceCategory.Keyboard,
+    DeviceCategory.Mouse,
+    DeviceCategory.Input,
+)
+
+
 class Device:
     @classmethod
     def id_from_device(cls, dev: qubesadmin.devices.DeviceInfo) -> str:
@@ -299,6 +306,14 @@ class Device:
             case DeviceCategory.Bluetooth:
                 return "bluetooth"
         return ""
+
+    @property
+    def is_input_only(self) -> bool:
+        """True if every interface of the device is a keyboard, mouse or other
+        input interface."""
+        return bool(self._interfaces) and all(
+            interface.category in INPUT_CATEGORIES for interface in self._interfaces
+        )
 
     @property
     def backend_domain(self) -> Optional[VM]:
