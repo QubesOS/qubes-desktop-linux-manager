@@ -35,3 +35,18 @@
 .vm_item {
     margin: 4px 0 4px 0;
 }
+
+.dangerous_item {
+    font-weight: bold;
+    color: #ff7b72;
+}
+
+menuitem:hover > box > .dangerous_item {
+    color: white;
+}
+
+.empty_info {
+    font-style: italic;
+    color: #858585;
+    margin: 2px 0 2px 8px;
+}

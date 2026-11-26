@@ -206,6 +206,21 @@ class InfoHeader(Gtk.Label, ActionableWidget):
         self.actionable = False
 
 
+NO_RUNNING_QUBES = "No running qubes"
+NO_DISPVM_TEMPLATES = "No disposable templates"
+
+
+class EmptyInfo(Gtk.Label, ActionableWidget):
+    """Greyed-out note that a section has no items."""
+
+    def __init__(self, text):
+        super().__init__()
+        self.set_text(text)
+        self.get_style_context().add_class("empty_info")
+        self.set_halign(Gtk.Align.START)
+        self.actionable = False
+
+
 class SeparatorItem(Gtk.Separator, ActionableWidget):
     """Separator item"""
 
@@ -449,6 +464,38 @@ class GlobalAttachmentWidget(ActionableWidget, SimpleActionWidget):
         await asyncio.create_subprocess_exec("qubes-global-config", "-o", "attachments")
 
 
+class InputDeviceWarning(ActionableWidget, SimpleActionWidget):
+    """
+    Warn against attaching an input device to a qube; open input proxy settings
+    """
+
+    def __init__(self, variant: str = "dark"):
+        super().__init__(
+            "settings",
+            "<b>Do not attach input devices directly to qubes.</b>\n"
+            "Use the input proxy instead: click here to open its settings.",
+            variant,
+        )
+
+    async def widget_action(self, *_args):
+        await asyncio.create_subprocess_exec("qubes-global-config", "-o", "usb")
+
+
+class AttachAnywayWidget(ActionableWidget, SimpleActionWidget):
+    """Submenu with the usual attach options, for input-only devices"""
+
+    def __init__(self, attach_widgets: List[ActionableWidget], variant: str = "dark"):
+        super().__init__("qui-red-warn", "Attach anyway (unsafe)...", variant)
+        self.text_label.get_style_context().add_class("dangerous_item")
+        self.attach_widgets = attach_widgets
+
+    def get_child_widgets(self):
+        return self.attach_widgets
+
+    async def widget_action(self, *_args):
+        """No-op, only shows child item."""
+
+
 class GlobalSettingsWidget(ActionableWidget, SimpleActionWidget):
     """
     Not yet implemented.
@@ -603,6 +650,22 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
                     yield DetachWithWidget(vm, self.device, self.variant)
             yield SeparatorItem()
 
+        attach_widgets = self._attach_widgets(
+            attached_vms, assigned_vms, other_vms, disp_vm_templates
+        )
+        if self.device.is_input_only:
+            yield InputDeviceWarning(self.variant)
+            yield AttachAnywayWidget(list(attach_widgets), self.variant)
+        else:
+            yield from attach_widgets
+
+        yield DeviceSettingsWidget(self.device, self.variant)
+
+    def _attach_widgets(
+        self, attached_vms, assigned_vms, other_vms, disp_vm_templates
+    ) -> Iterable[ActionableWidget]:
+        """Widgets that attach the device to a qube."""
+        if attached_vms:
             if assigned_vms:
                 yield InfoHeader("Detach and attach to preferred qube:")
                 for vm in assigned_vms:
@@ -612,6 +675,8 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
 
             for vm in other_vms:
                 yield DetachAndAttachWidget(vm, self.device, self.variant)
+            if not other_vms:
+                yield EmptyInfo(NO_RUNNING_QUBES)
 
             yield SeparatorItem()
 
@@ -619,6 +684,8 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
 
             for vm in disp_vm_templates:
                 yield DetachAndAttachDisposableWidget(vm, self.device, self.variant)
+            if not disp_vm_templates:
+                yield EmptyInfo(NO_DISPVM_TEMPLATES)
 
         else:
             if assigned_vms:
@@ -629,6 +696,8 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
             yield InfoHeader("Attach to qube:")
             for vm in other_vms:
                 yield AttachWidget(vm, self.device)
+            if not other_vms:
+                yield EmptyInfo(NO_RUNNING_QUBES)
 
             yield SeparatorItem()
 
@@ -636,8 +705,8 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
 
             for vm in disp_vm_templates:
                 yield AttachDisposableWidget(vm, self.device, self.variant)
-
-        yield DeviceSettingsWidget(self.device, self.variant)
+            if not disp_vm_templates:
+                yield EmptyInfo(NO_DISPVM_TEMPLATES)
 
 
 def generate_wrapper_widget(
