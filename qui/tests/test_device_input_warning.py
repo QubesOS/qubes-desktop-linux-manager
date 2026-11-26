@@ -1,4 +1,4 @@
-"""Devices widget tests for the warning shown on input-only devices."""
+"""Devices widget menu tests: input-only device warning, empty sections."""
 
 from unittest import mock
 
@@ -111,3 +111,30 @@ def test_attached_input_only_menu_keeps_detach():
     assert not find(menu, actionable_widgets.DetachAndAttachWidget)
     anyway = submenu_of(menu, actionable_widgets.AttachAnywayWidget)
     assert find(anyway, actionable_widgets.DetachAndAttachWidget)
+
+
+def empty_notes(menu):
+    return [w.get_text() for w in find(menu, actionable_widgets.EmptyInfo)]
+
+
+def test_empty_sections_say_so():
+    """Attach sections with no qubes show a greyed-out note."""
+    device = make_device([SMART_CARD])
+    menu = DeviceMenu(actionable_widgets.MainDeviceWidget(device), [], [])
+
+    assert empty_notes(menu) == [
+        actionable_widgets.NO_RUNNING_QUBES,
+        actionable_widgets.NO_DISPVM_TEMPLATES,
+    ]
+
+
+def test_filled_sections_have_no_note():
+    """Attach sections with qubes show no empty note."""
+    device = make_device([SMART_CARD])
+    menu = DeviceMenu(
+        actionable_widgets.MainDeviceWidget(device),
+        [make_vm("work")],
+        [make_vm("default-dvm")],
+    )
+
+    assert not empty_notes(menu)

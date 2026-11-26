@@ -44,3 +44,9 @@
 menuitem:hover > box > .dangerous_item {
     color: white;
 }
+
+.empty_info {
+    font-style: italic;
+    color: #858585;
+    margin: 2px 0 2px 8px;
+}

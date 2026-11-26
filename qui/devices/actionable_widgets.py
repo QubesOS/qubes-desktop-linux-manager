@@ -206,6 +206,21 @@ class InfoHeader(Gtk.Label, ActionableWidget):
         self.actionable = False
 
 
+NO_RUNNING_QUBES = "No running qubes"
+NO_DISPVM_TEMPLATES = "No disposable templates"
+
+
+class EmptyInfo(Gtk.Label, ActionableWidget):
+    """Greyed-out note that a section has no items."""
+
+    def __init__(self, text):
+        super().__init__()
+        self.set_text(text)
+        self.get_style_context().add_class("empty_info")
+        self.set_halign(Gtk.Align.START)
+        self.actionable = False
+
+
 class SeparatorItem(Gtk.Separator, ActionableWidget):
     """Separator item"""
 
@@ -660,6 +675,8 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
 
             for vm in other_vms:
                 yield DetachAndAttachWidget(vm, self.device, self.variant)
+            if not other_vms:
+                yield EmptyInfo(NO_RUNNING_QUBES)
 
             yield SeparatorItem()
 
@@ -667,6 +684,8 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
 
             for vm in disp_vm_templates:
                 yield DetachAndAttachDisposableWidget(vm, self.device, self.variant)
+            if not disp_vm_templates:
+                yield EmptyInfo(NO_DISPVM_TEMPLATES)
 
         else:
             if assigned_vms:
@@ -677,6 +696,8 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
             yield InfoHeader("Attach to qube:")
             for vm in other_vms:
                 yield AttachWidget(vm, self.device)
+            if not other_vms:
+                yield EmptyInfo(NO_RUNNING_QUBES)
 
             yield SeparatorItem()
 
@@ -684,6 +705,8 @@ class MainDeviceWidget(ActionableWidget, Gtk.Grid):
 
             for vm in disp_vm_templates:
                 yield AttachDisposableWidget(vm, self.device, self.variant)
+            if not disp_vm_templates:
+                yield EmptyInfo(NO_DISPVM_TEMPLATES)
 
 
 def generate_wrapper_widget(
