@@ -36,7 +36,13 @@ from .application_selector import ApplicationBoxHandler
 from .template_handler import TemplateHandler, TemplateSelector
 from .network_selector import NetworkSelector
 from .advanced_handler import AdvancedHandler
-from ..widgets.gtk_utils import load_icon, show_error, load_theme
+from ..widgets.gtk_utils import (
+    load_icon,
+    show_error,
+    load_theme,
+    show_dialog_with_icon,
+    RESPONSES_OK,
+)
 from ..widgets.gtk_widgets import (
     ProgressBarDialog,
     ImageListModeler,
@@ -361,15 +367,15 @@ class CreateNewQube(Gtk.Application):
                         _("An error occurred: {error}").format(error=err),
                     )
                     return
-        msg = Gtk.MessageDialog(
-            transient_for=self.main_window,
-            modal=True,
-            destroy_with_parent=True,
-            message_type=Gtk.MessageType.INFO,
-            buttons=Gtk.ButtonsType.OK,
-            text=_("Qube created successfully!"),
+        show_dialog_with_icon(
+            self.main_window,
+            _("Qube created"),
+            _("Qube <b>{name}</b> created successfully!").format(
+                name=GLib.markup_escape_text(vm.name)
+            ),
+            RESPONSES_OK,
+            "qubes-ok",
         )
-        msg.run()
 
         if self.advanced_handler.get_launch_settings():
             subprocess.check_call(["qubes-vm-settings", str(vm)])
