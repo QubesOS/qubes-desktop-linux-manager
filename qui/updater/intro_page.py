@@ -29,7 +29,7 @@ from typing import List, Optional
 gi.require_version("Gtk", "3.0")  # isort:skip
 from gi.repository import Gtk  # isort:skip
 
-from qubes_config.widgets.gtk_utils import load_icon
+from qubes_config.widgets.gtk_utils import load_icon, UNKNOWN_QUBE_ICON
 from qubesadmin import exc
 
 from qui.utils import check_support
@@ -146,10 +146,12 @@ class IntroPage:
                 visible = False
             else:
                 try:
-                    if hide_skipped and bool(row.vm.features.get("skip-update", False)):
+                    if hide_skipped and bool(
+                        row.vm.features.get_if_allowed("skip-update", False)
+                    ):
                         visible = False
                     if hide_prohibited and bool(
-                        row.vm.features.get("prohibit-start", False)
+                        row.vm.features.get_if_allowed("prohibit-start", False)
                     ):
                         visible = False
                 except exc.QubesDaemonCommunicationError:
@@ -287,7 +289,7 @@ class IntroPage:
             default_select and cliargs.non_interactive or cliargs.all or cliargs.dom0
         ) and (
             cliargs.force_update
-            or bool(dom0.features.get("updates-available", False))
+            or bool(dom0.features.get_if_allowed("updates-available", False))
             or is_stale(dom0, cliargs.update_if_stale)
         ):
             to_update.add("dom0")
@@ -318,7 +320,7 @@ def is_stale(vm, expiration_period):
     if expiration_period is None:
         return False
     today = datetime.today()
-    last_update_str = vm.features.get(
+    last_update_str = vm.features.get_if_allowed(
         "last-updates-check",
         datetime.fromtimestamp(0).strftime("%Y-%m-%d %H:%M:%S"),
     )
@@ -340,18 +342,19 @@ class UpdateRowWrapper(RowWrapper):
     _STATUS = 8
 
     def __init__(self, list_store, vm, to_update: bool):
-        updates_available = bool(vm.features.get("updates-available", False))
+        updates_available = bool(vm.features.get_if_allowed("updates-available", False))
         if to_update and not updates_available:
             updates_available = None
         selected = updates_available is True
         supported = check_support(vm)
 
-        last_updates_check = vm.features.get("last-updates-check", None)
-        last_update = vm.features.get("last-update", None)
+        last_updates_check = vm.features.get_if_allowed("last-updates-check", None)
+        last_update = vm.features.get_if_allowed("last-update", None)
 
-        icon = load_icon(vm.icon)
-        name = QubeName(vm.name, str(vm.label))
-        prohibit_rationale = vm.features.get("prohibit-start", False)
+        # Properties may be refused in a GUI domain
+        icon = load_icon(getattr(vm, "icon", UNKNOWN_QUBE_ICON))
+        name = QubeName(vm.name, str(getattr(vm, "label", "unknown")))
+        prohibit_rationale = vm.features.get_if_allowed("prohibit-start", False)
 
         raw_row = [
             selected,
@@ -410,8 +413,10 @@ class UpdateRowWrapper(RowWrapper):
 
     @updates_available.setter
     def updates_available(self, value):
-        prohibited = bool(self.vm.features.get("prohibit-start", False))
-        updates_available = bool(self.vm.features.get("updates-available", False))
+        prohibited = bool(self.vm.features.get_if_allowed("prohibit-start", False))
+        updates_available = bool(
+            self.vm.features.get_if_allowed("updates-available", False)
+        )
         supported = check_support(self.vm)
 
         if value and not updates_available:
