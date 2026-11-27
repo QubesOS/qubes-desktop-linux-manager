@@ -21,6 +21,7 @@
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-class-docstring
 # pylint: disable=unnecessary-dunder-call
+import subprocess
 from unittest.mock import patch, call, ANY
 
 from ...new_qube.new_qube_app import CreateNewQube
@@ -336,6 +337,53 @@ def test_new_standalone(
     mock_error.assert_not_called()
     # no more subprocess calls, no actual new template was selected
     assert num_setup_calls == len(mock_subprocess.mock_calls)
+
+
+@patch("subprocess.check_output", side_effect=mock_output)
+@patch(
+    "subprocess.check_call",
+    side_effect=subprocess.CalledProcessError(2, "qubes-vm-boot-from-device"),
+)
+@patch("qubes_config.new_qube.new_qube_app.show_error")
+def test_new_standalone_boot_fails(
+    mock_error, _mock_check_call, _mock_subprocess, test_qapp, new_qube_builder
+):
+    """A failing qubes-vm-boot-from-device shows an error and still quits."""
+    assert new_qube_builder
+    new_qube_app = CreateNewQube(test_qapp)
+    new_qube_app.perform_setup()
+
+    new_qube_app.qube_name.set_text("test")
+    new_qube_app.qube_type_standalone.clicked()
+
+    test_qapp.expected_calls[
+        ("dom0", "admin.vm.Create.StandaloneVM", None, b"name=test label=red")
+    ] = b"0\x00"
+    test_qapp.expected_calls[("test", "admin.vm.property.Set", "virt_mode", b"hvm")] = (
+        b"0\x00"
+    )
+    test_qapp.expected_calls[("test", "admin.vm.property.Set", "kernel", b"")] = (
+        b"0\x00"
+    )
+    test_qapp.expected_calls[("test", "admin.vm.property.Reset", "netvm", None)] = (
+        b"0\x00"
+    )
+    test_qapp.expected_calls[
+        ("test", "admin.vm.property.Set", "provides_network", b"False")
+    ] = b"0\x00"
+    test_qapp.expected_calls[("dom0", "admin.vm.List", None, None)] = (
+        test_qapp.expected_calls[("dom0", "admin.vm.List", None, None)]
+        + "test class=StandaloneVM state=Halted\n".encode()
+    )
+
+    with patch(
+        "qubes_config.new_qube.new_qube_app.Gtk.MessageDialog"
+    ) as mock_dialog, patch.object(new_qube_app, "quit") as mock_quit:
+        new_qube_app.create_button.clicked()
+
+    mock_dialog.return_value.destroy.assert_called_once_with()
+    mock_error.assert_called_once()
+    mock_quit.assert_called_once_with()
 
 
 @patch("subprocess.check_output", side_effect=mock_output)
