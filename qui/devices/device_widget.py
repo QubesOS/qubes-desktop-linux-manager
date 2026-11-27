@@ -149,6 +149,7 @@ class DevicesTray(Gtk.Application):
                 "device-unassign:" + devclass, self.device_unassigned
             )
 
+        self.dispatcher.add_handler("connection-established", self.refresh_all)
         self.dispatcher.add_handler("device-assign:pci", self.pci_action)
         self.dispatcher.add_handler("device-unassign:pci", self.pci_action)
         self.dispatcher.add_handler("domain-pre-delete", self.remove_domain_item)
@@ -267,6 +268,25 @@ class DevicesTray(Gtk.Application):
             value=vm.features.get(backend.FEATURE_HIDE_CHILDREN, ""),
             oldvalue="",
         )
+
+    def refresh_all(self, _subject, _event, **_kwargs):
+        """Reload all VM and device data. Events sent before the events
+        connection was made are lost, so the data read at startup may be stale.
+        """
+        old_devices = self.devices
+        self.devices = {}
+        self.vms.clear()
+        self.dispvm_templates.clear()
+        self.active_usbvms.clear()
+        self.dormant_usbvms.clear()
+        self.cameras_to_hide = []
+
+        self.initialize_vm_data()
+        self.initialize_dev_data()
+        for dev_id, dev in self.devices.items():
+            if dev_id in old_devices:
+                dev.connection_timestamp = old_devices[dev_id].connection_timestamp
+        self.initialize_features()
 
     def initialize_vm_data(self):
         for vm in self.qapp.domains:
