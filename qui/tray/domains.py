@@ -78,6 +78,43 @@ class IconCache:
                 self.icons[icon_name] = icon
         return icon
 
+    def get_tinted_icon(self, icon_name, rgba):
+        """Return the icon redrawn in a single color, keeping its shape."""
+        key = (icon_name, rgba.to_string())
+        if key not in self.icons:
+            self.icons[key] = tint_pixbuf(self.get_icon(icon_name), rgba)
+        return self.icons[key]
+
+
+def tint_pixbuf(pixbuf, rgba):
+    """Copy of *pixbuf* with every pixel set to *rgba*, alpha kept."""
+    if not pixbuf.get_has_alpha():
+        pixbuf = pixbuf.add_alpha(False, 0, 0, 0)
+    width, height = pixbuf.get_width(), pixbuf.get_height()
+    rowstride = pixbuf.get_rowstride()
+    pixels = bytearray(pixbuf.get_pixels())
+    for i, channel in enumerate((rgba.red, rgba.green, rgba.blue)):
+        value = bytes([round(channel * 255)]) * width
+        for row in range(height):
+            start = row * rowstride + i
+            pixels[start : start + 4 * width : 4] = value
+    if rgba.alpha < 1:
+        for row in range(height):
+            start = row * rowstride + 3
+            end = start + 4 * width
+            pixels[start:end:4] = bytes(
+                round(a * rgba.alpha) for a in pixels[start:end:4]
+            )
+    return GdkPixbuf.Pixbuf.new_from_bytes(
+        GLib.Bytes.new(bytes(pixels)),
+        GdkPixbuf.Colorspace.RGB,
+        True,
+        8,
+        width,
+        height,
+        rowstride,
+    )
+
 
 def show_error(title, text):
     dialog = Gtk.MessageDialog(None, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.OK)
@@ -99,8 +136,14 @@ class ActionMenuItem(Gtk.MenuItem, metaclass=ABCGtkMenuItemMeta):
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
 
         # Add an icon to the menu item, if provided
+        self.icon_cache = icon_cache
+        self.icon_name = icon_name
+        self.img = None
         if icon_cache and icon_name:
             img = Gtk.Image.new_from_pixbuf(icon_cache.get_icon(icon_name))
+            self.img = img
+            # fixed-color icons can vanish on the highlight; recolor on hover
+            self.connect("state-flags-changed", self._update_icon)
         if img:
             img.show()
             box.pack_start(img, False, False, 0)
@@ -120,6 +163,16 @@ class ActionMenuItem(Gtk.MenuItem, metaclass=ABCGtkMenuItemMeta):
 
         # Connect the "activate" signal to the async function
         self.connect("activate", self.on_activate)
+
+    def _update_icon(self, *_args):
+        flags = self.get_state_flags()
+        if flags & Gtk.StateFlags.PRELIGHT:
+            color = self.get_style_context().get_color(flags)
+            pixbuf = self.icon_cache.get_tinted_icon(self.icon_name, color)
+        else:
+            pixbuf = self.icon_cache.get_icon(self.icon_name)
+        if self.img.get_pixbuf() is not pixbuf:
+            self.img.set_from_pixbuf(pixbuf)
 
     @abc.abstractmethod
     async def perform_action(self):

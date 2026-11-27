@@ -160,3 +160,42 @@ def test_disconnect_guivm_reset_handler(widget_factory):
     assert not widget.dispatcher.handlers.get("property-reset:guivm")
     # Restore the registrations so fixture cleanup can disconnect them normally.
     widget.register_events()
+
+
+def test_tint_pixbuf_keeps_shape():
+    """tint_pixbuf recolors every pixel and scales but keeps the alpha mask."""
+    pixbuf = domains_widget.GdkPixbuf.Pixbuf.new(
+        domains_widget.GdkPixbuf.Colorspace.RGB, True, 8, 3, 2
+    )
+    pixbuf.fill(0x3B82F6FF)
+    pixbuf.new_subpixbuf(0, 0, 1, 1).fill(0x3B82F600)
+    rgba = domains_widget.Gdk.RGBA()
+    rgba.parse("rgba(255, 255, 255, 0.5)")
+    tinted = domains_widget.tint_pixbuf(pixbuf, rgba)
+    stride = tinted.get_rowstride()
+    pixels = tinted.get_pixels()
+    for row in range(2):
+        for col in range(3):
+            pixel = pixels[row * stride + col * 4 : row * stride + col * 4 + 4]
+            alpha = 0 if (row, col) == (0, 0) else 128
+            assert tuple(pixel) == (255, 255, 255, alpha)
+
+
+def test_action_icon_recolored_on_hover(widget_factory):
+    """Submenu action icons use the text color while hovered, then revert."""
+    widget = widget_factory()
+    submenu = widget.menu_items[widget.qapp.domains["untrusted"]].get_submenu()
+    item = submenu.run_terminal
+    original = item.icon_cache.get_icon(item.icon_name)
+    assert item.img.get_pixbuf() is original
+
+    item.set_state_flags(domains_widget.Gtk.StateFlags.PRELIGHT, False)
+    color = item.get_style_context().get_color(item.get_state_flags())
+    hovered = item.img.get_pixbuf()
+    assert hovered is item.icon_cache.get_tinted_icon(item.icon_name, color)
+    assert tuple(hovered.get_pixels()[:3]) == tuple(
+        round(c * 255) for c in (color.red, color.green, color.blue)
+    )
+
+    item.unset_state_flags(domains_widget.Gtk.StateFlags.PRELIGHT)
+    assert item.img.get_pixbuf() is original
