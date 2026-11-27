@@ -162,74 +162,83 @@ def set_maxmem(widget, response=None, value="16000"):
         qapp.expected_calls[("dom0", "admin.property.Get", "maxmem", None)] = response
 
 
-def send_stats(widget, vm_name, memory_kb, assigned_total=None):
+def send_stats(
+    widget, vm_name, memory_kb, assigned_total=None, used=None, swap=None, **kwargs
+):
     """Send a vm-stats event, without the new memory keys if
-    *assigned_total* is None (like an older dom0 does)."""
-    kwargs = {"memory_kb": memory_kb, "cpu_usage": 1}
+    *assigned_total* is None (like an older dom0 does). *used* defaults to
+    *memory_kb* (a qube that does not report its memory)."""
+    kwargs.update(memory_kb=memory_kb, cpu_usage=1)
     if assigned_total is not None:
         kwargs.update(
             memory_assigned_total=assigned_total,
             memory_assigned_usable=memory_kb,
-            memory_with_swap_used=memory_kb,
+            memory_with_swap_used=memory_kb if used is None else used,
+            cpu_time=1000,
+            online_vcpus=2,
         )
+        if swap is not None:
+            kwargs["swap_used"] = swap
     widget.stats_dispatcher.handle(vm_name, "vm-stats", **kwargs)
 
 
-def shutdown(widget, vm_name):
-    widget.qapp._qubes[vm_name].running = False
-    widget.qapp.update_vm_calls()
-    widget.dispatcher.handle(vm_name, "domain-shutdown")
+def send_round(widget, available="8192000"):
+    """Stats of dom0 (with free memory) and untrusted"""
+    send_stats(
+        widget,
+        "dom0",
+        4096000,
+        assigned_total=4097024,
+        used=1024000,
+        swap=0,
+        memory_available=available,
+    )
+    send_stats(
+        widget, "untrusted", 1024000, assigned_total=1025024, used=512000, swap=0
+    )
 
 
 def test_memory_summary_hidden_without_new_stats(widget_factory, caplog):
+    """Older dom0: no summary, per-qube RAM as before and no RAM%."""
     widget = widget_factory()
     assert not widget.memory_summary.get_visible()
     send_stats(widget, "dom0", 4096000)
     send_stats(widget, "untrusted", 409600)
     assert not widget.memory_summary.get_visible()
     assert not global_property_calls(widget)
-    # existing per-qube column still updated
     item = widget.menu_items[widget.qapp.domains["untrusted"]]
     assert item.memory.mem_label.get_text() == "400 MiB"
+    assert item.memory.percent_label.get_text() == "-"
     assert not caplog.records
 
 
-def test_memory_summary(widget_factory, caplog):
+def test_memory_summary_hidden_without_memory_available(widget_factory):
+    """dom0 without memory_available: no summary."""
     widget = widget_factory()
     set_maxmem(widget)
     send_stats(widget, "dom0", 4096000, assigned_total=4097024)
-    send_stats(widget, "sys-net", 409600, assigned_total=410624)
-    send_stats(widget, "untrusted", 409600, assigned_total=1024000)
-    calls = global_property_calls(widget)
-    assert calls
-    # stats are sent periodically, the latest value replaces the previous one
-    send_stats(widget, "untrusted", 409600, assigned_total=1638400)
+    assert not widget.memory_summary.get_visible()
 
+
+def test_memory_summary(widget_factory, caplog):
+    """Free memory in MiB and percent of the system memory, totals in the tooltip."""
+    widget = widget_factory()
+    set_maxmem(widget)
+    send_round(widget)
     summary = widget.memory_summary
     assert summary.get_visible()
-    assert summary.memory_label.get_text() == "6002 / 16000 MiB"
-    assert summary.percentage_label.get_text() == "37.5%"
-    assert summary.level_bar.get_visible()
-    assert summary.level_bar.get_value() == pytest.approx(37.51, abs=0.01)
+    assert summary.memory_label.get_text() == "8000 MiB (50%)"
     tooltip = summary.get_tooltip_markup()
-    assert "Not assigned to any qube: <b>9998 MiB</b>" in tooltip
-    assert "Used by qubes (incl. swap; self-reported): <b>4800 MiB</b>" in tooltip
-    # maxmem cannot change, so it is fetched only once
-    assert global_property_calls(widget) == calls
+    assert "Free memory: <b>8000 MiB</b>" in tooltip
+    assert "Assigned to running qubes: <b>5002 MiB</b>" in tooltip
+    assert "Used by running qubes: <b>1500 MiB</b>" in tooltip
+    assert "Total system memory: <b>16000 MiB</b>" in tooltip
 
-    shutdown(widget, "untrusted")
-    assert summary.memory_label.get_text() == "4402 / 16000 MiB"
-    # late stats of a qube that is already halted are ignored
-    send_stats(widget, "untrusted", 409600, assigned_total=1638400)
-    assert summary.memory_label.get_text() == "4402 / 16000 MiB"
-
-    # menu is shown again, the summary must stay in sync
+    send_round(widget, available="4096000")
+    assert summary.memory_label.get_text() == "4000 MiB (25%)"
+    # the summary keeps its own visibility when the menu is shown again
     widget.tray_menu.show_all()
-    shutdown(widget, "sys-net")
-    widget.dispatcher.handle(None, "domain-delete", vm="dom0")
-    assert not summary.get_visible()
-    widget.tray_menu.show_all()
-    assert not summary.get_visible()
+    assert summary.get_visible()
     assert not caplog.records
 
 
@@ -237,94 +246,119 @@ def test_memory_summary(widget_factory, caplog):
     "response",
     [
         b"",  # calls denied by policy
-        None,  # older dom0, no global maxmem property
+        None,  # no global maxmem property
     ],
     ids=["denied", "missing"],
 )
 def test_memory_summary_without_maxmem(widget_factory, response, caplog):
+    """Without the system memory, only the free MiB are shown."""
     widget = widget_factory()
     if response is not None:
         set_maxmem(widget, response)
     else:
         widget.qapp.update_global_properties()
-    send_stats(widget, "dom0", 4096000, assigned_total=4097024)
-    calls = global_property_calls(widget)
-    send_stats(widget, "untrusted", 409600, assigned_total=410624)
+    send_round(widget)
     summary = widget.memory_summary
     assert summary.get_visible()
-    assert summary.memory_label.get_text() == "4402 MiB"
-    assert not summary.level_bar.get_visible()
-    assert not summary.percentage_label.get_visible()
-    widget.tray_menu.show_all()
-    assert not summary.level_bar.get_visible()
-    assert global_property_calls(widget) == calls
+    assert summary.memory_label.get_text() == "8000 MiB"
+    assert "Total system memory" not in summary.get_tooltip_markup()
     assert not caplog.records
 
 
 def test_memory_summary_position(widget_factory):
+    """The summary is after the qubes, before the separator."""
     widget = widget_factory()
     set_maxmem(widget)
-    send_stats(widget, "dom0", 4096000, assigned_total=4097024)
+    send_round(widget)
     children = widget.tray_menu.get_children()
     position = children.index(widget.memory_summary)
-    # after all qubes, before the separator and Qube Manager entry
     assert all(hasattr(child, "vm") for child in children[:position])
     assert isinstance(children[position + 1], domains_widget.Gtk.SeparatorMenuItem)
 
 
-def test_memory_history(widget_factory):
-    clock = [1000.0]
+def test_memory_summary_drops_stopped_qube(widget_factory):
+    """A stopped qube no longer counts, and its late stats are ignored."""
     widget = widget_factory()
     set_maxmem(widget)
-    summary = widget.memory_summary
-    summary.graph.clock = lambda: clock[0]
-    assert isinstance(summary.get_submenu(), domains_widget.Gtk.Menu)
+    send_round(widget)
+    widget.dispatcher.handle("untrusted", "domain-stopped")
+    assert "Assigned to running qubes: <b>4001 MiB</b>" in (
+        widget.memory_summary.get_tooltip_markup()
+    )
+    send_stats(widget, "untrusted", 1024000, assigned_total=1025024)
+    send_stats(widget, "dom0", 4096000, assigned_total=4097024, memory_available="1")
+    assert "Assigned to running qubes: <b>4001 MiB</b>" in (
+        widget.memory_summary.get_tooltip_markup()
+    )
 
-    # stats of all qubes in one round give one point
-    send_stats(widget, "dom0", 4096000, assigned_total=4097024)
-    send_stats(widget, "untrusted", 409600, assigned_total=1024000)
-    # memory_with_swap_used is memory_kb in send_stats()
-    assert summary.graph.samples == [(1000.0, 5121024, 4505600)]
 
-    clock[0] += 3
-    send_stats(widget, "untrusted", 819200, assigned_total=2048000)
-    assert summary.graph.samples == [
-        (1000.0, 5121024, 4505600),
-        (1003.0, 6145024, 4915200),
-    ]
+@pytest.mark.parametrize(
+    "kwargs, expected",
+    [
+        ({"memory_assigned_usable": "1000", "memory_with_swap_used": "600",
+          "swap_used": "100"}, 50),
+        # meminfo but no swapinfo (older agent)
+        ({"memory_assigned_usable": "1000", "memory_with_swap_used": "600"}, 60),
+        # no meminfo: dom0 sends the usable memory
+        ({"memory_assigned_usable": "1000", "memory_with_swap_used": "1000"}, None),
+        # older dom0
+        ({"memory_kb": "1000"}, None),
+        ({"memory_assigned_usable": "0", "memory_with_swap_used": "600",
+          "swap_used": "0"}, None),
+    ],
+)  # fmt: skip
+def test_memory_used_percent(kwargs, expected):
+    """Used memory in percent of the usable memory, when the qube reports it."""
+    assert domains_widget.memory_used_percent(kwargs) == expected
 
-    # older points are dropped, except the last one before the graph starts
-    clock[0] += domains_widget.MEMORY_HISTORY_SECONDS + 1
-    send_stats(widget, "untrusted", 409600, assigned_total=1024000)
-    assert summary.graph.samples == [
-        (1003.0, 6145024, 4915200),
-        (1604.0, 5121024, 4505600),
-    ]
+
+def test_memory_used_percent_column(widget_factory):
+    """The per-qube RAM% column shows the used part of the usable memory."""
+    widget = widget_factory()
+    send_round(widget)
+    item = widget.menu_items[widget.qapp.domains["untrusted"]]
+    assert item.memory.mem_label.get_text() == "1000 MiB"
+    assert item.memory.percent_label.get_text() == "50%"
 
 
 def test_memory_graph_segments():
-    clock = [1000.0]
-    graph = domains_widget.MemoryGraph(clock=lambda: clock[0])
-    for _ in range(3):
-        graph.add_sample(1024, 512)
-        clock[0] += 3
-    # no stats for a while, e.g. qubesd restarting
-    clock[0] += domains_widget.MEMORY_GAP_SECONDS
-    graph.add_sample(2048, 1024)
-    clock[0] += 3
-    segments = graph._segments(clock[0])
+    """Samples are split at gaps; recent last values extend to now."""
+    samples = [(1000.0, 1024, 512), (1003.0, 1024, 512), (1006.0, 1024, 512)]
+    samples.append((1006.0 + domains_widget.MEMORY_GAP_SECONDS + 3, 2048, 1024))
+    now = samples[-1][0] + 3
+    segments = domains_widget.MemoryGraph._segments(samples, now)
     assert [[sample[0] for sample in segment] for segment in segments] == [
         [1000.0, 1003.0, 1006.0],
-        # the last value is extended to now
         [1039.0, 1042.0],
     ]
-    # nothing is extended over a gap
-    clock[0] += domains_widget.MEMORY_GAP_SECONDS + 1
-    assert graph._segments(clock[0])[-1] == [(1039.0, 2048, 1024)]
+    now += domains_widget.MEMORY_GAP_SECONDS + 1
+    assert domains_widget.MemoryGraph._segments(samples, now)[-1] == [
+        (1039.0, 2048, 1024)
+    ]
+
+
+def test_memory_graph_y_range(widget_factory):
+    """With the system memory, the y axis goes from 0 to it."""
+    widget = widget_factory()
+    graph = widget.memory_summary.graph
+    widget.qapp.update_global_properties()
+    send_round(widget)
+    ticks, top = graph._y_range(graph._samples())
+    assert top == ticks[-1] and ticks[0] > 0
+
+    widget = widget_factory()
+    set_maxmem(widget)
+    graph = widget.memory_summary.graph
+    send_round(widget)
+    assert graph._y_range(graph._samples()) == (
+        [0, 5000, 10000, 16000],
+        16000,
+    )
 
 
 @pytest.mark.parametrize("maxmem", [True, False])
 def test_memory_graph_draw(widget_factory, maxmem):
+    """The graph draws the filled areas up to now."""
     cairo = pytest.importorskip("cairo")
     widget = widget_factory()
     if maxmem:
@@ -333,11 +367,10 @@ def test_memory_graph_draw(widget_factory, maxmem):
         widget.qapp.update_global_properties()
     graph = widget.memory_summary.graph
     clock = [1000.0]
-    graph.clock = lambda: clock[0]
-    send_stats(widget, "dom0", 4096000, assigned_total=4097024)
+    widget.stats_monitor.clock = lambda: clock[0]
     # two minutes of stats, every 3 seconds
     for _ in range(40):
-        send_stats(widget, "untrusted", 819200, assigned_total=2048000)
+        send_round(widget)
         clock[0] += 3
     window = domains_widget.Gtk.OffscreenWindow()
     graph.get_parent().remove(graph)
@@ -358,8 +391,6 @@ def test_memory_graph_draw(widget_factory, maxmem):
     def drawn_pixels(x):
         return sum(1 for y in range(height) if data[y * stride + x * 4 + 3])
 
-    # the filled "used" area ends at "now", on the right; on the left of the
-    # plot, where there is no data yet, there are only grid lines
     assert drawn_pixels(width - 30) > drawn_pixels(width // 2) + 10
     window.destroy()
 
@@ -376,65 +407,5 @@ def test_memory_graph_draw(widget_factory, maxmem):
     ],
 )
 def test_memory_graph_ticks(low, high, expected):
+    """Round y-axis ticks covering low to high."""
     assert domains_widget.memory_graph_ticks(low, high) == expected
-
-
-def test_memory_forgotten_on_domain_stopped(widget_factory):
-    widget = widget_factory()
-    set_maxmem(widget)
-    send_stats(widget, "dom0", 4096000, assigned_total=4097024)
-    send_stats(widget, "untrusted", 409600, assigned_total=1024000)
-    # qmemman gives the memory of the stopped qube to the other ones before
-    # domain-shutdown arrives
-    widget.dispatcher.handle("untrusted", "domain-stopped")
-    send_stats(widget, "dom0", 4096000, assigned_total=5121024)
-    assert widget.memory_summary.memory_label.get_text() == "5001 / 16000 MiB"
-
-
-def test_memory_late_stats_ignored(widget_factory):
-    widget = widget_factory()
-    set_maxmem(widget)
-    send_stats(widget, "dom0", 4096000, assigned_total=4097024)
-    send_stats(widget, "untrusted", 409600, assigned_total=1024000)
-    widget.dispatcher.handle("untrusted", "domain-stopped")
-    # stats come over another connection, a last round can still arrive
-    send_stats(widget, "untrusted", 409600, assigned_total=1024000)
-    assert widget.memory_summary.memory_label.get_text() == "4001 / 16000 MiB"
-
-    # until the qube starts again
-    widget.dispatcher.handle("untrusted", "domain-pre-start")
-    send_stats(widget, "untrusted", 409600, assigned_total=1024000)
-    assert widget.memory_summary.memory_label.get_text() == "5001 / 16000 MiB"
-
-
-def test_memory_late_stats_of_deleted_qube_ignored(widget_factory):
-    widget = widget_factory()
-    set_maxmem(widget)
-    send_stats(widget, "dom0", 4096000, assigned_total=4097024)
-    send_stats(widget, "untrusted", 409600, assigned_total=1024000)
-    widget.dispatcher.handle(
-        "dom0", "domain-delete", vm=widget.qapp.domains["untrusted"]
-    )
-    send_stats(widget, "untrusted", 409600, assigned_total=1024000)
-    assert widget.memory_summary.memory_label.get_text() == "4001 / 16000 MiB"
-
-
-def test_memory_total_needs_dom0(widget_factory):
-    widget = widget_factory()
-    set_maxmem(widget)
-    # e.g. a GUI qube that can see only some qubes
-    send_stats(widget, "untrusted", 409600, assigned_total=1024000)
-    summary = widget.memory_summary
-    assert summary.memory_label.get_text() == "1000 MiB"
-    assert not summary.level_bar.get_visible()
-
-
-def test_memory_maxmem_retried(widget_factory):
-    widget = widget_factory()
-    # qubesd not answering, e.g. while it restarts
-    set_maxmem(widget, b"2\x00QubesDaemonCommunicationError\x00\x00error\x00")
-    send_stats(widget, "dom0", 4096000, assigned_total=4097024)
-    assert widget.memory_summary.memory_label.get_text() == "4001 MiB"
-    set_maxmem(widget)
-    send_stats(widget, "dom0", 4096000, assigned_total=4097024)
-    assert widget.memory_summary.memory_label.get_text() == "4001 / 16000 MiB"

@@ -235,17 +235,32 @@ class DomainDecorator(PropertiesDecorator):
 
     class VMMem(Gtk.Box):
         def __init__(self):
-            super(DomainDecorator.VMMem, self).__init__()
+            super(DomainDecorator.VMMem, self).__init__(spacing=10)
             self.mem_label = Gtk.Label(xalign=1)
             self.pack_start(self.mem_label, True, True, 0)
+            self.percent_label = Gtk.Label(xalign=1)
+            self.percent_label.set_width_chars(5)
+            self.pack_start(self.percent_label, False, True, 0)
 
-        def update_state(self, memory=0, header=False):
+        def update_state(self, memory=0, header=False, used_percent=None):
+            """*memory* is the usable memory in KiB, *used_percent* the part
+            of it the qube uses, if known"""
             if header:
-                markup = _("<b>RAM</b>")
+                self.mem_label.set_markup(_("<b>RAM</b>"))
+                self.percent_label.set_markup(_("<b>RAM%</b>"))
+                return
+            self.mem_label.set_markup(f"{str(int(memory/1024))} MiB")
+            if used_percent is None:
+                color = (
+                    self.percent_label.get_style_context()
+                    .get_color(Gtk.StateFlags.INSENSITIVE)
+                    .to_color()
+                )
+                self.percent_label.set_markup(
+                    f'<span color="{color.to_string()}">-</span>'
+                )
             else:
-                markup = f"{str(int(memory/1024))} MiB"
-
-            self.mem_label.set_markup(markup)
+                self.percent_label.set_markup(f"{used_percent}%")
 
     def memory(self):
         mem_widget = DomainDecorator.VMMem()
