@@ -91,7 +91,7 @@ def test_simple_new_qube(mock_error, mock_subprocess, test_qapp, new_qube_builde
     )
 
     with patch(
-        "qubes_config.new_qube.new_qube_app.Gtk.MessageDialog"
+        "qubes_config.new_qube.new_qube_app.show_dialog_with_icon"
     ) as mock_dialog, patch("subprocess.Popen") as mock_popen:
         mock_popen().__enter__().returncode = 0
         new_qube_app.create_button.clicked()
@@ -170,7 +170,7 @@ def test_complex_new_qube(mock_error, mock_subprocess, test_qapp, new_qube_build
     )
 
     with patch(
-        "qubes_config.new_qube.new_qube_app.Gtk.MessageDialog"
+        "qubes_config.new_qube.new_qube_app.show_dialog_with_icon"
     ) as mock_dialog, patch("subprocess.Popen") as mock_popen:
         mock_popen().__enter__().returncode = 0
         new_qube_app.create_button.clicked()
@@ -244,7 +244,7 @@ def test_new_template_cloned(mock_error, mock_subprocess, test_qapp, new_qube_bu
     )
 
     with patch(
-        "qubes_config.new_qube.new_qube_app.Gtk.MessageDialog"
+        "qubes_config.new_qube.new_qube_app.show_dialog_with_icon"
     ) as mock_dialog, patch("subprocess.Popen") as mock_popen, patch.object(
         test_qapp, "clone_vm"
     ) as mock_clone:
@@ -315,7 +315,7 @@ def test_new_standalone(
     )
 
     with patch(
-        "qubes_config.new_qube.new_qube_app.Gtk.MessageDialog"
+        "qubes_config.new_qube.new_qube_app.show_dialog_with_icon"
     ) as mock_dialog, patch("subprocess.Popen") as mock_popen:
         new_qube_app.create_button.clicked()
         assert mock_dialog.mock_calls  # called to tell us about the success
@@ -399,7 +399,7 @@ def test_new_disposable(mock_error, mock_subprocess, test_qapp, new_qube_builder
     )
 
     with patch(
-        "qubes_config.new_qube.new_qube_app.Gtk.MessageDialog"
+        "qubes_config.new_qube.new_qube_app.show_dialog_with_icon"
     ) as mock_dialog, patch("subprocess.Popen") as mock_popen:
         new_qube_app.create_button.clicked()
         assert mock_dialog.mock_calls  # called to tell us about the success
@@ -473,7 +473,7 @@ def test_advanced_new_qube(
     )
 
     with patch(
-        "qubes_config.new_qube.new_qube_app.Gtk.MessageDialog"
+        "qubes_config.new_qube.new_qube_app.show_dialog_with_icon"
     ) as mock_dialog, patch("subprocess.Popen") as mock_popen:
         mock_popen().__enter__().returncode = 0
         new_qube_app.create_button.clicked()
@@ -545,7 +545,7 @@ def test_new_dvm_tpl(mock_error, _mock_subprocess, test_qapp, new_qube_builder):
     )
 
     with patch(
-        "qubes_config.new_qube.new_qube_app.Gtk.MessageDialog"
+        "qubes_config.new_qube.new_qube_app.show_dialog_with_icon"
     ) as mock_dialog, patch("subprocess.Popen") as mock_popen:
         mock_popen().__enter__().returncode = 0
         new_qube_app.create_button.clicked()
