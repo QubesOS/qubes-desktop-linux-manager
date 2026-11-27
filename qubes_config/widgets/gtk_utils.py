@@ -217,6 +217,7 @@ def show_dialog(
     for key, value in buttons.items():
         button: Gtk.Button = dialog.add_button(key, value)
         button.set_use_underline(True)
+        button.get_style_context().add_class("flat")
         button.get_style_context().add_class("flat_button")
         if value in [Gtk.ResponseType.YES, Gtk.ResponseType.OK]:
             button.get_style_context().add_class("button_save")
